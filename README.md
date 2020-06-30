@@ -1,5 +1,5 @@
 # Blender Tools
-Hi, below you can find all the information on how to access our tools, and learn how to use them.
+Hi, below you can find the information on how to access our tools, and learn how to use them.
 
 ### Downloads:
 Click here and select the .zip file with latest version number you want to download.
