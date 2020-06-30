@@ -12,4 +12,4 @@ Here you can find the links to the documentation for each of the Blender Addons 
 If you are new to these tools, be sure to look for the 'quickstart' sections under each of the tools!
 
 * [Send to Unreal](https://github.com/EpicGames/BlenderTools/wiki/Send-to-Unreal-Home)
-* UE to Rigify
+* [UE to Rigify](https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home)
