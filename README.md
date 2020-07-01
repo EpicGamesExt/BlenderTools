@@ -3,8 +3,8 @@ Hi, below you can find information on how to access our tools, and how to use th
 
 ### Downloads
 Click here and select the .zip file with latest version number you want to download.
-* [Send to Unreal](https://github.com/EpicGames/BlenderTools/edit/master/README.md)
-* [UE to Rigify](https://github.com/EpicGames/BlenderTools/edit/master/README.md)
+* [Send to Unreal](https://github.com/EpicGames/BlenderTools/tree/master/Send%20to%20Unreal/releases)
+* [UE to Rigify](https://github.com/EpicGames/BlenderTools/tree/master/UE%20to%20Rigify/releases)
 
 ### Documentation
 Here you can find the links to the documentation for each of the Blender Addons in this Repository. There is also video documentation that accompanies most of the written documentation, so be sure to look for the links to those videos under each section!
