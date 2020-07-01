@@ -2,7 +2,7 @@
 Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, be sure to always download the latest version for new features and bug fixes.
 
 ### Downloads
-Click here and select the .zip file with latest version number you want to download.
+Select the .zip file with latest version number you want to download.
 * [Send to Unreal](https://github.com/EpicGames/BlenderTools/tree/master/Send%20to%20Unreal/releases)
 * [UE to Rigify](https://github.com/EpicGames/BlenderTools/tree/master/UE%20to%20Rigify/releases)
 
