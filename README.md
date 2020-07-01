@@ -15,7 +15,7 @@ If you are new to these tools, be sure to look for the 'quickstart' sections und
 * [UE to Rigify](https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home)
 
 ### Creating Issues
-If needed you can create issues. In order for your issue to be considered, you need to follow the guide for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
+If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
 
 ### Release Log
 (7/14/2020) **Send to Unreal 1.3.4:** Initial public release.
