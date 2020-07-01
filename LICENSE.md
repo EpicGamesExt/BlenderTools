@@ -1,2 +1,2 @@
 # License
-All the code in this repository is licensed under the Epic Games EULA which can be found [here](https://www.epicgames.com/store/en-US/eula).
+Use of all code in this repository is governed by the terms of the Unreal® Engine End User License Agreement, which can be found at [https://www.unrealengine.com/eula](https://www.unrealengine.com/eula).
