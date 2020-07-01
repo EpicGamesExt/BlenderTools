@@ -1,5 +1,5 @@
 # Blender Tools
-Hi, below you can find the information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, be sure to always download the latest version for new features and bug fixes.
+Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, be sure to always download the latest version for new features and bug fixes.
 
 ### Downloads
 Click here and select the .zip file with latest version number you want to download.
