@@ -7,7 +7,7 @@ Select the .zip file with latest version number you want to download.
 * [UE to Rigify](https://github.com/EpicGames/BlenderTools/tree/master/UE%20to%20Rigify/releases)
 
 ### Documentation
-Here you can find the links to the documentation for each of the Blender Addons in this Repository. There is also video documentation that accompanies most of the written documentation, so be sure to look for the links to those videos under each section!
+Here you can find the links to the documentation for each of the Blender addons in this repository. There is also video documentation that accompanies most of the written documentation, so be sure to look for the links to those videos under each section!
 
 If you are new to these tools, be sure to look for the 'quickstart' sections under each of the tools!
 
