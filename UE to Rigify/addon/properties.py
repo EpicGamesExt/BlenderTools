@@ -45,6 +45,8 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     control_rig_name = 'rig'
     rig_ui_file_name = 'rig_ui.py'
 
+    context = {}
+
     # --------------------- read/write properties ---------------------
 
     # template variables

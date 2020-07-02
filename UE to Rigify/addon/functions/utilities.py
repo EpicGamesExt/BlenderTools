@@ -639,6 +639,44 @@ def source_rig_picker_update(self=None, context=None):
     picker_object.use_fake_user = True
 
 
+def save_context(properties):
+    """
+    This function saves the current context of a particular mode to the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    # save the previous mode's context
+    if properties.previous_mode == properties.control_mode:
+        control_mode_context = {}
+
+        # get the control rig
+        control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+        if control_rig_object:
+            control_rig_context = {}
+
+            # save the active action on the control rig
+            if control_rig_object.animation_data:
+                control_rig_context['active_action'] = control_rig_object.animation_data.action
+
+            # save the current property values on each bone
+            for bone in control_rig_object.pose.bones:
+                bone_context = {}
+
+                # for each bone save their properties
+                for key, value in bone.items():
+                    # only save the property if it is a float, integer, boolean or string
+                    if type(value) in [float, int, bool, str]:
+                        bone_context[key] = value
+
+                control_rig_context[bone.name] = bone_context
+
+            # save the control rig context in the control mode context
+            control_mode_context[properties.control_rig_name] = control_rig_context
+
+        # save the control mode context in the context
+        properties.context[properties.control_mode] = control_mode_context
+
+
 @bpy.app.handlers.persistent
 def save_properties(*args):
     """
@@ -652,12 +690,45 @@ def save_properties(*args):
 
     # assign all the addon property values to the scene property values
     for attribute in dir(window_manager_properties):
-        if not attribute.startswith(('__', 'bl_', 'rna_type')):
+        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group')):
             value = getattr(window_manager_properties, attribute)
             try:
                 scene_properties[attribute] = value
             except TypeError:
                 scene_properties[attribute] = str(value)
+
+
+def load_context(properties):
+    """
+    This function loads the current context of a particular mode that was saved in the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    if properties.context:
+        control_mode_context = properties.context.get(properties.control_mode)
+
+        # if the selected mode is control mode and a saved control mode context
+        if properties.selected_mode == properties.control_mode and control_mode_context:
+            control_rig_context = control_mode_context.get(properties.control_rig_name)
+            control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+
+            # if there is there is a control rig context and a control rig
+            if control_mode_context and control_rig_object:
+
+                # set the active action on the control rig
+                if control_rig_object.animation_data:
+                    active_action = control_rig_context.get('active_action')
+                    if active_action:
+                        control_rig_object.animation_data.action = active_action
+
+                # save the current property values on each bone
+                for bone in control_rig_object.pose.bones:
+                    bone_context = control_rig_context.get(bone.name)
+
+                    # if there is a bone context, set the bone properties to the saved context
+                    if bone_context:
+                        for key, value in bone_context.items():
+                            bone[key] = value
 
 
 @bpy.app.handlers.persistent
@@ -694,16 +765,15 @@ def undo(*args):
 
     :param args: This soaks up the extra arguments for the app handler.
     """
-    window_manager_properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.window_manager.ue2rigify
     scene_properties = bpy.context.scene.ue2rigify
 
-    if bpy.context.space_data.type == 'VIEW_3D' and window_manager_properties.selected_mode != 'SOURCE':
-
+    if bpy.context.space_data.type == 'VIEW_3D' and properties.selected_mode != properties.source_mode:
         # load the scene properties
         load_properties()
 
         # set the selected mode to the previous mode
-        window_manager_properties.selected_mode = scene_properties['previous_mode']
+        properties.selected_mode = scene_properties['previous_mode']
 
 
 def get_formatted_operator_parameter(parameter_name, regex, code_line):

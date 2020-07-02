@@ -14,7 +14,7 @@ bl_info = {
     "author": "Epic Games Inc.",
     "description": "Allows you to convert a given rig and its animations to a Rigify rig.",
     "blender": (2, 83, 0),
-    "version": (1, 3, 3),
+    "version": (1, 3, 4),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home",
     "warning": "",
