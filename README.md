@@ -20,4 +20,4 @@ If needed you can create issues. In order for your issue to be considered, you n
 ### Release Log
 (7/14/2020) **Send to Unreal 1.3.4:** Initial public release.
 
-(7/14/2020) **UE to Rigify 1.3.3:** Initial public release.
+(7/14/2020) **UE to Rigify 1.3.4:** Initial public release.
