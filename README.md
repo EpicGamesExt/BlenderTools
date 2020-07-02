@@ -3,16 +3,16 @@ Hi, below you can find information on how to access our tools, and how to use th
 
 ### Downloads
 Select the .zip file with latest version number you want to download.
-* [Send to Unreal](https://github.com/EpicGames/BlenderTools/tree/master/Send%20to%20Unreal/releases)
-* [UE to Rigify](https://github.com/EpicGames/BlenderTools/tree/master/UE%20to%20Rigify/releases)
+* [Send to Unreal Download](https://github.com/EpicGames/BlenderTools/tree/master/Send%20to%20Unreal/releases)
+* [UE to Rigify Download](https://github.com/EpicGames/BlenderTools/tree/master/UE%20to%20Rigify/releases)
 
 ### Documentation
 Here you can find the links to the documentation for each of the Blender addons in this repository. There is also video documentation that accompanies most of the written documentation, so be sure to look for the links to those videos under each section!
 
 If you are new to these tools, be sure to look for the 'quickstart' sections under each of the tools!
 
-* [Send to Unreal](https://github.com/EpicGames/BlenderTools/wiki/Send-to-Unreal-Home)
-* [UE to Rigify](https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home)
+* [Send to Unreal Documentation](https://github.com/EpicGames/BlenderTools/wiki/Send-to-Unreal-Home)
+* [UE to Rigify Documentation](https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home)
 
 ### Creating Issues
 If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
