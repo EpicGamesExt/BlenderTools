@@ -656,7 +656,8 @@ def save_context(properties):
 
             # save the active action on the control rig
             if control_rig_object.animation_data:
-                control_rig_context['active_action'] = control_rig_object.animation_data.action.name
+                if control_rig_object.animation_data.action:
+                    control_rig_context['active_action'] = control_rig_object.animation_data.action.name
 
             # save the current property values on each bone
             for bone in control_rig_object.pose.bones:
