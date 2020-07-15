@@ -1,5 +1,5 @@
 # Blender Tools
-Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, be sure to always download the latest version for new features and bug fixes.
+Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, so be sure to always download the latest version for new features and bug fixes.
 
 ### Downloads
 Select the .zip file with latest version number you want to download.
@@ -18,6 +18,6 @@ If you are new to these tools, be sure to look for the 'quickstart' sections und
 If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
 
 ### Release Log
-(7/14/2020) **Send to Unreal 1.3.4:** Initial public release.
+(7/14/2020) **Send to Unreal 1.3.4:** Initial public release. [Notes](https://github.com/EpicGames/BlenderTools/wiki/Send-to-Unreal-1.3.4-Release-Notes).
 
-(7/14/2020) **UE to Rigify 1.3.4:** Initial public release.
+(7/14/2020) **UE to Rigify 1.3.4:** Initial public release. [Notes](https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-1.3.4-Release-Notes).
