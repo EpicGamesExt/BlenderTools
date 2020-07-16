@@ -7,7 +7,6 @@ import time as _time
 import socket as _socket
 import logging as _logging
 import threading as _threading
-from platform import system
 
 def hello():
     _logging.debug("Hello from remote")
@@ -272,9 +271,9 @@ class _RemoteExecutionBroadcastConnection(object):
         '''
         self._broadcast_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM,
                                                 _socket.IPPROTO_UDP)  # UDP/IP socket
-        if system() == "Darwin": # OSX, TODO: Socket options for Linux needs testing 
+        if hasattr(self._broadcast_socket, 'SO_REUSEPORT'):
             self._broadcast_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
-        else: # Not OSX   
+        else:
             self._broadcast_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, 1)
         self._broadcast_socket.bind((self._config.multicast_bind_address, self._config.multicast_group_endpoint[1]))
         self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_MULTICAST_LOOP, 1)
@@ -485,7 +484,7 @@ class _RemoteExecutionCommandConnection(object):
         '''
         self._command_listen_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM,
                                                      _socket.IPPROTO_TCP)  # TCP/IP socket       
-        if system() == "Darwin": # OSX, TODO: Socket options for Linux needs testing 
+        if hasattr(self._command_listen_socket, 'SO_REUSEPORT'):
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
         else: # Not OSX  
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, 1)
