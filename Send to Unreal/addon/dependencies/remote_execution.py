@@ -483,7 +483,7 @@ class _RemoteExecutionCommandConnection(object):
         Initialize the TCP based command socket based on the current configuration, and set it to listen for an incoming connection.
         '''
         self._command_listen_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM,
-                                                     _socket.IPPROTO_TCP)  # TCP/IP socket       
+                                                     _socket.IPPROTO_TCP)  # TCP/IP socket
         if hasattr(_socket, 'SO_REUSEPORT'):
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
         else:
