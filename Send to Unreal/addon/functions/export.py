@@ -426,58 +426,65 @@ def create_action_data(rig_objects, properties):
         # get the asset data for the skeletal animations
         for rig_object in rig_objects:
 
-            if rig_object.animation_data:
-                control_rig_object = None
+            control_rig_object = None
+            unmuted_action_names = []
 
-                # if using ue2rigify get the control rig
-                if properties.use_ue2rigify:
-                    ue2rigify_properties = bpy.context.window_manager.ue2rigify
-                    control_rig_object = bpy.data.objects.get(ue2rigify_properties.control_rig_name)
+            # if using ue2rigify get the control rig
+            if properties.use_ue2rigify:
+                ue2rigify_properties = bpy.context.window_manager.ue2rigify
+                control_rig_object = bpy.data.objects.get(ue2rigify_properties.control_rig_name)
+
+                # if there is animation data on the control rig
+                if control_rig_object.animation_data:
+                    # if there is not animation data on the source rig
+                    if not rig_object.animation_data:
+                        # create animation data on the source rig
+                        rig_object.animation_data_create()
+
                     # get the names of the un-muted actions
                     unmuted_action_names = utilities.get_action_names(control_rig_object, properties, all_actions=False)
+            else:
+                # get the names of the un-muted actions
+                unmuted_action_names = utilities.get_action_names(rig_object, properties, all_actions=False)
 
-                else:
-                    # get the names of the un-muted actions
-                    unmuted_action_names = utilities.get_action_names(rig_object, properties, all_actions=False)
+            # if using ue2rigify and the auto sync nla strips option is on
+            if properties.use_ue2rigify and properties.auto_sync_control_nla_to_source:
+                bpy.ops.ue2rigify.sync_rig_actions()
 
-                # if using ue2rigify and the auto sync nla strips option is on
-                if properties.use_ue2rigify and properties.auto_sync_control_nla_to_source:
-                    bpy.ops.ue2rigify.sync_rig_actions()
+            # if using ue2rigify and the auto stash active action option is on
+            if not properties.use_ue2rigify and properties.auto_stash_active_action:
+                # stash the active animation data in the rig object's nla strips
+                utilities.stash_animation_data(rig_object, properties)
 
-                # if using ue2rigify and the auto stash active action option is on
-                if not properties.use_ue2rigify and properties.auto_stash_active_action:
-                    # stash the active animation data in the rig object's nla strips
-                    utilities.stash_animation_data(rig_object, properties)
+            # mute all actions on the control and source rigs
+            if properties.export_all_actions:
+                set_all_action_mute_values(control_rig_object, True)
+                set_all_action_mute_values(rig_object, True)
 
-                # mute all actions on the control and source rigs
-                if properties.export_all_actions:
-                    set_all_action_mute_values(control_rig_object, True)
-                    set_all_action_mute_values(rig_object, True)
+            # get the names of all the actions to export
+            action_names = utilities.get_action_names(
+                rig_object,
+                properties,
+                all_actions=properties.export_all_actions
+            )
 
-                # get the names of all the actions to export
-                action_names = utilities.get_action_names(
-                    rig_object,
-                    properties,
-                    all_actions=properties.export_all_actions
-                )
+            # export the actions and create the action import data
+            for action_name in action_names:
+                fbx_file_paths = export_action(rig_object, action_name, properties)
 
-                # export the actions and create the action import data
-                for action_name in action_names:
-                    fbx_file_paths = export_action(rig_object, action_name, properties)
+                # save the import data
+                action_data.append({
+                    'fbx_file_path': fbx_file_paths.get('unreal'),
+                    'game_path': properties.unreal_animation_folder_path,
+                    'skeleton_game_path': get_skeleton_game_path(rig_object, properties),
+                    'animation': True
+                })
 
-                    # save the import data
-                    action_data.append({
-                        'fbx_file_path': fbx_file_paths.get('unreal'),
-                        'game_path': properties.unreal_animation_folder_path,
-                        'skeleton_game_path': get_skeleton_game_path(rig_object, properties),
-                        'animation': True
-                    })
-
-                # set the action mute values back to their original state
-                if properties.use_ue2rigify:
-                    set_action_mute_values(control_rig_object, unmuted_action_names)
-                else:
-                    set_action_mute_values(rig_object, unmuted_action_names)
+            # set the action mute values back to their original state
+            if properties.use_ue2rigify:
+                set_action_mute_values(control_rig_object, unmuted_action_names)
+            else:
+                set_action_mute_values(rig_object, unmuted_action_names)
 
     return action_data
 

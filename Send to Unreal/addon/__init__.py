@@ -4,6 +4,7 @@ import bpy
 import importlib
 from . import operators
 from . import properties
+from .dependencies import remote_execution
 from .ui import header_menu, addon_preferences
 from .functions import export, unreal, validations, utilities
 from .dependencies import remote_execution
@@ -11,7 +12,7 @@ from .dependencies import remote_execution
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (1, 3, 4),
+    "version": (1, 3, 5),
     "blender": (2, 83, 0),
     "location": "Header > Pipeline > Export > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
