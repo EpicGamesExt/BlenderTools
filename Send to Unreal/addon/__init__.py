@@ -6,6 +6,7 @@ from . import operators
 from . import properties
 from .ui import header_menu, addon_preferences
 from .functions import export, unreal, validations, utilities
+from .dependencies import remote_execution
 
 bl_info = {
     "name": "Send to Unreal",
@@ -26,6 +27,7 @@ modules = [
     utilities,
     properties,
     validations,
+    remote_execution,
     addon_preferences,
 ]
 
