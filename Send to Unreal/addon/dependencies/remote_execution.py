@@ -271,7 +271,7 @@ class _RemoteExecutionBroadcastConnection(object):
         '''
         self._broadcast_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM,
                                                 _socket.IPPROTO_UDP)  # UDP/IP socket
-        if hasattr(self._broadcast_socket, 'SO_REUSEPORT'):
+        if hasattr(_socket, 'SO_REUSEPORT'):
             self._broadcast_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
         else:
             self._broadcast_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, 1)
@@ -484,9 +484,9 @@ class _RemoteExecutionCommandConnection(object):
         '''
         self._command_listen_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM,
                                                      _socket.IPPROTO_TCP)  # TCP/IP socket       
-        if hasattr(self._command_listen_socket, 'SO_REUSEPORT'):
+        if hasattr(_socket, 'SO_REUSEPORT'):
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
-        else: # Not OSX  
+        else:
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, 1)
         self._command_listen_socket.bind(self._config.command_endpoint)
         self._command_listen_socket.listen(1)
