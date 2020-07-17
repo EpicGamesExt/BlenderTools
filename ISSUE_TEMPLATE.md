@@ -1,5 +1,5 @@
 # Before creating an issue DO THIS FIRST!
-Search the existing [issues](https://github.com/EpicGames/BlenderTools/issues)
+Search the existing [issues](https://github.com/EpicGames/BlenderTools/issues?q=)
 
 
 
