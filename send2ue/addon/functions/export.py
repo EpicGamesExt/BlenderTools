@@ -501,6 +501,17 @@ def export_fbx_files(file_paths, properties):
     restore_rig_objects(context, properties)
 
 
+def is_collision_of(asset_name, mesh_object_name):
+    return bool(re.fullmatch(r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?", mesh_object_name))
+
+
+def select_asset_collisions(asset_name, properties):
+    collision_objects = get_from_collection(properties.collision_collection_name, 'MESH')
+    for mesh_object in collision_objects:
+        if is_collision_of(asset_name, mesh_object.name):
+            mesh_object.select_set(True)
+
+
 def export_mesh_lods(asset_name, properties):
     """
     This function exports a set of lod meshes to an fbx file.
@@ -539,6 +550,9 @@ def export_mesh_lods(asset_name, properties):
 
                 # select the lod mesh
                 mesh_object.select_set(True)
+        
+        # select collsion meshes
+        select_asset_collisions(asset_name, properties)
 
         # export the selected lod meshes and empty
         fbx_file_paths = get_fbx_paths(asset_name, 'MESH')
@@ -574,6 +588,9 @@ def export_mesh(mesh_object, properties):
 
     # select any rigs this object is parented too
     set_parent_rig_selection(mesh_object, properties)
+
+    # select collision meshes
+    select_asset_collisions(mesh_object.name, properties)
 
     # export selection to an fbx file
     export_fbx_files(fbx_file_paths, properties)
