@@ -31,17 +31,18 @@ def get_action_names(rig_object, all_actions=True):
     :return list: A list of action names.
     """
     action_names = []
-    for nla_track in rig_object.animation_data.nla_tracks:
-        # get all the action names if the all flag is set
-        if all_actions:
-            for strip in nla_track.strips:
-                action_names.append(strip.action.name)
-
-        # otherwise get only the un-muted actions
-        else:
-            if not nla_track.mute:
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            # get all the action names if the all flag is set
+            if all_actions:
                 for strip in nla_track.strips:
                     action_names.append(strip.action.name)
+
+            # otherwise get only the un-muted actions
+            else:
+                if not nla_track.mute:
+                    for strip in nla_track.strips:
+                        action_names.append(strip.action.name)
     return action_names
 
 
@@ -356,21 +357,22 @@ def clean_nla_tracks(rig_object, action):
     :param object rig_object: A object of type armature with animation data.
     :param object action: A action object.
     """
-    for nla_track in rig_object.animation_data.nla_tracks:
-        # remove any nla tracks that don't have strips
-        if len(nla_track.strips) == 0:
-            rig_object.animation_data.nla_tracks.remove(nla_track)
-        else:
-            for strip in nla_track.strips:
-                # remove nla strips if its action matches the active action duplicate actions
-                if strip.action == action:
-                    rig_object.animation_data.nla_tracks.remove(nla_track)
-
-                # remove nla strips with duplicate actions
-                if strip.action:
-                    action_names = get_action_names(rig_object)
-                    if action_names.count(strip.action.name) > 1:
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            # remove any nla tracks that don't have strips
+            if len(nla_track.strips) == 0:
+                rig_object.animation_data.nla_tracks.remove(nla_track)
+            else:
+                for strip in nla_track.strips:
+                    # remove nla strips if its action matches the active action duplicate actions
+                    if strip.action == action:
                         rig_object.animation_data.nla_tracks.remove(nla_track)
+
+                    # remove nla strips with duplicate actions
+                    if strip.action:
+                        action_names = get_action_names(rig_object)
+                        if action_names.count(strip.action.name) > 1:
+                            rig_object.animation_data.nla_tracks.remove(nla_track)
 
 
 def stash_animation_data(rig_object):
@@ -379,24 +381,25 @@ def stash_animation_data(rig_object):
 
     :param object rig_object: A object of type armature with animation data.
     """
-    # if there is an active action on the rig object
-    active_action = rig_object.animation_data.action
+    if rig_object.animation_data:
+        # if there is an active action on the rig object
+        active_action = rig_object.animation_data.action
 
-    # remove any nla tracks that have the active action, have duplicate names, or no strips
-    clean_nla_tracks(rig_object, active_action)
+        # remove any nla tracks that have the active action, have duplicate names, or no strips
+        clean_nla_tracks(rig_object, active_action)
 
-    if active_action:
-        # create a new nla track
-        rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
-        rig_object_nla_track.name = active_action.name
+        if active_action:
+            # create a new nla track
+            rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
+            rig_object_nla_track.name = active_action.name
 
-        # create a strip with the active action as the strip action
-        rig_object_nla_track.strips.new(
-            name=active_action.name,
-            start=1,
-            action=rig_object.animation_data.action
-        )
-        rig_object_nla_track.mute = False
+            # create a strip with the active action as the strip action
+            rig_object_nla_track.strips.new(
+                name=active_action.name,
+                start=1,
+                action=rig_object.animation_data.action
+            )
+            rig_object_nla_track.mute = False
 
 
 def clear_pose_location():

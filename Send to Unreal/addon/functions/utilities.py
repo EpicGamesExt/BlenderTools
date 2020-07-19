@@ -30,17 +30,18 @@ def get_action_names(rig_object, properties, all_actions=True):
     :return list: A list of action names.
     """
     action_names = []
-    for nla_track in rig_object.animation_data.nla_tracks:
-        # get all the action names if the all flag is set
-        if all_actions:
-            for strip in nla_track.strips:
-                action_names.append(strip.action.name)
-
-        # otherwise get only the un-muted actions
-        else:
-            if not nla_track.mute:
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            # get all the action names if the all flag is set
+            if all_actions:
                 for strip in nla_track.strips:
-                    action_names.append(get_action_name(strip.action.name, properties))
+                    action_names.append(strip.action.name)
+
+            # otherwise get only the un-muted actions
+            else:
+                if not nla_track.mute:
+                    for strip in nla_track.strips:
+                        action_names.append(get_action_name(strip.action.name, properties))
     return action_names
 
 
@@ -514,25 +515,26 @@ def stash_animation_data(rig_object, properties):
     :param object rig_object: A object of type armature with animation data.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    # if there is an active action on the rig object
-    active_action = rig_object.animation_data.action
+    if rig_object.animation_data:
+        # if there is an active action on the rig object
+        active_action = rig_object.animation_data.action
 
-    # remove any nla tracks that have the active action, have duplicate names, or no strips
-    clean_nla_tracks(rig_object, active_action, properties)
+        # remove any nla tracks that have the active action, have duplicate names, or no strips
+        clean_nla_tracks(rig_object, active_action, properties)
 
-    if active_action:
-        action_name = get_action_name(active_action.name, properties)
-        # create a new nla track
-        rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
-        rig_object_nla_track.name = action_name
+        if active_action:
+            action_name = get_action_name(active_action.name, properties)
+            # create a new nla track
+            rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
+            rig_object_nla_track.name = action_name
 
-        # create a strip with the active action as the strip action
-        rig_object_nla_track.strips.new(
-            name=action_name,
-            start=1,
-            action=rig_object.animation_data.action
-        )
-        rig_object_nla_track.mute = False
+            # create a strip with the active action as the strip action
+            rig_object_nla_track.strips.new(
+                name=action_name,
+                start=1,
+                action=rig_object.animation_data.action
+            )
+            rig_object_nla_track.mute = False
 
 
 def format_asset_path(game_reference):

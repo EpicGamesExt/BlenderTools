@@ -12,7 +12,7 @@ from .dependencies import remote_execution
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (1, 3, 6),
+    "version": (1, 3, 7),
     "blender": (2, 83, 0),
     "location": "Header > Pipeline > Export > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",

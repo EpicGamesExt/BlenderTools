@@ -124,10 +124,11 @@ def set_action_mute_value(rig_object, action_name, mute):
     :param bool mute: Whether or not to mute the nla track
     """
     if rig_object:
-        for nla_track in rig_object.animation_data.nla_tracks:
-            for strip in nla_track.strips:
-                if strip.action.name == action_name:
-                    nla_track.mute = mute
+        if rig_object.animation_data:
+            for nla_track in rig_object.animation_data.nla_tracks:
+                for strip in nla_track.strips:
+                    if strip.action.name == action_name:
+                        nla_track.mute = mute
 
 
 def set_action_mute_values(rig_object, action_names):
@@ -137,12 +138,13 @@ def set_action_mute_values(rig_object, action_names):
     :param object rig_object: A object of type armature with animation data.
     :param list action_names: A list of action names to un-mute
     """
-    for nla_track in rig_object.animation_data.nla_tracks:
-        for strip in nla_track.strips:
-            if strip.action.name in action_names:
-                nla_track.mute = False
-            else:
-                nla_track.mute = True
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            for strip in nla_track.strips:
+                if strip.action.name in action_names:
+                    nla_track.mute = False
+                else:
+                    nla_track.mute = True
 
 
 def set_all_action_mute_values(rig_object, mute):
@@ -154,8 +156,9 @@ def set_all_action_mute_values(rig_object, mute):
 
     """
     if rig_object:
-        for nla_track in rig_object.animation_data.nla_tracks:
-            nla_track.mute = mute
+        if rig_object.animation_data:
+            for nla_track in rig_object.animation_data.nla_tracks:
+                nla_track.mute = mute
 
 
 def set_parent_rig_selection(mesh_object, properties):
@@ -377,13 +380,15 @@ def export_action(rig_object, action_name, properties):
     :return str: The fbx file path of the exported action
     """
     control_rig_object = None
-    rig_object.animation_data.action = None
+    if rig_object.animation_data:
+        rig_object.animation_data.action = None
 
     # if using ue2rigify get the control rig and removes its active animation
     if properties.use_ue2rigify:
         ue2rigify_properties = bpy.context.window_manager.ue2rigify
         control_rig_object = bpy.data.objects.get(ue2rigify_properties.control_rig_name)
-        control_rig_object.animation_data.action = None
+        if control_rig_object.animation_data:
+            control_rig_object.animation_data.action = None
 
     fbx_file_paths = get_fbx_paths(action_name, 'ACTION')
 
