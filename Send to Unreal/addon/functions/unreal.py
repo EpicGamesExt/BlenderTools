@@ -36,7 +36,7 @@ def run_unreal_python_commands(remote_exec, commands, failed_connection_attempts
                 run_unreal_python_commands(remote_exec, commands, failed_connection_attempts + 1)
             else:
                 remote_exec.stop()
-                export.report_error("Could not find an open Unreal Editor instance!")
+                utilities.report_error("Could not find an open Unreal Editor instance!")
 
     # shutdown the connection
     finally:
