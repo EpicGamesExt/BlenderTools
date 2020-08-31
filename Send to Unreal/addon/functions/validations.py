@@ -1,7 +1,29 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
-
+import bpy
 import re
 from . import utilities
+
+
+def validate_collections_exist(properties):
+    """
+    This function checks the scene to make sure the appropriate collections exist.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return bool: True if all the collections exist.
+    """
+    error_message = []
+    for collection_name in properties.collection_names:
+        collection = bpy.data.collections.get(collection_name)
+        # throw an error if there is no collection with the given name
+        if not collection:
+            error_message.append(
+                f'You do not have a collection "{collection_name}" in your scene! Please create it!'
+            )
+    if error_message:
+        utilities.report_error('\n'.join(error_message))
+        return False
+
+    return True
 
 
 def validate_geometry_exists(mesh_objects):

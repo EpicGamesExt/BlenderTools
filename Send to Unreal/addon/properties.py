@@ -13,18 +13,6 @@ class Send2UeProperties:
     mesh_collection_name = 'Mesh'
     rig_collection_name = 'Rig'
 
-    # blender default project settings
-    default_unit_scale = 1
-    default_grid_scale = 1
-    default_viewport_clip_end = 1000
-    default_frame_rate = 25
-
-    # unreal default project settings
-    unreal_unit_scale = 0.01
-    unreal_grid_scale = 0.01
-    unreal_viewport_clip_end = 10000
-    unreal_frame_rate = 30
-
     # ----------- read/write variables -----------
 
     # this stores the error messages
@@ -37,14 +25,16 @@ class Send2UeUIProperties:
     """
     This class holds the UI variables for the addon.
     """
-    always_use_unreal_scene_scale: bpy.props.BoolProperty(
-        name="Always use unreal scene scale",
-        default=False,
-        description=(
-            "On a file load, sets Blender’s scene scale to 0.01 unit scale, and scales the camera clipping plane, and "
-            "viewport grid accordingly."
-        )
+    # import dialog interface properties
+    source_application: bpy.props.EnumProperty(
+        name="Source Application",
+        description="The application the original file was created with",
+        items=[
+            ('ue4', 'Unreal Engine 4', '', '', 0)
+        ],
+        default="ue4",
     )
+
     # addon preferences user interface properties
     options_type: bpy.props.EnumProperty(
         items=[
@@ -112,6 +102,13 @@ class Send2UeUIProperties:
             "action names in Blender"
         )
     )
+    automatically_scale_bones: bpy.props.BoolProperty(
+        name="Automatically scale bones",
+        default=True,
+        description=(
+            "This automatically scales your armature objects so they import at scale of 1"
+        )
+    )
     export_all_actions: bpy.props.BoolProperty(
         name="Export all actions",
         default=True,
@@ -165,6 +162,13 @@ class Send2UeUIProperties:
         name="LODs",
         default=False,
         description="Whether or not to import the custom LODs from the FBX file"
+    )
+    import_object_name_as_root: bpy.props.BoolProperty(
+        name="Object name as root bone",
+        default=True,
+        description=(
+            "This uses the armature object's name in blender as the root bone name in Unreal"
+        )
     )
     advanced_ui_import: bpy.props.BoolProperty(
         name="Launch FBX Import UI",

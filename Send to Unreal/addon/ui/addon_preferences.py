@@ -17,10 +17,6 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         """
         layout = self.layout
 
-        # basic or advanced menu
-        row = layout.row()
-        row.prop(self, 'always_use_unreal_scene_scale')
-
         row = layout.row()
         row.prop(self, 'options_type', expand=True)
 
@@ -60,6 +56,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                 row.prop(self, 'disk_animation_folder_path', text='')
 
         if self.options_type == 'export':
+            row = layout.row()
+            row.prop(self, 'automatically_scale_bones')
             row = layout.row()
             row.prop(self, 'export_all_actions')
             row = layout.row()
@@ -158,5 +156,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
             row.prop(self, 'import_animations')
             row = layout.row()
             row.prop(self, 'import_lods')
+            row = layout.row()
+            row.prop(self, 'import_object_name_as_root')
             row = layout.row()
             row.prop(self, 'advanced_ui_import')

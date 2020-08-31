@@ -1,7 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import time
-from . import export
 from . import utilities
 from ..dependencies import remote_execution
 
@@ -36,7 +35,7 @@ def run_unreal_python_commands(remote_exec, commands, failed_connection_attempts
                 run_unreal_python_commands(remote_exec, commands, failed_connection_attempts + 1)
             else:
                 remote_exec.stop()
-                export.report_error("Could not find an open Unreal Editor instance!")
+                utilities.report_error("Could not find an open Unreal Editor instance!")
 
     # shutdown the connection
     finally:
@@ -101,11 +100,20 @@ def import_asset(asset_data, properties):
             # assign the options object to the import task and import the asset
             f'import_task.options = options',
             f'unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([import_task])',
+
+            # check for a that the game asset imported correctly if the import object name as is False
+            f'if {not properties.import_object_name_as_root}:',
+            f'\tgame_asset = unreal.load_asset(r"{asset_data.get("game_path")}")',
+            f'\tif not game_asset:',
+            f'\t\traise RuntimeError("Multiple roots are found in the bone hierarchy. Unreal will only support a single root bone.")',
         ]))
 
     # if there is an error report it
-    if unreal_response['result'] != 'None':
-        utilities.report_error(unreal_response['result'])
+    if unreal_response:
+        if unreal_response['result'] != 'None':
+            utilities.report_error(unreal_response['result'])
+            return False
+    return True
 
 
 def asset_exists(game_path):

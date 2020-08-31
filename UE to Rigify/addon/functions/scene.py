@@ -540,22 +540,23 @@ def create_empties(rig_object, empty_prefix, constraints_collection, links_data,
     :param list links_data: A list of dictionaries that contains link attributes.
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     """
-    for link in links_data:
-        bone_name = link.get(socket_direction)
+    if rig_object:
+        for link in links_data:
+            bone_name = link.get(socket_direction)
 
-        # get the empty, edit bone, and pose bone
-        empty = create_empty(bone_name, empty_prefix, constraints_collection)
-        data_bone = rig_object.data.bones.get(bone_name)
-        pose_bone = rig_object.pose.bones.get(bone_name)
+            # get the empty, edit bone, and pose bone
+            empty = create_empty(bone_name, empty_prefix, constraints_collection)
+            data_bone = rig_object.data.bones.get(bone_name)
+            pose_bone = rig_object.pose.bones.get(bone_name)
 
-        # if the bone exists on the rig
-        if pose_bone:
-            # calculate the world bone matrix
-            pose_bone_object = pose_bone.id_data
-            bone_matrix_world = pose_bone_object.matrix_world @ data_bone.matrix_local
+            # if the bone exists on the rig
+            if pose_bone:
+                # calculate the world bone matrix
+                pose_bone_object = pose_bone.id_data
+                bone_matrix_world = pose_bone_object.matrix_world @ data_bone.matrix_local
 
-            # move the empty to the bone world matrix
-            empty.matrix_world = bone_matrix_world
+                # move the empty to the bone world matrix
+                empty.matrix_world = bone_matrix_world
 
 
 def create_constraints(rig_object, links_data, empty_prefix, socket_direction, properties):
@@ -573,18 +574,18 @@ def create_constraints(rig_object, links_data, empty_prefix, socket_direction, p
         empty_name = f'{empty_prefix}_{bone_name}'
 
         empty_object = bpy.data.objects.get(empty_name)
-
-        if empty_prefix is 'child':
-            bone = rig_object.pose.bones.get(bone_name)
-            if bone:
-                bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
-                bone_constraint.name = properties.constraints_collection_name
-                bone_constraint.target = empty_object
-        else:
-            object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
-            object_constraint.name = properties.constraints_collection_name
-            object_constraint.target = rig_object
-            object_constraint.subtarget = bone_name
+        if empty_object:
+            if empty_prefix is 'child':
+                bone = rig_object.pose.bones.get(bone_name)
+                if bone:
+                    bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
+                    bone_constraint.name = properties.constraints_collection_name
+                    bone_constraint.target = empty_object
+            else:
+                object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
+                object_constraint.name = properties.constraints_collection_name
+                object_constraint.target = rig_object
+                object_constraint.subtarget = bone_name
 
 
 def create_starter_metarig_template(properties):
@@ -790,13 +791,13 @@ def organize_rig_objects(properties, organize_control_rig=True):
         move_collection_to_collection(constraints_collection, extras_collection)
         constraints_collection.hide_viewport = True
 
-    # move the source rig to the rig collection
-    move_scene_object_to_collection(source_rig_object, rig_collection)
-
     # collapse the collections in the outliner
     utilities.collapse_collections_in_outliner()
 
     if organize_control_rig:
+        # move the source rig to the rig collection
+        move_scene_object_to_collection(source_rig_object, rig_collection)
+        # move the control rig to the extras collection
         move_scene_object_to_collection(control_rig_object, extras_collection)
 
         # move the constraints collection to the extras collection
@@ -872,6 +873,8 @@ def constrain_fk_to_source(control_rig_object, source_rig_object, properties):
     :param object source_rig_object: The source rig object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # set the template paths to fk to source mode
+    templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
 
     # constrain the control rig FKs to the source rig
     fk_to_source_link_data = templates.get_saved_links_data(properties)
@@ -953,44 +956,45 @@ def sync_nla_track_data(control_rig_object, source_rig_object, properties):
     :param object control_rig_object: The control rig object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    # get the nla tracks on the source rig
-    control_nla_tracks = control_rig_object.animation_data.nla_tracks
-    source_nla_tracks = source_rig_object.animation_data.nla_tracks
+    if control_rig_object and source_rig_object:
+        # get the nla tracks on the source rig
+        control_nla_tracks = control_rig_object.animation_data.nla_tracks
+        source_nla_tracks = source_rig_object.animation_data.nla_tracks
 
-    # remove all the nla tracks from the source rig
-    utilities.remove_nla_tracks(source_nla_tracks)
+        # remove all the nla tracks from the source rig
+        utilities.remove_nla_tracks(source_nla_tracks)
 
-    for control_nla_track in control_nla_tracks:
-        # create a new nla track on the source rig
-        source_nla_track = source_nla_tracks.new()
-        source_nla_track.name = control_nla_track.name
+        for control_nla_track in control_nla_tracks:
+            # create a new nla track on the source rig
+            source_nla_track = source_nla_tracks.new()
+            source_nla_track.name = control_nla_track.name
 
-        # set the nla track mute value and deselect it
-        source_nla_track.mute = control_nla_track.mute
-        source_nla_track.select = False
+            # set the nla track mute value and deselect it
+            source_nla_track.mute = control_nla_track.mute
+            source_nla_track.select = False
 
-        for control_strip in control_nla_track.strips:
-            if control_strip.action:
-                # get the source action
-                source_action_name = f'{properties.source_mode}_{control_strip.action.name}'
-                source_action = bpy.data.actions.get(source_action_name)
+            for control_strip in control_nla_track.strips:
+                if control_strip.action:
+                    # get the source action
+                    source_action_name = f'{properties.source_mode}_{control_strip.action.name}'
+                    source_action = bpy.data.actions.get(source_action_name)
 
-                # if there is not a matching source action, create one
-                if not source_action:
-                    source_action = bpy.data.actions.new(source_action_name)
+                    # if there is not a matching source action, create one
+                    if not source_action:
+                        source_action = bpy.data.actions.new(source_action_name)
 
-                # create a new nla strip on the source rig
-                source_strip = source_nla_track.strips.new(
-                    name=control_strip.name,
-                    start=control_strip.frame_start,
-                    action=source_action
-                )
+                    # create a new nla strip on the source rig
+                    source_strip = source_nla_track.strips.new(
+                        name=control_strip.name,
+                        start=control_strip.frame_start,
+                        action=source_action
+                    )
 
-                # sync the strip values
-                source_strip.name = control_strip.name
-                source_strip.frame_start = control_strip.frame_start
-                source_strip.frame_end = control_strip.frame_end
-                source_strip.select = False
+                    # sync the strip values
+                    source_strip.name = control_strip.name
+                    source_strip.frame_start = control_strip.frame_start
+                    source_strip.frame_end = control_strip.frame_end
+                    source_strip.select = False
 
 
 def sync_actions(control_rig_object, source_rig_object, properties):
@@ -1280,9 +1284,6 @@ def convert_to_control_rig(properties):
         set_fk_ik_switch_values(control_rig_object, 1.0)
 
         if source_rig_object.animation_data:
-            # set the template paths to fk to source mode
-            templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
-
             # constrain the fk bones to the source bones
             constrain_fk_to_source(control_rig_object, source_rig_object, properties)
 

@@ -2,9 +2,20 @@
 import bpy
 
 
+class TOPBAR_MT_Import(bpy.types.Menu):
+    """
+    This defines a new class that will be the menu, "Import".
+    """
+    bl_idname = "TOPBAR_MT_Import"
+    bl_label = "Import"
+
+    def draw(self, context):
+        self.layout.operator('wm.import_asset')
+
+
 class TOPBAR_MT_Export(bpy.types.Menu):
     """
-    This defines a new class that will be the  menu, "Export".
+    This defines a new class that will be the menu, "Export".
     """
     bl_idname = "TOPBAR_MT_Export"
     bl_label = "Export"
@@ -22,12 +33,12 @@ class TOPBAR_MT_Pipeline(bpy.types.Menu):
     bl_label = "Pipeline"
 
     def draw(self, context):
-        self.layout.menu(TOPBAR_MT_Export.bl_idname)
+        pass
 
 
 def pipeline_menu(self, context):
     """
-    This function creates the parent menu item. This will be referenced in other functions
+    This function creates the pipeline menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -39,17 +50,51 @@ def pipeline_menu(self, context):
     self.layout.menu(TOPBAR_MT_Pipeline.bl_idname)
 
 
-def add_parent_menu():
+def export_menu(self, context):
     """
-    This function adds the Parent "Pipeline" menu item by appending the create_parent_menu()
+    This function creates the export menu item. This will be referenced in other functions
+    as a means of appending and removing it's contents from the top bar editor class
+    definition.
+
+    :param object self: This refers the the Menu class definition that this function will
+    be appended to.
+    :param object context: This parameter will take the current blender context by default,
+    or can be passed an explicit context.
+    """
+    self.layout.menu(TOPBAR_MT_Export.bl_idname)
+
+
+def import_menu(self, context):
+    """
+    This function creates the import menu item. This will be referenced in other functions
+    as a means of appending and removing it's contents from the top bar editor class
+    definition.
+
+    :param object self: This refers the the Menu class definition that this function will
+    be appended to.
+    :param object context: This parameter will take the current blender context by default,
+    or can be passed an explicit context.
+    """
+    self.layout.menu(TOPBAR_MT_Import.bl_idname)
+
+
+def add_pipeline_menu():
+    """
+    This function adds the Parent "Pipeline" menu item by appending the pipeline_menu()
     function to the top bar editor class definition.
     """
-    bpy.types.TOPBAR_MT_editor_menus.append(pipeline_menu)
+    if not hasattr(bpy.types, TOPBAR_MT_Pipeline.bl_idname):
+        bpy.utils.register_class(TOPBAR_MT_Pipeline)
+        bpy.types.TOPBAR_MT_editor_menus.append(pipeline_menu)
+
+    bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
+    bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
 
 
 def remove_parent_menu():
     """
-    This function removes the Parent "Pipeline" menu item by removing the create_parent_menu()
+    This function removes the Parent "Pipeline" menu item by removing the pipeline_menu()
     function from the top bar editor class definition.
     """
-    bpy.types.TOPBAR_MT_editor_menus.remove(pipeline_menu)
+    if hasattr(bpy.types, TOPBAR_MT_Pipeline.bl_idname):
+        bpy.types.TOPBAR_MT_editor_menus.remove(pipeline_menu)

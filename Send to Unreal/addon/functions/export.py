@@ -84,13 +84,7 @@ def get_from_collection(collection_name, object_type):
                     # add it to the group of objects
                     group_objects.append(group_object)
 
-        return group_objects
-
-    # throw an error if there is no collection with the given name
-    else:
-        utilities.report_error(
-            f'You do not have a collection {collection_name} in your scene! Please create it!'
-        )
+    return group_objects
 
 
 def get_skeleton_game_path(rig_object, properties):
@@ -115,6 +109,30 @@ def get_skeleton_game_path(rig_object, properties):
             )
 
 
+def get_pre_scaled_context():
+    """
+    This function fetches the current scene's attributes.
+
+    :return dict: A dictionary containing the current data attributes.
+    """
+    # look for an armature object and get its name
+    context = {}
+    for selected_object in bpy.context.selected_objects:
+        if selected_object.type == 'ARMATURE':
+            context['source_object'] = {}
+            context['source_object']['object_name'] = selected_object.name
+            context['source_object']['armature_name'] = selected_object.data.name
+
+            # save the current scene scale
+            context['scene_scale'] = bpy.context.scene.unit_settings.scale_length
+            context['objects'] = bpy.data.objects.values()
+            context['meshes'] = bpy.data.meshes.values()
+            context['armatures'] = bpy.data.armatures.values()
+            context['actions'] = bpy.data.actions.values()
+
+    return context
+
+
 def set_action_mute_value(rig_object, action_name, mute):
     """
     This function sets a given action's nla track to the provided mute value.
@@ -127,8 +145,9 @@ def set_action_mute_value(rig_object, action_name, mute):
         if rig_object.animation_data:
             for nla_track in rig_object.animation_data.nla_tracks:
                 for strip in nla_track.strips:
-                    if strip.action.name == action_name:
-                        nla_track.mute = mute
+                    if strip.action:
+                        if strip.action.name == action_name:
+                            nla_track.mute = mute
 
 
 def set_action_mute_values(rig_object, action_names):
@@ -141,10 +160,11 @@ def set_action_mute_values(rig_object, action_names):
     if rig_object.animation_data:
         for nla_track in rig_object.animation_data.nla_tracks:
             for strip in nla_track.strips:
-                if strip.action.name in action_names:
-                    nla_track.mute = False
-                else:
-                    nla_track.mute = True
+                if strip.action:
+                    if strip.action.name in action_names:
+                        nla_track.mute = False
+                    else:
+                        nla_track.mute = True
 
 
 def set_all_action_mute_values(rig_object, mute):
@@ -235,6 +255,194 @@ def set_object_positions(original_positions):
             selected_object.location.z = original_positions[index][2]
 
 
+def scale_control_rig(scale_factor, properties):
+    """
+    This function scales the control rig.
+
+    :param float scale_factor: The amount to scale the control rig by.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    # if the using the ue2rigify addon
+    if properties.use_ue2rigify:
+        # remove all the constraints
+        bpy.ops.ue2rigify.remove_constraints()
+
+        # get the control rig
+        control_rig_name = bpy.context.window_manager.ue2rigify.control_rig_name
+        control_rig = bpy.data.objects.get(control_rig_name)
+
+        # scale the the control rig
+        utilities.scale_object(control_rig, scale_factor)
+
+
+def duplicate_objects_for_export(scene_scale, scale_factor, context, properties):
+    """
+    This function duplicates and prepares the selected objects for export.
+
+    :param float scene_scale: The value to set the scene scale to.
+    :param float scale_factor: The amount to scale the control rig by.
+    :param dict context: A dictionary containing the current data attributes.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return dict: A dictionary containing the current data attributes.
+    """
+    # switch to object mode
+    if bpy.context.mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    # change scene scale to 0.01
+    bpy.context.scene.unit_settings.scale_length = scene_scale
+
+    # scale the control rig if needed
+    scale_control_rig(scale_factor, properties)
+
+    # duplicate the the selected objects so the originals are not modified
+    bpy.ops.object.duplicate()
+
+    context['duplicate_objects'] = bpy.context.selected_objects
+
+    return context
+
+
+def fix_armature_scale(armature_object, scale_factor, context, properties):
+    """
+    This function scales the provided armature object and it's animations.
+
+    :param object armature_object: A object of type armature.
+    :param float scale_factor: The amount to scale the control rig by.
+    :param dict context: A dictionary containing the current data attributes.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return dict: A dictionary containing the current data attributes.
+    """
+    # deselect all objects
+    bpy.ops.object.select_all(action='DESELECT')
+
+    # scale the duplicate rig object
+    utilities.scale_object(armature_object, scale_factor)
+
+    # select the rig object
+    armature_object.select_set(True)
+
+    # apply the scale transformations on the selected object
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+
+    # scale up the objects action location keyframes to fix the applied scale
+    actions = utilities.get_actions(armature_object, properties)
+    context['source_object']['actions'] = actions
+    utilities.scale_object_actions([armature_object], actions, scale_factor)
+
+    return context
+
+
+def rename_duplicate_object(duplicate_object, context, properties):
+    """
+    This function renames the duplicated objects to match their original names and save a reference to them.
+    :param object duplicate_object: A scene object.
+    :param dict context: A dictionary containing the current data attributes.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return dict: A dictionary containing the current data attributes.
+    """
+    # Get a the root object name and save the object reference. This needs to happen so when the
+    # duplicate armature is renamed to correctly to match the original object. For example a
+    # duplicated object named 'Armature' is automatically given the name 'Armature.001' by Blender.
+    # By saving this object reference, its name can be restored back to 'Armature' after the export.
+    context['source_object']['object'] = bpy.data.objects.get(context['source_object']['object_name'])
+    context['source_object']['armature'] = bpy.data.armatures.get(context['source_object']['armature_name'])
+
+    # use the armature objects name as the root in unreal
+    if properties.import_object_name_as_root:
+        duplicate_object.name = context['source_object']['object_name']
+        duplicate_object.data.name = context['source_object']['armature_name']
+
+    # otherwise don't use the armature objects name as the root in unreal
+    else:
+        # Rename the armature object to 'Armature'. This is important, because this is a special
+        # reserved keyword for the Unreal FBX importer that will be ignored when the bone hierarchy
+        # is imported from the FBX file. That way there is not an additional root bone in the Unreal
+        # skeleton hierarchy.
+        duplicate_object.name = 'Armature'
+
+    return context
+
+
+def scale_rig_objects(properties):
+    """
+    This function changes the scene scale to 0.01 and scales the selected rig objects to offset that scene scale change.
+    Then it return to original context.
+
+    :return dict: The original context of the scene scale and its selected objects before changes occurred.
+    """
+    scene_scale = 0.01
+    # get the context of the scene before any of the scaling operations
+    context = get_pre_scaled_context()
+
+    # scale the rig objects by the scale factor needed to offset the 0.01 scene scale
+    scale_factor = context['scene_scale'] / scene_scale
+
+    # only scale the rig object if there was a root object added to the context and automatically scaling bones is on
+    if properties.automatically_scale_bones and context:
+        context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
+
+        for duplicate_object in context['duplicate_objects']:
+            if duplicate_object.type == 'ARMATURE':
+                # rename the duplicated objects and save the original object references to the context
+                context = rename_duplicate_object(duplicate_object, context, properties)
+
+                # fix the armature scale and its animation and save that information to the context
+                context = fix_armature_scale(duplicate_object, scale_factor, context, properties)
+
+        # constrain the source rig to the control rig if using ue2rigify
+        if properties.use_ue2rigify:
+            bpy.ops.ue2rigify.constrain_source_to_deform()
+
+        # restore the duplicate object selection for the export
+        for duplicate_object in context['duplicate_objects']:
+            duplicate_object.select_set(True)
+
+    return context
+
+
+def restore_rig_objects(context, properties):
+    """
+    This function takes the previous context of the scene scale and rig objects and sets them to the values in
+    the context dictionary.
+
+    :param dict context: The original context of the scene scale and its selected objects before changes occurred.
+    :param properties:
+    """
+    if properties.automatically_scale_bones and context:
+        scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
+
+        # scale the control rig if needed
+        scale_control_rig(scale_factor, properties)
+
+        # restore action scale the duplicated actions
+        utilities.scale_object_actions(context['duplicate_objects'], context['source_object']['actions'], scale_factor)
+
+        # remove all the duplicate objects
+        utilities.remove_extra_data(bpy.data.objects, context['objects'])
+
+        # remove all the duplicate meshes
+        utilities.remove_extra_data(bpy.data.meshes, context['meshes'])
+
+        # remove all the duplicate armatures
+        utilities.remove_extra_data(bpy.data.armatures, context['armatures'])
+
+        # remove all the duplicate actions
+        utilities.remove_extra_data(bpy.data.actions, context['actions'])
+
+        # restore the scene scale
+        bpy.context.scene.unit_settings.scale_length = context['scene_scale']
+
+        # restore the original object name on the root object name if needed
+        source_object = context['source_object'].get('object')
+        if source_object:
+            source_object.name = context['source_object']['object_name']
+            source_object.data.name = context['source_object']['armature_name']
+
+        if properties.use_ue2rigify:
+            bpy.ops.ue2rigify.constrain_source_to_deform()
+
+
 def export_fbx_files(file_paths, properties):
     """
     This function calls the blender fbx export operator with specific settings.
@@ -244,6 +452,9 @@ def export_fbx_files(file_paths, properties):
     """
     # gets the original position and sets the objects position according to the selected properties.
     original_positions = set_selected_objects_to_center(properties)
+
+    # change the scene scale and scale the rig objects and get their original context
+    context = scale_rig_objects(properties)
 
     for file_path in file_paths.values():
         # if the folder does not exists create it
@@ -285,6 +496,9 @@ def export_fbx_files(file_paths, properties):
 
     # restores original positions
     set_object_positions(original_positions)
+
+    # restores the original rig objects
+    restore_rig_objects(context, properties)
 
 
 def export_mesh_lods(asset_name, properties):
@@ -586,6 +800,9 @@ def validate(properties):
     mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH')
 
     # run through the selected validations
+    if not validations.validate_collections_exist(properties):
+        return False
+
     if not validations.validate_geometry_exists(mesh_objects):
         return False
 
@@ -634,9 +851,10 @@ def send2ue(properties):
             # check path mode to see if exported assets should be imported to unreal
             if properties.path_mode in ['send_to_unreal', 'both']:
                 for assets_data in assets_data:
-                    unreal.import_asset(assets_data, properties)
+                    result = unreal.import_asset(assets_data, properties)
+                    if not result:
+                        break
         else:
-            # TODO add more specific error logging
             utilities.report_error(
                 f'You do not have the correct objects under the "{properties.mesh_collection_name}" or '
                 f'"{properties.rig_collection_name}" collections or your rig does not have any '

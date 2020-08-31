@@ -14,7 +14,7 @@ bl_info = {
     "author": "Epic Games Inc.",
     "description": "Allows you to convert a given rig and its animations to a Rigify rig.",
     "blender": (2, 83, 0),
-    "version": (1, 3, 6),
+    "version": (1, 3, 7),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home",
     "warning": "",
@@ -53,6 +53,8 @@ classes = (
     operators.CreateLinkFromSelectedBones,
     operators.CombineSelectedNodes,
     operators.AlignActiveNodeSockets,
+    operators.ConstrainSourceToDeform,
+    operators.RemoveConstraints,
     addon_preferences.Ue2RigifyAddonPreferences,
     view_3d.UE_RIGIFY_PT_RigTemplatePanel
 )

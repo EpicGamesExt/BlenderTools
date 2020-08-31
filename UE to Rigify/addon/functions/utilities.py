@@ -722,7 +722,7 @@ def load_context(properties):
                 # set the active action on the control rig
                 if control_rig_object.animation_data:
                     active_action_name = control_rig_context.get('active_action')
-                    active_action = bpy.data.actions.get(active_action_name)
+                    active_action = bpy.data.actions.get(active_action_name, '')
                     if active_action:
                         control_rig_object.animation_data.action = active_action
 

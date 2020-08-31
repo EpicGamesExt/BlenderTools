@@ -209,3 +209,56 @@ class AlignActiveNodeSockets(bpy.types.Operator):
         properties = bpy.context.window_manager.ue2rigify
         nodes.align_active_node_sockets(context, properties)
         return {'FINISHED'}
+
+
+class ConstrainSourceToDeform(bpy.types.Operator):
+    """Constrain the source bones to the deform bones"""
+    bl_idname = "ue2rigify.constrain_source_to_deform"
+    bl_label = "Constrain source to deform"
+
+    control_rig_name: bpy.props.StringProperty(default='')
+    source_rig_name: bpy.props.StringProperty(default='')
+
+    def execute(self, context):
+        properties = bpy.context.window_manager.ue2rigify
+
+        # get the control and source rig objects
+        if self.control_rig_name:
+            control_rig = bpy.data.objects.get(self.control_rig_name)
+        else:
+            control_rig = bpy.data.objects.get(properties.control_rig_name)
+        if self.source_rig_name:
+            source_rig = bpy.data.objects.get(self.source_rig_name)
+        else:
+            source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+        # constrain the source rig to the deform rig
+        scene.constrain_source_to_deform(source_rig, control_rig, properties)
+        return {'FINISHED'}
+
+
+class RemoveConstraints(bpy.types.Operator):
+    """Remove all constraints on both the source rig and control rig"""
+    bl_idname = "ue2rigify.remove_constraints"
+    bl_label = "Remove Constraints"
+
+    control_rig_name: bpy.props.StringProperty(default='')
+    source_rig_name: bpy.props.StringProperty(default='')
+
+    def execute(self, context):
+        properties = bpy.context.window_manager.ue2rigify
+
+        # get the control and source rig objects
+        if self.control_rig_name:
+            control_rig = bpy.data.objects.get(self.control_rig_name)
+        else:
+            control_rig = bpy.data.objects.get(properties.control_rig_name)
+        if self.source_rig_name:
+            source_rig = bpy.data.objects.get(self.source_rig_name)
+        else:
+            source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+        # remove the constraints on the source rig and control rig
+        scene.remove_bone_constraints(control_rig, properties)
+        scene.remove_bone_constraints(source_rig, properties)
+        return {'FINISHED'}
