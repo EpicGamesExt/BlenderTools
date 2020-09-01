@@ -375,11 +375,11 @@ def scale_rig_objects(properties):
     # get the context of the scene before any of the scaling operations
     context = get_pre_scaled_context()
 
-    # scale the rig objects by the scale factor needed to offset the 0.01 scene scale
-    scale_factor = context['scene_scale'] / scene_scale
-
     # only scale the rig object if there was a root object added to the context and automatically scaling bones is on
     if properties.automatically_scale_bones and context:
+        # scale the rig objects by the scale factor needed to offset the 0.01 scene scale
+        scale_factor = context['scene_scale'] / scene_scale
+
         context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
 
         for duplicate_object in context['duplicate_objects']:
