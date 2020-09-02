@@ -2,3 +2,5 @@
 .idea
 *.pyc
 __pycache__
+/test/blends/*
+/test/unreal_projects/*
