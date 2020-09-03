@@ -78,29 +78,31 @@ def launch_blender():
     # define the flags passed to the blender application
     flags = '--background --disable-autoexec --python-exit-code 1 --python ./../unit_tests/main.py'
 
-    # launch blender according to each operating system
-    if sys.platform == 'linux':
-        blender_path = '/home/ue4/blender/blender'
-
-    # TODO macOS needs testing
-    if sys.platform == 'darwin':
-        blender_path = '/usr/local/bin/blender'
-
-    if sys.platform == 'win32':
-        # get the installed blender version using the chocolatey logs
-        blender_version = get_blender_version_from_chocolatey(os.path.join(
-            os.environ['PROGRAMDATA'],
-            'chocolatey',
-            'logs',
-            'chocolatey.log'
-        ))
-
-        # build the full path to the blender executable
-        blender_path = r'C:\Program Files\Blender Foundation\Blender {blender_version}\blender.exe'.format(
-            blender_version=blender_version
-        )
-
     if os.environ.get('CI'):
+
+        # launch blender according to each operating system
+        if sys.platform == 'linux':
+            blender_path = '/home/ue4/blender/blender'
+
+        # TODO macOS needs testing
+        if sys.platform == 'darwin':
+            blender_path = '/usr/local/bin/blender'
+
+        if sys.platform == 'win32':
+            # get the installed blender version using the chocolatey logs
+            blender_version = get_blender_version_from_chocolatey(os.path.join(
+                os.environ['PROGRAMDATA'],
+                'chocolatey',
+                'logs',
+                'chocolatey.log'
+            ))
+
+            # build the full path to the blender executable
+            blender_path = r'C:\Program Files\Blender Foundation\Blender {blender_version}\blender.exe'.format(
+                blender_version=blender_version
+            )
+
+
         blender_path = os.environ.get('BLENDER_EXE', blender_path)
     else:
         blender_path = os.environ.get('BLENDER_EXE', 'blender')
