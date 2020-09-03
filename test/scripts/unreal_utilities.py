@@ -25,7 +25,8 @@ from remote_execution import RemoteExecution
 
 unreal_response = ''
 
-logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger('remote_execution')
+logger.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
@@ -110,6 +111,24 @@ def delete_asset(game_path):
         ]))
 
 
+def delete_directory(directory_path):
+    """
+    This function deletes an folder and its contents in unreal.
+
+    :param str directory_path: The game path to the unreal project folder.
+    """
+    # start a connection to the engine that lets you send python strings
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+
+    # send over the python code as a string
+    run_unreal_python_commands(
+        remote_exec,
+        '\n'.join([
+            f'unreal.EditorAssetLibrary.delete_directory(r"{directory_path}")',
+        ]))
+
+
 def is_unreal_running(attempts, ping):
     """
     This function suspends the program execution until unreal remote execution socket responds.
@@ -168,6 +187,7 @@ def launch_unreal():
     """
     # the flags passed to the unreal editor
     flags = ['-unattended', '-nopause', '-nullrhi']
+    flags = ['-unattended', '-nopause', '-nullrhi']
 
     # the relative path to the unreal project in the repo
     test_project = os.path.normpath(
@@ -175,8 +195,8 @@ def launch_unreal():
             os.getcwd(),
             os.pardir,
             'unreal_projects',
-            'third_person_bp',
-            'third_person_bp.uproject'
+            'test_project_01',
+            'test_project_01.uproject'
         )
     )
 

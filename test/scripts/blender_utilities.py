@@ -8,9 +8,6 @@ import unittest
 import importlib
 from addon_manager import AddonManager
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('remote_execution')
-logger.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
@@ -79,7 +76,7 @@ def launch_blender():
     :param list test_files: A list of file names to run.
     """
     # define the flags passed to the blender application
-    flags = '--background --disable-autoexec --python-exit-code 1 --python ./../test_cases/main.py'
+    flags = '--background --disable-autoexec --python-exit-code 1 --python ./../unit_tests/main.py'
 
     # launch blender according to each operating system
     if sys.platform == 'linux':
@@ -118,13 +115,13 @@ def launch_blender():
 
 def run_tests(test_cases_folder):
     """
-    This function builds a test suite from all the test files runs the unit tests.
+    This function builds a test suite from all the unit test files and runs the unit tests.
     """
-    logging.info('Running the unit tests...')
+    logging.info('Running unit tests...')
     # import all the unit tests
-    _, _, test_cases_files = next(os.walk(test_cases_folder))
-    test_cases_files.remove('main.py')
-    unit_test_modules = [test_case_file.replace('.py', '') for test_case_file in test_cases_files]
+    _, _, unit_test_files = next(os.walk(test_cases_folder))
+    unit_test_files.remove('main.py')
+    unit_test_modules = [test_case_file.replace('.py', '') for test_case_file in unit_test_files]
 
     suite = unittest.TestSuite()
 

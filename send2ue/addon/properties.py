@@ -197,7 +197,6 @@ class Send2UeUIProperties:
     show_fbx_settings: bpy.props.BoolProperty(default=False)
     incorrect_disk_mesh_folder_path: bpy.props.BoolProperty(default=False)
     incorrect_disk_animation_folder_path: bpy.props.BoolProperty(default=False)
-    do_not_show_again: bpy.props.BoolProperty(default=False)
 
     # ---------------------------- fbx file settings --------------------------------
     # Include
