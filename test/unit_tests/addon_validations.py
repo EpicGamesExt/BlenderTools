@@ -4,6 +4,12 @@ import unittest
 
 
 class AddonValidationTestCases(unittest.TestCase):
+    """
+    related issue:
+    https://github.com/EpicGames/BlenderTools
+    ^ This is a core addon feature, but if this feature was created based off an issue, a link to the issue
+    should be left is the docstring.
+    """
 
     def __init__(self, *args, **kwargs):
         super(AddonValidationTestCases, self).__init__(*args, **kwargs)

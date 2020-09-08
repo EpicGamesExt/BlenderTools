@@ -768,15 +768,17 @@ def organize_rig_objects(properties, organize_control_rig=True):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool organize_control_rig: Whether to organize the control rig and its widgets or not.
     """
-
-    # get the organizational collections or create them if the don't exist
+    # get the rig collection or create it if it doesn't exist
     rig_collection = bpy.data.collections.get(properties.rig_collection_name)
     if not rig_collection:
         rig_collection = bpy.data.collections.new(properties.rig_collection_name)
+        bpy.context.scene.collection.children.link(rig_collection)
 
+    # get the extras collection or create it if it doesn't exist
     extras_collection = bpy.data.collections.get(properties.extras_collection_name)
     if not extras_collection:
         extras_collection = bpy.data.collections.new(properties.extras_collection_name)
+        bpy.context.scene.collection.children.link(extras_collection)
 
     # get the widgets and constraint collections
     widgets_collection = bpy.data.collections.get(properties.widgets_collection_name)
