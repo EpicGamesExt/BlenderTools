@@ -1,8 +1,6 @@
 # Blender Tools
 Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, so be sure to always download the latest version for new features and bug fixes.
 
-Just testing
-
 ### Downloads
 Select the .zip file with latest version number you want to download.
 * [Send to Unreal Download](https://github.com/EpicGames/BlenderTools/tree/master/send2ue/releases)
