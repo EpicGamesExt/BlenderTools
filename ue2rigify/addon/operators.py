@@ -262,3 +262,20 @@ class RemoveConstraints(bpy.types.Operator):
         scene.remove_bone_constraints(control_rig, properties)
         scene.remove_bone_constraints(source_rig, properties)
         return {'FINISHED'}
+
+
+class SwitchModes(bpy.types.Operator):
+    """Switch to the given mode"""
+    bl_idname = "ue2rigify.switch_modes"
+    bl_label = "Switch Modes"
+
+    mode: bpy.props.StringProperty(default='')
+
+    def execute(self, context):
+        properties = bpy.context.window_manager.ue2rigify
+        properties.freeze_rig = True
+        properties.selected_mode = self.mode
+        properties.freeze_rig = False
+        scene.switch_modes()
+        return {'FINISHED'}
+

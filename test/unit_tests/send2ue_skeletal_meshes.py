@@ -5,8 +5,13 @@ import unittest
 import unreal_utilities
 
 
-# TODO add github feature issue link
 class Send2UeSkeletalMeshTestCases(unittest.TestCase):
+    """
+    related issue:
+    https://github.com/EpicGames/BlenderTools
+    ^ This is a core addon feature, but if this feature was created based off an issue, a link to the issue
+    should be left is the docstring.
+    """
 
     def setUp(self):
         """
