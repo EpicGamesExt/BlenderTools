@@ -8,8 +8,9 @@ import unittest
 import importlib
 from addon_manager import AddonManager
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def get_blender_version_from_chocolatey(log_file_path):
@@ -52,7 +53,7 @@ def install_addons(addons):
     in the git repository and the value is the module name of the addon.
     :return:
     """
-    logging.info('Installing Blender addons...')
+    logger.info('Installing Blender addons...')
     for module_name in addons:
 
         # get the addon path
@@ -102,7 +103,6 @@ def launch_blender():
                 blender_version=blender_version
             )
 
-
         blender_path = os.environ.get('BLENDER_EXE', blender_path)
     else:
         blender_path = os.environ.get('BLENDER_EXE', 'blender')
@@ -134,8 +134,19 @@ def run_tests(test_cases_folder):
                 test_class = getattr(module, class_name)
                 suite.addTest(unittest.makeSuite(test_class))
 
-    tests = unittest.TextTestRunner(verbosity=2)
+    # pass a log file with write permissions into the test runner
+    log_file_path = os.path.join(os.pardir, 'unittest_results.log')
+    write_log_file = open(log_file_path, 'w')
+    tests = unittest.TextTestRunner(write_log_file, verbosity=2)
+
+    # run the unittests
     result = tests.run(suite)
+    write_log_file.close()
+
+    # log the test results from the file
+    read_log_file = open(log_file_path, 'r')
+    logger.info(read_log_file.read())
+    read_log_file.close()
 
     # if a test case fails, let the parent python process know there was a failure
     failure_count = len(result.failures + result.errors)
