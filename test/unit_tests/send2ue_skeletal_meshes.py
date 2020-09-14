@@ -15,6 +15,11 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
         # load in the file you will run tests on
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'skeletal_meshes.blend'))
 
+        # enable the required addons
+        bpy.ops.preferences.addon_enable(module='send2ue')
+        bpy.ops.preferences.addon_enable(module='ue2rigify')
+        bpy.ops.preferences.addon_enable(module='rigify')
+
     def test_send_cube_rig_to_unreal(self):
         """
         This method sends a skeletal cube mesh with animation to unreal.
