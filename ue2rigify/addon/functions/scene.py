@@ -641,7 +641,7 @@ def create_meta_rig(properties):
     bpy.context.view_layer.objects.active = metarig_object
 
     # get the path to the saved metarig file
-    rig_template_path = os.path.join(properties.saved_metarig_data, os.pardir)
+    rig_template_path = os.path.dirname(properties.saved_metarig_data)
 
     # switch the path to the location of the metarig module
     sys.path[0] = rig_template_path
