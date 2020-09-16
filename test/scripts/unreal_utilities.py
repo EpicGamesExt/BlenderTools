@@ -239,7 +239,7 @@ def launch_unreal():
 
         unreal_process = subprocess.Popen(
             command,
-            stdout=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT
         )
 
