@@ -41,11 +41,11 @@ class AddonManager:
                                 dictionary[key.s] = item.value.values[index].s
 
                             # add number as dictionary value
-                            if hasattr(item.value.values[index], 'n'):
+                            elif hasattr(item.value.values[index], 'n'):
                                 dictionary[key.s] = item.value.values[index].n
 
                             # add list as dictionary value
-                            if hasattr(item.value.values[index], 'elts'):
+                            elif hasattr(item.value.values[index], 'elts'):
                                 list_value = []
                                 for element in item.value.values[index].elts:
                                     # add a number to the list
@@ -53,7 +53,7 @@ class AddonManager:
                                         list_value.append(element.n)
 
                                     # add a string to the list
-                                    if hasattr(element, 's'):
+                                    elif hasattr(element, 's'):
                                         list_value.append(element.s)
 
                                 dictionary[key.s] = list_value
