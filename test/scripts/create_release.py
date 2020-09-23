@@ -31,6 +31,7 @@ def get_updated_addons(repo_name, addon_names):
 
     # get the most recent commit
     commit = repo.source.get_commits()[0]
+    print(commit)
 
     # get all the paths to the addon init file
     init_file_paths = [(addon_name, f'{addon_name}/addon/__init__.py') for addon_name in addon_names]

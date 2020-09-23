@@ -4,6 +4,7 @@ import os
 import shutil
 import logging
 import ast
+import sys
 
 try:
     import bpy
@@ -129,7 +130,8 @@ class AddonManager:
         versioned_folder_path = versioned_zip_file_path.replace('.zip', '')
 
         # change the permissions to allow the folders contents to be modified.
-        self.set_folder_contents_permissions(os.path.join(addon_folder_path, os.pardir), 0o777)
+        if sys.platform == 'win32':
+            self.set_folder_contents_permissions(os.path.join(addon_folder_path, os.pardir), 0o777)
 
         # remove the existing zip archive
         if os.path.exists(versioned_zip_file_path):
