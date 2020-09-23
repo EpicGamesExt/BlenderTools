@@ -4,6 +4,8 @@ FROM $IMAGE
 
 USER root
 
+RUN chmod -R a+rwx /home/ue4/BlenderTools/
+
 WORKDIR /home/ue4/
 
 COPY . ./BlenderTools/
