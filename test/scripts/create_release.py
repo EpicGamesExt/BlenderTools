@@ -22,7 +22,7 @@ git_hub = Github(os.environ['USERNAME'], os.environ['PASSWORD'])
     #     path=r"C:\Users\James Baber\PycharmProjects\BlenderTools\send2ue\releases\send2ue_1.4.2.zip",
     #     name='send2ue_1.4.2.zip',
     #     content_type='application/zip'
-    # )
+    # ) etst
 
 
 def get_updated_addons(repo_name, addon_names):
