@@ -79,7 +79,7 @@ def launch_blender():
     # define the flags passed to the blender application
     flags = '--background --disable-autoexec --python-exit-code 1 --python ./../unit_tests/main.py'
 
-    if os.environ.get('CI'):
+    if sys.argv[-1].lower() == '--ci':
 
         # launch blender according to each operating system
         if sys.platform == 'linux':
