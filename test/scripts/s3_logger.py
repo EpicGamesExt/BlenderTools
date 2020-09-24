@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     client = Github(os.environ['USERNAME'], os.environ['PASSWORD'])
     repo = client.get_repo(full_name_or_id='james-baber/BlenderTools')
-    commit = repo.get_commit(sha='ac3a2f212302cd56ef761b0a0437a29b5933f453')
+    commit = repo.get_commit(sha='639029c5535a5596c648056c9e04be15cc0cc4ed')
 
     from pprint import pprint
     pprint(commit.raw_data)
