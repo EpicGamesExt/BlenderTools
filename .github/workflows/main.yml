@@ -1,9 +1,8 @@
 name: Test Code
 
 on:
-  push:
-    branches:
-      - '**'
+  pull_request:
+    types: [synchronize]
 
 jobs:
   build:
