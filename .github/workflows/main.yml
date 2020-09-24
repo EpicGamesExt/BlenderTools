@@ -1,6 +1,9 @@
 name: Test Code
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - '**'
 
 jobs:
   build:
