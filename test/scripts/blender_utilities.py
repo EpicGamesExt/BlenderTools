@@ -36,13 +36,13 @@ def get_addon_folder_path(addon_name):
     :return str: The full path of the addon.
     """
     # get the path to the addon folder
-    return os.path.join(
+    return os.path.normpath(os.path.join(
         os.getcwd(),
         os.pardir,
         os.pardir,
         addon_name,
         'addon'
-    )
+    ))
 
 
 def install_addons(addons):
@@ -57,7 +57,7 @@ def install_addons(addons):
     for module_name in addons:
 
         # get the addon path
-        send_to_unreal_addon_path = os.path.normpath(get_addon_folder_path(module_name))
+        send_to_unreal_addon_path = get_addon_folder_path(module_name)
 
         # build the addon
         addon = AddonManager(module_name)
