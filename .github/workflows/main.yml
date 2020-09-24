@@ -1,6 +1,8 @@
 name: Test Code
 
-on: [pull_request]
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
 
 jobs:
   build:
@@ -47,7 +49,7 @@ jobs:
           exit 1;
         fi
 
-#    - name: Install Blender Test
+#    - name: Install Blender
 #      run: |
 #        python ./test/scripts/install_blender.py
 
