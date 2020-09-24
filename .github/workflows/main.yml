@@ -2,7 +2,7 @@ name: Test Code
 
 on:
   pull_request:
-    types: [assigned, opened, synchronize, reopened]
+    types: [assigned, opened, synchronize, reopened, edited]
 
 jobs:
   build:
