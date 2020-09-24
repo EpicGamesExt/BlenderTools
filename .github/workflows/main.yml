@@ -1,4 +1,4 @@
-name: Running Tests
+name: Test Code
 
 on: [pull_request]
 
