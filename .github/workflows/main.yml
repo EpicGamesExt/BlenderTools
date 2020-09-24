@@ -50,7 +50,7 @@ jobs:
           exit 1;
         fi
 
-#    - name: Install Blender test
+#    - name: Install Blender test 2
 #      run: |
 #        python ./test/scripts/install_blender.py
 
