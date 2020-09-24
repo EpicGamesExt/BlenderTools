@@ -1,11 +1,10 @@
 name: Test Code
 
 on:
-  pull_request:
-    types: [opened, reopened, edited]
-
-  pull_request_review:
-    types: [edited]
+  push:
+    branches:
+      - '*/*'
+      - '!master'
 
 jobs:
   build:
