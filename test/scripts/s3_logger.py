@@ -2,8 +2,10 @@ import boto3
 import urllib
 import sys
 import time
+import requests
+from requests.auth import HTTPBasicAuth
 import os
-from github import Github
+import json
 
 
 class LogFile:
@@ -46,6 +48,14 @@ class S3Logger:
             Key=self.sha,
         )
 
+def get_commit_state(repo, token, sha):
+    headers = {f'Authorization': f'token {sys.argv[-1]}'}
+    response = requests.get(
+        # headers=,
+        auth=HTTPBasicAuth(os.environ['USERNAME'], os.environ['PASSWORD']),
+        url=f'https://api.github.com/repos/{repo}/commits/{sha}/status'
+    )
+    return json.loads(response.text)['state'].lower()
 
 def get_flags():
     args = sys.argv[1:]
@@ -60,33 +70,29 @@ def get_flags():
 
 
 if __name__ == '__main__':
+    arguments = get_flags()
 
-    # arguments = get_flags()
-    # s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=arguments['--sha'])
-    #
-    # if arguments.get('--listen') == 'True':
-    #     while True:
-    #         time.sleep(5)
-    #         print(s3_logger.read_log())
-    #
-    # if arguments.get('--report') == 'True':
-    #     # while True:
-    #     #     time.sleep(5)
-    #     s3_logger.write_log('Hi james')
-    #     print('wrote!')
-    #
-    # if arguments.get('--delete') == 'True':
-    #     s3_logger.delete_log()
+    repo_name = 'james-baber/BlenderTools'
+    sha = arguments['--sha']
+    token = arguments['--token']
 
-    # https: // api.github.com / repos /${{github.repository}} / commits /${{github.sha}} / status
+    s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
-    client = Github(os.environ['USERNAME'], os.environ['PASSWORD'])
-    repo = client.get_repo(full_name_or_id='james-baber/BlenderTools')
-    commit = repo.get_commit(sha='639029c5535a5596c648056c9e04be15cc0cc4ed')
+    if arguments.get('--listen') == 'True':
+        while get_commit_state(repo_name, token, sha) == 'pending':
+            time.sleep(5)
+            print('hi')
+            print(s3_logger.read_log())
+        print(s3_logger.read_log())
 
-    from pprint import pprint
-    pprint(commit.raw_data)
-    pprint(commit.status)
+    if arguments.get('--report') == 'True':
+        # while True:
+        #     time.sleep(5)
+        s3_logger.write_log('Hi james')
+        print('wrote!')
+
+    if arguments.get('--delete') == 'True':
+        s3_logger.delete_log()
 
 
 
