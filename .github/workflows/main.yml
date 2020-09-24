@@ -1,11 +1,6 @@
 name: Test Code
 
-on:
-  pull_request:
-    branches:
-      - 'master'
-#      - '*/*'
-#      - '!master'
+on: [push]
 
 jobs:
   build:
