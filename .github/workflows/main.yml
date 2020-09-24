@@ -1,8 +1,11 @@
 name: Test Code
 
 on:
-  pull_request_target:
-    types: [assigned, opened, synchronize, reopened, edited]
+  pull_request:
+    types: [opened, reopened, edited]
+
+  pull_request_review:
+    types: [edited]
 
 jobs:
   build:
