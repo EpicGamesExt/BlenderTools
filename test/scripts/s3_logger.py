@@ -49,10 +49,10 @@ class S3Logger:
         )
 
 def get_commit_state(repo, token, sha):
-    headers = {f'Authorization': f'token {sys.argv[-1]}'}
+    headers = {f'Authorization': f'token {token}'}
     response = requests.get(
-        # headers=,
-        auth=HTTPBasicAuth(os.environ['USERNAME'], os.environ['PASSWORD']),
+        headers=headers,
+        # auth=HTTPBasicAuth(os.environ['USERNAME'], os.environ['PASSWORD']),
         url=f'https://api.github.com/repos/{repo}/commits/{sha}/status'
     )
     return json.loads(response.text)['state'].lower()
@@ -79,6 +79,7 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
+        print('listening for code build status!!!')
         while get_commit_state(repo_name, token, sha) == 'pending':
             time.sleep(5)
             print('hi')
