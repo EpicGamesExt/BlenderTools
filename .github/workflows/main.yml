@@ -1,10 +1,10 @@
 name: Test Code
 
-on:
-  push:
-    branches:
-      - '*/*'
-      - '!master'
+on: [push]
+#  push:
+#    branches:
+#      - '*/*'
+#      - '!master'
 
 jobs:
   build:
