@@ -90,4 +90,8 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    client = Github(os.environ['USERNAME'], os.environ['PASSWORD'])
+    repo = client.get_repo(full_name_or_id='james-baber/BlenderTools')
+    commit = repo.get_commit(sha='ac3a2f212302cd56ef761b0a0437a29b5933f453')
+
+    print(commit.committer.html_url)
