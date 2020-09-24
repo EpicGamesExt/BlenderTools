@@ -5,3 +5,4 @@
 /venv/*
 /test/blends/*
 /test/unreal_projects/*
+*/releases/*
