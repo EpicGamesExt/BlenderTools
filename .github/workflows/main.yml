@@ -1,8 +1,9 @@
 name: Test Code
 
-on: [push]
-#  push:
-#    branches:
+on:
+  push:
+    branches:
+      - 'master'
 #      - '*/*'
 #      - '!master'
 
