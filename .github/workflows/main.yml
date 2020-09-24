@@ -1,10 +1,11 @@
 name: Test Code
 
 on:
-  push:
+  pull_request:
     branches:
-      - '*/*'
-      - '!master'
+      - 'master'
+#      - '*/*'
+#      - '!master'
 
 jobs:
   build:
@@ -51,7 +52,7 @@ jobs:
           exit 1;
         fi
 
-#    - name: Install Blender
+#    - name: Install Blender test
 #      run: |
 #        python ./test/scripts/install_blender.py
 
