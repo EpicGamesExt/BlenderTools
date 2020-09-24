@@ -36,13 +36,13 @@ def get_addon_folder_path(addon_name):
     :return str: The full path of the addon.
     """
     # get the path to the addon folder
-    return os.path.join(
+    return os.path.normpath(os.path.join(
         os.getcwd(),
         os.pardir,
         os.pardir,
         addon_name,
         'addon'
-    )
+    ))
 
 
 def install_addons(addons):
@@ -57,7 +57,7 @@ def install_addons(addons):
     for module_name in addons:
 
         # get the addon path
-        send_to_unreal_addon_path = os.path.normpath(get_addon_folder_path(module_name))
+        send_to_unreal_addon_path = get_addon_folder_path(module_name)
 
         # build the addon
         addon = AddonManager(module_name)
@@ -79,7 +79,7 @@ def launch_blender():
     # define the flags passed to the blender application
     flags = '--background --disable-autoexec --python-exit-code 1 --python ./../unit_tests/main.py'
 
-    if os.environ.get('CI'):
+    if sys.argv[-1].lower() == '--ci':
 
         # launch blender according to each operating system
         if sys.platform == 'linux':

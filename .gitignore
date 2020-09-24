@@ -2,5 +2,6 @@
 .idea
 *.pyc
 *.log
+/venv/*
 /test/blends/*
 /test/unreal_projects/*
