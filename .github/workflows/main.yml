@@ -40,12 +40,7 @@ jobs:
 
         function print {
             python ./s3_logger.py --sha ${{ github.sha }} --listen True
-            if [ -z "${{cat ./latest_ouput.log}}" ]
-            then
-                  :
-            else
-                  cat ./latest_ouput.log
-            fi
+            cat ./latest_ouput.log
         }
 
         print
