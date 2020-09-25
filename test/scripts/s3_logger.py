@@ -4,6 +4,7 @@ import time
 import requests
 import json
 import docker
+import os
 try:
     import boto3
 except ImportError:
@@ -43,6 +44,12 @@ class S3Logger:
         try:
             file = urllib.request.urlopen(f'{self.public_web_address}/{self.sha}')
             logs = file.read().decode("utf-8")
+
+            if not os.path.exists(self.previous_logs):
+                previous_logs = open(self.previous_logs, 'w')
+                previous_logs.write('')
+                previous_logs.close()
+
             previous_logs = open(self.previous_logs, 'r')
             output = logs.replace(previous_logs.read(), '')
             previous_logs.close()
