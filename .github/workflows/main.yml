@@ -1,5 +1,3 @@
-name: Continuous Integration
-
 on:
   workflow_dispatch:
     inputs:
@@ -7,6 +5,8 @@ on:
         description: 'The sha of the commit'
         required: true
         default: ''
+
+name: ${{ github.event.inputs.sha }}
 
 jobs:
   build:
