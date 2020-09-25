@@ -44,7 +44,7 @@ jobs:
             then
                   :
             else
-                  echo $output
+                  printf "%-20st" 'UTF-8:'; echo $output | iconv -t utf8
             fi
         }
 
