@@ -64,7 +64,7 @@ jobs:
         output="${output//$'\r'/'%0D'}"
         echo $output
 
-#    - name: Install Blender test
+#    - name: Install Blender
 #      run: |
 #        python ./test/scripts/install_blender.py
 
