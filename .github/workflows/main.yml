@@ -40,7 +40,12 @@ jobs:
 
         function print {
             output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
-            echo $output
+            if [ -z "$output" ]
+            then
+
+            else
+                  echo $output
+            fi
         }
 
         # Check the status of the Git commit

@@ -51,6 +51,8 @@ class S3Logger:
                 previous_logs.close()
 
             previous_logs = open(self.previous_logs, 'r')
+
+
             output = logs.replace(previous_logs.read(), '')
             previous_logs.close()
 
