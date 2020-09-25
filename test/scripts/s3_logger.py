@@ -48,14 +48,15 @@ class S3Logger:
             Key=self.sha,
         )
 
+
 def get_commit_state(repo, token, sha):
     headers = {f'Authorization': f'token {token}'}
     response = requests.get(
         headers=headers,
-        # auth=HTTPBasicAuth(os.environ['USERNAME'], os.environ['PASSWORD']),
         url=f'https://api.github.com/repos/{repo}/commits/{sha}/status'
     )
     return json.loads(response.text)['state'].lower()
+
 
 def get_flags():
     args = sys.argv[1:]
@@ -79,12 +80,16 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        print('listening for code build status!!!')
         while get_commit_state(repo_name, token, sha) == 'pending':
             time.sleep(5)
             print('hi')
             print(s3_logger.read_log())
-        print(s3_logger.read_log())
+
+        if get_commit_state(repo_name, token, sha) == 'failure':
+            print(s3_logger.read_log())
+            raise RuntimeError('Build Failed!')
+        else:
+            print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
         # while True:
