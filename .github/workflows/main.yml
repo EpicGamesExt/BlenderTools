@@ -36,13 +36,14 @@ jobs:
       id: commit-status
       run: |
         cd ./test/scripts
-        previous_output=""
+        previous_output="Starting CI machine... This might take a few minutes..."
 
         function print {
             output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True --output $1)
             output="${output//'%'/'%25'}"
             output="${output//$'\n'/'%0A'}"
             output="${output//$'\r'/'%0D'}"
+            previous_output="${previous_output}${output}"
             echo $output
         }
 

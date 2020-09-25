@@ -39,13 +39,12 @@ class S3Logger:
             ExtraArgs={'ACL': 'public-read'}
         )
 
-    def read_log(self):
+    def read_log(self, previous_logs):
         try:
             file = urllib.request.urlopen(f'{self.public_web_address}/{self.sha}')
             logs = file.read().decode("utf-8")
-            output = logs.replace(self.previous_logs, '')
+            output = logs.replace(previous_logs, '')
             if output:
-                self.previous_logs = logs
                 return output
         except:
             return ''
@@ -88,8 +87,7 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        print('Ping')
-        print(s3_logger.read_log())
+        print(s3_logger.read_log(), arguments.get('--output'))
 
     if arguments.get('--report') == 'True':
         client = docker.from_env()
