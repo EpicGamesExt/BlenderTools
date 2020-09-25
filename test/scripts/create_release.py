@@ -86,7 +86,7 @@ def main():
 
     for addon in addons:
         release_addon = ReleaseAddon(
-            repo_name='jamesbaber1/BlenderTools',
+            repo_name='james-baber/BlenderTools',
             addon_name=addon
         )
         release_addon.create_release()
