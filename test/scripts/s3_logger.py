@@ -5,6 +5,7 @@ import requests
 import json
 import docker
 import os
+from github import Github
 try:
     import boto3
 except ImportError:
@@ -79,14 +80,20 @@ def get_commit_state(repo, token, sha):
     return json.loads(response.text)['state'].lower()
 
 
-def launch_workflow(repo, token, workflow_id):
-    headers = {f'Authorization': f'token {token}'}
-    response = requests.post(
-        headers=headers,
-        url=f'/repos/{repo}/actions/workflows/{workflow_id}/dispatches',
-        data={}
-    )
-    print(response)
+def launch_workflow(repository_name, git_hub_token, workflow_name):
+    git_hub_client = Github(git_hub_token)
+    repo = git_hub_client.get_repo(full_name_or_id=repository_name)
+
+    branch = repo.get_branches()[0]
+
+    for workflow in repo.get_workflows():
+        if workflow.name == workflow_name:
+            workflow.create_dispatch(
+                ref=branch,
+                inputs={
+                    'sha': sha
+                }
+            )
 
 
 def get_flags():
@@ -118,11 +125,11 @@ if __name__ == '__main__':
         latest_ouput.close()
 
     if arguments.get('--report') == 'True':
-        client = docker.from_env()
+        docker_client = docker.from_env()
         container = None
 
         while get_commit_state(repo_name, token, sha) == 'pending':
-            containers = client.containers.list()
+            containers = docker_client.containers.list()
             if containers:
                 if not container:
                     container = containers[0]
@@ -134,6 +141,9 @@ if __name__ == '__main__':
 
         docker_logs = container.logs().decode("utf-8")
         s3_logger.write_log(docker_logs)
+
+    if arguments.get('--launch_workflow') == 'True':
+        launch_workflow(repo_name, token, 'Continuous Integration')
 
     if arguments.get('--delete') == 'True':
         s3_logger.delete_log()
