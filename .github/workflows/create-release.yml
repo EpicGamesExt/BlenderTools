@@ -35,4 +35,4 @@ jobs:
       id: commit-status
       run: |
         cd ./test/scripts
-        python3 ./create_release.py --token ${{ secrets.GITHUB_TOKEN }}
+        python3 ./create_release.py --token ${{ secrets.RELEASE_TOKEN }}
