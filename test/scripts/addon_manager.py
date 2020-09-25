@@ -168,9 +168,6 @@ class AddonManager:
 
         :param str addon_folder_path: The path to the addon folder.
         """
-        print('--------------------------')
-        print(self.get_addon_zip_path(addon_folder_path))
-        print('--------------------------')
 
         # install addon if it isn't installed
         if not self.addon_is_installed(self.addon_name):

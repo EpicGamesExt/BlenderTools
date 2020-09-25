@@ -84,11 +84,10 @@ if __name__ == '__main__':
         print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
-        log_file_path = os.path.join(os.pardir, 'unittest_results.log')
 
         while get_commit_state(repo_name, token, sha) == 'pending':
-            time.sleep(5)
-            logs_file = open(log_file_path)
+            time.sleep(3)
+            logs_file = open('/tmp/blender-tools-ci/unittest_results.log')
             s3_logger.write_log(logs_file.read())
             logs_file.close()
 
