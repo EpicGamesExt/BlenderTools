@@ -28,7 +28,7 @@ class S3Logger:
         self.bucket_name = bucket_name
         self.sha = sha
         self.public_web_address = f'https://{bucket_name}.s3.amazonaws.com'
-        self.previous_logs = ''
+        self.previous_logs = 'previous_logs.log'
 
     def write_log(self, log_contents):
         log_file = LogFile(log_contents)
@@ -39,12 +39,17 @@ class S3Logger:
             ExtraArgs={'ACL': 'public-read'}
         )
 
-    def read_log(self, previous_logs):
+    def read_log(self):
         try:
             file = urllib.request.urlopen(f'{self.public_web_address}/{self.sha}')
             logs = file.read().decode("utf-8")
-            output = logs.replace(previous_logs, '')
+            previous_logs = open(self.previous_logs, 'r')
+            output = logs.replace(previous_logs.read(), '')
+            previous_logs.close()
+
             if output:
+                previous_logs = open(self.previous_logs, 'a')
+                previous_logs.write(output)
                 return output
         except:
             return ''
@@ -87,7 +92,7 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        print(s3_logger.read_log(arguments.get('--output')))
+        print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
         client = docker.from_env()
