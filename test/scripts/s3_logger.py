@@ -80,22 +80,17 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        while get_commit_state(repo_name, token, sha) == 'pending':
-            time.sleep(5)
-            print('hi')
-            print(s3_logger.read_log())
-
-        if get_commit_state(repo_name, token, sha) == 'failure':
-            print(s3_logger.read_log())
-            raise RuntimeError('Build Failed!')
-        else:
-            print(s3_logger.read_log())
+        print('asdasdasff')
+        print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
-        # while True:
-        #     time.sleep(5)
-        s3_logger.write_log('Hi james')
-        print('wrote!')
+        log_file_path = os.path.join(os.pardir, 'unittest_results.log')
+
+        while get_commit_state(repo_name, token, sha) == 'pending':
+            time.sleep(5)
+            logs_file = open(log_file_path)
+            s3_logger.write_log(logs_file.read())
+            logs_file.close()
 
     if arguments.get('--delete') == 'True':
         s3_logger.delete_log()
