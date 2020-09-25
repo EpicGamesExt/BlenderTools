@@ -1,13 +1,6 @@
 name: Create Release
 
-on:
-  workflow_dispatch:
-    inputs:
-      sha:
-        description: 'The sha of the commit'
-        required: true
-        default: ''
-
+on: [push]
 
 jobs:
   build:
@@ -34,6 +27,5 @@ jobs:
     - name: Create Release
       id: commit-status
       run: |
-        echo "Hello ${{ github.event.inputs.sha }}!"
         cd ./test/scripts
         python3 ./create_release.py

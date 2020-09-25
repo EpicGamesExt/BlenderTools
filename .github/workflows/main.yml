@@ -1,6 +1,12 @@
 name: Continuous Integration
 
-on: [push]
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: 'The sha of the commit'
+        required: true
+        default: ''
 
 jobs:
   build:
@@ -12,7 +18,11 @@ jobs:
         python-version: [3.7]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check Out Commit
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.inputs.sha }}
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:

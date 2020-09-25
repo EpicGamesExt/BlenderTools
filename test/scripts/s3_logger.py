@@ -79,7 +79,7 @@ def get_commit_state(repo, token, sha):
     return json.loads(response.text)['state'].lower()
 
 
-def launch_worflow(repo, token, workflow_id):
+def launch_workflow(repo, token, workflow_id):
     headers = {f'Authorization': f'token {token}'}
     response = requests.post(
         headers=headers,
