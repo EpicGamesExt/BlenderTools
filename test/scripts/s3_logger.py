@@ -87,7 +87,7 @@ if __name__ == '__main__':
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        print(s3_logger.read_log(), arguments.get('--output'))
+        print(s3_logger.read_log(arguments.get('--output')))
 
     if arguments.get('--report') == 'True':
         client = docker.from_env()
