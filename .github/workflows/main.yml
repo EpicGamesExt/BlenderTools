@@ -42,7 +42,7 @@ jobs:
             output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
             if [ -z "$output" ]
             then
-
+                  :
             else
                   echo $output
             fi
