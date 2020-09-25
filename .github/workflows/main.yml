@@ -9,7 +9,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-#        os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.7]
 
     steps:
@@ -32,11 +31,12 @@ jobs:
 #        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 #        flake8 . --count --exit-zero --max-complexity=20 --max-line-length=127 --statistics --exclude properties.py,operators.py,metarig.py,remote_execution.py --ignore=F541,F405,W292,F403
 
-    - name: Running Unit Tests
+    - name: Run Unit Tests
       id: commit-status
       run: |
         cd ./test/scripts
         echo "Starting CI machine... This might take a few minutes..."
+        printf "%-20st" 'UTF-8:'; echo "Testinf \n hello" | iconv -t utf8
 
         function print {
             output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
@@ -65,12 +65,3 @@ jobs:
 
         print
         echo $output
-
-#    - name: Install Blender
-#      run: |
-#        python ./test/scripts/install_blender.py
-
-#    - name: Run Unit Tests
-#      run: |
-#        cd ./test/scripts
-#        python ./run_unit_tests.py
