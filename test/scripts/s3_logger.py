@@ -1,10 +1,13 @@
-import boto3
 import urllib
 import sys
 import time
 import requests
 import json
 import docker
+try:
+    import boto3
+except ImportError:
+    boto3 = None
 
 
 class LogFile:
@@ -20,7 +23,8 @@ class LogFile:
 
 class S3Logger:
     def __init__(self, bucket_name, sha):
-        self.client = boto3.client('s3')
+        if boto3:
+            self.client = boto3.client('s3')
         self.bucket_name = bucket_name
         self.sha = sha
         self.public_web_address = f'https://{bucket_name}.s3.amazonaws.com'
