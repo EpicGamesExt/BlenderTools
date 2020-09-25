@@ -91,18 +91,8 @@ if __name__ == '__main__':
         client = docker.from_env()
         container = None
 
-        print('reporting!')
-        print(repo_name)
-        print(token)
-        print(sha)
-
         while get_commit_state(repo_name, token, sha) == 'pending':
-
-            print(get_commit_state(repo_name, token, sha))
-
             containers = client.containers.list()
-            print(containers)
-
             if containers:
                 if not container:
                     container = containers[0]
