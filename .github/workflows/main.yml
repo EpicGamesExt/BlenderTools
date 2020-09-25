@@ -37,22 +37,24 @@ jobs:
         cd ./test/scripts
         echo "Starting CI machine... This might take a few minutes..."
 
+
         function print {
-            output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
-            if [ -z "$output" ]
+            python ./s3_logger.py --sha ${{ github.sha }} --listen True
+            if [ -z "${{cat ./latest_ouput.log}}" ]
             then
                   :
             else
-                  cq
+                  cat ./latest_ouput.log
             fi
         }
+
+        print
 
         # Check the status of the Git commit
         CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
         while [ "${CURRENT_STATUS^^}" = "PENDING" ];
           do sleep 5;
           print
-          cat ./latest_ouput.log
 
           CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/${{ github.repository }}/commits/${{ github.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
         done;
