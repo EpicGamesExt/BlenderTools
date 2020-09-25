@@ -47,8 +47,10 @@ class ReleaseAddon:
         return f'{self.addon_name} {version}'
 
     def create_release(self):
+        print('Looking for', self.addon_name)
         # get the previous addon releases
         previous_releases = self.get_previous_releases()
+        print(previous_releases)
 
         # build the addon zip file
         addon_manager = AddonManager(self.addon_name)
