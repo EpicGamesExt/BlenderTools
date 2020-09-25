@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
         while get_commit_state(repo_name, token, sha) == 'pending':
             time.sleep(3)
-            logs_file = open('/tmp/blender-tools-ci/unittest_results.log')
+            logs_file = open('/tmp/unittest_results.log')
             s3_logger.write_log(logs_file.read())
             logs_file.close()
 

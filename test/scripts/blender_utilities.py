@@ -45,6 +45,22 @@ def get_addon_folder_path(addon_name):
     ))
 
 
+def get_log_file_path():
+    """
+    This function get the full path to the log file and create the log folder if needed.
+    """
+    log_file_path = os.path.normpath(os.path.join(
+        os.getcwd(),
+        os.pardir,
+        'logs', 'unittest_results.log')
+    )
+
+    if not os.path.exists(os.path.dirname(log_file_path)):
+        os.makedirs(os.path.dirname(log_file_path))
+
+    return log_file_path
+
+
 def install_addons(addons):
     """
     This function installs a dictionary of addons.
@@ -135,7 +151,7 @@ def run_tests(test_cases_folder):
                 suite.addTest(unittest.makeSuite(test_class))
 
     # pass a log file with write permissions into the test runner
-    log_file_path = os.path.join(os.pardir, 'unittest_results.log')
+    log_file_path = get_log_file_path()
     write_log_file = open(log_file_path, 'w')
     tests = unittest.TextTestRunner(write_log_file, verbosity=2)
 
