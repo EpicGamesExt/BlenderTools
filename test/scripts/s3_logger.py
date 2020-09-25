@@ -3,8 +3,6 @@ import urllib
 import sys
 import time
 import requests
-from requests.auth import HTTPBasicAuth
-import os
 import json
 
 
