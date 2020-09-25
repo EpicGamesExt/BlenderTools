@@ -6,7 +6,8 @@ on:
         required: true
         default: ''
 
-name: ${{ github.event.inputs.sha }}
+name: Continuous Integration
+description: ${{ github.event.inputs.sha }}
 
 jobs:
   build:
