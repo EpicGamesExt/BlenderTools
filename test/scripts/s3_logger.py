@@ -88,16 +88,32 @@ if __name__ == '__main__':
         print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
+        client = docker.from_env()
+        container = None
+
+        print('reporting!')
+        print(repo_name)
+        print(token)
+        print(sha)
+
         while get_commit_state(repo_name, token, sha) == 'pending':
 
-            client = docker.from_env()
+            print(get_commit_state(repo_name, token, sha))
+
             containers = client.containers.list()
+            print(containers)
 
             if containers:
-                container = containers[0]
+                if not container:
+                    container = containers[0]
+
                 time.sleep(3)
                 docker_logs = container.logs().decode("utf-8")
                 s3_logger.write_log(docker_logs)
+                print(docker_logs)
+
+        docker_logs = container.logs().decode("utf-8")
+        s3_logger.write_log(docker_logs)
 
     if arguments.get('--delete') == 'True':
         s3_logger.delete_log()
