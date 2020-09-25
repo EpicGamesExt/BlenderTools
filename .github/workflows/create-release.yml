@@ -1,12 +1,6 @@
 name: Create Release
 
-on:
-  workflow_dispatch:
-    inputs:
-      latest:
-        description: 'The version to release'
-        required: true
-        default: true
+on: [workflow_dispatch]
 
 jobs:
   build:

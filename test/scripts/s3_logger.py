@@ -79,6 +79,21 @@ def get_commit_state(repo, token, sha):
     return json.loads(response.text)['state'].lower()
 
 
+def launch_worflow(repo, token, workflow_id):
+    headers = {f'Authorization': f'token {token}'}
+    response = requests.post(
+        headers=headers,
+        url=f'/repos/{repo}/actions/workflows/{workflow_id}/dispatches',
+        data={
+
+        }
+    )
+    return json.loads(response.text)['state'].lower()
+
+
+
+
+
 def get_flags():
     args = sys.argv[1:]
     flags = {}
