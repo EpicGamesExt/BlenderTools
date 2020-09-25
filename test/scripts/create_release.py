@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 from addon_manager import AddonManager
 from blender_utilities import get_addon_folder_path
@@ -7,7 +8,7 @@ from github import Github
 
 class ReleaseAddon:
     def __init__(self, repo_name, addon_name):
-        self.client = Github(os.environ['USERNAME'], os.environ['PASSWORD'])
+        self.client = Github(sys.argv[-1])
         self.repo = self.client.get_repo(full_name_or_id=repo_name)
         self.addon_name = addon_name
 
@@ -90,5 +91,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # main()
-    pass
+    main()

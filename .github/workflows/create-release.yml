@@ -1,6 +1,9 @@
 name: Create Release
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 jobs:
   build:
@@ -12,7 +15,11 @@ jobs:
         python-version: [3.7]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Check Out Master
+      uses: actions/checkout@v2
+      with:
+        ref: "master"
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
@@ -28,4 +35,4 @@ jobs:
       id: commit-status
       run: |
         cd ./test/scripts
-        python3 ./create_release.py
+        python3 ./create_release.py --token ${{ secrets.GITHUB_TOKEN }}
