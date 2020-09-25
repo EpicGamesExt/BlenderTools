@@ -58,7 +58,8 @@ jobs:
         done;
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
         then
-          print previous_output
+          print
+          echo "CI machine failure"
           exit 1;
         fi
 
