@@ -84,14 +84,9 @@ def launch_worflow(repo, token, workflow_id):
     response = requests.post(
         headers=headers,
         url=f'/repos/{repo}/actions/workflows/{workflow_id}/dispatches',
-        data={
-
-        }
+        data={}
     )
-    return json.loads(response.text)['state'].lower()
-
-
-
+    print(response)
 
 
 def get_flags():
