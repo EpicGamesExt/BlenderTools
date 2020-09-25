@@ -94,17 +94,21 @@ if __name__ == '__main__':
     repo = client.get_repo(full_name_or_id='james-baber/BlenderTools')
 
     # commit = repo.get_commit(sha='ac3a2f212302cd56ef761b0a0437a29b5933f453')
+    branch = repo.get_branches()[0]
     commit = repo.get_commits()[0]
+
+    for i in dir(commit):
+        print(i)
+
+    from pprint import pprint
+    pprint(commit.commit.raw_data)
 
     for workflow in repo.get_workflows():
         print(workflow.name)
         if workflow.name == 'Create Release':
-            print(workflow.id)
-            print(workflow.create_dispatch(ref=commit))
-        # for i in dir(workflow):
-        #     print(i)
-
-    # repo.wor
-    # commit = repo.get_commit(sha='ac3a2f212302cd56ef761b0a0437a29b5933f453')
-
-    # print(commit.committer.html_url)
+            print(workflow.create_dispatch(
+                ref=branch,
+                inputs={
+                    'sha': commit.sha
+                }
+            ))
