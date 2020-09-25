@@ -170,9 +170,6 @@ class AddonManager:
         """
         # install addon if it isn't installed
         if not self.addon_is_installed(self.addon_name):
-            print('-------------------')
-            print(self.get_addon_zip_path(addon_folder_path))
-            print('-------------------')
             bpy.ops.preferences.addon_install(filepath=self.get_addon_zip_path(addon_folder_path))
 
         # enable addon if it is disabled
