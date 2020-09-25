@@ -3,13 +3,10 @@ name: Continuous Integration
 on:
   workflow_dispatch:
     inputs:
-      name:
-        description: 'Person to greet'
+      latest:
+        description: 'The version to release'
         required: true
-        default: 'Mona the Octocat'
-      home:
-        description: 'location'
-        required: false
+        default: true
 
 jobs:
   build:
@@ -33,7 +30,7 @@ jobs:
         pip install -r requirements.txt
 
 
-    - name: Run Unit Tests
+    - name: Create Release
       id: commit-status
       run: |
         cd ./test/scripts

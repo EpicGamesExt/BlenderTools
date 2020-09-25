@@ -36,7 +36,6 @@ jobs:
       run: |
         cd ./test/scripts
         echo "Starting CI machine... This might take a few minutes..."
-        printf "%-20st" 'UTF-8:'; echo "Testinf \n hello" | iconv -t utf8
 
         function print {
             output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
@@ -44,7 +43,7 @@ jobs:
             then
                   :
             else
-                  printf "%-20st" 'UTF-8:'; echo $output | iconv -t utf8
+                  echo $output
             fi
         }
 
