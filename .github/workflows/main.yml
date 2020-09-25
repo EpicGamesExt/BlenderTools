@@ -42,8 +42,7 @@ jobs:
         echo "Current status is: $CURRENT_STATUS"
         while [ "${CURRENT_STATUS^^}" = "PENDING" ];
           do sleep 5;
-          python ./s3_logger.py --sha ${{ github.sha }} --listen True
-          output=$(python release_mail_generator.py v2.21)
+          output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
           output="${output//'%'/'%25'}"
           output="${output//$'\n'/'%0A'}"
           output="${output//$'\r'/'%0D'}"
@@ -53,8 +52,7 @@ jobs:
         done;
         echo "Current status is: $CURRENT_STATUS"
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
-          python ./s3_logger.py --sha ${{ github.sha }} --listen True
-          output=$(python release_mail_generator.py v2.21)
+          output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
           output="${output//'%'/'%25'}"
           output="${output//$'\n'/'%0A'}"
           output="${output//$'\r'/'%0D'}"
@@ -63,8 +61,7 @@ jobs:
           exit 1;
         fi
 
-        python ./s3_logger.py --sha ${{ github.sha }} --listen True
-        output=$(python release_mail_generator.py v2.21)
+        output=$(python ./s3_logger.py --sha ${{ github.sha }} --listen True)
         output="${output//'%'/'%25'}"
         output="${output//$'\n'/'%0A'}"
         output="${output//$'\r'/'%0D'}"

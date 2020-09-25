@@ -74,13 +74,13 @@ if __name__ == '__main__':
     arguments = get_flags()
 
     repo_name = 'james-baber/BlenderTools'
-    sha = arguments['--sha']
-    token = arguments['--token']
+    sha = arguments.get('--sha')
+    token = arguments.get('--token')
 
     s3_logger = S3Logger(bucket_name='blender-tools-logs', sha=sha)
 
     if arguments.get('--listen') == 'True':
-        print('asdasdasff')
+        print('Ping')
         print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
