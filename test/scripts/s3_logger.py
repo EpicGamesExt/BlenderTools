@@ -4,6 +4,7 @@ import sys
 import time
 import requests
 import json
+import docker
 
 
 class LogFile:
@@ -23,6 +24,7 @@ class S3Logger:
         self.bucket_name = bucket_name
         self.sha = sha
         self.public_web_address = f'https://{bucket_name}.s3.amazonaws.com'
+        self.previous_logs = ''
 
     def write_log(self, log_contents):
         log_file = LogFile(log_contents)
@@ -36,7 +38,11 @@ class S3Logger:
     def read_log(self):
         try:
             file = urllib.request.urlopen(f'{self.public_web_address}/{self.sha}')
-            return file.read().decode("utf-8")
+            logs = file.read().decode("utf-8")
+            output = logs.replace(self.previous_logs, '')
+            if output:
+                self.previous_logs = logs
+                return output
         except:
             return ''
 
@@ -82,12 +88,16 @@ if __name__ == '__main__':
         print(s3_logger.read_log())
 
     if arguments.get('--report') == 'True':
-
         while get_commit_state(repo_name, token, sha) == 'pending':
-            time.sleep(3)
-            logs_file = open('/tmp/unittest_results.log')
-            s3_logger.write_log(logs_file.read())
-            logs_file.close()
+
+            client = docker.from_env()
+            containers = client.containers.list()
+
+            if containers:
+                container = containers[0]
+                time.sleep(3)
+                docker_logs = container.logs().decode("utf-8")
+                s3_logger.write_log(docker_logs)
 
     if arguments.get('--delete') == 'True':
         s3_logger.delete_log()
