@@ -104,6 +104,8 @@ if __name__ == '__main__':
         log = s3_logger.read_log()
         if log:
             print(log)
+            print('testing new line')
+            print('\n'.join(['James', 'Nathan', 'Rachel']))
 
     if arguments.get('--report') == 'True':
         client = docker.from_env()
