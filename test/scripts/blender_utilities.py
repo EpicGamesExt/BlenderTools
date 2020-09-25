@@ -159,11 +159,6 @@ def run_tests(test_cases_folder):
     result = tests.run(suite)
     write_log_file.close()
 
-    # log the test results from the file
-    read_log_file = open(log_file_path, 'r')
-    logger.info(read_log_file.read())
-    read_log_file.close()
-
     # if a test case fails, let the parent python process know there was a failure
     failure_count = len(result.failures + result.errors)
     if failure_count != 0:
