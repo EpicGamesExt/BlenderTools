@@ -65,6 +65,7 @@ class S3Logger:
         self.bucket_name = bucket_name
         self.public_web_address = f'https://{bucket_name}.s3.amazonaws.com'
         self.previous_logs = 'previous_logs.log'
+        self.latest_logs = 'latest_logs.log'
 
     def get_flags(self):
         """
@@ -78,7 +79,7 @@ class S3Logger:
                 try:
                     flags[arg] = self.args[index + 1]
                 except IndexError:
-                    raise ValueError(f'The flag {self.arg} needs a value!')
+                    raise ValueError(f'The flag {arg} needs a value!')
         return flags
 
     def get_commit_state(self):
@@ -90,7 +91,7 @@ class S3Logger:
         headers = {f'Authorization': f'token {self.token}'}
         response = requests.get(
             headers=headers,
-            url=f'https://api.github.com/repos/{self.repo}/commits/{self.sha}/status'
+            url=f'https://api.github.com/repos/{self.repo_name}/commits/{self.sha}/status'
         )
         return json.loads(response.text)['state'].lower()
 
@@ -144,7 +145,7 @@ class S3Logger:
         """
         This method delete the log file created for this commit
         """
-        self.client.delete_object(
+        self.s3_client.delete_object(
             Bucket=self.bucket_name,
             Key=self.sha,
         )
@@ -193,11 +194,11 @@ class S3Logger:
         This method will pull any new logs from s3 and write them to a local
         log file.
         """
-        latest_output = open('latest_output.log', 'w')
+        latest_logs = open(self.latest_logs, 'w')
         log = self.read_log()
         if log:
-            latest_output.write(log)
-        latest_output.close()
+            latest_logs.write(log)
+        latest_logs.close()
 
 
 if __name__ == '__main__':
