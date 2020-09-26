@@ -122,6 +122,8 @@ class S3Logger:
         except HTTPError:
             logs = ''
 
+        print(logs)
+
         # create a file to store the previously read logs
         if not os.path.exists(self.previous_logs):
             previous_logs = open(self.previous_logs, 'w')
