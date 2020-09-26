@@ -50,7 +50,7 @@ jobs:
 
         function print {
             python ./s3_logger.py --sha ${{ github.sha }} --pull True
-            cat ./latest_ouput.log
+            cat ./latest_output.log
         }
 
         print
