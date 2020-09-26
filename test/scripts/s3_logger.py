@@ -40,7 +40,7 @@ class S3Logger:
     """
     This class handles the interaction of reporting logs and receiving logs from s3.
     """
-    def __init__(self, bucket_name, repo_name):
+    def __init__(self, bucket_name, repo_name, workflow_name):
         """
         This method instantiates the S3 logger object.
 
@@ -63,6 +63,7 @@ class S3Logger:
 
         # set constants
         self.bucket_name = bucket_name
+        self.workflow_name = workflow_name
         self.public_web_address = f'https://{bucket_name}.s3.amazonaws.com'
         self.previous_logs = 'previous_logs.log'
         self.latest_logs = 'latest_logs.log'
@@ -94,6 +95,29 @@ class S3Logger:
             url=f'https://api.github.com/repos/{self.repo_name}/commits/{self.sha}/status'
         )
         return json.loads(response.text)['state'].lower()
+
+    def get_workflow(self):
+        """
+        This method gets a workflow by name.
+
+        :return object: A workflow object.
+        """
+        repo = self.github_client.get_repo(self.repo_name)
+        for work_flow in repo.get_workflows():
+            if work_flow.name == self.workflow_name:
+                return work_flow
+
+    def get_run(self, run_number):
+        """
+        This method gets a workflow run by run number:
+
+        :param int run_number: The unique run number
+        :return object: A run object.
+        """
+        workflow = self.get_workflow()
+        for run in workflow.get_runs():
+            if run.run_number == run_number:
+                return run
 
     def write_log(self, log_contents):
         """
@@ -150,7 +174,7 @@ class S3Logger:
             Key=self.sha,
         )
 
-    def launch_workflow(self, workflow_name):
+    def launch_workflow(self):
         """
         This method will launch the given github workflow.
 
@@ -161,7 +185,7 @@ class S3Logger:
         commit = repo.get_commit(sha=self.sha)
 
         for workflow in repo.get_workflows():
-            if workflow.name == workflow_name:
+            if workflow.name == self.workflow_name:
                 return workflow.create_dispatch(
                     ref=branch,
                     inputs={
@@ -204,12 +228,32 @@ class S3Logger:
             latest_logs.write(log)
         latest_logs.close()
 
+    def update_commit_status(self, state, description, run_number):
+        """
+        This method updates the status of a commit.
+
+        :param string state: The status of the commit: success, failure, or pending.
+        :param str description: The description to show in the status.
+        :param run_number: The run number to use to set the link in the status,
+        """
+        repo = self.github_client.get_repo(full_name_or_id=self.repo_name)
+        commit = repo.get_commit(sha=self.sha)
+        run = self.get_run(run_number)
+
+        commit.create_status(
+            state=state,
+            target_url=run.html_url,
+            description=description,
+            context="Blender Tools CI"
+        )
+
 
 if __name__ == '__main__':
     # create a new log instance that will log to or access a bucket
     s3_logger = S3Logger(
         bucket_name='blender-tools-logs',
-        repo_name='james-baber/BlenderTools'
+        repo_name='james-baber/BlenderTools',
+        workflow_name='Continuous Integration'
     )
 
     # this will pull any new logs
@@ -223,11 +267,17 @@ if __name__ == '__main__':
     # this will launch the github workflow which will then be
     # able to ping s3 for log updates
     if s3_logger.arguments.get('--launch_workflow') == 'True':
-        s3_logger.launch_workflow('Continuous Integration')
+        s3_logger.launch_workflow()
 
     # this will delete the log file created for this commit
     if s3_logger.arguments.get('--delete') == 'True':
         s3_logger.delete_log()
 
-    # repo = s3_logger.github_client.get_repo(full_name_or_id=s3_logger.repo_name) test
+    # this will update the commit status
+    if s3_logger.arguments.get('--set_status') == 'True':
+        s3_logger.update_commit_status(
+            state=s3_logger.arguments.get('--status'),
+            description=s3_logger.arguments.get('--description'),
+            run_number=s3_logger.arguments.get('--run_number')
+        )
 
