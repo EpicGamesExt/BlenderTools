@@ -190,7 +190,6 @@ class S3Logger:
                     ref=branch,
                     inputs={
                         'sha': self.sha,
-                        'date': commit.commit.committer.date,
                         'message': commit.commit.message,
                         'html_url': commit.html_url
                     }

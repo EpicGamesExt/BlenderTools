@@ -7,10 +7,6 @@ on:
         description: 'The sha of the commit'
         required: true
         default: ''
-      date:
-        description: 'The date of the commit'
-        required: true
-        default: ''
       message:
         description: 'The commit message'
         required: true
