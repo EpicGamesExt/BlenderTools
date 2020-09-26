@@ -1,10 +1,8 @@
 import os
 import sys
 import time
-import json
 import docker
 import github
-import requests
 from urllib import request
 from urllib.error import HTTPError
 
@@ -86,12 +84,13 @@ class S3Logger:
 
         :return str: A state, either: success, failure, or pending.
         """
-        headers = {f'Authorization': f'token {self.token}'}
-        response = requests.get(
-            headers=headers,
-            url=f'https://api.github.com/repos/{self.repo_name}/commits/{self.sha}/status'
-        )
-        return json.loads(response.text)['state'].lower()
+        repo = self.github_client.get_repo(self.repo_name)
+        commit = repo.get_commit(sha=self.sha)
+
+        for status in commit.get_statuses():
+            if status.context == 'AWS CodeBuild':
+                print(status.state)
+                return status.state
 
     def get_workflow(self):
         """
@@ -269,6 +268,10 @@ if __name__ == '__main__':
     # this will delete the log file created for this commit
     if s3_logger.arguments.get('--delete') == 'True':
         s3_logger.delete_log()
+
+    # this will get the current  status
+    if s3_logger.arguments.get('--get_status') == 'True':
+        s3_logger.get_commit_state()
 
     # this will update the commit status
     if s3_logger.arguments.get('--set_status') == 'True':
