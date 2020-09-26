@@ -42,7 +42,7 @@ class S3Logger:
     """
     def __init__(self, bucket_name, repo_name):
         """
-        This method
+        This method instantiates the S3 logger object.
 
         :param str bucket_name: The name of the s3 bucket to write to and read the logs from.
         """
@@ -102,7 +102,7 @@ class S3Logger:
         :param str log_contents: A string of all the file contents.
         """
         log_file = LogFile(log_contents)
-        self.client.upload_fileobj(
+        self.s3_client.upload_fileobj(
             Fileobj=log_file,
             Bucket=self.bucket_name,
             Key=self.sha,
@@ -121,8 +121,6 @@ class S3Logger:
             logs = file.read().decode("utf-8")
         except HTTPError:
             logs = ''
-
-        print(logs)
 
         # create a file to store the previously read logs
         if not os.path.exists(self.previous_logs):
@@ -171,7 +169,7 @@ class S3Logger:
 
     def push_logs(self):
         """
-        This method will push any new logs to s3.
+        This method will push the docker logs to s3.
         """
         container = None
 
