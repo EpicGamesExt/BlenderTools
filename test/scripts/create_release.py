@@ -27,7 +27,7 @@ class ReleaseAddon:
 
         :return str: The commit message.
         """
-        for commit in self.repo.source.get_commits():
+        for commit in self.repo.get_commits():
             for file in commit.files:
                 if file.filename == f'{self.addon_name}/addon/__init__.py':
                     return commit.commit.message
