@@ -13,21 +13,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def get_blender_version_from_chocolatey(log_file_path):
-    """
-    This function searches the chocolately logs to get the recently installed blender version.
-
-    :param str log_file_path: The full path to the chocolately log file.
-    :return str: The version of the blender installation.
-    """
-    log_file = open(log_file_path)
-    for line in log_file:
-        if re.search(r'(blender v\d\.\d\d\.\d \[Approved\])', line):
-            return line.replace('blender v', '').replace(' [Approved]', '')[:-3]
-
-    raise RuntimeError('Could not determine the blender version from chocolatey logs!')
-
-
 def get_addon_folder_path(addon_name):
     """
     This function builds the full path to the provided addon folder.
@@ -96,30 +81,7 @@ def launch_blender():
     flags = '--background --disable-autoexec --python-exit-code 1 --python ./../unit_tests/main.py'
 
     if sys.argv[-1].lower() == '--ci':
-
-        # launch blender according to each operating system
-        if sys.platform == 'linux':
-            blender_path = '/home/ue4/blender/blender'
-
-        # TODO macOS needs testing
-        if sys.platform == 'darwin':
-            blender_path = '/usr/local/bin/blender'
-
-        if sys.platform == 'win32':
-            # get the installed blender version using the chocolatey logs
-            blender_version = get_blender_version_from_chocolatey(os.path.join(
-                os.environ['PROGRAMDATA'],
-                'chocolatey',
-                'logs',
-                'chocolatey.log'
-            ))
-
-            # build the full path to the blender executable
-            blender_path = r'C:\Program Files\Blender Foundation\Blender {blender_version}\blender.exe'.format(
-                blender_version=blender_version
-            )
-
-        blender_path = os.environ.get('BLENDER_EXE', blender_path)
+        blender_path = os.environ.get('BLENDER_EXE', '/home/ue4/blender/blender')
     else:
         blender_path = os.environ.get('BLENDER_EXE', 'blender')
 

@@ -187,7 +187,6 @@ def launch_unreal():
     """
     # the flags passed to the unreal editor
     flags = ['-unattended', '-nopause', '-nullrhi']
-    flags = ['-unattended', '-nopause', '-nullrhi']
 
     # the relative path to the unreal project in the repo
     test_project = os.path.normpath(

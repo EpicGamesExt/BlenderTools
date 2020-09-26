@@ -49,7 +49,7 @@ jobs:
 
 
         function print {
-            python ./s3_logger.py --sha ${{ github.sha }} --listen True
+            python ./s3_logger.py --sha ${{ github.sha }} --pull True
             cat ./latest_ouput.log
         }
 
@@ -66,7 +66,7 @@ jobs:
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
         then
           print
-          echo "CI machine failure"
+          echo "CI Machine Failure!"
           exit 1;
         fi
 
