@@ -5,8 +5,8 @@ Hi, below you can find information on how to access our tools, and how to use th
 
 ### Downloads
 Select the .zip file with latest version number you want to download.
-* [Send to Unreal Download](https://github.com/EpicGames/BlenderTools/tree/master/send2ue/releases)
-* [UE to Rigify Download](https://github.com/EpicGames/BlenderTools/tree/master/ue2rigify/releases)
+* [Send to Unreal Download](https://github.com/EpicGames/BlenderTools/releases)
+* [UE to Rigify Download](https://github.com/EpicGames/BlenderTools/releases)
 
 ### Documentation
 Here you can find the links to the documentation for each of the Blender addons in this repository. There is also video documentation that accompanies most of the written documentation, so be sure to look for the links to those videos under each section!
