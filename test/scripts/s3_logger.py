@@ -229,3 +229,5 @@ if __name__ == '__main__':
     if s3_logger.arguments.get('--delete') == 'True':
         s3_logger.delete_log()
 
+    # repo = s3_logger.github_client.get_repo(full_name_or_id=s3_logger.repo_name)
+
