@@ -158,14 +158,17 @@ class S3Logger:
         """
         repo = self.github_client.get_repo(full_name_or_id=self.repo_name)
         branch = repo.get_branches()[0]
+        commit = repo.get_commit(sha=self.sha)
 
         for workflow in repo.get_workflows():
             if workflow.name == workflow_name:
-                workflow.create_dispatch(
+                return workflow.create_dispatch(
                     ref=branch,
                     inputs={
                         'sha': self.sha,
-                        'client_payload': {'text': 'a title'}
+                        'date': commit.commit.committer.date,
+                        'message': commit.commit.message,
+                        'html_url': commit.html_url
                     }
                 )
 
@@ -225,5 +228,4 @@ if __name__ == '__main__':
     # this will delete the log file created for this commit
     if s3_logger.arguments.get('--delete') == 'True':
         s3_logger.delete_log()
-
 

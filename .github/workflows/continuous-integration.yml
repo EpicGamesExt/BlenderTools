@@ -7,6 +7,18 @@ on:
         description: 'The sha of the commit'
         required: true
         default: ''
+      date:
+        description: 'The date of the commit'
+        required: true
+        default: ''
+      message:
+        description: 'The commit message'
+        required: true
+        default: ''
+      html_url:
+        description: 'The url to the commit'
+        required: true
+        default: ''
 
 jobs:
   build:
@@ -18,6 +30,12 @@ jobs:
         python-version: [3.7]
 
     steps:
+    - name: Commit Info
+      run: |
+        echo "Date: ${{ github.event.inputs.date }}"
+        echo "Message: ${{ github.event.inputs.message }}"
+        echo "Link: ${{ github.event.inputs.html_url }}"
+
     - name: Check Out Commit
       uses: actions/checkout@v2
       with:
@@ -34,12 +52,12 @@ jobs:
         pip install flake8
         pip install -r requirements.txt
 
-#    - name: Validate Python Syntax test
-#      run: |
-#        # stop the build if there are Python syntax errors or undefined names
-#        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude properties.py,operators.py
-#        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-#        flake8 . --count --exit-zero --max-complexity=20 --max-line-length=127 --statistics --exclude properties.py,operators.py,metarig.py,remote_execution.py --ignore=F541,F405,W292,F403
+    - name: Validate Python Syntax test
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude properties.py,operators.py
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=20 --max-line-length=127 --statistics --exclude properties.py,operators.py,metarig.py,remote_execution.py --ignore=F541,F405,W292,F403
 
     - name: Run Unit Tests
       id: commit-status
