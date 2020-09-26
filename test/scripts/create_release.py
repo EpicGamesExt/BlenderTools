@@ -124,12 +124,3 @@ if __name__ == '__main__':
 
         # create a new release for the addon if necessary
         release_addon.create_release()
-
-    # client = Github(sys.argv[-1])
-    #
-    # repo = client.get_repo(full_name_or_id='james-baber/BlenderTools')
-    #
-    # commit = repo.get_commit(sha='825af87cd93a5752e9ec0b08ba3f4282fc973a3a')
-    #
-    # from pprint import pprint
-    # pprint(commit.raw_data)

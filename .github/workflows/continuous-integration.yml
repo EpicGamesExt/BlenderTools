@@ -49,19 +49,19 @@ jobs:
 
 
         function print {
-            python ./s3_logger.py --sha ${{ github.sha }} --pull True
+            python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --pull True
             cat ./latest_logs.log
         }
 
         print
 
         # Check the status of the Git commit
-        CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/james-baber/BlenderTools/commits/${{ github.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
+        CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.inputs.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
         while [ "${CURRENT_STATUS^^}" = "PENDING" ];
           do sleep 5;
           print
 
-          CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/james-baber/BlenderTools/commits/${{ github.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
+          CURRENT_STATUS=$(curl -sS --url https://api.github.com/repos/${{ github.repository }}/commits/${{ github.event.inputs.sha }}/status --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' | jq -r '.state');
         done;
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
         then
