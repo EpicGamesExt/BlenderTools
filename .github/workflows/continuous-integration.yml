@@ -58,7 +58,7 @@ jobs:
       id: commit-status
       run: |
         cd ./test/scripts
-        python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --update_status True --status "pending" --description "Running Unit Tests..." --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
+        python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --set_status True --status "pending" --description "Running Unit Tests..." --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
         echo "Starting CI machine... This might take a few minutes..."
 
 
@@ -81,11 +81,11 @@ jobs:
         then
           print
           echo "CI Machine Failure!"
-          python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --update_status True --status "failure" --description "Failed to pass all tests!" --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
+          python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --set_status True --status "failure" --description "Failed to pass all tests!" --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
           exit 1;
         fi
 
         print
         echo $output
 
-        python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --update_status True --status "success" --description "Successly passed all tests!" --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
+        python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --set_status True --status "success" --description "Successly passed all tests!" --run_number ${{ github.run_id }} --token ${{ secrets.GITHUB_TOKEN }}
