@@ -236,12 +236,13 @@ class S3Logger:
         commit = repo.get_commit(sha=self.sha)
         run = self.get_run(run_number)
 
-        commit.create_status(
-            state=state,
-            target_url=run.html_url,
-            description=description,
-            context="Blender Tools CI"
-        )
+        if run:
+            commit.create_status(
+                state=state,
+                target_url=run.html_url,
+                description=description,
+                context="Blender Tools CI"
+            )
 
 
 if __name__ == '__main__':
@@ -276,4 +277,7 @@ if __name__ == '__main__':
             description=s3_logger.arguments.get('--description'),
             run_number=s3_logger.arguments.get('--run_number')
         )
+        print(s3_logger.arguments.get('--status'))
+        print(s3_logger.arguments.get('--description'))
+        print(s3_logger.arguments.get('--run_number'))
 
