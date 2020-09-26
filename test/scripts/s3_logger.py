@@ -275,9 +275,5 @@ if __name__ == '__main__':
         s3_logger.update_commit_status(
             state=s3_logger.arguments.get('--status'),
             description=s3_logger.arguments.get('--description'),
-            run_number=s3_logger.arguments.get('--run_number')
+            run_number=int(s3_logger.arguments.get('--run_number'))
         )
-        print(s3_logger.arguments.get('--status'))
-        print(s3_logger.arguments.get('--description'))
-        print(s3_logger.arguments.get('--run_number'))
-

@@ -28,7 +28,6 @@ jobs:
     steps:
     - name: Commit Info
       run: |
-        echo ${{ github.run_number }}
         echo "Message: ${{ github.event.inputs.message }}"
         echo "Link: ${{ github.event.inputs.html_url }}"
 
