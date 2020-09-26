@@ -2,19 +2,17 @@ import os
 import sys
 import time
 import json
+import docker
+import github
 import requests
 from urllib import request
 from urllib.error import HTTPError
 
 try:
-    import docker
-    import github
     import boto3
 
 except ImportError:
     boto3 = None
-    github = None
-    docker = None
 
 
 class LogFile:
@@ -56,10 +54,9 @@ class S3Logger:
         # create clients
         if boto3:
             self.s3_client = boto3.client('s3')
-        if github:
-            self.github_client = github.Github(self.token)
-        if docker:
-            self.docker_client = docker.from_env()
+
+        self.github_client = github.Github(self.token)
+        self.docker_client = docker.from_env()
 
         # set constants
         self.bucket_name = bucket_name
