@@ -164,7 +164,8 @@ class S3Logger:
                 workflow.create_dispatch(
                     ref=branch,
                     inputs={
-                        'sha': self.sha
+                        'sha': self.sha,
+                        'client_payload': {'text': 'a title'}
                     }
                 )
 

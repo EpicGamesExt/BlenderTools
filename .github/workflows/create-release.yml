@@ -3,7 +3,7 @@ name: Create Release
 on:
   push:
     branches:
-      - master
+      - james-baber/BlenderTools/master
 
 jobs:
   build:
