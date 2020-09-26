@@ -575,7 +575,7 @@ def create_constraints(rig_object, links_data, empty_prefix, socket_direction, p
 
         empty_object = bpy.data.objects.get(empty_name)
         if empty_object:
-            if empty_prefix is 'child':
+            if empty_prefix == 'child':
                 bone = rig_object.pose.bones.get(bone_name)
                 if bone:
                     bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
