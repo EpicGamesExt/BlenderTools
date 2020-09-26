@@ -3,6 +3,6 @@
 *.pyc
 *.log
 /venv/*
-/test/blends/*
-/test/unreal_projects/*
+*/blends/*
+*/unreal_projects/*
 */releases/*
