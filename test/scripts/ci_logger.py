@@ -32,7 +32,7 @@ class LogFile:
         return self.contents.encode('utf-8')
 
 
-class S3Logger:
+class CILogger:
     """
     This class handles the interaction of reporting logs and receiving logs from s3.
     """
@@ -203,7 +203,7 @@ class S3Logger:
                 if not container:
                     container = containers[0]
 
-                time.sleep(3)
+                time.sleep(5)
                 docker_logs = container.logs().decode("utf-8")
                 if docker_logs:
                     self.write_log(docker_logs)
@@ -246,37 +246,37 @@ class S3Logger:
 
 if __name__ == '__main__':
     # create a new log instance that will log to or access a bucket
-    s3_logger = S3Logger(
+    ci_logger = CILogger(
         bucket_name='blender-tools-logs',
         repo_name='james-baber/BlenderTools',
         workflow_name='Continuous Integration'
     )
 
     # this will pull any new logs
-    if s3_logger.arguments.get('--pull') == 'True':
-        s3_logger.pull_logs()
+    if ci_logger.arguments.get('--pull') == 'True':
+        ci_logger.pull_logs()
 
     # this will push any new logs
-    if s3_logger.arguments.get('--push') == 'True':
-        s3_logger.push_logs()
+    if ci_logger.arguments.get('--push') == 'True':
+        ci_logger.push_logs()
 
     # this will launch the github workflow which will then be
     # able to ping s3 for log updates
-    if s3_logger.arguments.get('--launch_workflow') == 'True':
-        s3_logger.launch_workflow()
+    if ci_logger.arguments.get('--launch_workflow') == 'True':
+        ci_logger.launch_workflow()
 
     # this will delete the log file created for this commit
-    if s3_logger.arguments.get('--delete') == 'True':
-        s3_logger.delete_log()
+    if ci_logger.arguments.get('--delete') == 'True':
+        ci_logger.delete_log()
 
     # this will get the current  status
-    if s3_logger.arguments.get('--get_status') == 'True':
-        s3_logger.get_commit_state()
+    if ci_logger.arguments.get('--get_status') == 'True':
+        ci_logger.get_commit_state()
 
     # this will update the commit status
-    if s3_logger.arguments.get('--set_status') == 'True':
-        s3_logger.update_commit_status(
-            state=s3_logger.arguments.get('--status'),
-            description=s3_logger.arguments.get('--description'),
-            run_number=int(s3_logger.arguments.get('--run_number'))
+    if ci_logger.arguments.get('--set_status') == 'True':
+        ci_logger.update_commit_status(
+            state=ci_logger.arguments.get('--status'),
+            description=ci_logger.arguments.get('--description'),
+            run_number=int(ci_logger.arguments.get('--run_number'))
         )

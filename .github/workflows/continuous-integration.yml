@@ -58,29 +58,27 @@ jobs:
       id: commit-status
       run: |
         cd ./test/scripts
-        python ./s3_logger.py --sha ${{ github.event.inputs.sha }}
         echo "Starting CI machine... This might take a few minutes..."
 
-
         function print {
-            python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --pull True --set_status True --status "pending" --description "Running Unit Tests..." --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }}
+            python ./ci_logger.py --sha ${{ github.event.inputs.sha }} --pull True --set_status True --status $1 --description $2 --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }}
             cat ./latest_logs.log
         }
 
-        print
+        print "pending" "Running Unit Tests..."
         # Check the status of the Git commit
-        CURRENT_STATUS=$(python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --get_status True --token ${{ secrets.GITHUB_TOKEN }});
+        CURRENT_STATUS=$(python ./ci_logger.py --sha ${{ github.event.inputs.sha }} --get_status True --token ${{ secrets.GITHUB_TOKEN }});
         while [ "${CURRENT_STATUS^^}" = "PENDING" ];
           do sleep 5;
-          print
+          print "pending" "Running Unit Tests..."
 
-          CURRENT_STATUS=$(python ./s3_logger.py --sha ${{ github.event.inputs.sha }} --get_status True --token ${{ secrets.GITHUB_TOKEN }});
+          CURRENT_STATUS=$(python ./ci_logger.py --sha ${{ github.event.inputs.sha }} --get_status True --token ${{ secrets.GITHUB_TOKEN }});
         done;
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
         then
-          print
+          print "failure" "Unit Tests Failed!"
           echo "CI Machine Failure!"
           exit 1;
         fi
 
-        print
+        print "success" "Unit Tests Passed!"
