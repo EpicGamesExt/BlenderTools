@@ -88,7 +88,7 @@ class S3Logger:
         commit = repo.get_commit(sha=self.sha)
 
         for status in commit.get_statuses():
-            if status.context == 'AWS CodeBuild':
+            if status.context == 'Blender Tools CI':
                 print(status.state)
                 return status.state
 
