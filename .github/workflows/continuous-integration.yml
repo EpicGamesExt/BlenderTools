@@ -26,10 +26,11 @@ jobs:
         python-version: [3.7]
 
     steps:
-    - name: Commit Info
+    - name: Commit Message "${{ github.event.inputs.message }}"
       run: |
         echo "Message: ${{ github.event.inputs.message }}"
         echo "Link: ${{ github.event.inputs.html_url }}"
+        echo "sha: ${{ github.event.inputs.sha }}"
 
     - name: Check Out Commit
       uses: actions/checkout@v2
