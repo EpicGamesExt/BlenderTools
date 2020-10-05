@@ -30,9 +30,10 @@ Clone your fork and checkout that branch:
 `git checkout <some-task-branch>`
 
 ##Testing your changes
-While developing, you will want to be able to rapidly test your new changes. You can do this by running this script in the Blender text editor.
-Note, you need to modify `test_scripts_path` to match the absolute path to the scripts folder in your local project. Running this script will zip
-up the addon into a new .zip file according to the addon version in the `bl_info` and install it in blender.
+
+While developing, you will want to be able to rapidly test your new changes. You can do this by running this code in the Blender text editor.
+Note, you will need to modify `test_scripts_path` to match the absolute path to the scripts folder in your local project. Running this script will zip
+up the addon into a new .zip file according to the addon version in the `bl_info` and install it into Blender.
     
     import os
     import sys
