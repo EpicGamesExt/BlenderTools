@@ -92,6 +92,33 @@ def asset_exists(game_path):
     if unreal_response:
         return bool(unreal_response['success'])
 
+def has_custom_collision(game_path):
+    """
+    This function checks to see if an asset has a custom collision.
+
+    :param str game_path: The game path to the unreal asset.
+    :return bool: Whether or not the asset has a custom collision or not.
+    """
+    # start a connection to the engine that lets you send python strings
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+    
+    # send over the python code as a string
+    run_unreal_python_commands(
+        remote_exec,
+        '\n'.join([
+            f'game_asset = unreal.load_asset(r"{game_path}")',
+            f'if game_asset:',
+            f'\tif game_asset.get_editor_property("customized_collision"):',
+            f'\t\tpass',
+            f'else:',
+            f'\traise RuntimeError("Asset not found")',
+        ]))
+
+    if unreal_response:
+        return bool(unreal_response['success'])
+
+
 
 def delete_asset(game_path):
     """
