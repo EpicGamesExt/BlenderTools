@@ -23,24 +23,32 @@ class Send2UeCollisionsTestCases(unittest.TestCase):
 
     def test_send_collision_meshes_to_unreal(self):
         """
-        This method sends 
+        This method sends several different collision meshes and checks that those collision meshes exist in Unreal.
         """
-        capsule_collision = bpy.data.objects['SM_Capsule']
-        cubeConvex_collision = bpy.data.objects['SM_CubeConvex']
-        cubeSuffix_collision = bpy.data.objects['SM_CubeSuffix']
-        cubeNoSuffix_collision = bpy.data.objects['SM_CubeNoSuffix']
-        sphere_collision = bpy.data.objects['SM_Sphere']
-
-
         # run the send to unreal operation
         bpy.ops.wm.send2ue()
 
         # check if the collision meshes exist in the unreal project
-        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Capsule'))
-        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_CubeConvex'))
-        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_CubeSuffix'))
-        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_CubeNoSuffix'))
-        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Sphere'))
+        self.assertTrue(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_Capsule'))
+        self.assertTrue(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_CubeConvex'))
+        self.assertTrue(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_CubeNoSuffix'))
+        self.assertTrue(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_Sphere'))
+
+        # This object actually has several collision meshes but unreal.StaticMesh can't count them.
+        self.assertTrue(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_CubeSuffix'))
+
+        # delete all the assets created by the import
+        unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
+    
+    def test_send_without_collision_meshes(self):
+        """
+        This method sends a mesh without any collision meshes and verifies that it isn't included in Unreal.
+        """
+        # run the send to unreal operation
+        bpy.ops.wm.send2ue()
+
+        # check that objects without a collision mesh doesn't have one in the unreal project
+        self.assertFalse(unreal_utilities.has_custom_collision('/Game/untitled_category/untitled_asset/SM_CubeNoCollisionMesh'))
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
