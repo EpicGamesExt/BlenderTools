@@ -18,6 +18,8 @@ If you are new to these tools, be sure to look for the 'quickstart' sections und
 If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
 
 ### Release Log
+(10/5/2020) **Send to Unreal 1.4.3:**  Fixed issue 22. [Notes](https://github.com/EpicGames/BlenderTools/issues/22).
+
 (9/15/2020) **UE to Rigify 1.3.9:**  Fixed issue 75. [Notes](https://github.com/EpicGames/BlenderTools/issues/75).
 
 (9/4/2020) **UE to Rigify 1.3.8:**  Fixed issue 57. [Notes](https://github.com/EpicGames/BlenderTools/issues/57).
