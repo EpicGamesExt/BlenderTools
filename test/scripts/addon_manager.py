@@ -1,10 +1,9 @@
 #  Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
-import sys
 import shutil
 import logging
-import importlib
+import ast
 
 try:
     import bpy
@@ -21,27 +20,45 @@ class AddonManager:
         """
         self.addon_name = addon_name
 
-    def get_cached_addon_module(self, addon_folder_path):
+    def get_dict_from_python_file(self, python_file, dict_name):
         """
-        This method gets the cached addon folder path.
+        This method gets the first dictionary from the given file that matches the given variable name.
 
-        :param str addon_folder_path: The path to the addon folder.
-        :return module: The relative path to the cached addon folder
+        :param object python_file: A file object to read from.
+        :param str dict_name: The variable name of a dictionary.
+        :return dict: The value of the dictionary.
         """
-        addon_module = os.path.basename(addon_folder_path)
+        dictionary = {}
+        tree = ast.parse(python_file.read())
 
-        addon_folder_path = os.path.split(addon_folder_path)[0]
+        for item in tree.body:
+            if hasattr(item, 'targets'):
+                for target in item.targets:
+                    if target.id == dict_name:
+                        for index, key in enumerate(item.value.keys):
+                            # add string as dictionary value
+                            if hasattr(item.value.values[index], 's'):
+                                dictionary[key.s] = item.value.values[index].s
 
-        # add the folder that contains the addon to the path
-        sys.path.append(addon_folder_path)
+                            # add number as dictionary value
+                            elif hasattr(item.value.values[index], 'n'):
+                                dictionary[key.s] = item.value.values[index].n
 
-        # import the addon module
-        addon_module = importlib.import_module(addon_module)
+                            # add list as dictionary value
+                            elif hasattr(item.value.values[index], 'elts'):
+                                list_value = []
+                                for element in item.value.values[index].elts:
+                                    # add a number to the list
+                                    if hasattr(element, 'n'):
+                                        list_value.append(element.n)
 
-        # remove the folder that contains the addon from the path
-        sys.path.remove(addon_folder_path)
+                                    # add a string to the list
+                                    elif hasattr(element, 's'):
+                                        list_value.append(element.s)
 
-        return addon_module
+                                dictionary[key.s] = list_value
+                        break
+        return dictionary
 
     def get_addon_version_number(self, addon_folder_path):
         """
@@ -50,8 +67,10 @@ class AddonManager:
         :param str addon_folder_path: The path to the addon folder.
         :return str: The version of the addon.
         """
-        addon_module = self.get_cached_addon_module(addon_folder_path)
-        version_numbers = [str(number) for number in addon_module.bl_info['version']]
+        addon_init = open(os.path.join(addon_folder_path, '__init__.py'))
+
+        bl_info = self.get_dict_from_python_file(addon_init, 'bl_info')
+        version_numbers = [str(number) for number in bl_info['version']]
         version_number = '.'.join(version_numbers)
         return version_number
 

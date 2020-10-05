@@ -9,9 +9,10 @@ class Send2UeProperties:
     """
     # read only properties
     module_name = __package__
-    collection_names = ['Mesh', 'Rig', 'Extras']
+    collection_names = ['Mesh', 'Rig', 'Collision', 'Extras']
     mesh_collection_name = 'Mesh'
     rig_collection_name = 'Rig'
+    collision_collection_name = 'Collision'
 
     # ----------- read/write variables -----------
 
