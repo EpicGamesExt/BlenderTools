@@ -1,13 +1,13 @@
 import os
 import sys
 import time
-import docker
 import github
 from urllib import request
 from urllib.error import HTTPError
 
 try:
     import boto3
+    import docker
 
 except ImportError:
     boto3 = None
@@ -52,9 +52,10 @@ class CILogger:
         # create clients
         if boto3:
             self.s3_client = boto3.client('s3')
+        if docker:
+            self.docker_client = docker.from_env()
 
         self.github_client = github.Github(self.token)
-        self.docker_client = docker.from_env()
 
         # set constants
         self.bucket_name = bucket_name
@@ -248,6 +249,7 @@ if __name__ == '__main__':
     # create a new log instance that will log to or access a bucket
     ci_logger = CILogger(
         bucket_name='blender-tools-logs',
+        # TODO change to EpicGames
         repo_name='james-baber/BlenderTools',
         workflow_name='Continuous Integration'
     )
