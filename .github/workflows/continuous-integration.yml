@@ -67,7 +67,7 @@ jobs:
         }
 
         print
-        python ./ci_logger.py --set_status True --status pending --description "Running unit tests..." --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
+        python ./ci_logger.py --set_status True --status "pending" --description "Running unit tests..." --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
 
         # Check the status of the Git commit
         CURRENT_STATUS=$(python ./ci_logger.py --sha ${{ github.event.inputs.sha }} --get_status True --token ${{ secrets.GITHUB_TOKEN }});
@@ -80,10 +80,10 @@ jobs:
         if [ "${CURRENT_STATUS^^}" = "FAILURE" ];
         then
           print
-          python ./ci_logger.py --set_status True --status failed --description "Failed to pass unit tests!" --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
+          python ./ci_logger.py --set_status True --status "failed" --description "Failed to pass unit tests!" --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
           echo "CI Machine Failure!"
           exit 1;
         fi
 
         print "success" "Unit Tests Passed!"
-        python ./ci_logger.py --set_status True --status success --description "Passed all unit tests!" --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
+        python ./ci_logger.py --set_status True --status "success" --description "Passed all unit tests!" --run_number ${{ github.run_number }} --token ${{ secrets.GITHUB_TOKEN }})
