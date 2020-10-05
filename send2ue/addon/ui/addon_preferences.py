@@ -47,12 +47,18 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                 # disable the mesh folder path input if a skeleton path is provided
                 row.enabled = not bool(self.unreal_skeleton_asset_path)
                 row = layout.row()
-                row.alert = self.incorrect_disk_mesh_folder_path
+                if self.untitled_blend_file:
+                    row.alert = self.untitled_blend_file
+                else:
+                    row.alert = self.incorrect_disk_mesh_folder_path
                 row.prop(self, 'disk_mesh_folder_path', text='')
                 row = layout.row()
                 row.label(text='Animation Folder (Disk)')
                 row = layout.row()
-                row.alert = self.incorrect_disk_animation_folder_path
+                if self.untitled_blend_file:
+                    row.alert = self.untitled_blend_file
+                else:
+                    row.alert = self.incorrect_disk_animation_folder_path
                 row.prop(self, 'disk_animation_folder_path', text='')
 
         if self.options_type == 'export':

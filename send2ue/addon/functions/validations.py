@@ -60,6 +60,10 @@ def validate_disk_paths(properties):
                 f'The animation folder "{properties.disk_animation_folder_path}" does not exist! '
                 f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!')
 
+        if not bpy.data.filepath:
+            error_message.append(
+                f'"untitled" blend files are not supported! Please save your scene.')
+
     if error_message:
         utilities.report_error('\n'.join(error_message))
         return False

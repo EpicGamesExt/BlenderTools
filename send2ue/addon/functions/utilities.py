@@ -487,6 +487,8 @@ def auto_format_disk_mesh_folder_path(self, value):
     :param object self: This is a reference to the property group class this functions in appended to.
     :param object value: The value of the property group class this update function is assigned to.
     """
+    if self.disk_mesh_folder_path.startswith('//') and not bpy.data.filepath:
+        self.untitled_blend_file = True
     if os.path.isdir(self.disk_mesh_folder_path):
         self.incorrect_disk_mesh_folder_path = False
     else:
@@ -500,6 +502,8 @@ def auto_format_disk_animation_folder_path(self, value):
     :param object self: This is a reference to the property group class this functions in appended to.
     :param object value: The value of the property group class this update function is assigned to.
     """
+    if self.disk_animation_folder_path.startswith('//') and not bpy.data.filepath:
+        self.untitled_blend_file = True
     if os.path.isdir(self.disk_animation_folder_path):
         self.incorrect_disk_animation_folder_path = False
     else:
