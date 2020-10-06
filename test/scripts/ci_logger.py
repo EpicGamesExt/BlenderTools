@@ -278,12 +278,6 @@ if __name__ == '__main__':
 
     # this will update the commit status
     if ci_logger.arguments.get('--set_status') == 'True':
-        print('---------------------')
-        print(ci_logger.arguments.get('--status'))
-        print(ci_logger.arguments.get('--description'))
-        print(int(ci_logger.arguments.get('--run_number')))
-        print('---------------------')
-
         ci_logger.update_commit_status(
             state=ci_logger.arguments.get('--status'),
             description=ci_logger.arguments.get('--description'),
