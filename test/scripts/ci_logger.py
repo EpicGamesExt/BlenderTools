@@ -11,6 +11,7 @@ try:
 
 except ImportError:
     boto3 = None
+    docker = None
 
 
 class LogFile:
