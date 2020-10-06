@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Errors
 
 ### Error: RIGIFY ERROR: Bone `<bone name>`: `<rigify error>`

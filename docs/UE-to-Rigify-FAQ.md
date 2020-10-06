@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # FAQ
 
 ### How can I share a template I created with another artist?

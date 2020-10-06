@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Animation
 ### Video:
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/animation.png?)](https://www.youtube.com/watch?v=r3ORukeV_70&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=5)

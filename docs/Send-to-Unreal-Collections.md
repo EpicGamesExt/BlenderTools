@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Collections
 ## Video:
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/collections.png?)](https://www.youtube.com/watch?v=CukIe_OSGiQ&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=3)

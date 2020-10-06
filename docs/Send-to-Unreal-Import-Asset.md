@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Import Asset
 
 This is an overview of how to import assets into Blender with the Asset Importer.

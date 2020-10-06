@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 ### Node Editor Panel
 This section defines all the properties and operators depicted below in the ‘Node Editor’ panel that is available in ‘FK to Source’ and ‘Source to Deform’ mode under the ‘Bone Remapping Nodes’ view.
 

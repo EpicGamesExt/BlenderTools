@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Errors:
 
 ### **You do not have the correct objects under the "Mesh" or "Rig" collections or your rig does not have any actions to export!**

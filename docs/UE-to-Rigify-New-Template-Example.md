@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # New Template Example
 ### Video:
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/new_template_example.png?)](https://www.youtube.com/watch?v=F9cTXzO8wq0&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=4)

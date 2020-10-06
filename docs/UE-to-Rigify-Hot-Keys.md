@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Hot Keys
 
 ### ALT+1

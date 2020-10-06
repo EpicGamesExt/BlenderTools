@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Modes
 ### Video:
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/modes.png?)](https://www.youtube.com/watch?v=yDMt8FeXoe4&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=3)

@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # Validations
 ## Video:
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/validations.png)](https://www.youtube.com/watch?v=1MrE2PMDkqg&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=8)

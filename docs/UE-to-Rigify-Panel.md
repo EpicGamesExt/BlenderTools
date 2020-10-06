@@ -1,3 +1,7 @@
+---
+layout: home
+---
+
 # UE to Rigify Panel
 This section defines all the properties and operators depicted below in the ‘UE to Rigify’ panel in the 3D viewport.
 
