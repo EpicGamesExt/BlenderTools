@@ -1,0 +1,1 @@
+This release is the first public release of Send to Unreal, and all the current features of this tool can be found in the documentation.

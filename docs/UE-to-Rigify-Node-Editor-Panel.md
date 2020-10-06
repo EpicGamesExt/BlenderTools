@@ -1,0 +1,31 @@
+### Node Editor Panel
+This section defines all the properties and operators depicted below in the ‘Node Editor’ panel that is available in ‘FK to Source’ and ‘Source to Deform’ mode under the ‘Bone Remapping Nodes’ view.
+
+![1](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/images/node_editor_panel/1.png)
+
+### X-axis Mirror
+
+When this property is enabled, this will mirror your constraints across the x-axis.
+
+
+### Left
+
+This property is the left token name found in all left bones on the source rig.
+
+
+### Right
+
+This property is the right token name found in all left bones on the source rig
+
+
+### Align Active Node  Sockets
+
+This operator aligns the active node sockets with the sockets of the node it is linked to.
+
+
+### Combine Selected Nodes
+
+This operator Combines the selected nodes into a new node that will have the name of the active node.
+
+
+
