@@ -23,6 +23,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 
 # the base hostname & protocol for your site, e.g. http://example.com
 #url: "https://james-baber.github.io/BlenderTools/"
+url: ""
 twitter_username: jekyllrb
 github_username:  jekyll
 #root: /octo-5
