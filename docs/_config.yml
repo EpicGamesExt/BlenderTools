@@ -25,7 +25,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 url: "https://james-baber.github.io/BlenderTools/"
 twitter_username: jekyllrb
 github_username:  jekyll
-root: /octo-5
+#root: /octo-5
 
 # Build settings
 markdown: kramdown
