@@ -71,7 +71,7 @@ def resolve_path(path):
 
     # Check for a relative path input. Relative paths are represented
     # by '//' eg. '//another/path/relative/to/blend_file'
-    if path.startswith('//'):
+    if path.startswith('//') or path.startswith('./'):
         # Build an absolute path resolving the relative path from the blend file
         path = bpy.path.abspath(path)
 
@@ -848,6 +848,9 @@ def validate(properties):
         return False
 
     if not validations.validate_disk_paths(properties):
+        return False
+
+    if not validations.validate_unreal_paths(properties):
         return False
 
     if not validations.validate_unreal_skeleton_path(unreal, properties):

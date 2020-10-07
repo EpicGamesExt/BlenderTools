@@ -26,7 +26,12 @@ class AddonValidationTestCases(unittest.TestCase):
             'axis_up',
             'primary_bone_axis',
             'secondary_bone_axis',
-            'use_metadata'
+            'use_metadata',
+            'mesh_folder_untitled_blend_file',
+            'animation_folder_untitled_blend_file',
+            'incorrect_unreal_mesh_folder_path',
+            'incorrect_unreal_animation_folder_path',
+            'incorrect_unreal_skeleton_path'
         ]
 
         # this is the list of send2ue properties not to validate

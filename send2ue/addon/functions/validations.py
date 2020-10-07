@@ -48,27 +48,177 @@ def validate_disk_paths(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return bool: True if the objects passed the validation.
     """
-    error_message = []
+
     if properties.path_mode in ['export_to_disk', 'both']:
-        if properties.incorrect_disk_mesh_folder_path:
-            error_message.append(
-                f'The mesh folder "{properties.disk_mesh_folder_path}" does not exist! '
-                f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly!')
 
-        if properties.incorrect_disk_animation_folder_path:
-            error_message.append(
-                f'The animation folder "{properties.disk_animation_folder_path}" does not exist! '
-                f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!')
+        error_message = validate_disk_path_by_property(
+            properties,
+            "incorrect_disk_mesh_folder_path",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
 
-        if not bpy.data.filepath:
-            error_message.append(
-                f'"untitled" blend files are not supported! Please save your scene.')
+        error_message = validate_disk_path_by_property(
+            properties,
+            "incorrect_disk_animation_folder_path",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
 
-    if error_message:
-        utilities.report_error('\n'.join(error_message))
-        return False
+        error_message = validate_disk_path_by_property(
+            properties,
+            "mesh_folder_untitled_blend_file",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
+
+        error_message = validate_disk_path_by_property(
+            properties,
+            "animation_folder_untitled_blend_file",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
 
     return True
+
+
+def validate_disk_path_by_property(properties, property_name, detailed_message=False):
+    """
+    This function returns a validation message about the property passed in
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str property_name: Property Name to check
+    :param bool detailed_message: Boolean to determine whether to return a detailed message
+    :return str: The message from validation
+    """
+
+    message = ""
+    if properties.path_mode in ['export_to_disk', 'both']:
+        if property_name == "incorrect_disk_mesh_folder_path":
+            if getattr(properties, property_name):
+                message = f'The mesh folder "{properties.disk_mesh_folder_path}" does not exist! '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly!'
+
+            return message
+
+        if property_name == "incorrect_disk_animation_folder_path":
+            if getattr(properties, property_name):
+                message = f'The animation folder "{properties.disk_animation_folder_path}" does not exist! '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!'
+
+            return message
+
+        if property_name == "mesh_folder_untitled_blend_file":
+            if getattr(properties, property_name):
+                message = f'"untitled" blend files are not supported for relative paths! Please save your scene. '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly!'
+
+            return message
+
+        if property_name == "animation_folder_untitled_blend_file":
+            if getattr(properties, property_name):
+                message = f'"untitled" blend files are not supported for relative paths! Please save your scene. '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!'
+
+            return message
+
+    return message
+
+
+def validate_unreal_paths(properties):
+    """
+    This function checks each of the entered unreal paths to see if they are
+    correct.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return bool: True if the objects passed the validation.
+    """
+
+    if properties.path_mode in ['send_to_unreal', 'both']:
+        error_message = validate_unreal_path_by_property(
+            properties,
+            "incorrect_unreal_mesh_folder_path",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
+
+        error_message = validate_unreal_path_by_property(
+            properties,
+            "incorrect_unreal_animation_folder_path",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
+
+        error_message = validate_unreal_path_by_property(
+            properties,
+            "incorrect_unreal_skeleton_path",
+            True
+        )
+        if error_message:
+            utilities.report_error(error_message)
+            return False
+
+    return True
+
+
+def validate_unreal_path_by_property(properties, property_name, detailed_message=False):
+    """
+    This function returns a validation message about the property passed in
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str property_name: Property Name to check
+    :param bool detailed_message: Boolean to determine whether to return a detailed message
+    :return str: The message from validation
+    """
+
+    message = ""
+    if properties.path_mode in ['send_to_unreal', 'both']:
+        if property_name == "incorrect_unreal_mesh_folder_path":
+            if getattr(properties, property_name):
+                message = f'The mesh folder "{properties.unreal_mesh_folder_path}" needs to start with "/Game`"! '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Mesh Folder (Unreal)" was entered correctly!'
+
+            return message
+
+        if property_name == "incorrect_unreal_animation_folder_path":
+            if getattr(properties, property_name):
+                message = f'The animation folder "{properties.unreal_animation_folder_path}" needs to start with "/Game`"! '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Animation Folder (Unreal)" was entered correctly!'
+
+            return message
+
+        if property_name == "incorrect_unreal_skeleton_path":
+            if getattr(properties, property_name):
+                message = f'The skeleton asset name "{properties.unreal_skeleton_asset_path}" needs to start with "/Game`"! '
+
+                if detailed_message:
+                    message += f'Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly!'
+
+            return message
+
+    return message
 
 
 def validate_unreal_skeleton_path(unreal, properties):

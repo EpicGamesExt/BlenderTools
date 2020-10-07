@@ -454,6 +454,12 @@ def auto_format_unreal_mesh_folder_path(self, value):
     if self.unreal_mesh_folder_path != formatted_value:
         self.unreal_mesh_folder_path = formatted_value
 
+    # Make sure the mesh path to unreal is correct as the engine will
+    # hard crash if passed an incorrect path
+    self.incorrect_unreal_mesh_folder_path = False
+    if self.unreal_mesh_folder_path and not self.unreal_mesh_folder_path.lower().startswith("/game"):
+        self.incorrect_unreal_mesh_folder_path = True
+
 
 def auto_format_unreal_animation_folder_path(self, value):
     """
@@ -465,6 +471,12 @@ def auto_format_unreal_animation_folder_path(self, value):
     formatted_value = format_folder_path(self.unreal_animation_folder_path)
     if self.unreal_animation_folder_path != formatted_value:
         self.unreal_animation_folder_path = formatted_value
+
+    # Make sure the animation path to unreal is correct as the engine will
+    # hard crash if passed an incorrect path
+    self.incorrect_unreal_animation_folder_path = False
+    if self.unreal_animation_folder_path and not self.unreal_animation_folder_path.lower().startswith("/game"):
+        self.incorrect_unreal_animation_folder_path = True
 
 
 def auto_format_unreal_skeleton_asset_path(self, value):
@@ -479,6 +491,12 @@ def auto_format_unreal_skeleton_asset_path(self, value):
         if self.unreal_skeleton_asset_path != formatted_value:
             self.unreal_skeleton_asset_path = formatted_value
 
+    # Make sure the skeleton path to unreal is correct as the engine will
+    # hard crash if passed an incorrect path
+    self.incorrect_unreal_skeleton_path = False
+    if self.unreal_skeleton_asset_path and not self.unreal_skeleton_asset_path.lower().startswith("/game"):
+        self.incorrect_unreal_skeleton_path = True
+
 
 def auto_format_disk_mesh_folder_path(self, value):
     """
@@ -487,12 +505,26 @@ def auto_format_disk_mesh_folder_path(self, value):
     :param object self: This is a reference to the property group class this functions in appended to.
     :param object value: The value of the property group class this update function is assigned to.
     """
-    if self.disk_mesh_folder_path.startswith('//') and not bpy.data.filepath:
-        self.untitled_blend_file = True
-    if os.path.isdir(self.disk_mesh_folder_path):
-        self.incorrect_disk_mesh_folder_path = False
+    is_relative = True
+    self.incorrect_disk_mesh_folder_path = True
+
+    self.mesh_folder_untitled_blend_file = False
+    if self.disk_mesh_folder_path.startswith('//'):
+        if not bpy.data.filepath:
+            self.mesh_folder_untitled_blend_file = True
     else:
-        self.incorrect_disk_mesh_folder_path = True
+        is_relative = False
+
+    # If the path is relative, prevent the UI from displaying it as a wrong
+    # path. We expect the process that's going to use this path to resolve
+    # the path and have an additional validation
+    if is_relative:
+        self.incorrect_disk_mesh_folder_path = False
+
+    # os.path.isdir is very slow to check on every UI update. Lets only check if
+    # we are not a relative path
+    elif os.path.isdir(self.disk_mesh_folder_path):
+        self.incorrect_disk_mesh_folder_path = False
 
 
 def auto_format_disk_animation_folder_path(self, value):
@@ -502,12 +534,26 @@ def auto_format_disk_animation_folder_path(self, value):
     :param object self: This is a reference to the property group class this functions in appended to.
     :param object value: The value of the property group class this update function is assigned to.
     """
-    if self.disk_animation_folder_path.startswith('//') and not bpy.data.filepath:
-        self.untitled_blend_file = True
-    if os.path.isdir(self.disk_animation_folder_path):
-        self.incorrect_disk_animation_folder_path = False
+    is_relative = True
+    self.incorrect_disk_animation_folder_path = True
+
+    self.animation_folder_untitled_blend_file = False
+    if self.disk_animation_folder_path.startswith('//'):
+        if not bpy.data.filepath:
+            self.animation_folder_untitled_blend_file = True
     else:
-        self.incorrect_disk_animation_folder_path = True
+        is_relative = False
+
+    # If the path is relative, prevent the UI from displaying it as a wrong
+    # path. We expect the process that's going to use this path to resolve
+    # the path and have an additional validation
+    if is_relative:
+        self.incorrect_disk_animation_folder_path = False
+
+    # os.path.isdir is very slow to check on every UI update. Lets only check
+    # if we are not a relative path
+    elif os.path.isdir(self.disk_animation_folder_path):
+        self.incorrect_disk_animation_folder_path = False
 
 
 def round_keyframes(actions):
