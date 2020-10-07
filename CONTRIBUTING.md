@@ -29,7 +29,26 @@ Clone your fork and checkout that branch:
 
 `git checkout <some-task-branch>`
 
-## Testing Instructions
+
+## Testing Your Changes
+While developing, you will want to be able to rapidly test your new changes. You can do this by running this code in the Blender text editor.
+Note, you will need to modify `test_scripts_path` to match the absolute path to the scripts folder in your local project. Running this script will zip
+up the addon into a new .zip file according to the addon version in the `bl_info` and install it into Blender.
+    
+    import os
+    import sys
+    
+    test_scripts_path = r'<Path to BlenderTools>\test\scripts'
+    
+    sys.path.append(test_scripts_path)
+    os.chdir(test_scripts_path)
+    
+    import blender_utilities
+    
+    # install the latest addons
+    blender_utilities.install_addons(addons=['send2ue', 'ue2rigify'])
+
+## Running the Unit Tests
 All files containing a TestCase class in `./test/unit_tests` will be run when the unit testing is run. (Note that any new features require an accompanying unit test for it to be approved.)
 
 For the unit testing to work correctly, you will need to add both Blender and Unreal Engine to your system `PATH` variable. 
