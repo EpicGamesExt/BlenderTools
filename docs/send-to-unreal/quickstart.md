@@ -4,7 +4,7 @@ layout: default
 
 # Quickstart
 ## Video:
-[![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/quickstart.png?)](https://www.youtube.com/watch?v=apa9EXI2KZA&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=2&t=0s)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/apa9EXI2KZA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 ## Text:
 This quick start guide will help you get up and running with the Send to Unreal addon.
