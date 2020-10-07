@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: default
 ---
 
 # New Template Example

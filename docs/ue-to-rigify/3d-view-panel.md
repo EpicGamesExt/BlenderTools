@@ -1,5 +1,5 @@
 ---
-layout: home
+layout: default
 ---
 
 # UE to Rigify Panel
