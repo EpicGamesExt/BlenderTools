@@ -18,7 +18,9 @@ If you are new to these tools, be sure to look for the 'quickstart' sections und
 If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
 
 ### Release Log
-(10/8/2020) **Send to Unreal 1.4.5:**  Fixed issue 5. [Notes](https://github.com/EpicGames/BlenderTools/issues/5). Fixed issue 26. [Notes](https://github.com/EpicGames/BlenderTools/issues/26).
+(10/8/2020) **Send to Unreal 1.4.6:**  Fixed issue 26. [Notes](https://github.com/EpicGames/BlenderTools/issues/26).
+
+(10/8/2020) **Send to Unreal 1.4.5:**  Fixed issue 5. [Notes](https://github.com/EpicGames/BlenderTools/issues/5).
 
 (10/7/2020) **Send to Unreal 1.4.4:**  Fixed issue 105. [Notes](https://github.com/EpicGames/BlenderTools/issues/105).
 
