@@ -8,11 +8,15 @@ from .dependencies import remote_execution
 from .ui import header_menu, addon_preferences, importer
 from .functions import export, unreal, validations, utilities
 
+# NOTE: The blender version in the `bl_info` dictionary is for the minimum
+#  blender version support and should only be changed when there's new
+#  functionality that will break the addon
+
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (1, 4, 4),
-    "blender": (2, 90, 1),
+    "version": (1, 4, 5),   # addon plugin version
+    "blender": (2, 83, 0),  # minimum blender version
     "location": "Header > Pipeline > Export > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
     "warning": "",

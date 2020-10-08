@@ -45,16 +45,40 @@ def get_fbx_paths(asset_name, asset_type):
 
     if properties.path_mode in ['export_to_disk', 'both']:
         if asset_type == 'MESH':
+            # Check for relative paths and also sanitize the path
+            export_dir = resolve_path(properties.disk_mesh_folder_path)
             fbx_paths['disk'] = os.path.join(
-                properties.disk_mesh_folder_path,
+                export_dir,
                 f'{get_unreal_asset_name(asset_name, properties)}.fbx'
             )
         if asset_type == 'ACTION':
+            export_dir = resolve_path(properties.disk_animation_folder_path)
             fbx_paths['disk'] = os.path.join(
-                properties.disk_animation_folder_path,
+                export_dir,
                 f'{get_unreal_asset_name(asset_name, properties)}.fbx'
             )
     return fbx_paths
+
+
+def resolve_path(path):
+    """
+    This function checks if a given path is relative and returns the full
+    path else returns the original path
+
+    :param str path: The input path
+    :return str: The expanded path
+    """
+
+    # Check for a relative path input. Relative paths are represented
+    # by '//' eg. '//another/path/relative/to/blend_file'
+    if path.startswith('//') or path.startswith('./'):
+        # Build an absolute path resolving the relative path from the blend file
+        path = bpy.path.abspath(path)
+
+    # Make sure the path has the correct OS separators
+    path = bpy.path.native_pathsep(path)
+
+    return path
 
 
 def get_from_collection(collection_name, object_type):
@@ -824,6 +848,9 @@ def validate(properties):
         return False
 
     if not validations.validate_disk_paths(properties):
+        return False
+
+    if not validations.validate_unreal_paths(properties):
         return False
 
     if not validations.validate_unreal_skeleton_path(unreal, properties):
