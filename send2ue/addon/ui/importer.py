@@ -11,6 +11,12 @@ class ImportAsset(ImportHelper):
     bl_idname = "send2ue.import_asset"
     bl_label = "Import Asset"
 
+    filter_glob = bpy.props.StringProperty(
+        default="*.fbx",
+        options={"HIDDEN"},
+        subtype="FILE_PATH",
+        )
+
     def draw(self, context):
         """
         This function overrides the draw method in the ImportHelper class. The draw method is the function that
