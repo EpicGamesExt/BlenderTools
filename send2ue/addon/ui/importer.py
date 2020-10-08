@@ -11,7 +11,7 @@ class ImportAsset(ImportHelper):
     bl_idname = "send2ue.import_asset"
     bl_label = "Import Asset"
 
-    filter_glob = bpy.props.StringProperty(
+    filter_glob : bpy.props.StringProperty(
         default="*.fbx",
         options={"HIDDEN"},
         subtype="FILE_PATH",
