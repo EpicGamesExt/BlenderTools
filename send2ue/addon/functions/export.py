@@ -73,7 +73,7 @@ def resolve_path(path):
     # by '//' eg. '//another/path/relative/to/blend_file'
     if path.startswith('//') or path.startswith('./'):
         # Build an absolute path resolving the relative path from the blend file
-        path = bpy.path.abspath(path)
+        path = bpy.path.abspath(path.replace("./", "//", 1))
 
     # Make sure the path has the correct OS separators
     path = bpy.path.native_pathsep(path)
