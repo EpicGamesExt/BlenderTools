@@ -13,16 +13,15 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Blender Tools Documentation
+title: Blender Tools
 description: >- # this means to ignore newlines until "baseurl:"
-  Write an awesome description for your new site here. You can edit this
-  line in _config.yml. It will appear in your document head meta (for
-  Google search results) and in your feed.xml site description.
+  Blender addons developed by Epic Games that improve the game development workflow between Blender and Unreal.
 #baseurl: "" # the subpath of your site, e.g. /blog
 
 # the base hostname & protocol for your site, e.g. http://example.com
 url: ""
-github_username:  epicgames
+
+github:  EpicGames/BlenderTools
 
 # Build settings
 markdown: kramdown
@@ -30,7 +29,9 @@ theme: minima
 
 
 header_pages:
+  - index.md
   - about.md
+  - downloads.md
 
 
 

@@ -1,5 +1,6 @@
 ---
 layout: default
+folder: ""
 ---
 
 # Send to Unreal Documentation

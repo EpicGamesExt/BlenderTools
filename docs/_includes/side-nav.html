@@ -1,6 +1,42 @@
-<div class="sidenav">
-{% for item in site.data.side-nav.send-to-unreal %}
 
-   <a href="./send-to-unreal/{{ item.url }}">{{ item.title }}</a>
-{% endfor %}
-</div>
+<nav id="sidebar">
+    <div class="sidebar-header">
+        <a style="text-decoration: none;" href="/"><h3>{{ site.title | escape }}</h3></a>
+    </div>
+
+    <ul class="list-unstyled components">
+        {% for addon in site.data.side-nav.addons %}
+        <li>
+        <a style="text-decoration: none;" href="#{{ addon.name | remove: ' '}}" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-section">{{ addon.name }}</a>
+        <ul class="collapse {% if page.url contains addon.module %}show{% endif %} list-unstyled" id="{{ addon.name | remove: ' '}}">
+
+        <li>
+            {% for menu in addon.menus %}
+            {% if menu.submenus %}
+            <a style="text-decoration: none;" href="#{{ addon.name | append: menu.title | remove: ' '}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{ menu.title }}</a>
+            <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ addon.name | append: menu.title | remove: ' '}}">
+                {% for submenu in menu.submenus %}
+                <li>
+                    <a style="text-decoration: none; background: #1f1f1f" href="{{ site.url }}/{{ submenu.url }}">{{ submenu.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+              <a style="text-decoration: none;" href="{{ site.url }}/{{ menu.url }}">{{ menu.title }}</a>
+            {% endif %}
+            {% endfor %}
+            <ul class="list-unstyled CTAs">
+            <li>
+                <a style="text-decoration: none;" href="https://github.com/{{ site.github }}/tree/master/{{ addon.module }}/addon" class="article">View Source</a>
+            </li>
+            <li>
+                <a style="text-decoration: none;" href="https://github.com/{{ site.github }}/tree/master/{{ addon.module }}/releases" class="download">Download</a>
+            </li>
+        </ul>
+        </li>
+        </ul>
+        </li>
+        {% endfor %}
+    </ul>
+
+</nav>

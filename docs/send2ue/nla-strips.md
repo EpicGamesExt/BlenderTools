@@ -1,5 +1,6 @@
 ---
 layout: default
+folder: ""
 ---
 
 # NLA Strips
