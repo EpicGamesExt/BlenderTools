@@ -4,10 +4,10 @@ folder: ""
 ---
 
 # Paths
-## Video:
+:
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/paths.png)](https://www.youtube.com/watch?v=oVIKQVbXgbY&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=5)
 
-## Text:
+
 
 First, let's talk about the settings under the ‘Paths’ section. You'll see that there is this drop down, and it gives you three options: ‘Send to Unreal’, ‘Export to Disk’ or ‘Both’. 
 

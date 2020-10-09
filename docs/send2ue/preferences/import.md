@@ -4,10 +4,10 @@ folder: ""
 ---
 
 # Import
-## Video:
+:
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/import.png)](https://www.youtube.com/watch?v=MAHPBJdQHCQ&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=7)
 
-## Text:
+
 
 Now let's talk about the import settings. Under the import settings, you can specify what data you want to import from the FBX file.
 

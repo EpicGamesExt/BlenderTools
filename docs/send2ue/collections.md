@@ -4,10 +4,10 @@ folder: ""
 ---
 
 # Collections
-## Video:
+:
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/collections.png?)](https://www.youtube.com/watch?v=CukIe_OSGiQ&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=3)
 
-## Text:
+
 
 Send to Unreal creates several collections for you. These collections are important, and each name is a reserved name for Send to Unreal. The exact names are: ‘Mesh’, ‘Rig’, ‘Extras’.
 

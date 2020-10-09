@@ -1,6 +1,23 @@
 ---
 ---
 @import "https://fonts.googleapis.com/css?family=Poppins:250,400,500,600,700";
+//@import "minima";
+
+.wrapper {
+  all: unset;
+}
+
+.components {
+  all: unset;
+}
+
+li {
+  all: unset;
+}
+
+ul {
+  all: unset;
+}
 
 
 body {
@@ -71,12 +88,12 @@ a, a:hover, a:focus {
     right: 0%;
     bottom: 0;
     transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
-    //transform-origin: bottom left;
+    transform-origin: bottom left;
 }
 
 #sidebar.active {
     margin-left: -250px;
-    transform: rotateY(100deg);
+    transform: translateX(-250);
 }
 
 #footer.active {
@@ -213,7 +230,7 @@ a.article, a.article:hover {
 @media (max-width: 768px) {
     #sidebar {
         margin-left: -250px;
-        transform: rotateY(90deg);
+        transform: translateX(-250);
     }
     #footer {
         margin-left: -250px;
@@ -251,13 +268,12 @@ a.article, a.article:hover {
 }
 
 a.site-title {
-    margin-left: 20px;
+    margin-left: 30px;
     font-size: 20px;
 
 }
 
-a {
-    text-decoration: underline;
-    color: #2a7ae2;
+.highlighter-rouge .highlight {
+    background: unset;
 }
 

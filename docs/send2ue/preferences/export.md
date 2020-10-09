@@ -4,10 +4,10 @@ folder: ""
 ---
 
 # Export
-## Video:
+
 [![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/export.png)](https://www.youtube.com/watch?v=yZz5Zl5EB4A&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=6)
 
-## Text:
+
 Let's take a look at the export settings. If you look under the export settings, you'll see a series of options. All these options are operations that will get applied to your objects before they're exported to a FBX file.
 
 ![1](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/export/1.png?)

@@ -21,7 +21,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 # the base hostname & protocol for your site, e.g. http://example.com
 url: ""
 
-github:  EpicGames/BlenderTools
+github:  james-baber/BlenderTools
 
 # Build settings
 markdown: kramdown
@@ -32,7 +32,6 @@ header_pages:
   - index.md
   - about.md
   - downloads.md
-  - CONTRIBUTING.md
 
 
 # Exclude from processing.

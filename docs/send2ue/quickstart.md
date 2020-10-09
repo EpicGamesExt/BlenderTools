@@ -4,10 +4,10 @@ folder: ""
 ---
 
 # Quickstart
-## Video:
+:
 <iframe width="560" height="315" src="https://www.youtube.com/embed/apa9EXI2KZA" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-## Text:
+
 This quick start guide will help you get up and running with the Send to Unreal addon.
 
 First thing you need to do is open Blender. You need to install the add on. Go to Edit > Preferences then to addons. Click ‘install’.

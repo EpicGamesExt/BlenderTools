@@ -1,6 +1,6 @@
-addons:
+categories:
   - name: Send to Unreal
-    module: send2ue
+    folder: send2ue
     menus:
       - title: Quickstart
         url: send2ue/quickstart.html
@@ -36,7 +36,7 @@ addons:
         url: send2ue/faq.html
 
   - name: UE to Rigify
-    module: ue2rigify
+    folder: ue2rigify
     menus:
         - title: Quickstart
           url: ue2rigify/quickstart.html

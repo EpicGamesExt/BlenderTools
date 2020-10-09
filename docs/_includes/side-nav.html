@@ -5,16 +5,16 @@
     </div>
 
     <ul class="list-unstyled components">
-        {% for addon in site.data.side-nav.addons %}
+        {% for category in site.data.side-nav.categories %}
         <li>
-        <a style="text-decoration: none; color: #999" href="#{{ addon.name | remove: ' '}}" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-section">{{ addon.name }}</a>
-        <ul class="collapse {% if page.url contains addon.module %}show{% endif %} list-unstyled" id="{{ addon.name | remove: ' '}}">
+        <a style="text-decoration: none; color: #999" href="#{{ category.name | remove: ' '}}" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-section">{{ category.name }}</a>
+        <ul class="collapse {% if page.url contains category.folder %}show{% endif %} list-unstyled" id="{{ category.name | remove: ' '}}">
 
         <li>
-            {% for menu in addon.menus %}
+            {% for menu in category.menus %}
             {% if menu.submenus %}
-            <a style="text-decoration: none; color: #999" href="#{{ addon.name | append: menu.title | remove: ' '}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{ menu.title }}</a>
-            <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ addon.name | append: menu.title | remove: ' '}}">
+            <a style="text-decoration: none; color: #999" href="#{{ category.name | append: menu.title | remove: ' '}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{ menu.title }}</a>
+            <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ category.name | append: menu.title | remove: ' '}}">
                 {% for submenu in menu.submenus %}
                 <li>
                     <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}/{{ submenu.url }}">{{ submenu.title }}</a>
@@ -25,14 +25,6 @@
               <a style="text-decoration: none; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}/{{ menu.url }}">{{ menu.title }}</a>
             {% endif %}
             {% endfor %}
-            <ul class="list-unstyled CTAs">
-            <li>
-                <a style="text-decoration: none;" href="https://github.com/{{ site.github }}/tree/master/{{ addon.module }}/addon" class="article">View Source</a>
-            </li>
-            <li>
-                <a style="text-decoration: none;" href="https://github.com/{{ site.github }}/tree/master/{{ addon.module }}/releases" class="download">Download</a>
-            </li>
-        </ul>
         </li>
         </ul>
         </li>
