@@ -17,12 +17,12 @@
             <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ addon.name | append: menu.title | remove: ' '}}">
                 {% for submenu in menu.submenus %}
                 <li>
-                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% unless jekyll.environment %}BlenderTools{% endunless %}/{{ submenu.url }}">{{ submenu.title }}</a>
+                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% unless jekyll.environment %}BlenderTools{% endunless %}/{{ jekyll.environment }}{{ submenu.url }}">{{ submenu.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-              <a style="text-decoration: none; color: #999" href="{{ site.url }}{% unless jekyll.environment %}BlenderTools{% endunless %}/{{ menu.url }}">{{ menu.title }}</a>
+              <a style="text-decoration: none; color: #999" href="{{ site.url }}{% unless jekyll.environment %}BlenderTools{% endunless %}/{{ jekyll.environment }}{{ menu.url }}">{{ menu.title }}</a>
             {% endif %}
             {% endfor %}
             <ul class="list-unstyled CTAs">
