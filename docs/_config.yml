@@ -33,10 +33,6 @@ header_pages:
   - about.md
   - downloads.md
 
-include:
-  - send2ue/
-  - ue2rigify/
-
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
