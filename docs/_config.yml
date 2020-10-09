@@ -32,6 +32,7 @@ header_pages:
   - index.md
   - about.md
   - downloads.md
+  - CONTRIBUTING.md
 
 
 # Exclude from processing.
