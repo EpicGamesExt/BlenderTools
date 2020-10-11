@@ -1,7 +1,7 @@
 ---
 ---
 @import "https://fonts.googleapis.com/css?family=Poppins:250,400,500,600,700";
-//@import "minima";
+@import "minima";
 
 .wrapper {
   all: unset;
@@ -12,11 +12,11 @@
 }
 
 li {
-  all: unset;
+  margin: unset;
 }
 
 ul {
-  all: unset;
+  margin: unset;
 }
 
 
@@ -192,7 +192,7 @@ a.article, a.article:hover {
 #sidebarCollapse {
     width: 40px;
     height: 40px;
-    background: #f5f5f5;
+    background: #f8f9fa;
     cursor: pointer;
 }
 
@@ -267,13 +267,33 @@ a.article, a.article:hover {
 
 }
 
-a.site-title {
-    margin-left: 30px;
-    font-size: 20px;
+@media (min-width: 768px) {
+    #search-doc {
+        left: -45px;
+    }
+}
 
+a.sidebar-title {
+    margin: 30px;
+    text-align: center;
 }
 
 .highlighter-rouge .highlight {
-    background: unset;
+    background: #f5f2f0;
 }
+
+input.slide-search-bar-left{
+    transform: translateX(-45px)
+}
+
+input.slide-search-bar-right{
+    transform: translateX(45px)
+}
+
+.max-image-height{
+    height: 100%;
+}
+
+
+
 

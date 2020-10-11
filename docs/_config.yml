@@ -13,7 +13,7 @@
 # you will see them accessed via {{ site.title }}, {{ site.email }}, and so on.
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
-title: Blender Tools
+title: Blender Tools Documentation
 description: >- # this means to ignore newlines until "baseurl:"
   Blender addons developed by Epic Games that improve the game development workflow between Blender and Unreal.
 #baseurl: "" # the subpath of your site, e.g. /blog

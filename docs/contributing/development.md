@@ -88,7 +88,6 @@ If all went well you should see output similar to this:
     Ran 11 tests in 33.714s
 
     OK
-## Important Notes
 
 ## Our Standards
 Our primary standard for code is [PEP 8](https://www.python.org/dev/peps/pep-0008/), overridden by any specific naming conventions recommended by the [blender python API](https://docs.blender.org/api/current/index.html):

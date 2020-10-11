@@ -1,28 +1,28 @@
 
 <nav id="sidebar">
     <div class="sidebar-header">
-        <a style="text-decoration: none; color: #ffffff" href="/"><h3>{{ site.title | escape }}</h3></a>
+        <a style="color: #ffffff" class="sidebar-title" href="/"><h3 style="margin-left: -15px; font-size: 25px" >{{ site.title | escape }}</h3></a>
     </div>
 
     <ul class="list-unstyled components">
         {% for category in site.data.side-nav.categories %}
         <li>
-        <a style="text-decoration: none; color: #999" href="#{{ category.name | remove: ' '}}" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-section">{{ category.name }}</a>
-        <ul class="collapse {% if page.url contains category.folder %}show{% endif %} list-unstyled" id="{{ category.name | remove: ' '}}">
+        <a style="text-decoration: none; color: #999" href="#{{ category.title | remove: ' '}}" data-toggle="collapse" aria-expanded="true" class="dropdown-toggle sidebar-section">{{ category.title }}</a>
+        <ul class="collapse {% if page.url contains category.folder %}show{% endif %} list-unstyled" id="{{ category.title | remove: ' '}}">
 
         <li>
             {% for menu in category.menus %}
             {% if menu.submenus %}
-            <a style="text-decoration: none; color: #999" href="#{{ category.name | append: menu.title | remove: ' '}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{ menu.title }}</a>
-            <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ category.name | append: menu.title | remove: ' '}}">
+            <a style="text-decoration: none; color: #999" href="#{{ category.title | append: menu.title | remove: ' '}}" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">{{ menu.title }}</a>
+            <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ category.title | append: menu.title | remove: ' '}}">
                 {% for submenu in menu.submenus %}
                 <li>
-                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}/{{ submenu.url }}">{{ submenu.title }}</a>
+                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}{{ submenu.url }}">{{ submenu.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-              <a style="text-decoration: none; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}/{{ menu.url }}">{{ menu.title }}</a>
+              <a style="text-decoration: none; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}{{ menu.url }}">{{ menu.title }}</a>
             {% endif %}
             {% endfor %}
         </li>
