@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
     for addon in addons:
         release_addon = ReleaseAddon(
-            repo_name='james-baber/BlenderTools',
+            repo_name='epicgames/BlenderTools',
             addon_name=addon
         )
 
