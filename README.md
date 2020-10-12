@@ -12,7 +12,7 @@ Here you can find the links to the documentation for each of the Blender addons 
 
 If you are new to these tools, be sure to look for the 'quickstart' sections under each of the tools!
 
-* [Send to Unreal Documentation](https://epicgames.github.io/BlenderTools/)
+* [Documentation](https://epicgames.github.io/BlenderTools/)
 
 ### Creating Issues
 If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/wiki/Creating-Issues).
