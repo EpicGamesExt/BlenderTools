@@ -5,7 +5,7 @@ folder: ""
 
 # NLA Strips
 
-[![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/nla_tracks.png?)](https://www.youtube.com/watch?v=l0dVg7Oulq8&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=4)
+<iframe src="https://www.youtube.com/embed/l0dVg7Oulq8" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Send to Unreal uses NLA strips to associate particular actions with particular objects. Understanding this relationship is essential to exporting your actions correctly. Let's look at an example with the Mannequin that has the ThirdPersonRun animation on it. 
 

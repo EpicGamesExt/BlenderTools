@@ -4,7 +4,7 @@ layout: default
 
 # New Template Example
 
-[![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/new_template_example.png?)](https://www.youtube.com/watch?v=F9cTXzO8wq0&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=4)
+<iframe src="https://www.youtube.com/embed/F9cTXzO8wq0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 Now that we understand a bit about templates and modes, let's walk through creating our own template.

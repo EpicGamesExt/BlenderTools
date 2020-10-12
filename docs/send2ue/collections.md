@@ -4,7 +4,7 @@ folder: ""
 ---
 
 # Collections
-[![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/collections.png?)](https://www.youtube.com/watch?v=CukIe_OSGiQ&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=3)
+<iframe src="https://www.youtube.com/embed/CukIe_OSGiQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 

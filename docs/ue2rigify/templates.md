@@ -4,7 +4,7 @@ layout: default
 
 # Templates
 
-[![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/templates.png?)](https://www.youtube.com/watch?v=eLnZfQRR-DE&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=3&t=0s)
+<iframe src="https://www.youtube.com/embed/eLnZfQRR-DE" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 Let's talk about templates in ‘UE to Rigify’.
