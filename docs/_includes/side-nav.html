@@ -17,12 +17,12 @@
             <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ category.title | append: menu.title | remove: ' '}}">
                 {% for submenu in menu.submenus %}
                 <li>
-                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{% if jekyll.environment == 'production' %}{{ site.epic_docs_url }}{{ submenu.url }}{% else %}{{ site.url }}{{ submenu.url }}{% endif %}">{{ submenu.title }}</a>
+                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ submenu.url | relative_url }}">{{ submenu.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
             {% else %}
-              <a style="text-decoration: none; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}{{ menu.url }}">{{ menu.title }}</a>
+              <a style="text-decoration: none; color: #999" href="{{ menu.url | relative_url }}">{{ menu.title }}</a>
             {% endif %}
             {% endfor %}
         </li>
