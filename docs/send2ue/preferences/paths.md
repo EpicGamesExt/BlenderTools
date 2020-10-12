@@ -4,8 +4,7 @@ folder: ""
 ---
 
 # Paths
-:
-[![](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/videos/thumbnails/paths.png)](https://www.youtube.com/watch?v=oVIKQVbXgbY&list=PLZlv_N0_O1gZfQaN9qXynWllL7bzX8H3t&index=5)
+<iframe src="https://www.youtube.com/embed/oVIKQVbXgbY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 

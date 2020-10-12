@@ -4,7 +4,7 @@ layout: default
 
 # Modes
 
-[![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/modes.png?)](https://www.youtube.com/watch?v=yDMt8FeXoe4&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=3)
+<iframe src="https://www.youtube.com/embed/yDMt8FeXoe4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
 Now that we understand what templates are, let's talk about how they're created. Templates are created in ‘UE to Rigify’ using five different modes:

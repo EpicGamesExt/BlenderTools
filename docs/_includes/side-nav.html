@@ -1,7 +1,7 @@
 
 <nav id="sidebar">
     <div class="sidebar-header">
-        <a style="color: #ffffff" class="sidebar-title" href="/"><h3 style="margin-left: -15px; font-size: 25px" >{{ site.title | escape }}</h3></a>
+        <a style="color: #ffffff" class="sidebar-title" href="/"><h1 style="margin-left: -15px; font-size: 25px" >{{ site.title | escape }}</h1></a>
     </div>
 
     <ul class="list-unstyled components">
@@ -17,7 +17,7 @@
             <ul class="collapse {% if page.url contains menu.folder %}show{% endif %} list-unstyled" id="{{ category.title | append: menu.title | remove: ' '}}">
                 {% for submenu in menu.submenus %}
                 <li>
-                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{{ site.url }}{% if jekyll.environment == 'production' %}BlenderTools{% endif %}{{ submenu.url }}">{{ submenu.title }}</a>
+                    <a style="text-decoration: none; background: #1f1f1f; color: #999" href="{% if jekyll.environment == 'production' %}{{ site.epic_docs_url }}{{ submenu.url }}{% else %}{{ site.url }}{{ submenu.url }}{% endif %}">{{ submenu.title }}</a>
                 </li>
                 {% endfor %}
             </ul>
