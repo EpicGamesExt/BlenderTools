@@ -3,10 +3,10 @@ layout: default
 ---
 
 # Templates
-### Video:
+
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/templates.png?)](https://www.youtube.com/watch?v=eLnZfQRR-DE&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=3&t=0s)
 
-### Text:
+
 Let's talk about templates in ‘UE to Rigify’.
 
 Using the mannequin as an example again, you can see If you hit ‘Convert’, that a Rigify ‘Control’ rig is created that drives the original ‘Source’ rig.

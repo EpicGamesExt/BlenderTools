@@ -1,38 +1,14 @@
 ---
 ---
 [
-  {% for category in site.data.side-nav.categories %}
-    {% for menu in category.menus %}
-      {% if menu.url %}
-        {
-          "title" : "{{ menu.title | escape }}",
-          "url" : "{{ site.url }}{{ menu.url }}",
-          {% for page in site.pages %}
-            {% if page.url == menu.url %}
-              "content" : "{{ page.content | strip_html | strip_newlines | escape }}"
-            {% break %}
-            {% endif %}
-          {% endfor %}
-        }
-      {% else %}
-        {% for submenu in menu.submenus %}
-        {
-            "title" : "{{ submenu.title | escape }}",
-            "url" : "{{ site.url }}{{ submenu.url }}",
-            {% for page in site.pages %}
-              {% if page.url == menu.url %}
-                "content" : "{{ page.content | strip_html | strip_newlines | escape }}"
-              {% break %}
-              {% endif %}
-            {% endfor %}
-
-        }
-        {% unless forloop.last %},{% endunless %}
-        {% endfor %}
-
+  {% for page in site.pages %}
+    {
+      {% if page.title != nil %}
+      "title" : "{{ page.title | escape }}",
+      "url" : "{{ site.url }}{{ page.url }}",
+      "base_url" : "{{ page.url }}",
+      "content" : {{ page.content | strip_html | strip_newlines | jsonify }}
       {% endif %}
-    {% unless forloop.last %},{% endunless %}
-    {% endfor %}
-  {% unless forloop.last %},{% endunless %}
+    }{% unless forloop.last %},{% endunless %}
   {% endfor %}
 ]

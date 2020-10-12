@@ -3,10 +3,10 @@ layout: default
 ---
 
 # Quickstart
-### Video:
+
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/quickstart.png?)](https://www.youtube.com/watch?v=9FjlgyuGhNo&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=2&t=0s)
 
-### Text:
+
 This quick start guide will help you get up and running with the ‘UE to Rigify’ addon.
 
 First thing you need to do is open Blender. You need to install the add on. Go to Edit > Preferences then to addons. Click ‘install’.

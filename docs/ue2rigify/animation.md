@@ -3,10 +3,9 @@ layout: default
 ---
 
 # Animation
-### Video:
+
 [![](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/videos/thumbnails/animation.png?)](https://www.youtube.com/watch?v=r3ORukeV_70&list=PLZlv_N0_O1gaxZDBH0-8A_C3OyhyLsJcE&index=5)
 
-### Text:
 Let's talk about the animation workflow with ‘UE to Rigify’. When you have an animation on your ‘Source’ rig and you click ‘Convert’ and switch to ‘Control’ mode, a new Rigify rig is being created and the key frames from your original source rig are being copied over into a new action on that rig.
 
 

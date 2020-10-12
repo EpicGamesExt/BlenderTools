@@ -267,9 +267,9 @@ a.article, a.article:hover {
 
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) {
     #search-doc {
-        left: -45px;
+        left: -2%;
     }
 }
 
@@ -280,14 +280,6 @@ a.sidebar-title {
 
 .highlighter-rouge .highlight {
     background: #f5f2f0;
-}
-
-input.slide-search-bar-left{
-    transform: translateX(-45px)
-}
-
-input.slide-search-bar-right{
-    transform: translateX(45px)
 }
 
 .max-image-height{
