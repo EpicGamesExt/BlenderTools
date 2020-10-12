@@ -196,8 +196,13 @@ class Send2UeUIProperties:
 
     # ----------- read/write variables -----------
     show_fbx_settings: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_mesh_folder_path: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_animation_folder_path: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_skeleton_path: bpy.props.BoolProperty(default=False)
     incorrect_disk_mesh_folder_path: bpy.props.BoolProperty(default=False)
     incorrect_disk_animation_folder_path: bpy.props.BoolProperty(default=False)
+    mesh_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
+    animation_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
 
     # ---------------------------- fbx file settings --------------------------------
     # Include
