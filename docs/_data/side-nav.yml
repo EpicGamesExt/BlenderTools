@@ -1,0 +1,80 @@
+categories:
+  - title: Send to Unreal
+    folder: send2ue
+    menus:
+      - title: Quickstart
+        url: /send2ue/quickstart.html
+
+      - title: Collections
+        url: /send2ue/collections.html
+
+      - title: Import Asset
+        url: /send2ue/import-asset.html
+
+      - title: NLA Strips
+        url: /send2ue/nla-strips.html
+
+      - title: Preferences
+        folder: preferences
+        submenus:
+          - title: Paths
+            url: /send2ue/preferences/paths.html
+
+          - title: Export
+            url: /send2ue/preferences/export.html
+
+          - title: Import
+            url: /send2ue/preferences/import.html
+
+          - title: Validations
+            url: /send2ue/preferences/validations.html
+
+      - title: Errors
+        url: /send2ue/errors.html
+
+      - title: FAQ
+        url: /send2ue/faq.html
+
+  - title: UE to Rigify
+    folder: ue2rigify
+    menus:
+        - title: Quickstart
+          url: /ue2rigify/quickstart.html
+
+        - title: Templates
+          url: /ue2rigify/templates.html
+
+        - title: Modes
+          url: /ue2rigify/modes.html
+
+        - title: New Template Example
+          url: /ue2rigify/new-template-example.html
+
+        - title: Animation
+          url: /ue2rigify/animation.html
+
+        - title: User Interface
+          folder: user-interface
+          submenus:
+            - title: Hot Keys
+              url: /ue2rigify/user-interface/hot-keys.html
+
+            - title: 3D View Panel
+              url: /ue2rigify/user-interface/3d-view-panel.html
+
+            - title: Node Editor Panel
+              url: /ue2rigify/user-interface/node-editor-panel.html
+
+        - title: Errors
+          url: /ue2rigify/errors.html
+
+        - title: FAQ
+          url: /ue2rigify/faq.html
+
+  - title: Contributing
+    folder: contributing
+    menus:
+      - title: Development
+        url: /contributing/development.html
+
+

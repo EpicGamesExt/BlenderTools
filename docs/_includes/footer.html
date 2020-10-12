@@ -1,0 +1,35 @@
+<footer class="card-footer" id="footer">
+  <data class="u-url" href="{{ "/" | relative_url }}"></data>
+
+  <div class="container-fluid">
+
+    <div class="row">
+        <div class="col-sm-6">
+            <p>{{ site.description | escape }}</p>
+            <a href="https://github.com/{{ site.github }}/edit/master/docs{% if page.url == '/' %}/index.md{% else %}{{ page.url | replace: '.html', '.md' }}{% endif %}" title="{{ site.github }}">
+                <svg style="padding-right: 0" class="svg-icon grey"><use xlink:href="{{ '/assets/minima-social-icons.svg#github' | relative_url }}"></use></svg><span style="padding-left: 5px; position: relative; top: -3px">Edit this page on Github</span></a>
+        </div>
+
+        <div class="col-sm-6">
+            {%- assign default_paths = site.pages | map: "path" -%}
+            {%- assign page_paths = site.header_pages | default: default_paths -%}
+            {%- assign titles_size = site.pages | map: 'title' | join: '' | size -%}
+            {%- if titles_size > 0 -%}
+
+            <ul class="nav navbar-nav ml-auto">
+                {%- for path in page_paths -%}
+                {%- assign my_page = site.pages | where: "path", path | first -%}
+                {%- if my_page.title -%}
+                <li class="nav-item active">
+                    <a class="nav-link" href="{{ my_page.url | relative_url }}">{{ my_page.title | escape }}</a>
+                </li>
+                {%- endif -%}
+                {%- endfor -%}
+            </ul>
+            {%- endif -%}
+        </div>
+    </div>
+
+  </div>
+
+</footer>

@@ -1,0 +1,117 @@
+
+<!-- jQuery CDN - Slim version (=without AJAX) -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<!-- Popper.JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+<!--Prism JS for Code Sytanx highlighting-->
+<script src="{{ '/assets/js/prism.js' | relative_url }}" type="text/javascript"></script>
+
+<!-- search.js -->
+<script src="{{ '/assets/js/search.js' | relative_url }}" type="text/javascript"></script>
+
+<!--Side bar-->
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#sidebarCollapse').on('click', function () {
+            $('#sidebar').toggleClass('active');
+            $('#footer').toggleClass('active');
+            $(this).toggleClass('active');
+        });
+    });
+</script>
+
+<!--Search Dropdown-->
+<script type="text/javascript">
+    function searchBarDropdown(){
+
+        if($.trim($("#search-input").val()))
+        {
+            if (!$("#results-container").hasClass('show'))
+            {
+                $("#results-container").addClass('show')
+            }
+        }
+        else
+        {
+            $("#results-container").removeClass('show')
+
+        }
+    };
+</script>
+
+<!-- Search Configurations -->
+<script>
+SimpleJekyllSearch({
+  searchInput: document.getElementById('search-input'),
+  resultsContainer: document.getElementById('results-container'),
+  json: "{{ '/assets/js/search.json.liquid' | relative_url }}",
+  searchResultTemplate: '' +
+        '<li>' +
+            '<a class="dropdown-item" href="{url}" title="{desc}">{title}' +
+                '<br>' +
+                '<span style="font-size: 12px;">{base_url}</span>' +
+                '<br>' +
+                '<span class="d-inline-block text-truncate" style="font-size: 10px; max-width: 100%;">{content}</span>' +
+            '</a>' +
+        '</li>',
+  noResultsText: '<div class="container">No Results Found!</div>',
+
+  templateMiddleware: function(prop, value, template) {
+    if (prop === 'title' || prop === 'base_url') {
+        var input = $("#search-input").val()
+        return value.replace(input, (match) => `<mark>${match}</mark>`);
+    }
+    if (prop === 'content') {
+        var input = $("#search-input").val()
+        for (parsed_line of value.match(/.{1,500}/g)){
+            if (parsed_line.includes(input)){
+                return parsed_line.replace(input, (match) => `<mark>${match}</mark>`);
+            }
+        }
+    }
+
+   $('.dropdown-divider').remove()
+
+   $('#results-container li').each(function( index ) {
+       if (index + 1 >= 5){
+           $(this).remove()
+       }
+       else {
+           $("<div class='dropdown-divider'></div>").insertAfter(this);
+       }
+   });
+  }
+})
+</script>
+
+<!--Addition Styling to Markdown-->
+<script>
+    // Add dividers before h2 and h3 headers
+    $( "<div class='line'></div>" ).insertBefore('.container-fluid h2');
+    $( "<div class='line'></div>" ).insertBefore('.container-fluid h3');
+    $( "<div class='line'></div>" ).insertAfter('iframe');
+
+    // make all images responsive
+    $('img').addClass('img-fluid').addClass('shadow').addClass('rounded');
+
+    // make all videos responsive
+    $('iframe').addClass('rounded').addClass('embed-responsive-item').wrap( "<div class='embed-responsive embed-responsive-16by9 shadow'></div>" );
+
+    // make all code blocks have python syntax highlighting
+    $('code').addClass('language-python');
+    $('.highlight').addClass('shadow-sm').addClass('rounded');
+
+    $('h2, h3').each(function () {
+        $(this).append(`<a href="#${this.id}">` +
+                    '<svg width="0.5em" height="0.5em" viewBox="0 0 16 16" class="bi bi-link-45deg" fill="currentColor" xmlns="http://www.w3.org/2000/svg">\n' +
+                    '  <path d="M4.715 6.542L3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.001 1.001 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>\n' +
+                    '  <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 0 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 0 0-4.243-4.243L6.586 4.672z"/>\n' +
+                    '</svg>' +
+                    '</a>'
+        )
+    });
+
+
+</script>

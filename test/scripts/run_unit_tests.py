@@ -5,6 +5,8 @@ import blender_utilities
 import logging
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 if __name__ == '__main__':
@@ -19,3 +21,9 @@ if __name__ == '__main__':
             blender_utilities.launch_blender()
     finally:
         unreal_utilities.close_unreal(unreal_process)
+
+        # log the test results from the file
+        log_file_path = blender_utilities.get_log_file_path()
+        read_log_file = open(log_file_path, 'r')
+        logger.info(f'\n{read_log_file.read()}')
+        read_log_file.close()

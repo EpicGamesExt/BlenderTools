@@ -214,7 +214,6 @@ def launch_unreal():
     """
     # the flags passed to the unreal editor
     flags = ['-unattended', '-nopause', '-nullrhi']
-    flags = ['-unattended', '-nopause', '-nullrhi']
 
     # the relative path to the unreal project in the repo
     test_project = os.path.normpath(
@@ -232,7 +231,7 @@ def launch_unreal():
     # build the command to launch the unreal commandline according to each operating system
     # build the launch command for windows
     if sys.platform == 'win32':
-        if os.environ.get('CI'):
+        if sys.argv[-1].lower() == '--ci':
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
                 r'C:\UnrealEngine\Engine\Binaries\Win64\UE4Editor-Cmd.exe'
@@ -251,7 +250,7 @@ def launch_unreal():
 
     # TODO unreal macOS launch command needs to be tested
     else:
-        if os.environ.get('CI'):
+        if sys.argv[-1].lower() == '--ci':
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
                 '/home/ue4/UnrealEngine/Engine/Binaries/Linux/UE4Editor-Cmd'
