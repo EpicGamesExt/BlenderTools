@@ -1,5 +1,4 @@
 # Blender Tools
-![build_badge](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiT3pWRFdxeE8zK2k3UmlKaEJRcjRzTGJLV2h0OVdONm1aWEdVUjJ0TE52Tk92QjhhV2lLTmtLTEI0MTJPOXpnamM4Rm03V1doV0EyZXVzakZScUhMWEFVPSIsIml2UGFyYW1ldGVyU3BlYyI6IjdrajloeitFTE40cDFaM0ciLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
 
 Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, so be sure to always download the latest version for new features and bug fixes.
 
