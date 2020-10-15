@@ -87,8 +87,13 @@ def add_pipeline_menu():
         bpy.utils.register_class(TOPBAR_MT_Pipeline)
         bpy.types.TOPBAR_MT_editor_menus.append(pipeline_menu)
 
-    bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
-    bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
+    try:
+        bpy.types.TOPBAR_MT_Pipeline.remove(import_menu)
+        bpy.types.TOPBAR_MT_Pipeline.remove(export_menu)
+
+    finally:
+        bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
+        bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
 
 
 def remove_parent_menu():
@@ -97,4 +102,5 @@ def remove_parent_menu():
     function from the top bar editor class definition.
     """
     if hasattr(bpy.types, TOPBAR_MT_Pipeline.bl_idname):
+        bpy.utils.unregister_class(TOPBAR_MT_Pipeline)
         bpy.types.TOPBAR_MT_editor_menus.remove(pipeline_menu)

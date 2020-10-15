@@ -295,8 +295,6 @@ def addon_enabled():
     timer, then make function calls that use the scene context, and then is removed.
     """
     setup_project()
-    from ..ui import header_menu
-    header_menu.add_pipeline_menu()
 
     # remove this function from the event timer so that it only fires once.
     bpy.app.timers.unregister(addon_enabled)
@@ -317,6 +315,9 @@ def setup_project(*args):
     remove_temp_folder()
 
     create_groups(properties)
+
+    from ..ui import header_menu
+    header_menu.add_pipeline_menu()
 
 
 def draw_error_message(self, context):
