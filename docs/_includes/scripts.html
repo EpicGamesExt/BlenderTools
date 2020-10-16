@@ -49,7 +49,7 @@ SimpleJekyllSearch({
   json: "{{ '/assets/js/search.json.liquid' | relative_url }}",
   searchResultTemplate: '' +
         '<li>' +
-            '<a class="dropdown-item" href="{url}" title="{desc}">{title}' +
+            '<a class="dropdown-item" href="{url}" title="{title}">{title}' +
                 '<br>' +
                 '<span style="font-size: 12px;">{base_url}</span>' +
                 '<br>' +
@@ -59,15 +59,19 @@ SimpleJekyllSearch({
   noResultsText: '<div class="container">No Results Found!</div>',
 
   templateMiddleware: function(prop, value, template) {
-    if (prop === 'title' || prop === 'base_url') {
+    if (prop === 'title') {
         var input = $("#search-input").val()
         return value.replace(input, (match) => `<mark>${match}</mark>`);
     }
+    if (prop === 'base_url') {
+        var input = $("#search-input").val().toLowerCase()
+        return value.toLowerCase().replace(input, (match) => `<mark>${match}</mark>`);
+    }
     if (prop === 'content') {
-        var input = $("#search-input").val()
+        var input = $("#search-input").val().toLowerCase()
         for (parsed_line of value.match(/.{1,500}/g)){
-            if (parsed_line.includes(input)){
-                return parsed_line.replace(input, (match) => `<mark>${match}</mark>`);
+            if (parsed_line.toLowerCase().includes(input)){
+                return parsed_line.toLowerCase().replace(input, (match) => `<mark>${match}</mark>`);
             }
         }
     }

@@ -19,8 +19,7 @@ description: >- # this means to ignore newlines until "baseurl:"
 #baseurl: "" # the subpath of your site, e.g. /blog
 
 # the base hostname & protocol for your site, e.g. http://example.com
-url: ""
-epic_docs_url: "https://james-baber.github.io/BlenderTools"
+url: "https://epicgames.github.io/BlenderTools"
 
 github:  EpicGames/BlenderTools
 
