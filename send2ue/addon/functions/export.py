@@ -146,6 +146,7 @@ def get_pre_scaled_context():
             context['source_object'] = {}
             context['source_object']['object_name'] = selected_object.name
             context['source_object']['armature_name'] = selected_object.data.name
+            bpy.context.view_layer.objects.active = selected_object
 
             # save the current scene scale
             context['scene_scale'] = bpy.context.scene.unit_settings.scale_length
