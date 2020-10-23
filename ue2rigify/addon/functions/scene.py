@@ -264,11 +264,6 @@ def set_fk_ik_switch_values(rig_object, value):
     :param object rig_object: A blender object that contains armature data.
     :param float value: The floating point value of the FK to IK slider.
     """
-    # change the ik solver type and mode to reduce bone jitter in unreal
-    rig_object.pose.ik_solver = 'ITASC'
-    rig_object.pose.ik_param.mode = 'SIMULATION'
-    rig_object.pose.ik_param.reiteration_method = 'ALWAYS'
-
     for bone in rig_object.pose.bones:
         if isinstance(bone.get("IK_FK"), float):
             bone['IK_FK'] = value

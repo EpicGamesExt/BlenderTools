@@ -92,6 +92,7 @@ def import_asset(asset_data, properties):
             f'\t\toptions.set_editor_property("skeleton", skeleton_asset)',
             f'\t\toptions.set_editor_property("original_import_type", unreal.FBXImportType.FBXIT_ANIMATION)',
             f'\t\toptions.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)',
+            f'\t\toptions.anim_sequence_import_data.set_editor_property("preserve_local_transform", True)',
             f'\telse:',
             f'\t\traise RuntimeError("Unreal could not find a skeleton here: {asset_data.get("skeleton_game_path")}")',
 
