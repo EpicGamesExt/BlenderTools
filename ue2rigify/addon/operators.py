@@ -2,6 +2,7 @@
 
 import bpy
 from .ui import exporter
+from .functions import undo
 from .functions import scene
 from .functions import nodes
 from .functions import templates
@@ -277,5 +278,18 @@ class SwitchModes(bpy.types.Operator):
         properties.selected_mode = self.mode
         properties.freeze_rig = False
         scene.switch_modes()
+        return {'FINISHED'}
+
+
+class Ue2RigifyUndo(bpy.types.Operator):
+    """Special Undo for UE to Rigify modes"""
+    bl_idname = "ue2rigify.undo"
+    bl_label = "Switch Modes"
+
+    mode: bpy.props.StringProperty(default='')
+
+    def execute(self, context):
+        properties = bpy.context.window_manager.ue2rigify
+        undo.undo(properties)
         return {'FINISHED'}
 

@@ -64,6 +64,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     current_nodes_and_links: bpy.props.IntProperty(default=0, update=scene.update_rig_constraints)
 
     # utility variables
+    freeze_history: bpy.props.BoolProperty(default=False)
     previous_viewport_settings = {}
 
     # --------------------- user interface properties ------------------

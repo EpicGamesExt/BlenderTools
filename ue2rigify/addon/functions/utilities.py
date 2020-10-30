@@ -7,6 +7,20 @@ addon_key_maps = []
 pie_menu_classes = []
 
 
+def get_modes():
+    """
+    This function gets all the ue2rigify modes
+    """
+    properties = bpy.context.window_manager.ue2rigify
+    return [
+        properties.source_mode,
+        properties.metarig_mode,
+        properties.fk_to_source_mode,
+        properties.source_to_deform_mode,
+        properties.control_mode
+    ]
+
+
 def get_picker_object():
     """
     This function gets or creates a new picker object if needed.
@@ -694,7 +708,7 @@ def save_properties(*args):
 
     # assign all the addon property values to the scene property values
     for attribute in dir(window_manager_properties):
-        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group')):
+        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group', 'idp_array')):
             value = getattr(window_manager_properties, attribute)
             try:
                 scene_properties[attribute] = value
@@ -761,24 +775,6 @@ def load_properties(*args):
             # if the scene and window manger value are not the same
             if window_manger_value != str(scene_value):
                 setattr(window_manager_properties, attribute, scene_value)
-
-
-@bpy.app.handlers.persistent
-def undo(*args):
-    """
-    This function sets the selected mode back to the previous mode on an undo.
-
-    :param args: This soaks up the extra arguments for the app handler.
-    """
-    properties = bpy.context.window_manager.ue2rigify
-    scene_properties = bpy.context.scene.ue2rigify
-
-    if bpy.context.space_data.type == 'VIEW_3D' and properties.selected_mode != properties.source_mode:
-        # load the scene properties
-        load_properties()
-
-        # set the selected mode to the previous mode
-        properties.selected_mode = scene_properties['previous_mode']
 
 
 def get_formatted_operator_parameter(parameter_name, regex, code_line):

@@ -5,7 +5,7 @@ import sys
 import importlib
 from . import properties, operators
 from .settings import tool_tips, viewport_settings
-from .functions import scene, nodes, templates, utilities
+from .functions import scene, nodes, templates, utilities, undo
 from .ui import view_3d, node_editor, addon_preferences, exporter
 
 
@@ -23,6 +23,7 @@ bl_info = {
 
 
 modules = (
+    undo,
     scene,
     nodes,
     view_3d,
@@ -83,7 +84,7 @@ def register():
     bpy.app.handlers.save_pre.append(utilities.save_properties)
 
     # add an event handler that loads the saved scene properties after an undo
-    bpy.app.handlers.undo_post.append(utilities.undo)
+    bpy.app.handlers.depsgraph_update_post.append(undo.update_history)
 
 
 def unregister():
@@ -97,7 +98,7 @@ def unregister():
     # remove event handlers
     bpy.app.handlers.load_post.remove(utilities.load_properties)
     bpy.app.handlers.save_pre.remove(utilities.save_properties)
-    bpy.app.handlers.undo_post.remove(utilities.undo)
+    bpy.app.handlers.depsgraph_update_post.remove(undo.update_history)
 
     # remove the added system path
     sys.path.pop(0)

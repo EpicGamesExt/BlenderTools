@@ -6,6 +6,7 @@ import sys
 import bpy
 import importlib
 
+from . import undo
 from . import nodes
 from . import utilities
 from . import templates
@@ -1315,6 +1316,11 @@ def switch_modes(self=None, context=None):
     """
     properties = bpy.context.window_manager.ue2rigify
 
+    properties.freeze_history = True
+
+    # record this mode change in the history
+    undo.add_mode_change_to_history(properties)
+
     # save the current state of the tool properties
     utilities.save_properties()
 
@@ -1323,6 +1329,7 @@ def switch_modes(self=None, context=None):
 
     # if the rig is not frozen run the following operations
     if not properties.freeze_rig:
+
         # save the metarig
         save_meta_rig(properties)
 
@@ -1343,15 +1350,20 @@ def switch_modes(self=None, context=None):
 
         if properties.selected_mode == properties.metarig_mode:
             edit_meta_rig_template(properties)
+            pass
 
         if properties.selected_mode == properties.fk_to_source_mode:
             edit_fk_to_source_nodes(properties)
+            pass
 
         if properties.selected_mode == properties.source_to_deform_mode:
             edit_source_to_deform_nodes(properties)
+            pass
 
         if properties.selected_mode == properties.control_mode:
             convert_to_control_rig(properties)
 
         # restore the context
         utilities.load_context(properties)
+
+    properties.freeze_history = False
