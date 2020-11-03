@@ -1323,6 +1323,7 @@ def switch_modes(self=None, context=None):
 
     # if the rig is not frozen run the following operations
     if not properties.freeze_rig:
+
         # save the metarig
         save_meta_rig(properties)
 
@@ -1352,6 +1353,9 @@ def switch_modes(self=None, context=None):
 
         if properties.selected_mode == properties.control_mode:
             convert_to_control_rig(properties)
+
+        # record this mode change in the history
+        utilities.clear_undo_history()
 
         # restore the context
         utilities.load_context(properties)

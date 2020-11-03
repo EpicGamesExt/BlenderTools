@@ -7,6 +7,20 @@ addon_key_maps = []
 pie_menu_classes = []
 
 
+def get_modes():
+    """
+    This function gets all the ue2rigify modes
+    """
+    properties = bpy.context.window_manager.ue2rigify
+    return [
+        properties.source_mode,
+        properties.metarig_mode,
+        properties.fk_to_source_mode,
+        properties.source_to_deform_mode,
+        properties.control_mode
+    ]
+
+
 def get_picker_object():
     """
     This function gets or creates a new picker object if needed.
@@ -694,7 +708,7 @@ def save_properties(*args):
 
     # assign all the addon property values to the scene property values
     for attribute in dir(window_manager_properties):
-        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group')):
+        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group', 'idp_array')):
             value = getattr(window_manager_properties, attribute)
             try:
                 scene_properties[attribute] = value
@@ -763,22 +777,18 @@ def load_properties(*args):
                 setattr(window_manager_properties, attribute, scene_value)
 
 
-@bpy.app.handlers.persistent
-def undo(*args):
+def clear_undo_history():
     """
-    This function sets the selected mode back to the previous mode on an undo.
-
-    :param args: This soaks up the extra arguments for the app handler.
+    This function clears blenders undo history by doing a deselect all operation and repeatedly
+    pushing that operation into the undo stack until all previous history is cleared from the undo
+    history.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    scene_properties = bpy.context.scene.ue2rigify
+    # run this null operator
+    bpy.ops.ue2rigify.null_operator()
 
-    if bpy.context.space_data.type == 'VIEW_3D' and properties.selected_mode != properties.source_mode:
-        # load the scene properties
-        load_properties()
-
-        # set the selected mode to the previous mode
-        properties.selected_mode = scene_properties['previous_mode']
+    # repeatedly push the last operator into the undo stack till there are no more undo steps
+    for item in range(0, bpy.context.preferences.edit.undo_steps+1):
+        bpy.ops.ed.undo_push(message='UE to Rigify Mode Change')
 
 
 def get_formatted_operator_parameter(parameter_name, regex, code_line):
