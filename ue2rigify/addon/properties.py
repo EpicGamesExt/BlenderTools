@@ -46,6 +46,8 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     rig_ui_file_name = 'rig_ui.py'
 
     context = {}
+    history = {}
+    undo_key_values = {}
 
     # --------------------- read/write properties ---------------------
 

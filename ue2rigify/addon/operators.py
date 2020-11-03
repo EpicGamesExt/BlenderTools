@@ -284,9 +284,7 @@ class SwitchModes(bpy.types.Operator):
 class Ue2RigifyUndo(bpy.types.Operator):
     """Special Undo for UE to Rigify modes"""
     bl_idname = "ue2rigify.undo"
-    bl_label = "Switch Modes"
-
-    mode: bpy.props.StringProperty(default='')
+    bl_label = "Undo"
 
     def execute(self, context):
         properties = bpy.context.window_manager.ue2rigify

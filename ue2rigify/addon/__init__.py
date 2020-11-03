@@ -57,6 +57,7 @@ classes = (
     operators.ConstrainSourceToDeform,
     operators.RemoveConstraints,
     operators.SwitchModes,
+    operators.Ue2RigifyUndo,
     addon_preferences.Ue2RigifyAddonPreferences,
     view_3d.UE_RIGIFY_PT_RigTemplatePanel
 )

@@ -1307,15 +1307,7 @@ def convert_to_control_rig(properties):
         )
 
 
-def switch_modes(self=None, context=None):
-    """
-    This function gets the called every time mode enumeration dropdown is updated.
-
-    :param object self: This is a reference to the class this functions in appended to.
-    :param object context: The context of the object this function is appended to.
-    """
-    properties = bpy.context.window_manager.ue2rigify
-
+def pre_mode_change(properties):
     properties.freeze_history = True
 
     # record this mode change in the history
@@ -1326,6 +1318,28 @@ def switch_modes(self=None, context=None):
 
     # save the current context
     utilities.save_context(properties)
+
+
+def post_mode_change(properties):
+    # restore the context
+    utilities.load_context(properties)
+
+    # change the undo key
+    undo.modify_undo_key(properties)
+
+    properties.freeze_history = False
+
+
+def switch_modes(self=None, context=None):
+    """
+    This function gets the called every time mode enumeration dropdown is updated.
+
+    :param object self: This is a reference to the class this functions in appended to.
+    :param object context: The context of the object this function is appended to.
+    """
+    properties = bpy.context.window_manager.ue2rigify
+
+    pre_mode_change(properties)
 
     # if the rig is not frozen run the following operations
     if not properties.freeze_rig:
@@ -1350,20 +1364,14 @@ def switch_modes(self=None, context=None):
 
         if properties.selected_mode == properties.metarig_mode:
             edit_meta_rig_template(properties)
-            pass
 
         if properties.selected_mode == properties.fk_to_source_mode:
             edit_fk_to_source_nodes(properties)
-            pass
 
         if properties.selected_mode == properties.source_to_deform_mode:
             edit_source_to_deform_nodes(properties)
-            pass
 
         if properties.selected_mode == properties.control_mode:
             convert_to_control_rig(properties)
 
-        # restore the context
-        utilities.load_context(properties)
-
-    properties.freeze_history = False
+        post_mode_change(properties)
