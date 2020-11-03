@@ -52,13 +52,14 @@ def get_keyframes(fcurve, bone, data_path, keyed_values):
     :return list: A list of keyed values.
     """
     # only save the rotation key frames if they match the current rotation mode
-    if 'rotation_euler' == data_path:
-        if len(bone.rotation_mode) != 3:
-            return keyed_values
+    if bone:
+        if 'rotation_euler' == data_path:
+            if len(bone.rotation_mode) != 3:
+                return keyed_values
 
-    if 'rotation_quaternion' == data_path:
-        if bone.rotation_mode.lower() not in data_path:
-            return keyed_values
+        if 'rotation_quaternion' == data_path:
+            if bone.rotation_mode.lower() not in data_path:
+                return keyed_values
 
     for keyframe_point in fcurve.keyframe_points:
         # get the original key frame value
