@@ -252,14 +252,16 @@ def validate_geometry_materials(mesh_objects):
             # for each polygon check for its material index
             for polygon in mesh_object.data.polygons:
                 material = mesh_object.material_slots[polygon.material_index].name
+
+                # remove used material names from the list of unused material names
                 if material in material_slots:
                     material_slots.remove(material)
 
-                # remove used material names from the list of unused material names
-                if material_slots:
-                    for material_slot in material_slots:
-                        utilities.report_error(f'Mesh "{mesh_object.name}" has a unused material "{material_slot}"')
-                        return False
+            # iterate over unused materials and report about them
+            if material_slots:
+                for material_slot in material_slots:
+                    utilities.report_error(f'Mesh "{mesh_object.name}" has a unused material "{material_slot}"')
+                    return False
     return True
 
 
