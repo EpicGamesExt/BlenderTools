@@ -777,6 +777,20 @@ def load_properties(*args):
                 setattr(window_manager_properties, attribute, scene_value)
 
 
+def clear_undo_history():
+    """
+    This function clears blenders undo history by doing a deselect all operation and repeatedly
+    pushing that operation into the undo stack until all previous history is cleared from the undo
+    history.
+    """
+    # run this null operator
+    bpy.ops.ue2rigify.null_operator()
+
+    # repeatedly push the last operator into the undo stack till there are no more undo steps
+    for item in range(0, bpy.context.preferences.edit.undo_steps+1):
+        bpy.ops.ed.undo_push(message='UE to Rigify Mode Change')
+
+
 def get_formatted_operator_parameter(parameter_name, regex, code_line):
     """
     This function re-formats the given code into keyword argument parameters.

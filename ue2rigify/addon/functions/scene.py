@@ -6,7 +6,6 @@ import sys
 import bpy
 import importlib
 
-from . import undo
 from . import nodes
 from . import utilities
 from . import templates
@@ -1307,29 +1306,6 @@ def convert_to_control_rig(properties):
         )
 
 
-def pre_mode_change(properties):
-    properties.freeze_history = True
-
-    # record this mode change in the history
-    undo.add_mode_change_to_history(properties)
-
-    # save the current state of the tool properties
-    utilities.save_properties()
-
-    # save the current context
-    utilities.save_context(properties)
-
-
-def post_mode_change(properties):
-    # restore the context
-    utilities.load_context(properties)
-
-    # change the undo key
-    undo.modify_undo_key(properties)
-
-    properties.freeze_history = False
-
-
 def switch_modes(self=None, context=None):
     """
     This function gets the called every time mode enumeration dropdown is updated.
@@ -1339,7 +1315,11 @@ def switch_modes(self=None, context=None):
     """
     properties = bpy.context.window_manager.ue2rigify
 
-    pre_mode_change(properties)
+    # save the current state of the tool properties
+    utilities.save_properties()
+
+    # save the current context
+    utilities.save_context(properties)
 
     # if the rig is not frozen run the following operations
     if not properties.freeze_rig:
@@ -1374,4 +1354,8 @@ def switch_modes(self=None, context=None):
         if properties.selected_mode == properties.control_mode:
             convert_to_control_rig(properties)
 
-        post_mode_change(properties)
+        # record this mode change in the history
+        utilities.clear_undo_history()
+
+        # restore the context
+        utilities.load_context(properties)
