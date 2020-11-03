@@ -1363,6 +1363,9 @@ def switch_modes(self=None, context=None):
         if properties.selected_mode == properties.control_mode:
             convert_to_control_rig(properties)
 
+        # record this mode change in the history
+        utilities.clear_undo_history()
+
         # restore the context
         utilities.load_context(properties)
 

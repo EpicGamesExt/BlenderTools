@@ -5,7 +5,7 @@ import sys
 import importlib
 from . import properties, operators
 from .settings import tool_tips, viewport_settings
-from .functions import scene, nodes, templates, utilities, undo
+from .functions import scene, nodes, templates, utilities
 from .ui import view_3d, node_editor, addon_preferences, exporter
 
 
@@ -14,7 +14,7 @@ bl_info = {
     "author": "Epic Games Inc.",
     "description": "Allows you to convert a given rig and its animations to a Rigify rig.",
     "blender": (2, 83, 0),
-    "version": (1, 3, 10),
+    "version": (1, 3, 11),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://github.com/EpicGames/BlenderTools/wiki/UE-to-Rigify-Home",
     "warning": "",
@@ -23,7 +23,6 @@ bl_info = {
 
 
 modules = (
-    undo,
     scene,
     nodes,
     view_3d,
@@ -57,6 +56,7 @@ classes = (
     operators.ConstrainSourceToDeform,
     operators.RemoveConstraints,
     operators.SwitchModes,
+    operators.NullOperator,
     addon_preferences.Ue2RigifyAddonPreferences,
     view_3d.UE_RIGIFY_PT_RigTemplatePanel
 )
@@ -83,9 +83,6 @@ def register():
     bpy.app.handlers.load_post.append(utilities.load_properties)
     bpy.app.handlers.save_pre.append(utilities.save_properties)
 
-    # add an event handler that loads the saved scene properties after an undo
-    bpy.app.handlers.depsgraph_update_post.append(undo.update_history)
-
 
 def unregister():
     """
@@ -98,7 +95,6 @@ def unregister():
     # remove event handlers
     bpy.app.handlers.load_post.remove(utilities.load_properties)
     bpy.app.handlers.save_pre.remove(utilities.save_properties)
-    bpy.app.handlers.depsgraph_update_post.remove(undo.update_history)
 
     # remove the added system path
     sys.path.pop(0)

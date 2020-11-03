@@ -2,7 +2,6 @@
 
 import bpy
 from .ui import exporter
-from .functions import undo
 from .functions import scene
 from .functions import nodes
 from .functions import templates
@@ -281,15 +280,11 @@ class SwitchModes(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class Ue2RigifyUndo(bpy.types.Operator):
-    """Special Undo for UE to Rigify modes"""
-    bl_idname = "ue2rigify.undo"
-    bl_label = "Switch Modes"
-
-    mode: bpy.props.StringProperty(default='')
+class NullOperator(bpy.types.Operator):
+    """This is an operator that changes nothing, but it used to clear the undo stack"""
+    bl_idname = "ue2rigify.null_operator"
+    bl_label = "Null Operator"
 
     def execute(self, context):
-        properties = bpy.context.window_manager.ue2rigify
-        undo.undo(properties)
         return {'FINISHED'}
 
