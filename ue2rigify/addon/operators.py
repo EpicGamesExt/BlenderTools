@@ -2,7 +2,6 @@
 
 import bpy
 from .ui import exporter
-from .functions import undo
 from .functions import scene
 from .functions import nodes
 from .functions import templates
