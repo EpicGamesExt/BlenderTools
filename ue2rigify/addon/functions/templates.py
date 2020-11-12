@@ -10,6 +10,11 @@ from . import scene
 from . import utilities
 from ..settings.tool_tips import *
 
+_result_reference_get_starter_metarig_templates = []
+_result_reference_populate_templates_dropdown = []
+_result_reference_get_modes = []
+_result_reference_get_rig_templates = []
+
 
 # -------------- functions that handle the rig templating --------------
 def get_rig_templates_path():
@@ -349,7 +354,6 @@ def export_zip(zip_file_path, properties):
 #   the strings returned by the callback or Blender will misbehave or even crash.
 #   For more information, see:
 #
-_result_reference_get_starter_metarig_templates = []
 
 def safe_get_starter_metarig_templates(self, context):
     """
@@ -363,8 +367,6 @@ def safe_get_starter_metarig_templates(self, context):
     global _result_reference_get_starter_metarig_templates
     _result_reference_get_starter_metarig_templates = items
     return items
-
-_result_reference_populate_templates_dropdown = []
 
 def safe_populate_templates_dropdown(self, context):
     """
@@ -380,8 +382,6 @@ def safe_populate_templates_dropdown(self, context):
     return items
 
 
-_result_reference_get_modes = []
-
 def safe_get_modes(self, context):
     """
     This function is an EnumProperty safe wrapper for scene.get_modes.
@@ -394,8 +394,6 @@ def safe_get_modes(self, context):
     global _result_reference_get_modes
     _result_reference_get_modes = items
     return items
-
-_result_reference_get_rig_templates = []
 
 def safe_get_rig_templates(self, context):
     """
