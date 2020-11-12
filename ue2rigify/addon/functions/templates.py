@@ -6,6 +6,7 @@ import bpy
 import json
 import shutil
 
+from . import scene
 from . import utilities
 from ..settings.tool_tips import *
 
@@ -339,3 +340,72 @@ def export_zip(zip_file_path, properties):
     # zip up the folder and save it to the given path
     template_folder_path = os.path.join(properties.rig_templates_path, properties.selected_export_template)
     shutil.make_archive(no_extension_file_path, 'zip', template_folder_path)
+
+#
+# Dynamic EnumProperty item list workaround:
+# https://docs.blender.org/api/current/bpy.props.html?highlight=bpy%20props%20enumproperty#bpy.props.EnumProperty
+#
+#   There is a known bug with using a callback, Python must keep a reference to
+#   the strings returned by the callback or Blender will misbehave or even crash.
+#   For more information, see:
+#
+_result_reference_get_starter_metarig_templates = []
+
+def safe_get_starter_metarig_templates(self, context):
+    """
+    This function is an EnumProperty safe wrapper for get_starter_metarig_templates.
+
+    :param object self: This is a reference to the class this functions in appended to.
+    :param object context: The context of the object this function is appended to.
+    :return list: Result of get_starter_metarig_templates.
+    """
+    items = get_starter_metarig_templates()
+    global _result_reference_get_starter_metarig_templates
+    _result_reference_get_starter_metarig_templates = items
+    return items
+
+_result_reference_populate_templates_dropdown = []
+
+def safe_populate_templates_dropdown(self, context):
+    """
+    This function is an EnumProperty safe wrapper for populate_templates_dropdown.
+
+    :param object self: This is a reference to the class this functions in appended to.
+    :param object context: The context of the object this function is appended to.
+    :return list: Result of populate_templates_dropdown.
+    """
+    items = populate_templates_dropdown()
+    global _result_reference_populate_templates_dropdown
+    _result_reference_populate_templates_dropdown = items
+    return items
+
+
+_result_reference_get_modes = []
+
+def safe_get_modes(self, context):
+    """
+    This function is an EnumProperty safe wrapper for scene.get_modes.
+
+    :param object self: This is a reference to the class this functions in appended to.
+    :param object context: The context of the object this function is appended to.
+    :return list: Result of scene.get_modes.
+    """
+    items = scene.get_modes()
+    global _result_reference_get_modes
+    _result_reference_get_modes = items
+    return items
+
+_result_reference_get_rig_templates = []
+
+def safe_get_rig_templates(self, context):
+    """
+    This function is an EnumProperty safe wrapper for get_rig_templates.
+
+    :param object self: This is a reference to the class this functions in appended to.
+    :param object context: The context of the object this function is appended to.
+    :return list: Result of get_rig_templates.
+    """
+    items = get_rig_templates()
+    global _result_reference_get_rig_templates
+    _result_reference_get_rig_templates = items
+    return items

@@ -6,7 +6,6 @@ from .functions import templates
 from .functions import utilities
 from .settings import tool_tips
 
-
 class UE2RigifyProperties(bpy.types.PropertyGroup):
     """
     This class defines a property group that can be accessed through the blender api.
@@ -83,14 +82,14 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     selected_starter_metarig_template: bpy.props.EnumProperty(
         name="Metarig",
         description=tool_tips.starter_metarig_template_tool_tip,
-        items=templates.get_starter_metarig_templates,
+        items=templates.safe_get_starter_metarig_templates,
         update=scene.set_meta_rig
     )
 
     selected_rig_template: bpy.props.EnumProperty(
         name="Rig Template",
         description=tool_tips.rig_template_tool_tip,
-        items=templates.populate_templates_dropdown,
+        items=templates.safe_populate_templates_dropdown,
         options={'ANIMATABLE'},
         update=templates.set_template
     )
@@ -98,7 +97,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     selected_mode: bpy.props.EnumProperty(
         name="Modes",
         description=tool_tips.mode_tool_tip,
-        items=scene.get_modes,
+        items=templates.safe_get_modes,
         options={'ANIMATABLE'},
         update=scene.switch_modes
     )
@@ -107,7 +106,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     selected_export_template: bpy.props.EnumProperty(
         name="Export Rig Template",
         description=tool_tips.export_template_tool_tip,
-        items=templates.get_rig_templates,
+        items=templates.safe_get_rig_templates,
         options={'ANIMATABLE'}
     )
 
