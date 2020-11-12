@@ -73,29 +73,30 @@ def get_current_context():
 
     :return dict: A dictionary of values that are the current context.
     """
-    active_object = bpy.context.active_object
-
     selected_objects = []
     for selected_object in bpy.context.selected_objects:
-        active_action = None
+        active_action_name = ''
         # get the selected objects active animation
         if selected_object.animation_data:
-            active_action = selected_object.animation_data.action
+            if selected_object.animation_data.action:
+                active_action_name = selected_object.animation_data.action.name
 
         # save the selected object reference and its active animation
-        selected_objects.append([selected_object, active_action])
+        selected_objects.append([selected_object.name, active_action_name])
 
     current_context = {
-        'visible_objects': bpy.context.visible_objects,
+        'visible_objects': [visible_object.name for visible_object in bpy.context.visible_objects],
         'selected_objects': selected_objects,
-        'active_object': active_object,
         'mode': bpy.context.mode
     }
 
     # save the current action if there is one
+    active_object = bpy.context.active_object
     if active_object:
+        current_context['active_object'] = active_object.name
         if active_object.animation_data:
-            current_context['active_animation'] = active_object.animation_data.action
+            if active_object.animation_data.action:
+                current_context['active_animation'] = active_object.animation_data.action.name
 
     return current_context
 
@@ -106,21 +107,27 @@ def set_context(context):
 
     :param dict context: A dictionary of values the the context should be set to.
     """
-    active_object = context['active_object']
-
     # set the visible objects
-    for scene_object in context['visible_objects']:
-        scene_object.hide_set(False)
+    for visible_object_name in context['visible_objects']:
+        visible_object = bpy.data.objects.get(visible_object_name)
+        if visible_object:
+            visible_object.hide_set(False)
 
     # set the selected objects
-    for scene_object in context['selected_objects']:
-        scene_object[0].select_set(True)
+    for scene_object_name, active_action_name in context['selected_objects']:
+        scene_object = bpy.data.objects.get(scene_object_name)
+        if scene_object:
+            scene_object.select_set(True)
+
         # set the objects active animation
-        if scene_object[1]:
-            scene_object[0].animation_data.action = scene_object[1]
+        active_action = bpy.data.objects.get(active_action_name)
+        if active_action:
+            scene_object.animation_data.action = active_action
 
     # set the active object
-    bpy.context.view_layer.objects.active = active_object
+    active_object_name = context.get('active_object')
+    if active_object_name:
+        bpy.context.view_layer.objects.active = bpy.data.objects.get(active_object_name)
 
     # set the mode
     if bpy.context.mode != context['mode']:
@@ -164,7 +171,7 @@ def remove_extra_data(data_blocks, original_data_blocks):
         data_blocks.remove(data_block_to_remove)
 
 
-def remove_object_scale_keyframes(scale, actions):
+def remove_object_scale_keyframes(actions):
     """
     This function removes all scale keyframes the exist a object in the provided actions.
 
@@ -619,8 +626,8 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
                         keyframe_point.handle_left[1] = keyframe_point.handle_left[1] * scale[fcurve.array_index]
                         keyframe_point.handle_right[1] = keyframe_point.handle_right[1] * scale[fcurve.array_index]
 
-        # apply the scale on the object
-        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+            # apply the scale on the object
+            bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
 
 def import_unreal_4_asset(file_path):
@@ -643,7 +650,7 @@ def import_unreal_4_asset(file_path):
     scale_object_actions(bpy.context.selected_objects, imported_actions, 1)
 
     # remove the object scale keyframes
-    remove_object_scale_keyframes(scale=1, actions=imported_actions)
+    remove_object_scale_keyframes(actions=imported_actions)
 
     # round keyframes
     round_keyframes(imported_actions)
@@ -658,3 +665,89 @@ def import_asset(file_path, properties):
     """
     if properties.source_application == 'ue4':
         import_unreal_4_asset(file_path)
+
+    clear_undo_history('Asset Import')
+
+
+def recreate_lod_meshes(mesh_objects):
+    """
+    This function recreates the provided lod meshes by duplicating them and deleting there originals.
+
+    :param list mesh_objects: A list of lod mesh objects.
+    :return object: The new object.
+    """
+    new_mesh_objects = []
+    # get the current selection and context
+    context = get_current_context()
+
+    for mesh_object in mesh_objects:
+        if 'LOD' in mesh_object.name:
+
+            previous_object_name = mesh_object.name
+            previous_mesh_name = mesh_object.data.name
+
+            # deselect all objects
+            deselect_all_objects()
+
+            # select and duplicate the mesh object
+            mesh_object.select_set(True)
+            bpy.ops.object.duplicate()
+
+            # remove the old object
+            bpy.data.objects.remove(mesh_object)
+
+            # remove the old mesh
+            previous_mesh = bpy.data.meshes.get(previous_mesh_name)
+            if previous_mesh:
+                bpy.data.meshes.remove(previous_mesh)
+
+            new_mesh_object = bpy.context.selected_objects[0]
+
+            # rename the duplicated object to the old name
+            new_mesh_object.name = previous_object_name
+            # rename the duplicated mesh to the old name
+            new_mesh_object.data.name = previous_mesh_name
+
+        new_mesh_objects.append(new_mesh_object)
+
+    # restore selection and context
+    set_context(context)
+
+    return new_mesh_objects
+
+
+def clear_undo_history(message):
+    """
+    This function clears blenders undo history by doing a deselect all operation and repeatedly
+    pushing that operation into the undo stack until all previous history is cleared from the undo
+    history.
+
+    :param str message: The message to display in the undo history.
+    """
+    # run this null operator
+    bpy.ops.send2ue.null_operator()
+
+    # repeatedly push the last operator into the undo stack till there are no more undo steps
+    for item in range(0, bpy.context.preferences.edit.undo_steps + 1):
+        bpy.ops.ed.undo_push(message=message)
+
+
+def resolve_path(path):
+    """
+    This function checks if a given path is relative and returns the full
+    path else returns the original path
+
+    :param str path: The input path
+    :return str: The expanded path
+    """
+
+    # Check for a relative path input. Relative paths are represented
+    # by '//' eg. '//another/path/relative/to/blend_file'
+    if path.startswith('//') or path.startswith('./'):
+        # Build an absolute path resolving the relative path from the blend file
+        path = bpy.path.abspath(path.replace("./", "//", 1))
+
+    # Make sure the path has the correct OS separators
+    path = bpy.path.native_pathsep(path)
+
+    return path

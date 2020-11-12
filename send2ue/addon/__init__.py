@@ -15,12 +15,12 @@ from .functions import export, unreal, validations, utilities
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (1, 4, 9),   # addon plugin version
+    "version": (1, 4, 10),   # addon plugin version
     "blender": (2, 83, 0),  # minimum blender version
     "location": "Header > Pipeline > Export > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
     "warning": "",
-    "wiki_url": "https://github.com/EpicGames/BlenderTools/wiki/Send-to-Unreal-Home",
+    "wiki_url": "https://epicgames.github.io/BlenderTools/send2ue/quickstart.html",
     "category": "Pipeline",
 }
 
@@ -39,6 +39,7 @@ modules = [
 classes = [
     operators.Send2Ue,
     operators.ImportAsset,
+    operators.NullOperator,
     addon_preferences.SendToUnrealPreferences,
     header_menu.TOPBAR_MT_Export,
     header_menu.TOPBAR_MT_Import

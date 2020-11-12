@@ -26,3 +26,12 @@ class ImportAsset(bpy.types.Operator, importer.ImportAsset):
         properties = bpy.context.preferences.addons[__package__].preferences
         utilities.import_asset(self.filepath, properties)
         return {'FINISHED'}
+
+
+class NullOperator(bpy.types.Operator):
+    """This is an operator that changes nothing, but it used to clear the undo stack"""
+    bl_idname = "send2ue.null_operator"
+    bl_label = "Null Operator"
+
+    def execute(self, context):
+        return {'FINISHED'}
