@@ -104,12 +104,19 @@ def get_skeleton_game_path(rig_object, properties):
 
     else:
         if rig_object.children:
-            # set the skeleton game path to the first child of the skeletons children
-            return f'{properties.unreal_mesh_folder_path}{get_unreal_asset_name(rig_object.children[0].name, properties)}_Skeleton'
-        else:
-            utilities.report_error(
-                f'"{rig_object.name}" does not have any mesh as children, so it can not be imported!'
-            )
+            # get all meshes from the mesh collection
+            mesh_collection = get_from_collection(properties.mesh_collection_name, 'MESH')
+
+            # use the child mesh that is in the mesh collection to build the skeleton game path
+            for child in rig_object.children:
+                if child in mesh_collection:
+                    asset_name = get_unreal_asset_name(child.name, properties)
+                    return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
+        utilities.report_error(
+            f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
+            f'so it can be imported correctly!'
+        )
 
 
 def get_pre_scaled_context():
