@@ -23,14 +23,26 @@ url: "https://epicgames.github.io/BlenderTools"
 
 github:  EpicGames/BlenderTools
 
+social:
+  name: Unreal Engine
+  links:
+    - https://twitter.com/UnrealEngine
+    - https://github.com/epicgames
+    - http://unrealengine.com
+
+webmaster_verifications:
+  google: G-NVX6X5L76V
+
 # Build settings
 markdown: kramdown
 theme: minima
 
-
 header_pages:
   - index.md
   - about.md
+
+plugins:
+ - jekyll-seo-tag
 
 
 # Exclude from processing.
