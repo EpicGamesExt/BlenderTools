@@ -715,6 +715,10 @@ def save_properties(*args):
             except TypeError:
                 scene_properties[attribute] = str(value)
 
+    # if the selected mode is control mode, then save the rig as frozen
+    if window_manager_properties.selected_mode == window_manager_properties.control_mode:
+        scene_properties['freeze_rig'] = True
+
 
 def load_context(properties):
     """
