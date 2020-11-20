@@ -14,7 +14,7 @@ bl_info = {
     "author": "Epic Games Inc.",
     "description": "Allows you to convert a given rig and its animations to a Rigify rig.",
     "blender": (2, 83, 0),
-    "version": (1, 3, 13),
+    "version": (1, 3, 14),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://epicgames.github.io/BlenderTools/ue2rigify/quickstart.html",
     "warning": "",
@@ -80,6 +80,7 @@ def register():
         bpy.utils.register_class(cls)
 
     # add an event handler that will save and load  preferences from the blend file
+    bpy.app.handlers.load_pre.append(utilities.pre_file_load)
     bpy.app.handlers.load_post.append(utilities.load_properties)
     bpy.app.handlers.save_pre.append(utilities.save_properties)
 
@@ -93,6 +94,7 @@ def unregister():
     window_manager_properties.selected_mode = window_manager_properties.source_mode
 
     # remove event handlers
+    bpy.app.handlers.load_pre.remove(utilities.pre_file_load)
     bpy.app.handlers.load_post.remove(utilities.load_properties)
     bpy.app.handlers.save_pre.remove(utilities.save_properties)
 

@@ -24,12 +24,13 @@ def get_socket_names(rig_object, regex=None):
     :return list: A list of inputs.
     """
     node_socket_names = []
-    for bone in rig_object.data.bones:
-        if regex:
-            if regex.search(bone.name):
+    if rig_object:
+        for bone in rig_object.data.bones:
+            if regex:
+                if regex.search(bone.name):
+                    node_socket_names.append(bone.name)
+            else:
                 node_socket_names.append(bone.name)
-        else:
-            node_socket_names.append(bone.name)
 
     return node_socket_names
 
@@ -273,19 +274,23 @@ def remove_duplicate_socket_links(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return bool: True or False whether or not a link was removed.
     """
-    # get the node tree and sockets
-    rig_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
-    linked_sockets = [(link.from_socket.name, link.to_socket.name.replace('DEF', '')) for link in rig_node_tree.links]
+    linked_sockets = []
     removed_sockets = False
 
-    # check to see if the linked sockets already exist
-    for link in rig_node_tree.links:
-        socket_pair = link.from_socket.name, link.to_socket.name.replace('DEF', '')
+    # get the node tree and sockets
+    rig_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
+    if rig_node_tree:
+        if rig_node_tree.links:
+            linked_sockets = [(link.from_socket.name, link.to_socket.name.replace('DEF', '')) for link in rig_node_tree.links]
 
-        if linked_sockets.count(socket_pair) > 1:
-            rig_node_tree.links.remove(link)
-            linked_sockets.remove(socket_pair)
-            removed_sockets = True
+        # check to see if the linked sockets already exist
+        for link in rig_node_tree.links:
+            socket_pair = link.from_socket.name, link.to_socket.name.replace('DEF', '')
+
+            if linked_sockets.count(socket_pair) > 1:
+                rig_node_tree.links.remove(link)
+                linked_sockets.remove(socket_pair)
+                removed_sockets = True
 
     return removed_sockets
 
@@ -301,29 +306,30 @@ def remove_socket_links_to_null_bones(properties):
     # get the rig objects
     control_rig_object = bpy.data.objects.get(properties.control_rig_name)
     source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    removed_sockets = False
 
     # get the node tree and sockets
     rig_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
-    linked_sockets = [(link.from_socket.name, link.to_socket.name) for link in rig_node_tree.links]
-    removed_sockets = False
+    if rig_node_tree:
+        linked_sockets = [(link.from_socket.name, link.to_socket.name) for link in rig_node_tree.links]
 
-    # check to see if the linked sockets already exist
-    for link in rig_node_tree.links:
-        socket_pair = link.from_socket.name, link.to_socket.name
+        # check to see if the linked sockets already exist
+        for link in rig_node_tree.links:
+            socket_pair = link.from_socket.name, link.to_socket.name
 
-        # check if the socket names in the links are bones that exist on the rigs
-        if control_rig_object and source_rig_object:
-            from_source_bone = source_rig_object.pose.bones.get(socket_pair[0])
-            to_source_bone = source_rig_object.pose.bones.get(socket_pair[1])
+            # check if the socket names in the links are bones that exist on the rigs
+            if control_rig_object and source_rig_object:
+                from_source_bone = source_rig_object.pose.bones.get(socket_pair[0])
+                to_source_bone = source_rig_object.pose.bones.get(socket_pair[1])
 
-            from_control_bone = control_rig_object.pose.bones.get(socket_pair[0])
-            to_control_bone = control_rig_object.pose.bones.get(socket_pair[1])
+                from_control_bone = control_rig_object.pose.bones.get(socket_pair[0])
+                to_control_bone = control_rig_object.pose.bones.get(socket_pair[1])
 
-            # if the both bones are in neither of the rigs remove the link
-            if not ((from_source_bone or to_source_bone) and (from_control_bone or to_control_bone)):
-                rig_node_tree.links.remove(link)
-                linked_sockets.remove(socket_pair)
-                removed_sockets = True
+                # if the both bones are in neither of the rigs remove the link
+                if not ((from_source_bone or to_source_bone) and (from_control_bone or to_control_bone)):
+                    rig_node_tree.links.remove(link)
+                    linked_sockets.remove(socket_pair)
+                    removed_sockets = True
 
     return removed_sockets
 
@@ -477,6 +483,29 @@ def instantiate_node(node_data, properties):
     return node
 
 
+def update_node_tree(node_tree):
+    """
+    This function updates the tracked number of nodes and links in the node tree.
+
+    :param object node_tree: A node tree object.
+    """
+    # get the properties on every update
+    properties = bpy.context.window_manager.ue2rigify
+    if remove_duplicate_socket_links(properties):
+        return None
+
+    if remove_socket_links_to_null_bones(properties):
+        return None
+
+    # if the check for updates variable is true
+    if properties.check_node_tree_for_updates:
+
+        # count the nodes and links in the tree and see if a new value should be set.
+        if properties.current_nodes_and_links != len(node_tree.links) + len(node_tree.nodes):
+            # when this property changes
+            properties.current_nodes_and_links = len(node_tree.links) + len(node_tree.nodes)
+
+
 def create_node_tree_class(classes, properties):
     """
     This function dynamically defines a node tree class from the addon's properties by subclassing type.
@@ -492,22 +521,7 @@ def create_node_tree_class(classes, properties):
         :param class self: After this class gets dynamically defined, this becomes the traditional 'self' that is a
         reference to the class.
         """
-        # get the properties on every update
-        properties = bpy.context.window_manager.ue2rigify
-        if remove_duplicate_socket_links(properties):
-            return None
-
-        if remove_socket_links_to_null_bones(properties):
-            return None
-
-        # if the check for updates variable is true
-        if properties.check_node_tree_for_updates:
-
-            # count the nodes and links in the tree and see if a new value should be set.
-            if properties.current_nodes_and_links != len(self.links) + len(self.nodes):
-
-                # when this property changes
-                properties.current_nodes_and_links = len(self.links) + len(self.nodes)
+        update_node_tree(self)
 
     classes.append(type(
         properties.bone_tree_name.replace(' ', ''),
@@ -617,6 +631,16 @@ def create_node_class(node_class_data, properties):
         for socket_name in node_class_data['inputs']:
             self.inputs.new(properties.node_socket_name.replace(' ', ''), socket_name)
 
+    def free(self):
+        """
+        This function overrides the free method in the Node class. The free method is called when the node is
+        deleted.
+
+        :param class self: After this class gets dynamically defined, this becomes the traditional 'self' that is a
+        reference to the class.
+        """
+        update_node_tree(self.rna_type.id_data)
+
     # dynamically define the node class
     node_class_definition = type(
         node_class_data['bl_idname'],
@@ -626,6 +650,7 @@ def create_node_class(node_class_data, properties):
             'bl_label': node_class_data['bl_label'],
             'bl_icon': 'BONE_DATA',
             'init': init,
+            'free': free,
         }
     )
 

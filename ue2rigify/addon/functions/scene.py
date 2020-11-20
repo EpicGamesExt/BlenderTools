@@ -1173,7 +1173,7 @@ def edit_fk_to_source_nodes(properties):
     source_rig_object = bpy.data.objects.get(properties.source_rig_name)
     control_rig_object = create_control_rig(properties)
 
-    if control_rig_object:
+    if control_rig_object and source_rig_object:
         # constrain the fk bones to the source bones
         constrain_fk_to_source(control_rig_object, source_rig_object, properties)
 
@@ -1203,7 +1203,7 @@ def edit_source_to_deform_nodes(properties):
     source_rig_object = bpy.data.objects.get(properties.source_rig_name)
     control_rig_object = create_control_rig(properties)
 
-    if control_rig_object:
+    if control_rig_object and source_rig_object:
         # constrain the source bones to the deform bones
         constrain_source_to_deform(source_rig_object, control_rig_object, properties)
 
