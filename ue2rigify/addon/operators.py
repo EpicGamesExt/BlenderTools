@@ -161,6 +161,7 @@ class CreateNodesFromSelectedBones(bpy.types.Operator):
     """Create nodes that will have sockets with names of the selected bones"""
     bl_idname = "ue2rigify.create_nodes_from_selected_bones"
     bl_label = "Nodes From Selected Bones"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         properties = bpy.context.window_manager.ue2rigify
@@ -172,6 +173,7 @@ class CreateLinkFromSelectedBones(bpy.types.Operator):
     """Create a pair of linked nodes from the selected bones"""
     bl_idname = "ue2rigify.create_link_from_selected_bones"
     bl_label = "Link Selected Bones"
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
         properties = bpy.context.window_manager.ue2rigify
@@ -183,6 +185,7 @@ class CombineSelectedNodes(bpy.types.Operator):
     """Combine the selected nodes into a new node that will have the name of the active node"""
     bl_idname = "wm.combine_selected_nodes"
     bl_label = "Combine Selected Nodes"
+    bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
@@ -199,6 +202,7 @@ class AlignActiveNodeSockets(bpy.types.Operator):
     """Align the active node sockets with the sockets of the node it is linked to"""
     bl_idname = "wm.align_active_node_sockets"
     bl_label = "Align Active Node Sockets"
+    bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):

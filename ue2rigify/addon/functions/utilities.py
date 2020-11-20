@@ -715,10 +715,6 @@ def save_properties(*args):
             except TypeError:
                 scene_properties[attribute] = str(value)
 
-    # if the selected mode is control mode, then save the rig as frozen
-    if window_manager_properties.selected_mode == window_manager_properties.control_mode:
-        scene_properties['freeze_rig'] = True
-
 
 def load_context(properties):
     """
@@ -755,6 +751,22 @@ def load_context(properties):
 
 
 @bpy.app.handlers.persistent
+def pre_file_load(*args):
+    """
+    This function executes before a file load.
+
+    :param args: This soaks up the extra arguments for the app handler.
+    """
+    properties = bpy.context.window_manager.ue2rigify
+
+    # make sure that the node tree is not checking for updates
+    properties.check_node_tree_for_updates = False
+
+    # make sure that the rig is frozen
+    properties.freeze_rig = True
+
+
+@bpy.app.handlers.persistent
 def load_properties(*args):
     """
     This function loads the saved scene properties into the window manger properties.
@@ -765,25 +777,32 @@ def load_properties(*args):
     window_manager_properties = bpy.context.window_manager.ue2rigify
     scene_properties = bpy.context.scene.ue2rigify
 
-    # load the freeze rig property first
-    freeze_rig_value = scene_properties.get('freeze_rig')
-    if freeze_rig_value:
-        window_manager_properties.freeze_rig = freeze_rig_value
+    # make sure that the node tree is not checking for updates
+    window_manager_properties.check_node_tree_for_updates = False
+
+    # make sure that the rig is frozen
+    window_manager_properties.freeze_rig = True
 
     # assign all the scene property values to the addon property values
     for attribute in scene_properties.keys():
         if hasattr(window_manager_properties, attribute):
-            scene_value = scene_properties.get(attribute)
-            window_manger_value = str(getattr(window_manager_properties, attribute))
+            if attribute not in ['freeze_rig', 'check_node_tree_for_updates']:
+                scene_value = scene_properties.get(attribute)
+                window_manger_value = str(getattr(window_manager_properties, attribute))
 
-            # if the scene and window manger value are not the same
-            if window_manger_value != str(scene_value):
-                setattr(window_manager_properties, attribute, scene_value)
+                # if the scene and window manger value are not the same
+                if window_manger_value != str(scene_value):
+                    setattr(window_manager_properties, attribute, scene_value)
+
+    # get the updated window manager properties
+    properties = bpy.context.window_manager.ue2rigify
+    if properties.selected_mode in [properties.fk_to_source_mode, properties.source_to_deform_mode]:
+        properties.check_node_tree_for_updates = True
 
 
 def clear_undo_history():
     """
-    This function clears blenders undo history by doing a deselect all operation and repeatedly
+    This function clears blenders undo history by calling a null operator and repeatedly
     pushing that operation into the undo stack until all previous history is cleared from the undo
     history.
     """
