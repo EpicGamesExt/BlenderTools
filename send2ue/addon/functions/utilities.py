@@ -3,6 +3,7 @@
 import os
 import bpy
 import shutil
+import tempfile
 
 
 def get_action_name(action_name, properties):
@@ -203,9 +204,8 @@ def remove_temp_folder():
     """
     properties_window_manger = bpy.context.window_manager.send2ue
     temp_folder = os.path.join(
-        bpy.utils.user_resource('SCRIPTS', "addons"),
-        properties_window_manger.module_name,
-        'temp'
+        tempfile.gettempdir(),
+        properties_window_manger.module_name
     )
     try:
         original_umask = os.umask(0)

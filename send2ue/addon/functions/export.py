@@ -3,6 +3,7 @@
 import os
 import re
 import bpy
+import tempfile
 from . import unreal
 from . import utilities
 from . import validations
@@ -37,9 +38,8 @@ def get_fbx_paths(asset_name, asset_type):
 
     if properties.path_mode in ['send_to_unreal', 'both']:
         fbx_paths['unreal'] = os.path.join(
-            bpy.utils.user_resource('SCRIPTS', "addons"),
+            tempfile.gettempdir(),
             properties_window_manger.module_name,
-            'temp',
             f'{get_unreal_asset_name(asset_name, properties)}.fbx'
         )
 
