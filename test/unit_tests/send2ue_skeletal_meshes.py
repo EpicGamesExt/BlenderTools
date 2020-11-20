@@ -120,6 +120,9 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
         bpy.data.collections['Rig'].objects.link(mannequin_rig)
         bpy.context.scene.collection.objects.unlink(mannequin_rig)
 
+        # unfreeze the rig
+        bpy.context.window_manager.ue2rigify.freeze_rig = False
+
         # set the source rig
         bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
 
