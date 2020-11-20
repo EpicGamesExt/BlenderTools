@@ -77,9 +77,13 @@ a, a:hover, a:focus {
     min-width: 250px;
     max-width: 250px;
     background: #3f3f3f;
-    color: #fff;
+    color: #ffffff !important;
     transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
     transform-origin: bottom left;
+    text-decoration: none;
+    -webkit-text-fill-color: #ffffff;
+    -webkit-opacity: 1;
+
 }
 
 #footer {
@@ -101,15 +105,55 @@ a, a:hover, a:focus {
     transform: translateX(-250);
 }
 
+#sidebar .sidebar-title {
+    margin: 30px;
+    text-align: center;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
+}
+
 #sidebar .sidebar-header {
     padding-top: 20px;
     padding-left: 20px;
     padding-bottom: 0px;
-    background: #3f3f3f;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
 }
 
 #sidebar .sidebar-section {
     background: #1f1f1f;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
+}
+
+#sidebar .sidebar-item {
+    background: #2f2f2f;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
+}
+
+#sidebar .sidebar-sub-menu {
+    background: #1f1f1f;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
+}
+
+#sidebar .sidebar-sub-item {
+    background: #3f3f3f;
+    color: inherit;
+    text-decoration: inherit;
+    -webkit-text-fill-color: inherit;
+    -webkit-opacity: inherit;
 }
 
 #sidebar ul.components {
@@ -126,9 +170,9 @@ a, a:hover, a:focus {
     font-size: 1.1em;
     display: block;
 }
-#sidebar ul li a:hover {
+#sidebar a:hover {
     color: #3f3f3f;
-    background: #fff;
+    background: #9f9f9f;
 }
 
 #sidebar ul li.active > a, a[aria-expanded="true"] {
@@ -271,11 +315,15 @@ a.article, a.article:hover {
     #search-doc {
         left: -2%;
     }
+    #footer {
+        visibility: visible;
+    }
 }
 
-a.sidebar-title {
-    margin: 30px;
-    text-align: center;
+@media (max-width: 992px) {
+    #footer {
+        visibility: hidden;
+    }
 }
 
 .highlighter-rouge .highlight {
@@ -285,7 +333,4 @@ a.sidebar-title {
 .max-image-height{
     height: 100%;
 }
-
-
-
 

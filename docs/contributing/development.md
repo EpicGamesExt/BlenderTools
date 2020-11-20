@@ -36,7 +36,7 @@ Clone your fork and checkout that branch:
 
     git clone https://github.com/<your-user-name>/BlenderTools.git
     cd BlenderTools
-    git checkout <some-task-branch>`
+    git checkout <some-task-branch>
 
 ## Testing your changes
 While developing, you will want to be able to rapidly test your new changes. You can do this by running this script in the Blender text editor.
