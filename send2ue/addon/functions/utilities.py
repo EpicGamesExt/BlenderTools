@@ -4,6 +4,7 @@ import os
 import bpy
 import shutil
 import tempfile
+from mathutils import Vector, Quaternion
 
 
 def get_action_name(action_name, properties):
@@ -102,6 +103,44 @@ def get_current_context():
     return current_context
 
 
+def get_pose(rig_object):
+    """
+    This function gets the transforms of the pose bones on the provided rig object.
+
+    :param object rig_object: An armature object.
+    :return dict: A dictionary of pose bone transforms
+    """
+    pose = {}
+
+    if rig_object:
+        for bone in rig_object.pose.bones:
+            pose[bone.name] = {
+                'location': bone.location,
+                'rotation_quaternion': bone.rotation_quaternion,
+                'rotation_euler': bone.rotation_euler,
+                'scale': bone.scale
+            }
+
+    return pose
+
+
+def set_pose(rig_object, pose_values):
+    """
+    This function sets the transforms of the pose bones on the provided rig object.
+
+    :param object rig_object: An armature object.
+    :param dict pose_values: A dictionary of pose bone transforms.
+    """
+    if rig_object:
+        for bone in rig_object.pose.bones:
+            bone_values = pose_values.get(bone.name)
+            if bone_values:
+                bone.location = bone_values['location']
+                bone.rotation_quaternion = bone_values['rotation_quaternion']
+                bone.rotation_euler = bone_values['rotation_euler']
+                bone.scale = bone_values['scale']
+
+
 def set_context(context):
     """
     This function sets the current context of the scene and its objects.
@@ -121,7 +160,7 @@ def set_context(context):
             scene_object.select_set(True)
 
         # set the objects active animation
-        active_action = bpy.data.objects.get(active_action_name)
+        active_action = bpy.data.actions.get(active_action_name)
         if active_action:
             scene_object.animation_data.action = active_action
 
@@ -185,19 +224,6 @@ def remove_object_scale_keyframes(actions):
                 action.fcurves.remove(fcurve)
 
 
-def create_groups(properties):
-    """
-    This function creates the collections for the addon.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    # Create groups from the group_names if they don't already exist
-    for collection_name in properties.collection_names:
-        if collection_name not in bpy.data.collections:
-            new_collection = bpy.data.collections.new(collection_name)
-            bpy.context.scene.collection.children.link(new_collection)
-
-
 def remove_temp_folder():
     """
     This function removes the temp folder where send2ue caches FBX files for Unreal imports.
@@ -214,6 +240,33 @@ def remove_temp_folder():
             shutil.rmtree(temp_folder)
     finally:
         os.umask(original_umask)
+
+
+def create_groups(properties):
+    """
+    This function creates the collections for the addon.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    # Create groups from the group_names if they don't already exist
+    for collection_name in properties.collection_names:
+        if collection_name not in bpy.data.collections:
+            new_collection = bpy.data.collections.new(collection_name)
+            bpy.context.scene.collection.children.link(new_collection)
+
+
+def clear_pose(rig_object):
+    """
+    This function sets the transforms of the pose bones on the provided rig object to the resting position.
+
+    :param object rig_object: An armature object.
+    """
+    if rig_object:
+        for bone in rig_object.pose.bones:
+            bone.location = Vector((0, 0, 0))
+            bone.rotation_quaternion = Quaternion((0, 0, 0), 1)
+            bone.rotation_euler = Vector((0, 0, 0))
+            bone.scale = Vector((1, 1, 1))
 
 
 def focus_on_selected():

@@ -650,6 +650,10 @@ def export_action(rig_object, action_name, properties):
 
     # mute the action
     if properties.export_all_actions:
+        # ensure the rigs are in rest position before setting the mute values
+        utilities.clear_pose(rig_object)
+        utilities.clear_pose(control_rig_object)
+
         set_action_mute_value(rig_object, action_name, True)
         set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), True)
 
@@ -675,11 +679,14 @@ def create_action_data(rig_objects, properties):
 
             control_rig_object = None
             unmuted_action_names = []
+            current_pose = utilities.get_pose(rig_object)
+            current_control_pose = None
 
             # if using ue2rigify get the control rig
             if properties.use_ue2rigify:
                 ue2rigify_properties = bpy.context.window_manager.ue2rigify
                 control_rig_object = bpy.data.objects.get(ue2rigify_properties.control_rig_name)
+                current_control_pose = utilities.get_pose(control_rig_object)
 
                 # if there is animation data on the control rig
                 if control_rig_object.animation_data:
@@ -732,6 +739,10 @@ def create_action_data(rig_objects, properties):
                 set_action_mute_values(control_rig_object, unmuted_action_names)
             else:
                 set_action_mute_values(rig_object, unmuted_action_names)
+
+            # set the rig poses back to their original states
+            utilities.set_pose(rig_object, current_pose)
+            utilities.set_pose(control_rig_object, current_control_pose)
 
     return action_data
 
