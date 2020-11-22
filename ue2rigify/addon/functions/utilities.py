@@ -591,7 +591,7 @@ def report_rigify_error(error):
 
     # if a bone name can be parsed from the rigify error message, assign the show error function and confirmation
     if len(parsed_bone_name) > 1:
-        confirm_message = 'Click "OK" to see what is causing the issue!'
+        confirm_message = 'Click "OK" to see what is causing the issue.'
         show_error = lambda: show_bone_setting(parsed_bone_name[0], 'BONE')
 
     report_error(error_header, error_message, confirm_message, show_error, width=600)
@@ -633,7 +633,7 @@ def report_missing_bone_error(link, socket_direction):
     error_header = 'MISSING BONE ERROR:'
     error_message = (
         f'You have a bone socket "{bone_name}" in your node "{node_name}", but your rig '
-        f'"{rig_name}" does not have a bone named "{bone_name}"!'
+        f'"{rig_name}" does not have a bone named "{bone_name}".'
     )
 
     confirm_message = f'Click "OK" to remove the socket "{bone_name}" from node "{node_name}"'
@@ -868,8 +868,8 @@ def get_rigify_bone_operator(un_hashed_operator_name, bone_name, properties):
                     ctrl_bones = get_formatted_operator_parameter('ctrl_bones', regex, rig_ui_lines[index])
                 else:
                     raise RuntimeError(
-                        f'There was an error parsing the rigify {properties.rig_ui_file_name} file!. Check the rigify '
-                        f'addon code to see if that code has changed how it generates the rig ui!'
+                        f'There was an error parsing the rigify {properties.rig_ui_file_name} file. Check the rigify '
+                        f'addon code to see if that code has changed how it generates the rig ui.'
                     )
 
                 if output_bones and input_bones and ctrl_bones:
