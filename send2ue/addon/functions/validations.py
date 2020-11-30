@@ -17,7 +17,7 @@ def validate_collections_exist(properties):
         # throw an error if there is no collection with the given name
         if not collection:
             error_message.append(
-                f'You do not have a collection "{collection_name}" in your scene! Please create it!'
+                f'You do not have a collection "{collection_name}" in your scene. Please create it.'
             )
     if error_message:
         utilities.report_error('\n'.join(error_message))
@@ -103,37 +103,37 @@ def validate_disk_path_by_property(properties, property_name, detailed_message=F
     if properties.path_mode in ['export_to_disk', 'both']:
         if property_name == "incorrect_disk_mesh_folder_path":
             if getattr(properties, property_name):
-                message = f'The mesh folder "{properties.disk_mesh_folder_path}" does not exist! '
+                message = f'The mesh folder "{properties.disk_mesh_folder_path}" does not exist. '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly!'
+                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly.'
 
             return message
 
         if property_name == "incorrect_disk_animation_folder_path":
             if getattr(properties, property_name):
-                message = f'The animation folder "{properties.disk_animation_folder_path}" does not exist! '
+                message = f'The animation folder "{properties.disk_animation_folder_path}" does not exist. '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!'
+                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly.'
 
             return message
 
         if property_name == "mesh_folder_untitled_blend_file":
             if getattr(properties, property_name):
-                message = f'"untitled" blend files are not supported for relative paths! Please save your scene. '
+                message = f'"untitled" blend files are not supported for relative paths. Please save your scene. '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly!'
+                    message += f'Please make sure that the path under "Mesh Folder (Disk)" was entered correctly.'
 
             return message
 
         if property_name == "animation_folder_untitled_blend_file":
             if getattr(properties, property_name):
-                message = f'"untitled" blend files are not supported for relative paths! Please save your scene. '
+                message = f'"untitled" blend files are not supported for relative paths. Please save your scene. '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly!'
+                    message += f'Please make sure that the path under "Animation Folder (Disk)" was entered correctly.'
 
             return message
 
@@ -193,28 +193,28 @@ def validate_unreal_path_by_property(properties, property_name, detailed_message
     if properties.path_mode in ['send_to_unreal', 'both']:
         if property_name == "incorrect_unreal_mesh_folder_path":
             if getattr(properties, property_name):
-                message = f'The mesh folder "{properties.unreal_mesh_folder_path}" needs to start with "/Game`"! '
+                message = f'The mesh folder "{properties.unreal_mesh_folder_path}" needs to start with "/Game`". '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Mesh Folder (Unreal)" was entered correctly!'
+                    message += f'Please make sure that the path under "Mesh Folder (Unreal)" was entered correctly.'
 
             return message
 
         if property_name == "incorrect_unreal_animation_folder_path":
             if getattr(properties, property_name):
-                message = f'The animation folder "{properties.unreal_animation_folder_path}" needs to start with "/Game`"! '
+                message = f'The animation folder "{properties.unreal_animation_folder_path}" needs to start with "/Game`". '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Animation Folder (Unreal)" was entered correctly!'
+                    message += f'Please make sure that the path under "Animation Folder (Unreal)" was entered correctly.'
 
             return message
 
         if property_name == "incorrect_unreal_skeleton_path":
             if getattr(properties, property_name):
-                message = f'The skeleton asset name "{properties.unreal_skeleton_asset_path}" needs to start with "/Game`"! '
+                message = f'The skeleton asset name "{properties.unreal_skeleton_asset_path}" needs to start with "/Game`". '
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly!'
+                    message += f'Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly.'
 
             return message
 
