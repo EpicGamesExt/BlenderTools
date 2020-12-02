@@ -73,9 +73,12 @@ Also each image should be named a number according to the order which they appea
     
 A image can be referenced into a markdown file by just using the relative path to the `/assets` folder. For example
 adding a image to the Send to Unreal quickstart page would look like:
+{% raw %}
 
 `![1]( {{ '/assets/images/send2ue/quickstart/1.jpg' | relative_url }} )`
     
+{% endraw %}
+
 ## Modifying the Sidebar
 To edit or add to the side bar, you can edit `/docs/_data/side-nav.yml`. This yaml file contains the titles and the urls
 for each of the links in the side bar. The the hierarchy starts with `categories` then `menus` then `submenus`.
