@@ -12,58 +12,58 @@ This quick start guide will help you get up and running with the Send to Unreal 
 
 First thing you need to do is open Blender. You need to install the add on. Go to Edit > Preferences then to addons. Click ‘install’.
 
-![1](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/1.png?)
+![1](/assets/images/send2ue/quickstart/1.jpg)
 
 Go to the location where you have your addon on disk and install the zip file. Once installed. Go ahead and activate it.
 
-![2](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/2.png?)
+![2](/assets/images/send2ue/quickstart/2.jpg)
 
 You'll notice when you activate it. This pipeline menu gets built.
 
-![3](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/3.png?)
+![3](/assets/images/send2ue/quickstart/3.jpg)
 
 Also, as soon as you interact with the scene, you will see that these collections get created. These collections are important for sending objects over to Unreal.
 
-![4](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/4.png?)
+![4](/assets/images/send2ue/quickstart/4.jpg)
 
 Next thing you want to do is configure your Unreal project. So open up on Unreal and create a new project. Once your project is open, go to Edit >Plugins.
 
-![5](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/5.png?)
+![5](/assets/images/send2ue/quickstart/5.jpg)
 
 Search for the Python Editor Script Plugin and enable it. Then search for the Editor Scripting Utilities Plugin and enable it.
 
-![6](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/6.png?)
+![6](/assets/images/send2ue/quickstart/6.jpg)
 
 Once you have enabled the plugins, you'll be prompted to restart the editor. Go ahead and restart. Once you've restarted, go to Edit > Project Settings.
 
-![7](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/7.png?)
+![7](/assets/images/send2ue/quickstart/7.jpg)
 
 Search for ‘python’ and then enable remote execution. Now Send to Unreal will work with your new Unreal project.
 
-![8](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/8.png?)
+![8](/assets/images/send2ue/quickstart/8.jpg)
 
 Another thing I like to do is go to Edit > Editor Preferences.
 
-![9](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/9.png?)
+![9](/assets/images/send2ue/quickstart/9.jpg)
 
 Search for ‘CPU’, then under Editor Performance disable ‘Use Less CPU when in Background’.  That way unreal continues to update even when it is not the active application. Now the Blender and Unreal UI will update at the same time and you will see your changes update without having to click on Unreal.
 
-![10](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/10.png?)
+![10](/assets/images/send2ue/quickstart/10.jpg)
 
 A simple test we can do in Blender to make sure this is working is move our cube to our mesh collection.
 
-![11](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/11.png?)
+![11](/assets/images/send2ue/quickstart/11.jpg)
 
 Click Pipeline>Export>Send to Unreal.
 
-![12](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/12.png?)
+![12](/assets/images/send2ue/quickstart/12.jpg)
 
 NOTE: on windows, if you see this security alert, go ahead and allow Blender access across your private network.
 
-![13](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/13.png?)
+![13](/assets/images/send2ue/quickstart/13.jpg)
 
 You should now see the cube in unreal under untitled category > untitled asset > Cube.
 
-![14](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/quickstart/14.png?)
+![14](/assets/images/send2ue/quickstart/14.jpg)
 
 As you can see, Send to Unreal is now working!

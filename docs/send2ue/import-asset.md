@@ -9,7 +9,7 @@ This is an overview of how to import assets into Blender with the Asset Importer
 
 The Asset importer allows you to import assets then run series of operations on them to fix them.  The series of operations run on the imported asset depends on what source application you select from the drop down. A source application is the application the original file was generated in.
 
-![1](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/import_asset/1.png?)
+![1](/assets/images/send2ue/import-asset/1.jpg)
 
 ### Unreal Engine 4:
 

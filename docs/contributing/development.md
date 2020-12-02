@@ -26,11 +26,11 @@ with the owners of this repository, before making a change. Each pull request mu
 ## Getting Setup
 Fork the BlenderTools repository.
 
-![1](https://blender-tools-documentation.s3.amazonaws.com/contributing/images/1.png?)
+![1](/assets/images/contributing/development/1.jpg)
 
 Create a branch in your fork with the name of the task/issue you are working on.
 
-![2](https://blender-tools-documentation.s3.amazonaws.com/contributing/images/2.png?)
+![2](/assets/images/contributing/development/2.jpg)
 
 Clone your fork and checkout that branch:
 
@@ -70,11 +70,11 @@ Here are some example paths you might add:
 
 You can add these by searching `Edit the system enviroment variables` in the quick search menu, then selecting it, then  `Environment Variables > Path > Edit..`
 
-![3](https://blender-tools-documentation.s3.amazonaws.com/contributing/images/3.png?)
+![3](/assets/images/contributing/development/3.jpg)
 
 Add the full paths to the Blender and Unreal Engine executable directories.
 
-![4](https://blender-tools-documentation.s3.amazonaws.com/contributing/images/4.png?)
+![4](/assets/images/contributing/development/4.jpg)
 
 Now click 'Ok' to all the dialogs. Open a new terminal at the root of the BlenderTools project, and run these commands to run the unit tests (note that the working directory has to be `./test/scripts`):
 

@@ -9,11 +9,11 @@ layout: default
 
 Now that we understand what templates are, let's talk about how they're created. Templates are created in ‘UE to Rigify’ using five different modes:
 
-![1](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/images/modes/1.png)
+![1](/assets/images/ue2rigify/modes/1.jpg)
 
 These modes become available as soon as you select a ‘Source’ rig.
 
-![2](https://blender-tools-documentation.s3.amazonaws.com/ue-to-rigify/images/modes/2.png)
+![2](/assets/images/ue2rigify/modes/2.jpg)
 
 NOTE:
 Your ‘Source’ rig is the rig that you create in blender or the rig that you import into blender that has the skinned to mesh attached to it. The idea of ‘UE to Rigify’ is you want to drive the ‘Source’ rig with your ‘Control’ rig.

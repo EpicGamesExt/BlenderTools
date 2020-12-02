@@ -10,15 +10,17 @@ folder: ""
 
 First, let's talk about the settings under the ‘Paths’ section. You'll see that there is this drop down, and it gives you three options: ‘Send to Unreal’, ‘Export to Disk’ or ‘Both’. 
 
-![1](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/1.png)
+![1](/assets/images/send2ue/preferences/paths/1.jpg)
 
 When using ‘Send to Unreal’ the paths are the relative paths from your open Unreal project that ‘Send to Unreal’ uses when it runs the import. The ‘Game’ folder is equivalent to the ‘Content’ folder you see in your open Unreal project.
 
-![2](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/2.png)![2.5](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/2.5.png)
+![2](/assets/images/send2ue/preferences/paths/2.jpg)
+![3](/assets/images/send2ue/preferences/paths/3.jpg)
 
 When using ‘Export to Disk’, the path is the full path to the folder where the files will be exported on disk.
 
-![3](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/3.png)![3.5](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/3.5.png)
+![4](/assets/images/send2ue/preferences/paths/4.jpg)
+![5](/assets/images/send2ue/preferences/paths/5.jpg)
 
 When using ‘Both’, it will export to the specified folders on disk and import to the specified folders in your project.
 
@@ -36,7 +38,7 @@ This is the animation import path. All your actions that are in an Armature obje
 
 This is the direct path to the Skeleton you want to import animation on. You can get this path by right-clicking on the skeleton asset in Unreal and selecting ‘Copy Reference’.
 
-![4](https://blender-tools-documentation.s3.amazonaws.com/send-to-unreal/images/paths/4.png)
+![6](/assets/images/send2ue/preferences/paths/6.jpg)
 
 NOTE:
 
