@@ -35,7 +35,7 @@ NOTE:
 
 In order for this to work properly you must name your associated LOD assets with ‘_LOD<number>’ like in the example below.
 
-![1](/assets/images/send2ue/preferences/import/1.jpg)
+![1]( {{ '/assets/images/send2ue/preferences/import/1.jpg' | relative_url }} )
 
 
 ### Object name as root bone:

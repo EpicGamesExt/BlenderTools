@@ -5,10 +5,10 @@ layout: default
 # UE to Rigify Panel
 This section defines all the properties and operators depicted below in the ‘UE to Rigify’ panel in the 3D viewport.
 
-![1](/assets/images/ue2rigify/user-interface/3d-view-panel/1.jpg)
-![2](/assets/images/ue2rigify/user-interface/3d-view-panel/2.jpg)
-![3](/assets/images/ue2rigify/user-interface/3d-view-panel/3.jpg)
-![4](/assets/images/ue2rigify/user-interface/3d-view-panel/4.jpg)
+![1]( {{ '/assets/images/ue2rigify/user-interface/3d-view-panel/1.jpg' | relative_url }} )
+![2]( {{ '/assets/images/ue2rigify/user-interface/3d-view-panel/2.jpg' | relative_url }} )
+![3]( {{ '/assets/images/ue2rigify/user-interface/3d-view-panel/3.jpg' | relative_url }} )
+![4]( {{ '/assets/images/ue2rigify/user-interface/3d-view-panel/4.jpg' | relative_url }} )
 
 ### Source
 

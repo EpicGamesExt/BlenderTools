@@ -10,7 +10,7 @@ folder: ""
 
 Let's take a look at the export settings. If you look under the export settings, you'll see a series of options. All these options are operations that will get applied to your objects before they're exported to a FBX file.
 
-![1](/assets/images/send2ue/preferences/export/1.jpg)
+![1]( {{ '/assets/images/send2ue/preferences/export/1.jpg' | relative_url }} )
 
 
 ### Automatically scale bones:

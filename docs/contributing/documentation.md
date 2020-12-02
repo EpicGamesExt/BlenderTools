@@ -9,19 +9,19 @@ Having accurate and up to date documentation is important, so that is why we hav
 ## Editing a Page
 To edit an existing page, click the link 'Edit this Page on Github' in the footer of the page you want to edit.
 
-![1](/assets/images/contributing/documentation/1.jpg)
+![1]( {{ '/assets/images/contributing/documentation/1.jpg' | relative_url }} )
 
 You will then be prompted to make your own fork of the repository. Click 'Fork this repository'.
 
-![2](/assets/images/contributing/documentation/2.jpg)
+![2]( {{ '/assets/images/contributing/documentation/2.jpg' | relative_url }} )
 
 Edit the markdown file and click 'Propose changes'.
 
-![3](/assets/images/contributing/documentation/3.jpg)
+![3]( {{ '/assets/images/contributing/documentation/3.jpg' | relative_url }} )
 
 Then create a pull request.
 
-![4](/assets/images/contributing/documentation/4.jpg)
+![4]( {{ '/assets/images/contributing/documentation/4.jpg' | relative_url }} )
 
 After your pull request is merged in a new deployment of the site will be made.
 
@@ -74,7 +74,7 @@ Also each image should be named a number according to the order which they appea
 A image can be referenced into a markdown file by just using the relative path to the `/assets` folder. For example
 adding a image to the Send to Unreal quickstart page would look like:
 
-`![1](/assets/images/send2ue/quickstart/1.jpg)`
+`![1]( {{ '/assets/images/send2ue/quickstart/1.jpg' | relative_url }} )`
     
 ## Modifying the Sidebar
 To edit or add to the side bar, you can edit `/docs/_data/side-nav.yml`. This yaml file contains the titles and the urls
