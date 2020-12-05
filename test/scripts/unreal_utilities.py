@@ -201,7 +201,7 @@ def close_unreal(unreal_process):
         if unreal_response:
             if unreal_response['success']:
                 process_id = int(unreal_response['output'][0]['output'])
-                os.kill(process_id, signal.CTRL_C_EVENT)
+                os.kill(process_id, signal.SIGTERM)
 
     # TODO needs to be tested on macOS
     else:
