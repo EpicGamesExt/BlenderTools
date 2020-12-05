@@ -1,5 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
+import os
 import time
 from . import utilities
 from ..dependencies import remote_execution
@@ -49,6 +50,10 @@ def import_asset(asset_data, properties):
     :param dict asset_data: A dictionary of import parameters.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # Get the expected unreal asset name so we can check if the file was properly created after import.
+    short_name = os.path.splitext(os.path.basename(asset_data.get("fbx_file_path")))[0]
+    game_file = asset_data.get("game_path") + '/' + short_name
+
     # start a connection to the engine that lets you send python strings
     remote_exec = remote_execution.RemoteExecution()
     remote_exec.start()
@@ -102,7 +107,7 @@ def import_asset(asset_data, properties):
 
             # check for a that the game asset imported correctly if the import object name as is False
             f'if {not properties.import_object_name_as_root}:',
-            f'\tgame_asset = unreal.load_asset(r"{asset_data.get("game_path")}")',
+            f'\tgame_asset = unreal.load_asset(r"{game_file}")',
             f'\tif not game_asset:',
             f'\t\traise RuntimeError("Multiple roots are found in the bone hierarchy. Unreal will only support a single root bone.")',
         ]))
