@@ -52,8 +52,6 @@ def import_asset(asset_data, properties):
     """
     # Get the expected unreal asset name so we can check if the file was properly created after import.
     short_name = os.path.splitext(os.path.basename(asset_data.get("fbx_file_path")))[0]
-    print(short_name)
-    print(asset_data.get("game_path"))
     game_file = (asset_data.get("game_path") + '/' + short_name).replace('//', '/')
 
     # start a connection to the engine that lets you send python strings
