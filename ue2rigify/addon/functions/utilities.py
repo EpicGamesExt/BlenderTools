@@ -78,6 +78,102 @@ def get_object_transforms(scene_object):
         }
 
 
+def get_actions(scene_object):
+    """
+    This function gets all actions on the given object.
+
+    :param object scene_object: A blender object.
+    :return list: A list of actions.
+    """
+    actions = []
+    if scene_object:
+        if scene_object.animation_data:
+            if scene_object.animation_data.action:
+                actions.append(scene_object.animation_data.action)
+
+            for nla_track in scene_object.animation_data.nla_tracks:
+                for strip in nla_track.strips:
+                    if strip.action and strip.action not in actions:
+                        actions.append(strip.action)
+
+    return actions
+
+
+def get_action_transform_offset(action, bone_name=None):
+    """
+    This function gets the amount the first frame of the given action is offset from the applied
+    transforms.
+
+    :param object action: A action object.
+    :param str bone_name: If getting a bones transform offset, then provide the bone name.
+    :return dict: A dictionary of the transform offsets.
+    """
+    default_transforms = {
+        'location': [0, 0, 0],
+        'rotation_euler': [0, 0, 0],
+        'rotation_quaternion': [0, 0, 0, 1],
+        'scale': [1, 1, 1]
+    }
+
+    offset = default_transforms
+
+    # get each transform value for each of the data paths
+    for fcurve in action.fcurves:
+        for data_path in offset.keys():
+            if fcurve.data_path == data_path:
+                for keyframe_point in fcurve.keyframe_points:
+                    if keyframe_point.co[0] == action.frame_range[0]:
+                        offset[data_path][fcurve.array_index] = keyframe_point.co[1]
+
+    # zero out any transform that are still equal to their default value
+    for data_path, transform in offset.items():
+        if default_transforms[data_path] == [round(value, 5) for value in transform]:
+            zero_transform = []
+            for value in transform:
+                zero_transform.append(0)
+
+            offset[data_path] = zero_transform
+
+    return offset
+
+
+def set_action_transform_offsets(action, offset, operation, bone_name=None):
+    """
+    This function modifies each keyframe in the given action by applying the provided offset.
+
+    :param object action: A action object.
+    :param dict offset: A dictionary of the transform offsets.
+    :param str operation: Which operator to use; 'ADD' or 'SUBTRACT'.
+    :param str bone_name: If getting a bones transform offset, then provide the bone name.
+    """
+    data_paths = [
+        'location',
+        'rotation_euler',
+        'rotation_quaternion',
+        'scale'
+    ]
+
+    # if this is a bone format the data path for a bone
+    if bone_name:
+        data_paths = [f'pose.bones["{bone_name}"].{data_path}' for data_path in data_paths]
+
+    # apply the offset to each fcurve point and handle
+    for fcurve in action.fcurves:
+        for data_path in data_paths:
+            if fcurve.data_path == data_path:
+                for keyframe_point in fcurve.keyframe_points:
+                    transform_offset = offset[data_path.split('"].')[-1]][fcurve.array_index]
+                    if operation == 'ADD':
+                        keyframe_point.co[1] = keyframe_point.co[1] + transform_offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + transform_offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + transform_offset
+
+                    if operation == 'SUBTRACT':
+                        keyframe_point.co[1] = keyframe_point.co[1] - transform_offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] - transform_offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] - transform_offset
+
+
 def set_object_transforms(scene_object, transform_values):
     """
     This function sets the transforms of the provided object.
@@ -702,50 +798,90 @@ def source_rig_picker_update(self=None, context=None):
     picker_object.use_fake_user = True
 
 
+def save_control_mode_context(properties):
+    """
+    This function saves the current context of control mode to the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    control_mode_context = {}
+
+    # get the control rig
+    control_rig = bpy.data.objects.get(properties.control_rig_name)
+    if control_rig:
+        control_rig_context = {}
+
+        # save the active action on the control rig
+        if control_rig.animation_data:
+            if control_rig.animation_data.action:
+                control_rig_context['active_action'] = control_rig.animation_data.action.name
+
+        # save the current property values on each bone
+        for bone in control_rig.pose.bones:
+            bone_context = {}
+
+            # for each bone save their properties
+            for key, value in bone.items():
+                # only save the property if it is a float, integer, boolean or string
+                if type(value) in [float, int, bool, str]:
+                    bone_context[key] = value
+
+            control_rig_context[bone.name] = bone_context
+
+        # save the control rig context in the control mode context
+        control_mode_context[properties.control_rig_name] = control_rig_context
+
+    # save the control mode context in the context
+    properties.context[properties.control_mode] = control_mode_context
+
+
+def save_source_mode_context(properties):
+    """
+    This function saves the current context of source mode to the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    if source_rig:
+        if not properties.context.get('source_rig'):
+            properties.context['source_rig'] = {}
+
+        # if the object has actions then save their first frames transform offset values
+        actions = get_actions(source_rig)
+        if actions:
+            properties.context['source_rig']['action_offsets'] = {}
+            for action in actions:
+                offset = get_action_transform_offset(action)
+                properties.context['source_rig']['action_offsets'][action.name] = offset
+
+                # subtract the transform offsets of the first frame on the action
+                set_action_transform_offsets(action, offset, 'SUBTRACT')
+
+        # otherwise save the objects transform values
+        else:
+            properties.context['source_rig']['transforms'] = get_object_transforms(source_rig)
+            # set the object transforms to their applied transforms
+            clear_object_transforms(source_rig)
+
+
 def save_context(properties):
     """
     This function saves the current context of a particular mode to the addon's properties.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    # -------- generic properties --------
+    properties.context['frame_current'] = bpy.context.scene.frame_current
 
-    # # save the current transforms of the source rig
-    if source_rig:
-        properties.context['source_rig_object_transforms'] = get_object_transforms(source_rig)
-        clear_object_transforms(source_rig)
+    # set the current frame to zero
+    bpy.context.scene.frame_set(frame=0)
 
-    # save the previous mode's context
+    # -------- mode specific properties --------
+    if properties.previous_mode == properties.source_mode:
+        save_source_mode_context(properties)
+
     if properties.previous_mode == properties.control_mode:
-        control_mode_context = {}
-
-        # get the control rig
-        control_rig = bpy.data.objects.get(properties.control_rig_name)
-        if control_rig:
-            control_rig_context = {}
-
-            # save the active action on the control rig
-            if control_rig.animation_data:
-                if control_rig.animation_data.action:
-                    control_rig_context['active_action'] = control_rig.animation_data.action.name
-
-            # save the current property values on each bone
-            for bone in control_rig.pose.bones:
-                bone_context = {}
-
-                # for each bone save their properties
-                for key, value in bone.items():
-                    # only save the property if it is a float, integer, boolean or string
-                    if type(value) in [float, int, bool, str]:
-                        bone_context[key] = value
-
-                control_rig_context[bone.name] = bone_context
-
-            # save the control rig context in the control mode context
-            control_mode_context[properties.control_rig_name] = control_rig_context
-
-        # save the control mode context in the context
-        properties.context[properties.control_mode] = control_mode_context
+        save_control_mode_context(properties)
 
 
 @bpy.app.handlers.persistent
@@ -769,6 +905,68 @@ def save_properties(*args):
                 scene_properties[attribute] = str(value)
 
 
+def load_source_mode_context(properties):
+    """
+    This function loads the current context of a source mode that was saved in the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+    # restore the source rig object to its previous transform values
+    if source_rig and properties.context.get('source_rig'):
+        if properties.context['source_rig'].get('action_offsets'):
+            # restore the actions to their original values
+            for action_name, offset in properties.context['source_rig']['action_offsets'].items():
+                action = bpy.data.actions.get(action_name)
+                if action:
+                    set_action_transform_offsets(action, offset, 'ADD')
+
+            # remove the saved offsets from the context
+            del properties.context['source_rig']['action_offsets']
+
+        else:
+            set_object_transforms(source_rig, properties.context['source_rig']['transforms'])
+
+
+def load_control_mode_context(properties):
+    """
+    This function loads the current context of a control mode that was saved in the addon's properties.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+    control_rig_context = properties.context.get(properties.control_rig_name)
+
+    # move the control rig actions back to counter the offsets to the source rig actions
+    if properties.context.get('source_rig'):
+        if properties.context['source_rig'].get('action_offsets'):
+            # restore the actions to their original values
+            for action_name, offset in properties.context['source_rig']['action_offsets'].items():
+                action = bpy.data.actions.get(action_name.replace(f'{properties.source_mode}_', ''))
+                if action:
+                    set_action_transform_offsets(action, offset, 'ADD', 'root')
+
+    # if there is there is a control rig context and a control rig
+    if control_rig_object and control_rig_context:
+
+        # set the active action on the control rig
+        if control_rig_object.animation_data:
+            active_action_name = control_rig_context.get('active_action', '')
+            active_action = bpy.data.actions.get(active_action_name)
+            if active_action:
+                control_rig_object.animation_data.action = active_action
+
+        # save the current property values on each bone
+        for bone in control_rig_object.pose.bones:
+            bone_context = control_rig_context.get(bone.name)
+
+            # if there is a bone context, set the bone properties to the saved context
+            if bone_context:
+                for key, value in bone_context.items():
+                    bone[key] = value
+
+
 def load_context(properties):
     """
     This function loads the current context of a particular mode that was saved in the addon's properties.
@@ -776,36 +974,17 @@ def load_context(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if properties.context:
-        source_rig = bpy.data.objects.get(properties.source_rig_name)
+        # -------- generic properties --------
+        frame_current = properties.context.get('frame_current')
+        if frame_current:
+            bpy.context.scene.frame_set(frame=frame_current)
 
-        # restore the source rig object to its previous transform values
-        if source_rig:
-            set_object_transforms(source_rig, properties.context['source_rig_object_transforms'])
+        # -------- mode specific properties --------
+        if properties.selected_mode == properties.source_mode:
+            load_source_mode_context(properties)
 
-        # if the selected mode is control mode and a saved control mode context
-        control_mode_context = properties.context.get(properties.control_mode)
-        if properties.selected_mode == properties.control_mode and control_mode_context:
-            control_rig_context = control_mode_context.get(properties.control_rig_name)
-            control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-
-            # if there is there is a control rig context and a control rig
-            if control_mode_context and control_rig_object:
-
-                # set the active action on the control rig
-                if control_rig_object.animation_data:
-                    active_action_name = control_rig_context.get('active_action', '')
-                    active_action = bpy.data.actions.get(active_action_name)
-                    if active_action:
-                        control_rig_object.animation_data.action = active_action
-
-                # save the current property values on each bone
-                for bone in control_rig_object.pose.bones:
-                    bone_context = control_rig_context.get(bone.name)
-
-                    # if there is a bone context, set the bone properties to the saved context
-                    if bone_context:
-                        for key, value in bone_context.items():
-                            bone[key] = value
+        if properties.selected_mode == properties.control_mode:
+            load_control_mode_context(properties)
 
 
 @bpy.app.handlers.persistent
