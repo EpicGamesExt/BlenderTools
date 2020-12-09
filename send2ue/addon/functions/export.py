@@ -113,6 +113,12 @@ def get_skeleton_game_path(rig_object, properties):
                     asset_name = get_unreal_asset_name(child.name, properties)
                     return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
 
+            # otherwise just use the first child mesh
+            for child in rig_object.children:
+                if child in [mesh_object for mesh_object in bpy.data.objects if mesh_object.type == 'MESH']:
+                    asset_name = get_unreal_asset_name(child.name, properties)
+                    return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
         utilities.report_error(
             f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
             f'so it can be imported correctly!'

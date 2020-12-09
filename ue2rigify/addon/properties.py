@@ -31,6 +31,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     # node constants
     bone_tree_name = 'Bone Remapping Nodes'
     node_socket_name = 'Bone Node Socket'
+    source_rig_object_name = 'Source Rig Object'
     source_rig_category = 'Source Rig Bones'
     control_rig_fk_category = 'Control Rig FK Bones'
     control_rig_deform_category = 'Control Rig Deform Bones'

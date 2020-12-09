@@ -41,16 +41,20 @@ def get_modes(self=None, context=None):
     return modes
 
 
-def get_keyframes(fcurve, bone, data_path, keyed_values):
+def get_keyframes(rig_object, fcurve, socket_name, data_path, keyed_values):
     """
     This function gets the bones keyed frames and data paths.
 
-    :param object fcurve: A curve.
-    :param object bone: A armature bone.
+    :param object rig_object: A blender object that contains armature data.
+    :param object fcurve: A fcurve.
+    :param str socket_name: The name of the linked node socket.
     :param str data_path: The name of the bone data that is keyed.
     :param list keyed_values: A list of keyed values.
     :return list: A list of keyed values.
     """
+    # get the pose bone
+    bone = rig_object.pose.bones.get(socket_name)
+
     # only save the rotation key frames if they match the current rotation mode
     if bone:
         if 'rotation_euler' == data_path:
@@ -75,13 +79,13 @@ def get_keyframes(fcurve, bone, data_path, keyed_values):
     return keyed_values
 
 
-def get_keyframes_by_socket_links(rig_object, fcurve, bone_name, data_path, socket_direction, links_data, keyed_values):
+def get_keyframes_by_socket_links(rig_object, fcurve, socket_name, data_path, socket_direction, links_data, keyed_values):
     """
     This function gets the keyed bone data from the corresponding bone that is linked by nodes.
 
     :param object rig_object: A blender object that contains armature data.
     :param object fcurve: A curve.
-    :param str bone_name: The name of a bones
+    :param str socket_name: The name of the linked node socket.
     :param str data_path: The name of the bone data that is keyed.
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     :param list links_data: A list of dictionaries that contains link attributes.
@@ -92,19 +96,19 @@ def get_keyframes_by_socket_links(rig_object, fcurve, bone_name, data_path, sock
     # go through all the keyed bones
     for link in links_data:
         # select only the corresponding bones who's sockets are linked in the nodes
-        if link[socket_direction] == bone_name:
-            bone = rig_object.pose.bones.get(bone_name)
+        if link[socket_direction] == socket_name:
             keyed_values = get_keyframes(
-                fcurve,
-                bone,
-                data_path,
-                keyed_values,
+                    rig_object,
+                    fcurve,
+                    socket_name,
+                    data_path,
+                    keyed_values,
             )
 
     return keyed_values
 
 
-def get_keyframe_data(rig_object, socket_direction=None, links_data=None, name_token=None):
+def get_keyframe_data(rig_object, socket_direction=None, links_data=None):
     """
     This function get all the actions with there start and end frames and the keyed frames with their data paths from
     the provided rig object, a list of links, and a socket direction.
@@ -112,7 +116,6 @@ def get_keyframe_data(rig_object, socket_direction=None, links_data=None, name_t
     :param object rig_object: A blender object that contains armature data.
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     :param list links_data: A list of dictionaries that contains link attributes.
-    :param str name_token: A string token that is a part of a bone name.
     :return:
     """
     animation_data = {}
@@ -136,26 +139,30 @@ def get_keyframe_data(rig_object, socket_direction=None, links_data=None, name_t
 
                     # go through the strips fcurves
                     for fcurve in strip.action.fcurves:
-                        # if the fcurve data_path has a key
+                        socket_name = 'object'
+                        data_path = fcurve.data_path
+
+                        # if the fcurve data_path has a key parse out the bone name
                         if '["' in fcurve.data_path:
                             # parse out the bone name and data path
-                            bone_name = fcurve.data_path.split('"')[1]
+                            socket_name = fcurve.data_path.split('"')[1]
                             data_path = fcurve.data_path.split('.')[-1]
 
-                            if links_data:
-                                keyed_values = get_keyframes_by_socket_links(
-                                    rig_object,
-                                    fcurve,
-                                    bone_name,
-                                    data_path,
-                                    socket_direction,
-                                    links_data,
-                                    keyed_values
-                                )
+                        if links_data:
+                            keyed_values = get_keyframes_by_socket_links(
+                                rig_object,
+                                fcurve,
+                                socket_name,
+                                data_path,
+                                socket_direction,
+                                links_data,
+                                keyed_values
+                            )
 
-                            if keyed_values:
-                                # store the bone name and all its keyed values in the animation data dictionary
-                                animation_data[strip.action.name]['data'][bone_name] = keyed_values
+                        if keyed_values:
+                            # store the bone name and all its keyed values in the animation data dictionary
+                            animation_data[strip.action.name]['data'][socket_name] = keyed_values
+
     return animation_data
 
 
@@ -285,10 +292,11 @@ def set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, 
     # look for an existing nla track with this action already assigned
     for nla_track in to_rig_object.animation_data.nla_tracks:
         for strip in nla_track.strips:
-            if strip.action.name == to_rig_action.name:
-                to_rig_nla_track_name = nla_track.name
-                to_rig_strip_name = strip.name
-                to_rig_object.animation_data.nla_tracks.remove(nla_track)
+            if strip.action:
+                if strip.action.name == to_rig_action.name:
+                    to_rig_nla_track_name = nla_track.name
+                    to_rig_strip_name = strip.name
+                    to_rig_object.animation_data.nla_tracks.remove(nla_track)
 
     # set the nla track and strip names if they are not defined yet to the action name without the source prefix
     if not to_rig_nla_track_name:
@@ -362,30 +370,50 @@ def remove_metarig(properties):
         bpy.data.armatures.remove(metarig_armature_duplicate)
 
 
-def remove_constraint(bone):
+def remove_object_constraint(scene_object, properties):
+    """
+    This function removes a constraint provided a object.
+
+    :param object scene_object: A scene object.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    for constraint in scene_object.constraints:
+        if constraint.name.startswith(properties.constraints_collection_name):
+            if constraint:
+                # remove the parent and child bone constraints
+                if constraint.target:
+                    if constraint.target.parent:
+                        bpy.data.objects.remove(constraint.target.parent)
+                    if constraint.target:
+                        bpy.data.objects.remove(constraint.target)
+
+                # remove constraint from bone
+                scene_object.constraints.remove(constraint)
+
+
+def remove_bone_constraint(bone, properties):
     """
     This function removes a constraint provided a bone object.
 
     :param object bone: A pose bone object.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    if bone:
-        constraint = bone.constraints.get(properties.constraints_collection_name)
-        if constraint:
-            # remove the parent and child emptys
+    constraint = bone.constraints.get(properties.constraints_collection_name)
+    if constraint:
+        # remove the parent and child bone constraints
+        if constraint.target:
+            if constraint.target.parent:
+                bpy.data.objects.remove(constraint.target.parent)
             if constraint.target:
-                if constraint.target.parent:
-                    bpy.data.objects.remove(constraint.target.parent)
-                if constraint.target:
-                    bpy.data.objects.remove(constraint.target)
+                bpy.data.objects.remove(constraint.target)
 
-            # remove constraint from bone
-            bone.constraints.remove(constraint)
+        # remove constraint from bone
+        bone.constraints.remove(constraint)
 
 
-def remove_bone_constraints(rig_object, properties, socket_direction='', links_data=None):
+def remove_constraints(rig_object, properties, socket_direction='', links_data=None):
     """
-    This function removes bone constraints from a rig object.
+    This function removes all constraints from a rig object.
 
     :param object rig_object: A blender object that contains armature data.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -394,17 +422,26 @@ def remove_bone_constraints(rig_object, properties, socket_direction='', links_d
     """
     if rig_object:
         if rig_object.type == 'ARMATURE':
-
             # if there is links data, remove the associated bone constraints
             if links_data and socket_direction:
                 for link in links_data:
-                    bone_name = link.get(socket_direction)
-                    bone = rig_object.pose.bones.get(bone_name)
-                    remove_constraint(bone)
-            # if no links data is provided, remove all constraints on all bones of the rig object
+                    socket_name = link.get(socket_direction)
+
+                    # removes the constraint if it is on a bone
+                    bone = rig_object.pose.bones.get(socket_name)
+                    if bone:
+                        remove_bone_constraint(bone, properties)
+
+            # if no links data is provided
             else:
+                # remove all constraints on all bones of the rig object
                 for bone in rig_object.pose.bones:
-                    remove_constraint(bone)
+                    remove_bone_constraint(bone, properties)
+
+            # remove object constraints on the source_rig object
+            source_rig = bpy.data.objects.get(properties.source_rig_name)
+            if source_rig:
+                remove_object_constraint(source_rig, properties)
 
     constraints_collection = bpy.data.collections.get(properties.constraints_collection_name)
     if constraints_collection:
@@ -416,14 +453,13 @@ def remove_bone_constraints(rig_object, properties, socket_direction='', links_d
         bpy.data.collections.remove(constraints_collection)
 
 
-def remove_location_key_frames_except_root_bone(rig_object, root_bone_name, properties):
+def remove_location_key_frames(rig_object, excluded_fcurves):
     """
     This function removes all location keyframes from the bones of the provided object except from the provided
     root bone.
 
-    :param str root_bone_name: The name of the bone you do not want to remove location keyframes from.
-    :param object rig_object: A blender object that contains armature data.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param list excluded_fcurves: A list of fcurve names to exclude.
+    :param object rig_object: An object of type armature.
     """
     if rig_object:
         if rig_object.animation_data:
@@ -433,9 +469,14 @@ def remove_location_key_frames_except_root_bone(rig_object, root_bone_name, prop
                 for strip in nla_track.strips:
                     if strip.action:
                         for fcurve in strip.action.fcurves:
-                            if root_bone_name not in fcurve.data_path:
-                                if fcurve.data_path[-8:] == 'location':
-                                    strip.action.fcurves.remove(fcurve)
+                            # does not remove fcurves of the objects transforms
+                            if fcurve.data_path in ['location', 'rotation_euler', 'rotation_quaternion', 'scale']:
+                                continue
+
+                            for excluded_fcurve in excluded_fcurves:
+                                if excluded_fcurve not in fcurve.data_path:
+                                    if fcurve.data_path[-8:] == 'location':
+                                        strip.action.fcurves.remove(fcurve)
 
             utilities.operator_on_object_in_mode(
                 lambda: utilities.clear_pose_location(),
@@ -538,21 +579,84 @@ def create_empties(rig_object, empty_prefix, constraints_collection, links_data,
     """
     if rig_object:
         for link in links_data:
-            bone_name = link.get(socket_direction)
+            socket_name = link.get(socket_direction)
 
-            # get the empty, edit bone, and pose bone
-            empty = create_empty(bone_name, empty_prefix, constraints_collection)
-            data_bone = rig_object.data.bones.get(bone_name)
-            pose_bone = rig_object.pose.bones.get(bone_name)
+            # create the empty
+            empty = create_empty(socket_name, empty_prefix, constraints_collection)
 
-            # if the bone exists on the rig
-            if pose_bone:
-                # calculate the world bone matrix
-                pose_bone_object = pose_bone.id_data
-                bone_matrix_world = pose_bone_object.matrix_world @ data_bone.matrix_local
+            if socket_name == 'object':
+                # get the source rig
+                source_rig_name = bpy.context.window_manager.ue2rigify.source_rig_name
+                source_rig = bpy.data.objects.get(source_rig_name)
 
-                # move the empty to the bone world matrix
-                empty.matrix_world = bone_matrix_world
+                if source_rig:
+                    # move the empty to the source rig world matrix
+                    empty.matrix_world = source_rig.matrix_world
+
+            else:
+                # get edit bone and pose bone
+                data_bone = rig_object.data.bones.get(socket_name)
+                pose_bone = rig_object.pose.bones.get(socket_name)
+
+                # if the bone exists on the rig
+                if pose_bone:
+                    # calculate the world bone matrix
+                    pose_bone_object = pose_bone.id_data
+                    bone_matrix_world = pose_bone_object.matrix_world @ data_bone.matrix_local
+
+                    # move the empty to the bone world matrix
+                    empty.matrix_world = bone_matrix_world
+
+
+def create_source_rig_object_constraint(empty_object, socket_direction, properties):
+    """
+    This function creates a constraint for the source rig object.
+
+    :param object empty_object: A object of type empty.
+    :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    if empty_object:
+        if socket_direction == 'to_socket':
+            object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
+            object_constraint.name = properties.constraints_collection_name
+            object_constraint.target = source_rig
+
+        else:
+            object_constraint = source_rig.constraints.new('COPY_TRANSFORMS')
+            object_constraint.name = properties.constraints_collection_name
+            object_constraint.target = empty_object
+
+
+def create_object_constraint(rig_object, empty_object, bone_name, properties):
+    """
+    This function creates a object constraint to a the provided bone name.
+
+    :param rig_object: A object of type armature.
+    :param str bone_name: The name of the bone to constrain the object to.
+    :param object empty_object: A object of type empty.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    if empty_object:
+        object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
+        object_constraint.name = properties.constraints_collection_name
+        object_constraint.target = rig_object
+        object_constraint.subtarget = bone_name
+
+
+def create_bone_constraint(bone, empty_object, properties):
+    """
+    This function creates a bone constraint that constrains to the provided bone.
+
+    :param object bone: A bone object.
+    :param object empty_object: A object of type empty.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    if bone:
+        bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
+        bone_constraint.name = properties.constraints_collection_name
+        bone_constraint.target = empty_object
 
 
 def create_constraints(rig_object, links_data, empty_prefix, socket_direction, properties):
@@ -566,22 +670,18 @@ def create_constraints(rig_object, links_data, empty_prefix, socket_direction, p
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     for link in links_data:
-        bone_name = link.get(socket_direction)
-        empty_name = f'{empty_prefix}_{bone_name}'
-
+        socket_name = link.get(socket_direction)
+        empty_name = f'{empty_prefix}_{socket_name}'
         empty_object = bpy.data.objects.get(empty_name)
-        if empty_object:
-            if empty_prefix == 'child':
-                bone = rig_object.pose.bones.get(bone_name)
-                if bone:
-                    bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
-                    bone_constraint.name = properties.constraints_collection_name
-                    bone_constraint.target = empty_object
-            else:
-                object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
-                object_constraint.name = properties.constraints_collection_name
-                object_constraint.target = rig_object
-                object_constraint.subtarget = bone_name
+
+        if socket_name == 'object':
+            create_source_rig_object_constraint(empty_object, socket_direction, properties)
+
+        elif empty_prefix == 'child' and socket_name != 'object':
+            bone = rig_object.pose.bones.get(socket_name)
+            create_bone_constraint(bone, empty_object, properties)
+        else:
+            create_object_constraint(rig_object, empty_object, socket_name, properties)
 
 
 def create_starter_metarig_template(properties):
@@ -669,7 +769,7 @@ def create_control_rig(properties):
 
     # if the source rig is the mannequin, then fix it
     if properties.selected_rig_template == properties.default_template:
-        remove_location_key_frames_except_root_bone(source_rig_object, 'pelvis', properties)
+        remove_location_key_frames(source_rig_object, ['pelvis'])
 
     # create the meta rig
     create_meta_rig(properties)
@@ -743,17 +843,35 @@ def move_collection_to_collection(collection, to_collection):
 
 
 def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
+    """
+    This function selected all the bones that need to keyed in the action bake.
+
+    :param object to_rig_object: The rig that is being driven by constraints.
+    :param dict from_rig_action_data: A dictionary of animation data from the from rig.
+    :param list links_data: A list of dictionaries that contains link attributes.
+    """
     # deselect everything
-    bpy.ops.pose.select_all(action='DESELECT')
+    if bpy.context.mode == 'POSE':
+        bpy.ops.pose.select_all(action='DESELECT')
+    if bpy.context.mode == 'OBJECT':
+        bpy.ops.object.select_all(action='DESELECT')
 
     # go through all the keyed bones
     for from_bone_name in from_rig_action_data['data'].keys():
         for link in links_data:
             # select only the corresponding bones who's sockets are linked in the nodes
             if link['from_socket'] == from_bone_name:
-                to_bone = to_rig_object.data.bones.get(link['to_socket'])
-                if to_bone:
-                    to_bone.select = True
+                if bpy.context.mode == 'POSE':
+                    to_bone = to_rig_object.data.bones.get(link['to_socket'])
+                    if to_bone:
+                        to_bone.select = True
+
+            # select the source rig if there is a socket linked to it and its link has keyframes
+            if link['to_socket'] == 'object':
+                if bpy.context.mode == 'OBJECT':
+                    properties = bpy.context.window_manager.ue2rigify
+                    source_rig = bpy.data.objects.get(properties.source_rig_name)
+                    source_rig.select_set(True)
 
 
 def organize_rig_objects(properties, organize_control_rig=True):
@@ -894,7 +1012,7 @@ def constrain_source_to_deform(source_rig_object, control_rig_object, properties
         links_data = templates.get_saved_links_data(properties)
 
         # set the template paths to fk to source mode
-        remove_bone_constraints(source_rig_object, properties, 'from_socket', links_data)
+        remove_constraints(source_rig_object, properties, 'from_socket', links_data)
 
     # constrain the source rig to the deform bones on the control rig
     source_to_deform_links = templates.get_saved_links_data(properties)
@@ -926,14 +1044,14 @@ def update_rig_constraints(self=None, value=None):
 
     if properties.selected_mode == properties.fk_to_source_mode:
         # remove the control rig constraints that bind the FKs to the source bones
-        remove_bone_constraints(control_rig_object, properties, 'from_socket', links_data)
+        remove_constraints(control_rig_object, properties, 'from_socket', links_data)
 
         # constrain the control rig fk bones to the source bones on the control rig
         constrain_bones(links_data, control_rig_object, source_rig_object, properties)
 
     if properties.selected_mode == properties.source_to_deform_mode:
         # remove the source rig constraints that bind the source bones to the control rig deform bones
-        remove_bone_constraints(source_rig_object, properties, 'from_socket', links_data)
+        remove_constraints(source_rig_object, properties, 'from_socket', links_data)
 
         # constrain the source rig to the deform bones on the control rig
         constrain_bones(links_data, source_rig_object, control_rig_object, properties)
@@ -1014,6 +1132,64 @@ def sync_actions(control_rig_object, source_rig_object, properties):
     sync_nla_track_data(control_rig_object, source_rig_object, properties)
 
 
+def bake_pose_animation(to_rig_object, from_rig_action_data, links_data):
+    """
+    This function bakes the visual pose bone transform data to the rig driven by constraints.
+
+    :param object to_rig_object: The rig that is being driven by constraints.
+    :param dict from_rig_action_data: A dictionary of animation data from the from rig.
+    :param list links_data: A list of dictionaries that contains link attributes.
+    """
+    # select the bones on the to rig which have related keyed bones on the from rig
+    select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
+
+    # bake the visual transforms of the selected bones to the current action
+    bpy.ops.nla.bake(
+        frame_start=from_rig_action_data['action_frame_start'],
+        frame_end=from_rig_action_data['action_frame_end'],
+        step=1,
+        only_selected=True,
+        visual_keying=True,
+        use_current_action=True,
+        bake_types={'POSE'}
+    )
+
+
+def bake_object_animation(to_rig_object, from_rig_action_data, links_data):
+    """
+    This function bakes the visual object transform data to the source rig.
+
+    :param object to_rig_object: The rig that is being driven by constraints.
+    :param dict from_rig_action_data: A dictionary of animation data from the from rig.
+    :param list links_data: A list of dictionaries that contains link attributes.
+    """
+    selected_objects = bpy.context.selected_objects.copy()
+    mode = bpy.context.mode
+
+    # switch to object mode
+    if mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    # select the to rig object if it has related keyed bones on the from rig
+    select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
+
+    bpy.ops.nla.bake(
+        frame_start=from_rig_action_data['action_frame_start'],
+        frame_end=from_rig_action_data['action_frame_end'],
+        step=1,
+        only_selected=True,
+        visual_keying=True,
+        use_current_action=True,
+        bake_types={'OBJECT'}
+    )
+
+    # restore previous mode and selection
+    bpy.ops.object.select_all(action='DESELECT')
+    bpy.ops.object.mode_set(mode=mode)
+    for selected_object in selected_objects:
+        selected_object.select_set(True)
+
+
 def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_source=False):
     """
     This function takes all the keys on the bones of the from_rig_object rig and adds visual keys to the correct bones
@@ -1034,6 +1210,7 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
 
         # go through the from rig's animation data
         for action_name, from_rig_action_data in from_rig_animation_data.items():
+
             # get the rig actions
             from_rig_action = bpy.data.actions.get(action_name)
             to_rig_action = get_to_rig_action(from_rig_action, from_rig_object, to_rig_object, bake_to_source, properties)
@@ -1042,7 +1219,7 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
             if not to_rig_action:
                 return None
 
-            # make the to rig action a fake user so that it is saved to the blend file.
+            # make the rig action a fake user so that it is saved to the blend file.
             if not bake_to_source:
                 to_rig_action.use_fake_user = True
 
@@ -1051,23 +1228,15 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
                 for fcurve in to_rig_action.fcurves:
                     to_rig_action.fcurves.remove(fcurve)
 
-            # select the bones on the to rig which have related keyed bones on the from rig
-            select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
-
             if from_rig_action_data['data']:
-                # bake the visual transforms of the selected bones to the current action
-                bpy.ops.nla.bake(
-                    frame_start=from_rig_action_data['action_frame_start'],
-                    frame_end=from_rig_action_data['action_frame_end'],
-                    step=1,
-                    only_selected=True,
-                    visual_keying=True,
-                    use_current_action=True,
-                    bake_types={'POSE'}
-                )
+                # bake the visual pose transforms of the bones to the current action
+                bake_pose_animation(to_rig_object, from_rig_action_data, links_data)
 
                 # remove the control rig action when baking to source
                 if bake_to_source:
+                    # bake the visual object transforms of the source rig object to the current action
+                    bake_object_animation(to_rig_object, from_rig_action_data, links_data)
+
                     bpy.data.actions.remove(from_rig_action)
                     to_rig_action.name = to_rig_action.name.replace(f'{properties.source_mode}_', '')
 
@@ -1260,7 +1429,7 @@ def revert_to_source_rig(properties):
     # remove the constraints from the bones
     templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
     links_data = templates.get_saved_links_data(properties)
-    remove_bone_constraints(source_rig_object, properties, 'to_socket', links_data)
+    remove_constraints(source_rig_object, properties, 'to_socket', links_data)
 
     # remove the metarig
     remove_metarig(properties)
@@ -1277,6 +1446,9 @@ def convert_to_control_rig(properties):
     source_rig_object = bpy.data.objects.get(properties.source_rig_name)
     control_rig_object = create_control_rig(properties)
 
+    source_object_transforms = utilities.get_object_transforms(source_rig_object)
+    utilities.set_object_transforms(control_rig_object, source_object_transforms)
+
     if control_rig_object and source_rig_object:
         # change all the control rigs IKs to FKs
         set_fk_ik_switch_values(control_rig_object, 1.0)
@@ -1289,7 +1461,7 @@ def convert_to_control_rig(properties):
             bake_from_rig_to_rig(source_rig_object, control_rig_object, properties)
 
             links_data = templates.get_saved_links_data(properties)
-            remove_bone_constraints(control_rig_object, properties, 'from_socket', links_data)
+            remove_constraints(control_rig_object, properties, 'from_socket', links_data)
 
         # set the template paths to source to deform mode
         templates.set_template_files(properties, mode_override=properties.source_to_deform_mode)

@@ -2,6 +2,7 @@
 import bpy
 import re
 from . import scene
+from mathutils import Vector, Quaternion
 
 addon_key_maps = []
 pie_menu_classes = []
@@ -50,14 +51,44 @@ def get_action_names(rig_object, all_actions=True):
             # get all the action names if the all flag is set
             if all_actions:
                 for strip in nla_track.strips:
-                    action_names.append(strip.action.name)
+                    if strip.action:
+                        action_names.append(strip.action.name)
 
             # otherwise get only the un-muted actions
             else:
                 if not nla_track.mute:
                     for strip in nla_track.strips:
-                        action_names.append(strip.action.name)
+                        if strip.action:
+                            action_names.append(strip.action.name)
     return action_names
+
+
+def get_object_transforms(scene_object):
+    """
+    This function gets the transforms provided object.
+    :param object scene_object: An object.
+    :return dict: A dictionary of object transforms
+    """
+    if scene_object:
+        return {
+            'location': scene_object.location,
+            'rotation_quaternion': scene_object.rotation_quaternion,
+            'rotation_euler': scene_object.rotation_euler,
+            'scale': scene_object.scale
+        }
+
+
+def set_object_transforms(scene_object, transform_values):
+    """
+    This function sets the transforms of the provided object.
+    :param object scene_object: An object.
+    :param dict transform_values: A dictionary of object transforms.
+    """
+    if scene_object and transform_values:
+        scene_object.location = transform_values['location']
+        scene_object.rotation_quaternion = transform_values['rotation_quaternion']
+        scene_object.rotation_euler = transform_values['rotation_euler']
+        scene_object.scale = transform_values['scale']
 
 
 def set_to_title(text):
@@ -416,6 +447,21 @@ def stash_animation_data(rig_object):
             rig_object_nla_track.mute = False
 
 
+def clear_object_transforms(scene_object):
+    """
+    This function clears the transforms of the provided object to zero.
+    :param object scene_object: An object.
+    """
+    if scene_object:
+        scene_object.location = Vector((0, 0, 0))
+        scene_object.rotation_quaternion = Quaternion((0, 0, 0), 1)
+        scene_object.rotation_euler = Vector((0, 0, 0))
+        scene_object.scale = Vector((1, 1, 1))
+
+        scene_object.select_set(True)
+        bpy.ops.object.visual_transform_apply()
+
+
 def clear_pose_location():
     """
     This function selects all pose pose bones and sets there zeros out there locations.
@@ -662,22 +708,29 @@ def save_context(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+    # # save the current transforms of the source rig
+    if source_rig:
+        properties.context['source_rig_object_transforms'] = get_object_transforms(source_rig)
+        clear_object_transforms(source_rig)
+
     # save the previous mode's context
     if properties.previous_mode == properties.control_mode:
         control_mode_context = {}
 
         # get the control rig
-        control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-        if control_rig_object:
+        control_rig = bpy.data.objects.get(properties.control_rig_name)
+        if control_rig:
             control_rig_context = {}
 
             # save the active action on the control rig
-            if control_rig_object.animation_data:
-                if control_rig_object.animation_data.action:
-                    control_rig_context['active_action'] = control_rig_object.animation_data.action.name
+            if control_rig.animation_data:
+                if control_rig.animation_data.action:
+                    control_rig_context['active_action'] = control_rig.animation_data.action.name
 
             # save the current property values on each bone
-            for bone in control_rig_object.pose.bones:
+            for bone in control_rig.pose.bones:
                 bone_context = {}
 
                 # for each bone save their properties
@@ -723,9 +776,14 @@ def load_context(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if properties.context:
-        control_mode_context = properties.context.get(properties.control_mode)
+        source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+        # restore the source rig object to its previous transform values
+        if source_rig:
+            set_object_transforms(source_rig, properties.context['source_rig_object_transforms'])
 
         # if the selected mode is control mode and a saved control mode context
+        control_mode_context = properties.context.get(properties.control_mode)
         if properties.selected_mode == properties.control_mode and control_mode_context:
             control_rig_context = control_mode_context.get(properties.control_rig_name)
             control_rig_object = bpy.data.objects.get(properties.control_rig_name)

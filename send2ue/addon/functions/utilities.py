@@ -672,6 +672,10 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
             for action in actions:
                 # iterate through the location curves
                 for fcurve in [fcurve for fcurve in action.fcurves if fcurve.data_path.endswith('location')]:
+                    # don't scale the objects location keys
+                    if fcurve.data_path == 'location':
+                        continue
+
                     # and iterate through the keyframe values
                     for keyframe_point in fcurve.keyframe_points:
                         # multiply the location keyframes by the scale per channel

@@ -1,32 +1,5 @@
 [
  {
-  "name": "Source Spine",
-  "label": "Source Spine",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -288.0794982910156,
-   1294.8017578125
-  ],
-  "width": 222.369384765625,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [],
-  "outputs": [
-   "head",
-   "neck_01",
-   "spine_03",
-   "spine_02",
-   "spine_01",
-   "pelvis"
-  ],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
   "name": "Control Spine",
   "label": "Control Spine",
   "color": [
@@ -375,81 +348,6 @@
   "mode": "SOURCE_TO_DEFORM"
  },
  {
-  "name": "Control Right Leg",
-  "label": "Control Right Leg",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -301.3240661621094,
-   854.4548950195312
-  ],
-  "width": 250.275634765625,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-foot.R",
-   "DEF-thigh.R.001",
-   "DEF-toe.R",
-   "DEF-shin.R.001",
-   "DEF-shin.R",
-   "DEF-thigh.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
-  "name": "Control Right Thumb",
-  "label": "Control Right Thumb",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -289.4405517578125,
-   1542.434326171875
-  ],
-  "width": 200.0,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-thumb.03.R",
-   "DEF-thumb.02.R",
-   "DEF-thumb.01.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
-  "name": "Control Right Pinky Finger",
-  "label": "Control Right Pinky Finger",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -283.8596496582031,
-   2129.625
-  ],
-  "width": 200.0,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-f_pinky.01.R",
-   "DEF-f_pinky.02.R",
-   "DEF-f_pinky.03.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
   "name": "Source Right Pinky Finger",
   "label": "Source Right Pinky Finger",
   "color": [
@@ -471,78 +369,6 @@
    "pinky_02_r",
    "pinky_03_r"
   ],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
-  "name": "Control Right Index Finger",
-  "label": "Control Right Index Finger",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -291.0322265625,
-   1683.6904296875
-  ],
-  "width": 206.3668212890625,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-f_index.03.R",
-   "DEF-f_index.02.R",
-   "DEF-f_index.01.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
-  "name": "Control Right Ring Finger",
-  "label": "Control Right Ring Finger",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -284.63360595703125,
-   1985.01708984375
-  ],
-  "width": 200.0,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-f_ring.03.R",
-   "DEF-f_ring.02.R",
-   "DEF-f_ring.01.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
-  "name": "Control Right Middle Finger",
-  "label": "Control Right Middle Finger",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -287.8488464355469,
-   1829.2772216796875
-  ],
-  "width": 200.0,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-f_middle.03.R",
-   "DEF-f_middle.02.R",
-   "DEF-f_middle.01.R"
-  ],
-  "outputs": [],
   "mode": "SOURCE_TO_DEFORM"
  },
  {
@@ -761,29 +587,6 @@
   "mode": "SOURCE_TO_DEFORM"
  },
  {
-  "name": "Control Rig DEF-forearm.R.001",
-  "label": "Control Right Arm",
-  "color": [
-   0.6079999804496765,
-   0.6079999804496765,
-   0.6079999804496765
-  ],
-  "use_custom_color": false,
-  "location": [
-   -303.27496337890625,
-   591.1119384765625
-  ],
-  "width": 200.0,
-  "height": 100.0,
-  "type": "CUSTOM",
-  "inputs": [
-   "DEF-forearm.R.001",
-   "DEF-upper_arm.R"
-  ],
-  "outputs": [],
-  "mode": "SOURCE_TO_DEFORM"
- },
- {
   "name": "Source Rig hand_r",
   "label": "Source Right Arm",
   "color": [
@@ -809,6 +612,203 @@
   "mode": "SOURCE_TO_DEFORM"
  },
  {
+  "name": "Source Spine",
+  "label": "Source Spine",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -288.0794982910156,
+   1294.8017578125
+  ],
+  "width": 222.369384765625,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "head",
+   "neck_01",
+   "spine_03",
+   "spine_02",
+   "spine_01",
+   "pelvis"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Leg",
+  "label": "Control Right Leg",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -301.3240661621094,
+   854.4548950195312
+  ],
+  "width": 250.275634765625,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-foot.R",
+   "DEF-thigh.R.001",
+   "DEF-toe.R",
+   "DEF-shin.R.001",
+   "DEF-shin.R",
+   "DEF-thigh.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Thumb",
+  "label": "Control Right Thumb",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -289.4405517578125,
+   1542.434326171875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-thumb.03.R",
+   "DEF-thumb.02.R",
+   "DEF-thumb.01.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Pinky Finger",
+  "label": "Control Right Pinky Finger",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -283.8596496582031,
+   2129.625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-f_pinky.01.R",
+   "DEF-f_pinky.02.R",
+   "DEF-f_pinky.03.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Index Finger",
+  "label": "Control Right Index Finger",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -291.0322265625,
+   1683.6904296875
+  ],
+  "width": 206.3668212890625,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-f_index.03.R",
+   "DEF-f_index.02.R",
+   "DEF-f_index.01.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Ring Finger",
+  "label": "Control Right Ring Finger",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -284.63360595703125,
+   1985.01708984375
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-f_ring.03.R",
+   "DEF-f_ring.02.R",
+   "DEF-f_ring.01.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Right Middle Finger",
+  "label": "Control Right Middle Finger",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -287.8488464355469,
+   1829.2772216796875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-f_middle.03.R",
+   "DEF-f_middle.02.R",
+   "DEF-f_middle.01.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Rig DEF-forearm.R.001",
+  "label": "Control Right Arm",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -303.27496337890625,
+   591.1119384765625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-forearm.R.001",
+   "DEF-upper_arm.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
   "name": "Control Rig DEF-hand.R",
   "label": "Control Right Arm",
   "color": [
@@ -829,6 +829,50 @@
    "DEF-forearm.R",
    "DEF-upper_arm.R",
    "DEF-shoulder.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Source Rig Object",
+  "label": "",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -241.25387573242188,
+   169.654296875
+  ],
+  "width": 140.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "object"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Control Rig root",
+  "label": "",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   379.0954284667969,
+   154.46432495117188
+  ],
+  "width": 140.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "root"
   ],
   "outputs": [],
   "mode": "SOURCE_TO_DEFORM"

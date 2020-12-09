@@ -526,5 +526,11 @@
   "to_node": "Source Rig hand_r",
   "from_socket": "thumb.01_master.R",
   "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig root",
+  "to_node": "Source Rig Object",
+  "from_socket": "root",
+  "to_socket": "object"
  }
 ]

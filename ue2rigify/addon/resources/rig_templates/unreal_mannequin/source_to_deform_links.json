@@ -358,5 +358,11 @@
   "to_node": "Control Rig DEF-forearm.R.001",
   "from_socket": "upperarm_twist_01_r",
   "to_socket": "DEF-upper_arm.R"
+ },
+ {
+  "from_node": "Source Rig Object",
+  "to_node": "Control Rig root",
+  "from_socket": "object",
+  "to_socket": "root"
  }
 ]
