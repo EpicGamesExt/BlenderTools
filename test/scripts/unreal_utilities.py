@@ -103,7 +103,7 @@ def has_custom_collision(game_path):
     # start a connection to the engine that lets you send python strings
     remote_exec = RemoteExecution()
     remote_exec.start()
-    
+
     # send over the python code as a string
     run_unreal_python_commands(
         remote_exec,

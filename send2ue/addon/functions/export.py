@@ -561,7 +561,7 @@ def export_mesh_lods(asset_name, properties):
 
                 # select the lod mesh
                 mesh_object.select_set(True)
-        
+
         # select collsion meshes
         select_asset_collisions(asset_name, properties)
 
