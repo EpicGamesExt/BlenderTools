@@ -92,6 +92,7 @@ def asset_exists(game_path):
     if unreal_response:
         return bool(unreal_response['success'])
 
+
 def has_custom_collision(game_path):
     """
     This function checks to see if an asset has a custom collision.
@@ -117,7 +118,6 @@ def has_custom_collision(game_path):
 
     if unreal_response:
         return bool(unreal_response['success'])
-
 
 
 def delete_asset(game_path):

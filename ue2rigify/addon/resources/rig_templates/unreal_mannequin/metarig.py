@@ -1098,5 +1098,6 @@ def create(obj):
 
     return bones
 
+
 if __name__ == "__main__":
     create(bpy.context.active_object)
