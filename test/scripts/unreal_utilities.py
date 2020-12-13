@@ -21,7 +21,7 @@ send_to_unreal_modules = os.path.normpath(
 )
 
 sys.path.append(send_to_unreal_modules)
-from remote_execution import RemoteExecution
+from remote_execution import RemoteExecution  # noqa: E402
 
 unreal_response = ''
 
