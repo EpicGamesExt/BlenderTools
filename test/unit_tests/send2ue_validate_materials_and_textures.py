@@ -14,14 +14,15 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
     """
 
     def setUp(self):
-        """
-        This method is called before any of the methods in this unit test are run.
-        """
         # load in the file you will run tests on
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'static_meshes.blend'))
 
         # enable the required addons
         bpy.ops.preferences.addon_enable(module='send2ue')
+
+    def tearDown(self):
+        # restore blend file to the default test file
+        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
 
     def test_send_material_to_unreal_true(self):
         """
@@ -79,9 +80,3 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
         bpy.context.scene.collection.objects.link(cube)
         bpy.data.collections['Mesh'].objects.unlink(cube)
 
-    def tearDown(self):
-        """
-        This method is called after all of the methods in this unit test are run.
-        """
-        # restore blend file to the default test file
-        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
