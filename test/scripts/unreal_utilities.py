@@ -21,7 +21,7 @@ send_to_unreal_modules = os.path.normpath(
 )
 
 sys.path.append(send_to_unreal_modules)
-from remote_execution import RemoteExecution
+from remote_execution import RemoteExecution  # noqa: E402
 
 unreal_response = ''
 
@@ -92,6 +92,7 @@ def asset_exists(game_path):
     if unreal_response:
         return bool(unreal_response['success'])
 
+
 def has_custom_collision(game_path):
     """
     This function checks to see if an asset has a custom collision.
@@ -102,7 +103,7 @@ def has_custom_collision(game_path):
     # start a connection to the engine that lets you send python strings
     remote_exec = RemoteExecution()
     remote_exec.start()
-    
+
     # send over the python code as a string
     run_unreal_python_commands(
         remote_exec,
@@ -117,7 +118,6 @@ def has_custom_collision(game_path):
 
     if unreal_response:
         return bool(unreal_response['success'])
-
 
 
 def delete_asset(game_path):

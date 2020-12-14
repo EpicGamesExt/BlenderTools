@@ -6,6 +6,7 @@ from .functions import templates
 from .functions import utilities
 from .settings import tool_tips
 
+
 class UE2RigifyProperties(bpy.types.PropertyGroup):
     """
     This class defines a property group that can be accessed through the blender api.

@@ -355,6 +355,7 @@ def export_zip(zip_file_path, properties):
 #   For more information, see:
 #
 
+
 def safe_get_starter_metarig_templates(self, context):
     """
     This function is an EnumProperty safe wrapper for get_starter_metarig_templates.
@@ -367,6 +368,7 @@ def safe_get_starter_metarig_templates(self, context):
     global _result_reference_get_starter_metarig_templates
     _result_reference_get_starter_metarig_templates = items
     return items
+
 
 def safe_populate_templates_dropdown(self, context):
     """
@@ -394,6 +396,7 @@ def safe_get_modes(self, context):
     global _result_reference_get_modes
     _result_reference_get_modes = items
     return items
+
 
 def safe_get_rig_templates(self, context):
     """

@@ -97,6 +97,11 @@ Our primary standard for code is [PEP 8](https://www.python.org/dev/peps/pep-000
 * Classes should be `CamelCase`.
 * All operators and any UI properties must have tool tips.
 
+You can check your code follows PEP 8 with [`pycodesyle`](https://pycodestyle.pycqa.org/en/latest/).
+
+    pip install pycodestyle
+    pycodestyle
+
 ## Addon Code Structure
 
 This is how the addon code is structured. You will see this primary file and folder structure in each of the addons.

@@ -729,12 +729,12 @@ def report_rigify_error(error):
     error_message = error.replace('Error: RIGIFY ERROR: ', '')
     parsed_bone_name = error_message.replace("Bone '", '').split("'")
     confirm_message = None
-    show_error = lambda: None
+    def show_error(): return None
 
     # if a bone name can be parsed from the rigify error message, assign the show error function and confirmation
     if len(parsed_bone_name) > 1:
         confirm_message = 'Click "OK" to see what is causing the issue.'
-        show_error = lambda: show_bone_setting(parsed_bone_name[0], 'BONE')
+        def show_error(): return show_bone_setting(parsed_bone_name[0], 'BONE')
 
     report_error(error_header, error_message, confirm_message, show_error, width=600)
 
@@ -779,7 +779,7 @@ def report_missing_bone_error(link, socket_direction):
     )
 
     confirm_message = f'Click "OK" to remove the socket "{bone_name}" from node "{node_name}"'
-    remove_socket = lambda: scene.remove_missing_bone_socket(node_name, bone_name, properties)
+    def remove_socket(): return scene.remove_missing_bone_socket(node_name, bone_name, properties)
 
     report_error(error_header, error_message, confirm_message, remove_socket, width=700)
 

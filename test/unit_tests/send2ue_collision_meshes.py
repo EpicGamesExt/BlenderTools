@@ -39,7 +39,7 @@ class Send2UeCollisionsTestCases(unittest.TestCase):
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
-    
+
     def test_send_without_collision_meshes(self):
         """
         This method sends a mesh without any collision meshes and verifies that it isn't included in Unreal.
@@ -52,7 +52,7 @@ class Send2UeCollisionsTestCases(unittest.TestCase):
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
-    
+
     def tearDown(self):
         """
         This method is called after all of the methods in this unit test are run.

@@ -8,8 +8,10 @@ import socket as _socket
 import logging as _logging
 import threading as _threading
 
+
 def hello():
     _logging.debug("Hello from remote")
+
 
 # Protocol constants (see PythonScriptRemoteExecution.cpp for the full protocol definition)
 _PROTOCOL_VERSION = 1  # Protocol version number

@@ -5,7 +5,7 @@ import sys
 
 # set the python path to build_scripts directory and import the test_utils
 sys.path.append(os.getcwd())
-import blender_utilities
+import blender_utilities  # noqa: E402
 
 
 if __name__ == '__main__':
