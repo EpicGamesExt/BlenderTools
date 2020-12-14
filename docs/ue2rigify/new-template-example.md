@@ -57,5 +57,13 @@ Now you can see the tentacle controls in ‘Control Mode’.
 
 ![12]( {{ '/assets/images/ue2rigify/new-template-example/12.jpg' | relative_url }} )
 
-This is essentially the process that you have to go through to create your own templates for your own unique rigs.
+Transferring root motion is also possible by using the source rig object node. A link can be made between it and the 
+desired bone in 'FK to Source' mode and 'Source to Deform' mode. The source rig object node can be added to the node tree 
+by hitting:
 
+SHIFT+A > Object > Source Rig Object
+
+![13]( {{ '/assets/images/ue2rigify/new-template-example/13.jpg' | relative_url }} )
+![14]( {{ '/assets/images/ue2rigify/new-template-example/14.jpg' | relative_url }} )
+
+This is essentially the process that you have to go through to create your own templates for your own unique rigs.

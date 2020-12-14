@@ -263,8 +263,8 @@ class RemoveConstraints(bpy.types.Operator):
             source_rig = bpy.data.objects.get(properties.source_rig_name)
 
         # remove the constraints on the source rig and control rig
-        scene.remove_bone_constraints(control_rig, properties)
-        scene.remove_bone_constraints(source_rig, properties)
+        scene.remove_constraints(control_rig, properties)
+        scene.remove_constraints(source_rig, properties)
         return {'FINISHED'}
 
 

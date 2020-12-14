@@ -317,6 +317,10 @@ def remove_socket_links_to_null_bones(properties):
         for link in rig_node_tree.links:
             socket_pair = link.from_socket.name, link.to_socket.name
 
+            # dont remove the link if the socket pair has an object in it
+            if 'object' in socket_pair:
+                continue
+
             # check if the socket names in the links are bones that exist on the rigs
             if control_rig_object and source_rig_object:
                 from_source_bone = source_rig_object.pose.bones.get(socket_pair[0])
@@ -571,7 +575,10 @@ def create_socket_class(classes, properties):
         :param object node: The node this socket is attached too.
         :return tuple: A tuple that is the rgba color value of the node socket.
         """
-        return 0.314, 0.784, 1.0, 0.5
+        if self.name == 'object':
+            return 1.0, 0.627, 0.0, 0.75
+        else:
+            return 0.314, 0.784, 1.0, 0.5
 
     classes.append(type(
         properties.node_socket_name.replace(' ', ''),
@@ -641,14 +648,16 @@ def create_node_class(node_class_data, properties):
         """
         update_node_tree(self.rna_type.id_data)
 
+    bl_label = node_class_data['bl_label']
+
     # dynamically define the node class
     node_class_definition = type(
         node_class_data['bl_idname'],
         (node_editor.BaseRigBonesNode,),
         {
             'bl_idname': node_class_data['bl_idname'],
-            'bl_label': node_class_data['bl_label'],
-            'bl_icon': 'BONE_DATA',
+            'bl_label': bl_label,
+            'bl_icon': 'OBJECT_DATA' if bl_label == properties.source_rig_object_name else 'BONE_DATA',
             'init': init,
             'free': free,
         }
@@ -694,6 +703,9 @@ def create_node(node_data, properties, instantiate=True, add_to_category=False):
 
     if node_data['mode'] == properties.source_to_deform_mode and not node_data['outputs']:
         category = properties.control_rig_deform_category
+
+    if node_data['name'] == properties.source_rig_object_name:
+        category = 'Object'
 
     # if the node is a custom node, define the node class
     if node_data.get('type') != 'FRAME':
@@ -955,7 +967,18 @@ def populate_node_tree(node_data, links_data, properties):
     if properties.selected_mode == properties.fk_to_source_mode:
         regex = re.compile(r'^(?!VIS|DEF|ORG|MCH|ik).*$')
     if properties.selected_mode == properties.source_to_deform_mode:
-        regex = re.compile(r'(DEF|ORG-eye)')
+        regex = re.compile(r'(DEF|ORG-eye|root)')
+
+    # add the source rig object as a node
+    create_node({
+        'name': properties.source_rig_object_name,
+        'inputs': ['object'] if properties.selected_mode == properties.fk_to_source_mode else [],
+        'outputs': ['object'] if properties.selected_mode == properties.source_to_deform_mode else [],
+        'mode': properties.selected_mode},
+        properties,
+        instantiate=False,
+        add_to_category=True
+    )
 
     # add the source rig bones
     for socket_name in get_socket_names(source_rig_object):
