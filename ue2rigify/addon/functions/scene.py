@@ -966,6 +966,13 @@ def constrain_bones(links_data, from_rig_object, to_rig_object, properties):
     child_name = 'child'
 
     if links_data:
+        if properties.selected_mode != properties.control_mode:
+            utilities.save_source_mode_context(properties)
+
+        # set the current frame to zero
+        frame_current = bpy.context.scene.frame_current
+        bpy.context.scene.frame_set(frame=0)
+
         # create the constraints collection
         constraints_collection = create_constraints_collection(properties)
 
@@ -979,6 +986,11 @@ def constrain_bones(links_data, from_rig_object, to_rig_object, properties):
         # constrain the bone to the child empty and the child empty to the parent empty
         create_constraints(from_rig_object, links_data, child_name, 'from_socket', properties)
         create_constraints(to_rig_object, links_data, parent_name, 'to_socket', properties)
+
+        bpy.context.scene.frame_set(frame=frame_current)
+
+        if properties.selected_mode != properties.control_mode:
+            utilities.load_source_mode_context(properties)
 
 
 def constrain_fk_to_source(control_rig_object, source_rig_object, properties):
@@ -1452,6 +1464,7 @@ def convert_to_control_rig(properties):
     if control_rig_object and source_rig_object:
         # change all the control rigs IKs to FKs
         set_fk_ik_switch_values(control_rig_object, 1.0)
+        utilities.match_rotation_modes(properties)
 
         if source_rig_object.animation_data:
             # constrain the fk bones to the source bones

@@ -71,7 +71,7 @@ def get_saved_links_data(properties, reverse=False):
 
         return saved_links_data
     else:
-        return None
+        return []
 
 
 def get_metarig_data(properties):

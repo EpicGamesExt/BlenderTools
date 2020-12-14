@@ -1,7 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 import bpy
 import re
-from . import scene
+from . import scene, templates
 from mathutils import Vector, Quaternion
 
 addon_key_maps = []
@@ -877,7 +877,7 @@ def save_context(properties):
     bpy.context.scene.frame_set(frame=0)
 
     # -------- mode specific properties --------
-    if properties.previous_mode == properties.source_mode:
+    if properties.previous_mode == properties.source_mode and properties.selected_mode == properties.control_mode:
         save_source_mode_context(properties)
 
     if properties.previous_mode == properties.control_mode:
@@ -918,15 +918,19 @@ def load_source_mode_context(properties):
         if properties.context['source_rig'].get('action_offsets'):
             # restore the actions to their original values
             for action_name, offset in properties.context['source_rig']['action_offsets'].items():
+                # add the offset to all the source rig actions
                 action = bpy.data.actions.get(action_name)
+                if action:
+                    set_action_transform_offsets(action, offset, 'ADD')
+                action = bpy.data.actions.get(f'{properties.source_mode}_{action_name}')
                 if action:
                     set_action_transform_offsets(action, offset, 'ADD')
 
             # remove the saved offsets from the context
-            del properties.context['source_rig']['action_offsets']
+            bpy.context.window_manager.ue2rigify.context['source_rig']['action_offsets'] = {}
 
         else:
-            set_object_transforms(source_rig, properties.context['source_rig']['transforms'])
+            set_object_transforms(source_rig, properties.context['source_rig'].get('transforms'))
 
 
 def load_control_mode_context(properties):
@@ -941,11 +945,24 @@ def load_control_mode_context(properties):
     # move the control rig actions back to counter the offsets to the source rig actions
     if properties.context.get('source_rig'):
         if properties.context['source_rig'].get('action_offsets'):
-            # restore the actions to their original values
-            for action_name, offset in properties.context['source_rig']['action_offsets'].items():
-                action = bpy.data.actions.get(action_name.replace(f'{properties.source_mode}_', ''))
-                if action:
-                    set_action_transform_offsets(action, offset, 'ADD', 'root')
+
+            # get the link that maps the bone to the source rig object
+            root_bone = None
+            links_data = templates.get_saved_links_data(properties)
+            for link_data in links_data:
+                if link_data['from_socket'] == 'object':
+                    root_bone = link_data['to_socket']
+
+                if not root_bone:
+                    if link_data['to_socket'] == 'object':
+                        root_bone = link_data['from_socket']
+
+            if root_bone:
+                # restore the actions to their original values
+                for action_name, offset in properties.context['source_rig']['action_offsets'].items():
+                    action = bpy.data.actions.get(action_name.replace(f'{properties.source_mode}_', ''))
+                    if action:
+                        set_action_transform_offsets(action, offset, 'ADD', root_bone)
 
     # if there is there is a control rig context and a control rig
     if control_rig_object and control_rig_context:
@@ -1049,6 +1066,27 @@ def clear_undo_history():
     # repeatedly push the last operator into the undo stack till there are no more undo steps
     for item in range(0, bpy.context.preferences.edit.undo_steps+1):
         bpy.ops.ed.undo_push(message='UE to Rigify Mode Change')
+
+
+def match_rotation_modes(properties):
+    """
+    This function matches the rotation mode on the source rig object and it corresponding bone.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    control_rig = bpy.data.objects.get(properties.control_rig_name)
+    source_rig = bpy.data.objects.get(properties.source_rig_name)
+
+    # get the source to deform links
+    templates.set_template_files(properties, mode_override=properties.source_to_deform_mode)
+    links_data = templates.get_saved_links_data(properties)
+
+    # match the rotation mode to the objects rotation mode
+    for link_data in links_data:
+        if link_data['from_socket'] == 'object':
+            bone = control_rig.pose.bones.get(link_data['to_socket'])
+            if bone:
+                bone.rotation_mode = source_rig.rotation_mode
 
 
 def get_formatted_operator_parameter(parameter_name, regex, code_line):
