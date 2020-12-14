@@ -1446,6 +1446,10 @@ def revert_to_source_rig(properties):
     # remove the metarig
     remove_metarig(properties)
 
+    # remove the transform change to the action if the previous mode was control mode
+    if properties.previous_mode == properties.control_mode:
+        utilities.load_source_mode_context(properties)
+
 
 def convert_to_control_rig(properties):
     """
