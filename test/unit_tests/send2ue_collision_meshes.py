@@ -12,14 +12,15 @@ class Send2UeCollisionsTestCases(unittest.TestCase):
     """
 
     def setUp(self):
-        """
-        This method is called before any of the methods in this unit test are run.
-        """
         # load in the file you will run tests on
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'collision_meshes.blend'))
 
         # enable the required addons
         bpy.ops.preferences.addon_enable(module='send2ue')
+
+    def tearDown(self):
+        # restore blend file to the default test file
+        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
 
     def test_send_collision_meshes_to_unreal(self):
         """
@@ -52,10 +53,3 @@ class Send2UeCollisionsTestCases(unittest.TestCase):
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
-
-    def tearDown(self):
-        """
-        This method is called after all of the methods in this unit test are run.
-        """
-        # restore blend file to the default test file
-        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))

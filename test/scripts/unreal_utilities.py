@@ -155,6 +155,9 @@ def delete_directory(directory_path):
             f'unreal.EditorAssetLibrary.delete_directory(r"{directory_path}")',
         ]))
 
+    if unreal_response is None or not unreal_response['success']:
+        raise RuntimeError(f"delete_directory failed to delete {directory_path}")
+
 
 def is_unreal_running(attempts, ping):
     """

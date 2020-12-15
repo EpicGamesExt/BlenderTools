@@ -25,6 +25,10 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
         bpy.ops.preferences.addon_enable(module='ue2rigify')
         bpy.ops.preferences.addon_enable(module='rigify')
 
+    def tearDown(self):
+        # restore blend file to the default test file
+        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
+
     def test_send_cube_rig_to_unreal(self):
         """
         This method sends a skeletal cube mesh with animation to unreal.
@@ -157,9 +161,3 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
         bpy.context.scene.collection.objects.link(mannequin_rig)
         bpy.data.collections['Rig'].objects.unlink(mannequin_rig)
 
-    def tearDown(self):
-        """
-        This method is called after all of the methods in this unit test are run.
-        """
-        # restore blend file to the default test file
-        bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
