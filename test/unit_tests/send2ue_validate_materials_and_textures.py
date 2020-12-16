@@ -78,4 +78,3 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
         # move the cube out of the mesh collection
         bpy.context.scene.collection.objects.link(cube)
         bpy.data.collections['Mesh'].objects.unlink(cube)
-

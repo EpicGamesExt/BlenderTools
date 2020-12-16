@@ -69,4 +69,3 @@ class Send2UeStaticMeshTestCases(unittest.TestCase):
         # move the mannequin out of the mesh collection
         bpy.context.scene.collection.objects.link(mannequin)
         bpy.data.collections['Mesh'].objects.unlink(mannequin)
-
