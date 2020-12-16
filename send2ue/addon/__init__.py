@@ -15,7 +15,7 @@ from .functions import export, unreal, validations, utilities
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (1, 4, 14),   # addon plugin version
+    "version": (1, 5, 0),   # addon plugin version
     "blender": (2, 83, 0),  # minimum blender version
     "location": "Header > Pipeline > Export > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
@@ -30,6 +30,7 @@ modules = [
     unreal,
     importer,
     utilities,
+    operators,
     properties,
     validations,
     remote_execution,
@@ -38,6 +39,7 @@ modules = [
 
 classes = [
     operators.Send2Ue,
+    operators.AdvancedSend2Ue,
     operators.ImportAsset,
     operators.NullOperator,
     addon_preferences.SendToUnrealPreferences,

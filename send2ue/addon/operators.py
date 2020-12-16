@@ -2,11 +2,11 @@
 
 import bpy
 from .functions import export, utilities
-from .ui import importer
+from .ui import importer, addon_preferences
 
 
 class Send2Ue(bpy.types.Operator):
-    """Send your assets to an open unreal editor instance"""
+    """Quickly send your assets to an open unreal editor instance without a dialog"""
     bl_idname = "wm.send2ue"
     bl_label = "Send to Unreal"
 
@@ -14,6 +14,26 @@ class Send2Ue(bpy.types.Operator):
         properties = bpy.context.preferences.addons[__package__].preferences
         export.send2ue(properties)
         return {'FINISHED'}
+
+
+class AdvancedSend2Ue(bpy.types.Operator):
+    """Send your assets to an open unreal editor instance only after confirming the settings in a dialog"""
+    bl_idname = "wm.advanced_send2ue"
+    bl_label = "Advanced Dialog"
+
+    def execute(self, context):
+        properties = bpy.context.preferences.addons[__package__].preferences
+        export.send2ue(properties)
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self)
+
+    def draw(self, context):
+        # uses property group from
+        properties = bpy.context.preferences.addons[__package__].preferences
+        addon_preferences.SendToUnrealPreferences.draw(self, context, properties)
 
 
 class ImportAsset(bpy.types.Operator, importer.ImportAsset):
