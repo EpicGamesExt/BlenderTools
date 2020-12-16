@@ -160,4 +160,3 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
         # move the mannequin rig out of the rig collection
         bpy.context.scene.collection.objects.link(mannequin_rig)
         bpy.data.collections['Rig'].objects.unlink(mannequin_rig)
-

@@ -49,4 +49,3 @@ class Ue2RigifyModesTestCases(unittest.TestCase):
         # switch to each of the modes from source mode
         for mode in modes:
             self.assertEquals(bpy.ops.ue2rigify.switch_modes(mode=mode), {'FINISHED'})
-
