@@ -409,6 +409,24 @@ def report_error(message):
         raise RuntimeError(message)
 
 
+def report_path_error_message(layout, send2ue_property, report_text):
+    """
+    This function displays an error message on a row if a property
+    returns a False value.
+
+    :param object layout: The ui layout.
+    :param object send2ue_property: Registered property of the addon
+    :param str report_text: The text to report in the row label
+    """
+
+    # Only create the row  if the value of the property True
+    if send2ue_property:
+        row = layout.row()
+
+        row.alert = True
+        row.label(text=report_text)
+
+
 # TODO add to Blender Integration library
 def deselect_all_objects():
     """

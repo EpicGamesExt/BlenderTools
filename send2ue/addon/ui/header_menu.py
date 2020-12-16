@@ -22,6 +22,7 @@ class TOPBAR_MT_Export(bpy.types.Menu):
 
     def draw(self, context):
         self.layout.operator('wm.send2ue')
+        self.layout.operator('wm.advanced_send2ue')
 
 
 class TOPBAR_MT_Pipeline(bpy.types.Menu):
