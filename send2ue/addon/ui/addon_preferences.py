@@ -143,6 +143,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
             row = layout.row()
             row.prop(properties, 'use_object_origin')
             row = layout.row()
+            row.prop(properties, 'combine_child_meshes')
+            row = layout.row()
 
             # fbx export settings box
             box = row.box()

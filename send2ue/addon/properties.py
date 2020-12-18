@@ -144,6 +144,13 @@ class Send2UeUIProperties:
             "will move each object back to its original position"
         )
     )
+    combine_child_meshes: bpy.props.BoolProperty(
+        name="Combine child meshes",
+        default=False,
+        description=(
+            "This combines all children mesh of an object into as a single mesh when exported"
+        )
+    )
     import_materials: bpy.props.BoolProperty(
         name="Materials",
         default=True,
