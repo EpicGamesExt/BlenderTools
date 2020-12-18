@@ -47,6 +47,11 @@ This option will be greyed out if ‘UE to Rigify’ is not installed and activa
 When active, this option will center each object at world origin before it is exported to an FBX, then it will move each object back to its original position.
 
 
+### Combine child meshes:
+
+This combines all children mesh of an object into as a single mesh when exported.
+
+
 ### FBX Settings:
 
 All the standard FBX export settings that are in the normal blender fbx export. The only settings missing are: exporting by selection or by a collection and exporting all of your actions versus exporting just actions in an object NLA strip. Also you can’t change which object types can be exported. (only types ‘Empty’, ‘Armature’, and ‘Mesh’ are supported).

@@ -60,34 +60,39 @@ def get_fbx_paths(asset_name, asset_type):
     return fbx_paths
 
 
-def get_from_collection(collection_name, object_type):
+def get_from_collection(collection_name, object_type, properties):
     """
     This function fetches the objects inside each collection according to type and returns the
     the list of object references.
 
     :param str collection_name: The collection that you would like to retrieve objects from.
     :param str object_type: The object type you would like to get.
-    :param bool only_visible: A flag that specifies whether to get only the visible objects.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects
     """
-    group_objects = []
+    collection_objects = []
 
     # get the collection with the given name
     collection = bpy.data.collections.get(collection_name)
     if collection:
 
         # get all the objects in the collection
-        for group_object in collection.all_objects:
+        for collection_object in collection.all_objects:
+            # dont select an object if it has a parent and combine child meshes option is on
+            if properties.combine_child_meshes:
+                if collection_object.parent:
+                    if collection_object.parent.type == 'MESH':
+                        continue
 
             # if the object is the correct type
-            if group_object.type == object_type:
+            if collection_object.type == object_type:
 
                 # if the object is visible
-                if group_object.visible_get():
+                if collection_object.visible_get():
                     # add it to the group of objects
-                    group_objects.append(group_object)
+                    collection_objects.append(collection_object)
 
-    return group_objects
+    return collection_objects
 
 
 def get_skeleton_game_path(rig_object, properties):
@@ -105,7 +110,7 @@ def get_skeleton_game_path(rig_object, properties):
     else:
         if rig_object.children:
             # get all meshes from the mesh collection
-            mesh_collection = get_from_collection(properties.mesh_collection_name, 'MESH')
+            mesh_collection = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
 
             # use the child mesh that is in the mesh collection to build the skeleton game path
             for child in rig_object.children:
@@ -209,9 +214,13 @@ def set_parent_rig_selection(mesh_object, properties):
     if mesh_object.parent:
 
         # if the scene object's parent is in the rig collection
-        if mesh_object.parent in get_from_collection(properties.rig_collection_name, 'ARMATURE'):
+        if mesh_object.parent in get_from_collection(properties.rig_collection_name, 'ARMATURE', properties):
             # select the parent object
             mesh_object.parent.select_set(True)
+
+            # if the combine child meshes option is on, then select all the rigs children that are meshes
+            if properties.combine_child_meshes:
+                utilities.select_all_children(mesh_object.parent, 'MESH')
 
             # call the function again to see if this object has a parent that
             set_parent_rig_selection(mesh_object.parent, properties)
@@ -255,7 +264,8 @@ def set_source_rig_hide_value(hide_value):
 
     # set the hide value on the source rig
     source_rig_object = bpy.data.objects.get(ue2rigify_properties.source_rig_name)
-    source_rig_object.hide_set(hide_value)
+    if source_rig_object:
+        source_rig_object.hide_set(hide_value)
 
 
 def set_object_positions(original_positions):
@@ -473,6 +483,9 @@ def export_fbx_files(file_paths, properties):
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
 
+    # combine all child meshes if option is on
+    selected_object_names, duplicate_object_names = utilities.combine_child_meshes(properties)
+
     for file_path in file_paths.values():
         # if the folder does not exists create it
         folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
@@ -511,6 +524,12 @@ def export_fbx_files(file_paths, properties):
             use_metadata=properties.use_metadata
         )
 
+    # remove duplicate objects
+    utilities.remove_objects(duplicate_object_names)
+
+    # restore selection
+    utilities.set_selected_objects(selected_object_names)
+
     # restores original positions
     set_object_positions(original_positions)
 
@@ -519,11 +538,23 @@ def export_fbx_files(file_paths, properties):
 
 
 def is_collision_of(asset_name, mesh_object_name):
+    """
+    This function checks if the given asset name matches the collision naming convention.
+
+    :param str asset_name: The name of the asset to export.
+    :param str mesh_object_name: The name of the collision mesh.
+    """
     return bool(re.fullmatch(r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?", mesh_object_name))
 
 
 def select_asset_collisions(asset_name, properties):
-    collision_objects = get_from_collection(properties.collision_collection_name, 'MESH')
+    """
+    This function selects the collision assets for the given asset.
+
+    :param str asset_name: The name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    collision_objects = get_from_collection(properties.collision_collection_name, 'MESH', properties)
     for mesh_object in collision_objects:
         if is_collision_of(asset_name, mesh_object.name):
             mesh_object.select_set(True)
@@ -533,7 +564,7 @@ def export_mesh_lods(asset_name, properties):
     """
     This function exports a set of lod meshes to an fbx file.
 
-    :param str asset_name: The name of the mesh set to export minus the _LOD postfix.
+    :param str asset_name: The name of the mesh asset to export minus the _LOD postfix.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return str: The fbx file path of the exported mesh
     """
@@ -554,7 +585,7 @@ def export_mesh_lods(asset_name, properties):
         empty_object.select_set(True)
 
         # get all the lod mesh objects that contain the same name as the asset
-        for mesh_object in get_from_collection(properties.mesh_collection_name, 'MESH'):
+        for mesh_object in get_from_collection(properties.mesh_collection_name, 'MESH', properties):
             if asset_name in mesh_object.name:
                 # add it to the list of lod objects
                 lod_objects.append((mesh_object, mesh_object.parent))
@@ -600,6 +631,8 @@ def export_mesh(mesh_object, properties):
     # deselect everything
     utilities.deselect_all_objects()
 
+    mesh_object_name = mesh_object.name
+
     # select the scene object
     mesh_object.select_set(True)
 
@@ -607,13 +640,15 @@ def export_mesh(mesh_object, properties):
     set_parent_rig_selection(mesh_object, properties)
 
     # select collision meshes
-    select_asset_collisions(mesh_object.name, properties)
+    select_asset_collisions(mesh_object_name, properties)
 
     # export selection to an fbx file
     export_fbx_files(fbx_file_paths, properties)
 
     # deselect the exported object
-    mesh_object.select_set(False)
+    mesh_object = bpy.data.objects.get(mesh_object_name)
+    if mesh_object:
+        mesh_object.select_set(False)
 
     return fbx_file_paths
 
@@ -822,8 +857,11 @@ def create_import_data(properties):
         set_source_rig_hide_value(False)
 
     # get the mesh and rig objects from their collections
-    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH')
-    rig_objects = get_from_collection(properties.rig_collection_name, 'ARMATURE')
+    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+    rig_objects = get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
+
+    # if the combine meshes option is on, get only meshes with unique armature parents
+    mesh_objects = utilities.get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties)
 
     # get the asset data for all the mesh objects
     mesh_data = create_mesh_data(mesh_objects, rig_objects, properties)
@@ -846,7 +884,7 @@ def validate(properties):
     :return bool: True if the assets pass all the validations.
     """
     # get the objects that will be exported
-    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH')
+    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
 
     # run through the selected validations
     if not validations.validate_collections_exist(properties):
