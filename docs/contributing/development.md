@@ -8,19 +8,13 @@ When contributing to this repository, please first discuss the change you wish t
 with the owners of this repository, before making a change. Each pull request must first be an issue.
 
 ## Pull Request Process
-> 1: Fork the master repository.
->
-> 2: Create a branch in your fork that matches the name of the issue your are working on.
->
-> 3: Add the new feature or fix.
->
-> 4: Run the unit tests and ensure that none fail.
->
-> 5: Submit a pull request from your forked branch back to the master branch of the BlenderTools repository.
->
-> 6: The pull request will be reviewed, then merged into the master branch and a new versioned build will be made.
->
-> 7: Update the Documentation.
+1. Fork the master repository.
+2. Create a branch in your fork that matches the name of the issue your are working on.
+3. Add the new feature or fix.
+4. Run the unit tests and ensure that none fail.
+5. Submit a pull request from your forked branch back to the master branch of the BlenderTools repository.
+6. The pull request will be reviewed, then merged into the master branch and a new versioned build will be made.
+7. Update the Documentation.
 
 
 ## Getting Setup
@@ -107,25 +101,24 @@ You can check your code follows PEP 8 with [`pycodesyle`](https://pycodestyle.py
 This is how the addon code is structured. You will see this primary file and folder structure in each of the addons.
 
 
-    .
-    ├── ...
-    ├── addon                   # The root folder for the addon .zip
-    │   ├── functions           # This folder contains all the functions that make up the addon core logic.
-    │   ├── ui                  # This folder contains all UI classes for the addon.
-    │   ├── __init__.py         # This contains the addon bl_info and register and unregister calls for all property groups, operators, and app handlers.
-    │   ├── properties.py       # This file contains all the property group class definitions for the addon. All Addon properties should live in here.
-    │   └── operators.py        # This file contains all operator class definitions. This serves as the entry point to all logic that lives in the functions module.
-    └── ...
+```txt
+.
+├── ...
+├── addon               # The root folder for the addon .zip
+│   ├── functions       # This folder contains all the functions that make up the addon core logic.
+│   ├── ui              # This folder contains all UI classes for the addon.
+│   ├── __init__.py     # This contains the addon bl_info and register and unregister calls for all property groups, operators, and app handlers.
+│   ├── properties.py   # This file contains all the property group class definitions for the addon. All Addon properties should live in here.
+│   └── operators.py    # This file contains all operator class definitions. This serves as the entry point to all logic that lives in the functions module.
+└── ...
+```
 
 
 ## Pull Request Check List
-> 1: Did I bump the addon version in the `bl_info` dict of the `__init__.py` file? (i.e. `1.4.1` is `<core>.<new_feature>.<new_bug_fix>`)
->  
-> 2: After making my change does it pass all of the unit tests?
->  
-> 3: If I added a new feature, did a write a new unit test for it?
->
-> 4: Did I update the documentation? Did I include good images and descriptions?
+1. Did I bump the addon version in the `bl_info` dict of the `__init__.py` file? (i.e. `1.4.1` is `<core>.<new_feature>.<new_bug_fix>`)
+2. After making my change does it pass all of the unit tests?
+3. If I added a new feature, did a write a new unit test for it?
+4. Did I update the documentation? Did I include good images and descriptions?
 
 
 ## Have Questions?
