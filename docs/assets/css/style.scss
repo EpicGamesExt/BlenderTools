@@ -11,26 +11,22 @@
   all: unset;
 }
 
-li {
-  margin: unset;
+* {
+    font-family: 'Poppins', sans-serif;
 }
-
-ul {
-  margin: unset;
-}
-
 
 body {
-    font-family: 'Poppins', sans-serif;
     background: #fafafa;
 }
 
+p, ol, ul {
+    color: #999;
+}
+
 p {
-    font-family: 'Poppins', sans-serif;
     font-size: 1.1em;
     font-weight: 250;
     line-height: 1.7em;
-    color: #999;
 }
 
 a, a:hover, a:focus {
@@ -95,91 +91,99 @@ a, a:hover, a:focus {
     transform-origin: bottom left;
 }
 
-#sidebar.active {
-    margin-left: -250px;
-    transform: translateX(-250);
-}
-
 #footer.active {
     margin-left: -250px;
     transform: translateX(-250);
 }
 
-#sidebar .sidebar-title {
-    margin: 30px;
-    text-align: center;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
 
-#sidebar .sidebar-header {
-    padding-top: 20px;
-    padding-left: 20px;
-    padding-bottom: 0px;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
+#sidebar {
 
-#sidebar .sidebar-section {
-    background: #1f1f1f;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
+    .active {
+        margin-left: -250px;
+        transform: translateX(-250);
+    }
 
-#sidebar .sidebar-item {
-    background: #2f2f2f;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
+    .sidebar-title {
+        margin: 30px;
+        text-align: center;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar .sidebar-sub-menu {
-    background: #1f1f1f;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
+    .sidebar-header {
+        padding-top: 20px;
+        padding-left: 20px;
+        padding-bottom: 0px;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar .sidebar-sub-item {
-    background: #3f3f3f;
-    color: inherit;
-    text-decoration: inherit;
-    -webkit-text-fill-color: inherit;
-    -webkit-opacity: inherit;
-}
+    .sidebar-section {
+        background: #1f1f1f;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar ul.components {
-    padding: 20px 0;
-}
+    .sidebar-item {
+        background: #2f2f2f;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar ul p {
-    color: #fff;
-    padding: 10px;
-}
+    .sidebar-sub-menu {
+        background: #1f1f1f;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar ul li a {
-    padding: 10px;
-    font-size: 1.1em;
-    display: block;
-}
-#sidebar a:hover {
-    color: #3f3f3f;
-    background: #9f9f9f;
-}
+    .sidebar-sub-item {
+        background: #3f3f3f;
+        color: inherit;
+        text-decoration: inherit;
+        -webkit-text-fill-color: inherit;
+        -webkit-opacity: inherit;
+    }
 
-#sidebar ul li.active > a, a[aria-expanded="true"] {
-    color: #fff;
-    background: #2f2f2f;
-}
+    li, ul {
+      margin: unset;
+    }
 
+    ul.components {
+        padding: 20px 0;
+    }
+
+    ul p {
+        color: #fff;
+        padding: 10px;
+    }
+
+    ul li a {
+        padding: 10px;
+        font-size: 1.1em;
+        display: block;
+    }
+
+    a:hover {
+        color: #3f3f3f;
+        background: #9f9f9f;
+    }
+
+    ul li.active > a, a[aria-expanded="true"] {
+        color: #fff;
+        background: #2f2f2f;
+    }
+}
 
 a[data-toggle="collapse"] {
     position: relative;

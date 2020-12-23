@@ -46,10 +46,16 @@ Note: This will also significantly improve your iteration times if you are just 
 
 ![8]( {{ '/assets/images/send2ue/collections/8.jpg' | relative_url }} )
 
-Send to Unreal supports custom collision meshes. These meshes are merged with the exported file and not exported separately. To add a collision mesh, add a new mesh and place it under the Collision collection. Then make sure the name has one of the following prefixes: `UBX, UCP,USP,UCX`.
+Send to Unreal supports custom collision meshes. These meshes are merged with the exported file and not exported separately. To add a collision mesh:
+
+1. Add a new mesh.
+2. Place the mesh under the Collision collection.
+3. Prefix the mesh name with `UBX_` for box collision, `UCP_` for capsule collision, `USP_` for sphere collision, or `UCX_` for convex collision.
 
 Example: If your static mesh object is called SM_Cube, you add a new mesh object under the 'Collision' collection and name it UCX_SM_Cube:
 
 ![9]( {{ '/assets/images/send2ue/collections/9.jpg' | relative_url }} )
+
+For details, see [FBX Static Mesh Pipeline](https://docs.unrealengine.com/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/index.html#collision).
 
 This summarizes how Send to Unreal uses these collection names.
