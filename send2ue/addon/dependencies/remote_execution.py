@@ -585,7 +585,7 @@ class _RemoteExecutionMessage(object):
             bool: True if this message could be parsed, False otherwise.
         '''
         try:
-            json_obj = _json.loads(json_str, encoding='utf-8')
+            json_obj = _json.loads(json_str)
             # Read and validate required protocol version information
             if json_obj['version'] != _PROTOCOL_VERSION:
                 raise ValueError(
