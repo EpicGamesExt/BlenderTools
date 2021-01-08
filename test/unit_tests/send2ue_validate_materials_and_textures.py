@@ -5,12 +5,11 @@ import unittest
 import unreal_utilities
 
 
-class Send2UeMaterialToUnreal(unittest.TestCase):
+class Send2UeMaterialTextureTestCases(unittest.TestCase):
     """
     related issue:
-    https://github.com/EpicGames/BlenderTools
-    ^ This is a core addon feature, but if this feature was created based off an issue, a link to the issue
-    should be left is the docstring.
+    https://github.com/EpicGames/BlenderTools/issues/83
+    This tests to make sure materials and textures import correctly.
     """
 
     def setUp(self):
@@ -30,11 +29,12 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
         # Cleanup the import area after we are done.
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
 
-    def test_send_material_to_unreal_true(self):
+    def test_material_with_texture_true(self):
         """
-        This method sends a cube with a material to unreal
+        This method sends a cube with a material and texture to unreal
         """
         properties = bpy.context.preferences.addons['send2ue'].preferences
+        properties.import_materials = True
         properties.import_materials = True
 
         cube = bpy.data.objects['Cube']
@@ -46,20 +46,35 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
         # run the send to unreal operation
         bpy.ops.wm.send2ue()
 
-        # check if the cube and material exists in the unreal project
+        # check if the cube and material and its texture exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/Cube'))
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/Material'))
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/unreal-engine-logo'))
+
+        # check to make sure the image file created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures',
+            'unreal-engine-logo.jpg'
+        )))
+
+        # check to make sure the texture folder created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures'
+        )))
 
         # move the cube out of the mesh collection
         bpy.context.scene.collection.objects.link(cube)
         bpy.data.collections['Mesh'].objects.unlink(cube)
 
-    def test_send_material_to_unreal_false(self):
+    def test_material_with_texture_false(self):
         """
-        This method sends a cube without a material to unreal
+        This method sends a cube without a material and without a texture to unreal
         """
         properties = bpy.context.preferences.addons['send2ue'].preferences
         properties.import_materials = False
+        properties.import_textures = False
 
         cube = bpy.data.objects['Cube']
 
@@ -72,8 +87,9 @@ class Send2UeMaterialToUnreal(unittest.TestCase):
 
         # check if the cube exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/Cube'))
-        # make sure the material does not exist in the unreal project
+        # make sure the material and texture do not exist in the unreal project
         self.assertFalse(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/Material'))
+        self.assertFalse(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/unreal-engine-logo'))
 
         # move the cube out of the mesh collection
         bpy.context.scene.collection.objects.link(cube)

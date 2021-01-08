@@ -842,6 +842,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                     'skeletal_mesh': bool(rig_objects),
                     'import_mesh': True
                 })
+
     return mesh_data
 
 
@@ -931,6 +932,9 @@ def send2ue(properties):
         # first get the current state of the scene and its objects
         context = utilities.get_current_context()
 
+        # unpack the textures for export if needed
+        unpacked_files = utilities.unpack_textures()
+
         # get the asset data for the import
         assets_data = create_import_data(properties)
 
@@ -944,7 +948,13 @@ def send2ue(properties):
                     result = unreal.import_asset(assets_data, properties)
                     if not result:
                         break
+
+            # remove unpacked files
+            utilities.remove_unpacked_files(unpacked_files)
+
         else:
+            utilities.remove_unpacked_files(unpacked_files)
+
             utilities.report_error(
                 f'You do not have the correct objects under the "{properties.mesh_collection_name}" or '
                 f'"{properties.rig_collection_name}" collections or your rig does not have any '

@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 import bpy
 import re
+import os
 from . import utilities
 
 
@@ -299,11 +300,9 @@ def validate_texture_references(mesh_objects):
             for node in material_slot.material.node_tree.nodes:
                 # check to see if the material has an image
                 if node.type == 'TEX_IMAGE':
-                    if node.image:
-                        try:
-                            # check to see if the image reference works
-                            node.image.update()
-                        except RuntimeError:
+                    image = node.image
+                    if image.source == 'FILE':
+                        if not os.path.exists(image.filepath_from_user()):
                             utilities.report_error(
                                 f'Mesh "{mesh_object.name}" has a material "{material_slot.material.name}" that '
                                 f'contains a missing image "{node.image.name}".'
