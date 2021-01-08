@@ -275,6 +275,25 @@ def remove_object_scale_keyframes(actions):
                 action.fcurves.remove(fcurve)
 
 
+def remove_from_disk(path, directory=False):
+    """
+    This function removes the given path from disk.
+
+    :param str path: An file path.
+    :param bool directory: Whether or not the path is a directory.
+    """
+    try:
+        original_umask = os.umask(0)
+        if os.path.exists(path):
+            os.chmod(path, 0o777)
+            if directory:
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
+    finally:
+        os.umask(original_umask)
+
+
 def remove_temp_folder():
     """
     This function removes the temp folder where send2ue caches FBX files for Unreal imports.
@@ -284,13 +303,24 @@ def remove_temp_folder():
         tempfile.gettempdir(),
         properties_window_manger.module_name
     )
-    try:
-        original_umask = os.umask(0)
-        if os.path.exists(temp_folder):
-            os.chmod(temp_folder, 0o777)
-            shutil.rmtree(temp_folder)
-    finally:
-        os.umask(original_umask)
+    remove_from_disk(temp_folder, directory=True)
+
+
+def remove_unpacked_files(file_paths):
+    """
+    This function removes a list of files that were unpacked and re-packs them.
+
+    :param list file_paths: A list of file paths
+    """
+    for file_path in file_paths:
+        image = bpy.data.images.get(os.path.basename(file_path))
+        image.pack()
+        remove_from_disk(file_path)
+
+        # remove the parent folder if it is empty
+        folder = os.path.dirname(file_path)
+        if not os.listdir(folder):
+            remove_from_disk(folder, directory=True)
 
 
 def create_groups(properties):
@@ -961,3 +991,31 @@ def resolve_path(path):
     path = bpy.path.native_pathsep(path)
 
     return path
+
+
+def unpack_textures():
+    """
+    This function unpacks the textures from the .blend file if they dont exist on disk, so
+    the images will be included in the fbx export.
+
+    :return list: A list of file paths where the image was unpacked.
+    """
+    file_paths = []
+
+    # go through each material
+    for material in bpy.data.materials:
+        if material.node_tree:
+            # go through each node
+            for node in material.node_tree.nodes:
+                # check for packed textures
+                if node.type == 'TEX_IMAGE':
+                    image = node.image
+                    if image.source == 'FILE':
+                        if image.packed_file:
+                            # if the unpacked image does not exist on disk
+                            if not os.path.exists(image.filepath_from_user()):
+                                # unpack the image
+                                image.unpack()
+                                file_paths.append(image.filepath_from_user())
+
+    return file_paths
