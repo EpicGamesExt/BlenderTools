@@ -10,9 +10,6 @@ Download the .zip file on the release with the latest addon version number.
 Here you can find the all the documentation for the addons in this repository.
 * [Documentation](https://epicgames.github.io/BlenderTools/)
 
-### Creating Issues
-If needed you can create issues. In order for your issue to be considered, you need to follow the guidelines for [creating issues](https://github.com/EpicGames/BlenderTools/blob/master/ISSUE_TEMPLATE.md).
-
 ### Get Notified on a New Release
 Never miss a new addon release! To do this, select 'Watch' then 'Custom'.
 
