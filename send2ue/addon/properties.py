@@ -171,6 +171,12 @@ class Send2UeUIProperties:
         default=False,
         description="Whether or not to import the custom LODs from the FBX file"
     )
+    import_sockets: bpy.props.BoolProperty(
+        name="Sockets",
+        default=False,
+        description="Imports an empty as a socket as long as it is a child of a mesh and its name starts with 'SOCKET_'."
+                    "(Only works on static meshes)"
+    )
     import_object_name_as_root: bpy.props.BoolProperty(
         name="Object name as root bone",
         default=True,

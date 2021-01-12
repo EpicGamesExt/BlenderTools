@@ -113,7 +113,33 @@ def has_custom_collision(game_path):
             f'\tif game_asset.get_editor_property("customized_collision"):',
             f'\t\tpass',
             f'else:',
-            f'\traise RuntimeError("Asset not found")',
+            f'\traise RuntimeError("Asset has no collision")',
+        ]))
+
+    if unreal_response:
+        return bool(unreal_response['success'])
+
+
+def has_socket(game_path, socket_name):
+    """
+    This function checks to see if an asset has a socket.
+
+    :param str game_path: The game path to the unreal asset.
+    :param str socket_name: The name of the socket to look for.
+    :return bool: Whether or not the asset has the given socket or not.
+    """
+    # start a connection to the engine that lets you send python strings
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+
+    # send over the python code as a string
+    run_unreal_python_commands(
+        remote_exec,
+        '\n'.join([
+            f'game_asset = unreal.load_asset(r"{game_path}")',
+            f'if game_asset:',
+            f'\tif not game_asset.find_socket("{socket_name}"):',
+            f'\t\traise RuntimeError("Asset has no socket {socket_name}")',
         ]))
 
     if unreal_response:

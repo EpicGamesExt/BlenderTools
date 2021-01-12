@@ -30,13 +30,18 @@ Whether or not to import the animation from the FBX file.
 
 Whether or not to import the custom LODs from the FBX file.
 
-
 NOTE:
 
 In order for this to work properly you must name your associated LOD assets with ‘_LOD<number>’ like in the example below.
 
 ![1]( {{ '/assets/images/send2ue/preferences/import/1.jpg' | relative_url }} )
 
+
+### Sockets:
+
+Imports an empty as a socket as long as it is a child of a mesh and its name starts with 'SOCKET_'. (Only works on static meshes)
+
+![2]( {{ '/assets/images/send2ue/preferences/import/2.jpg' | relative_url }} )
 
 ### Object name as root bone:
 
