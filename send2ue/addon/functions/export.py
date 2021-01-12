@@ -560,6 +560,22 @@ def select_asset_collisions(asset_name, properties):
             mesh_object.select_set(True)
 
 
+def select_asset_sockets(asset_name, properties):
+    """
+    This function selects the socket under the given asset.
+
+    :param str asset_name: The name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    if properties.import_sockets:
+        mesh_object = bpy.data.objects.get(asset_name)
+        if mesh_object:
+            for child in mesh_object.children:
+                if child.type == 'EMPTY':
+                    if 'SOCKET_' in child.name:
+                        child.select_set(True)
+
+
 def export_mesh_lods(asset_name, properties):
     """
     This function exports a set of lod meshes to an fbx file.
@@ -602,6 +618,9 @@ def export_mesh_lods(asset_name, properties):
         # select collsion meshes
         select_asset_collisions(asset_name, properties)
 
+        # select sockets
+        select_asset_sockets(asset_name, properties)
+
         # export the selected lod meshes and empty
         fbx_file_paths = get_fbx_paths(asset_name, 'MESH')
         export_fbx_files(fbx_file_paths, properties)
@@ -641,6 +660,9 @@ def export_mesh(mesh_object, properties):
 
     # select collision meshes
     select_asset_collisions(mesh_object_name, properties)
+
+    # select sockets
+    select_asset_sockets(mesh_object_name, properties)
 
     # export selection to an fbx file
     export_fbx_files(fbx_file_paths, properties)

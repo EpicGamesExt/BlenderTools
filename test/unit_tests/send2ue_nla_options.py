@@ -5,7 +5,7 @@ import unittest
 import unreal_utilities
 
 
-class Send2UeNlaOptions(unittest.TestCase):
+class Send2UeNlaOptionsTestCases(unittest.TestCase):
     """
     related issue:
     https://github.com/EpicGames/BlenderTools/issues/99
@@ -13,9 +13,6 @@ class Send2UeNlaOptions(unittest.TestCase):
     """
 
     def setUp(self):
-        """
-        This method is called before any of the methods in this unit test are run.
-        """
         # load in the file you will run tests on
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'skeletal_meshes.blend'))
 
@@ -46,7 +43,7 @@ class Send2UeNlaOptions(unittest.TestCase):
         """
         This method tests that only stashed nla strips are exported when auto_stash_active_action is set to false.
         """
-        properties = properties = bpy.context.preferences.addons['send2ue'].preferences
+        properties = bpy.context.preferences.addons['send2ue'].preferences
         properties.export_all_actions = True
         properties.auto_stash_active_action = False
         properties.auto_sync_control_nla_to_source = True

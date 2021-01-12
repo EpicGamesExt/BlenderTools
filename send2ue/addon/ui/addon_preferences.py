@@ -233,6 +233,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
             row = layout.row()
             row.prop(properties, 'import_lods')
             row = layout.row()
+            row.prop(properties, 'import_sockets')
+            row = layout.row()
             row.prop(properties, 'import_object_name_as_root')
             row = layout.row()
             row.prop(properties, 'advanced_ui_import')

@@ -14,9 +14,6 @@ class Send2UeSkeletalMeshTestCases(unittest.TestCase):
     """
 
     def setUp(self):
-        """
-        This method is called before any of the methods in this unit test are run.
-        """
         # load in the file you will run tests on
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'skeletal_meshes.blend'))
 

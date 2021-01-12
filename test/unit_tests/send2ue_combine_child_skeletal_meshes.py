@@ -6,7 +6,7 @@ import unittest
 import unreal_utilities
 
 
-class Send2UeCombineChildSkeletalMeshes(unittest.TestCase):
+class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
     """
     related issue:
     https://github.com/EpicGames/BlenderTools/issues/70
