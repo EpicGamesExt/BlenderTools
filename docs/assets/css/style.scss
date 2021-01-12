@@ -82,6 +82,11 @@ a, a:hover, a:focus {
 
 }
 
+#sidebar.active {
+    margin-left: -250px;
+    transform: translateX(-250);
+}
+
 #footer {
     position: fixed;
     left: 250px;

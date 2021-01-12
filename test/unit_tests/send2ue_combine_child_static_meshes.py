@@ -19,6 +19,9 @@ class Send2UeCombineChildStaticMeshes(unittest.TestCase):
         # enable the required addons
         bpy.ops.preferences.addon_enable(module='send2ue')
 
+        # Make sure the import area is clean
+        unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
+
         cube = bpy.data.objects['Cube']
         mannequin = bpy.data.objects['SK_Mannequin']
 
