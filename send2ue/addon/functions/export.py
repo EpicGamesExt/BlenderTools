@@ -682,21 +682,19 @@ def export_action(rig_object, action_name, properties):
     rig_object.select_set(True)
 
     # un-mute the action
-    if properties.export_all_actions:
-        set_action_mute_value(rig_object, action_name, False)
-        set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), False)
+    set_action_mute_value(rig_object, action_name, False)
+    set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), False)
 
     # export the action
     export_fbx_files(fbx_file_paths, properties)
 
-    # mute the action
-    if properties.export_all_actions:
-        # ensure the rigs are in rest position before setting the mute values
-        utilities.clear_pose(rig_object)
-        utilities.clear_pose(control_rig_object)
+    # ensure the rigs are in rest position before setting the mute values
+    utilities.clear_pose(rig_object)
+    utilities.clear_pose(control_rig_object)
 
-        set_action_mute_value(rig_object, action_name, True)
-        set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), True)
+    # mute the action
+    set_action_mute_value(rig_object, action_name, True)
+    set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), True)
 
     # deselect the exported object
     rig_object.select_set(False)
@@ -762,6 +760,9 @@ def create_action_data(rig_objects, properties):
                 properties,
                 all_actions=properties.export_all_actions
             )
+
+            # mute all actions
+            set_all_action_mute_values(rig_object, mute=True)
 
             # export the actions and create the action import data
             for action_name in action_names:
