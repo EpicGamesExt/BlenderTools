@@ -25,10 +25,6 @@ Make sure that the Rigify addon is active. Rigify is a dependency for this addon
 
 ![4]( {{ '/assets/images/ue2rigify/quickstart/4.jpg' | relative_url }} )
 
-One very important thing to note is that you need to have a scene unit scale of 0.01 if you plan on using this rig in Unreal Engine.
-
-![5]( {{ '/assets/images/ue2rigify/quickstart/5.jpg' | relative_url }} )
-
 Now I'm just going to import an FBX file. This is just the standard third person mannequin with the run animation.
 
 ![6]( {{ '/assets/images/ue2rigify/quickstart/6.jpg' | relative_url }} )
