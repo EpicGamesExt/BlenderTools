@@ -28,6 +28,9 @@ When I click ‘Send to Unreal’, a static mesh is imported to the engine. This
 
 This time I'm gonna move the mannequin bones over to the ‘Rig’ collection. I'm gonna perform that same and just click ‘Send to Unreal’.
 
+
+Note: Your mesh must have an armature as a parent in order for it to import as a skeletal mesh
+
 ![5]( {{ '/assets/images/send2ue/collections/5.jpg' | relative_url }} )
 
 This time you can see Unreal imports a skeletal mesh. It knows that the exported object is a skeletal mesh because the mannequin mesh is under the ‘Mesh’ collection and and the Mannequin armature object is under the ‘Rig’ collection. Also since this mannequin mesh is a child of the mannequin rig, it is imported as a skeletal mesh in Unreal. When exporting meshes, it takes the name of the object in Blender, and that is the name that is given to the asset in Unreal. The skeleton is also given the name of the mesh object it is attached to along with ‘_Skeleton’ appended to the name.
