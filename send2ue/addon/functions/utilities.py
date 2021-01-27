@@ -528,11 +528,10 @@ def combine_child_meshes(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    selected_object_names = []
+    selected_object_names = [selected_object.name for selected_object in bpy.context.selected_objects]
     duplicate_object_names = []
 
     if properties.combine_child_meshes:
-        selected_object_names = [selected_object.name for selected_object in bpy.context.selected_objects]
         selected_objects = bpy.context.selected_objects.copy()
 
         if bpy.context.mode != 'OBJECT':
