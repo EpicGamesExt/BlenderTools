@@ -75,14 +75,15 @@ def get_saved_links_data(properties, reverse=False):
         return []
 
 
-def get_saved_constraints_data(properties):
+def get_saved_constraints_data(mode, properties):
     """
     This function reads from disk a list of dictionaries that are saved constraints on the rig.
 
+    :param str mode: The mode to get the saved constraints from.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     saved_constraints_data = {}
-    constraints_path = get_template_file_path(f'{properties.selected_mode.lower()}_constraints.json', properties)
+    constraints_path = get_template_file_path(f'{mode.lower()}_constraints.json', properties)
     if os.path.exists(constraints_path):
         saved_constraints_file = open(constraints_path)
         saved_constraints_data = json.load(saved_constraints_file)
@@ -230,7 +231,7 @@ def set_constraints_data(rig_object, properties):
     :param object rig_object: An object of type rig.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    constraints_data = get_saved_constraints_data(properties)
+    constraints_data = get_saved_constraints_data(properties.metarig_mode, properties)
 
     if rig_object:
         for bone_name, constraints_data in constraints_data.items():
