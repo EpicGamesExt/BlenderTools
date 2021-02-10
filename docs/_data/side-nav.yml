@@ -65,6 +65,12 @@ categories:
             - title: Node Editor Panel
               url: /ue2rigify/user-interface/node-editor-panel.html
 
+        - title: Advanced
+          folder: advanced
+          submenus:
+            - title: Relink Constraints
+              url: /ue2rigify/advanced/relink-constraints.html
+
         - title: Errors
           url: /ue2rigify/errors.html
 
