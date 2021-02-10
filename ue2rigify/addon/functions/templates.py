@@ -5,7 +5,7 @@ import re
 import bpy
 import json
 import shutil
-from mathutils import Matrix
+from mathutils import Color, Euler, Matrix, Quaternion, Vector
 
 from . import scene
 from . import utilities
@@ -110,31 +110,25 @@ def get_constraints_data(rig_object):
                 for attribute in dir(constraint):
                     value = getattr(constraint, attribute)
                     if value is not None and not attribute.startswith('__'):
-                        # dont save the attributes that are a type of constraint object
-                        if not type(value).__name__.endswith('Constraint'):
-                            # save all the basic types
-                            if type(value) in [str, bool, int, float]:
-                                constraint_attributes[attribute] = value
+                        # save all the basic types
+                        if type(value) in [str, bool, int, float]:
+                            constraint_attributes[attribute] = value
 
-                            else:
-                                # save objects as their name values
-                                if type(value) == bpy.types.Object:
-                                    constraint_attributes[attribute] = value.name
+                        # save all the mathutils data types in a format that json excepts
+                        if type(value) in [Color, Euler, Quaternion, Vector]:
+                            constraint_attributes[attribute] = utilities.get_array_data(value)
 
-                                # save all the mathutils data types in a format that json excepts
-                                else:
-                                    constraint_attributes[attribute] = []
-                                    if type(value) == Matrix:
-                                        for col in value.col:
-                                            col_values = []
-                                            for col_value in col:
-                                                col_values.append(col_value)
+                        # save objects as their name values
+                        if type(value) == bpy.types.Object:
+                            constraint_attributes[attribute] = value.name
 
-                                            constraint_attributes[attribute].append(col_values)
+                        # save a property collection into json
+                        if type(value) == bpy.types.bpy_prop_collection:
+                            constraint_attributes[attribute] = utilities.get_property_collections_data(value)
 
-                                    else:
-                                        for sub_value in value:
-                                            constraint_attributes[attribute].append(sub_value)
+                        # save all the matrix data types into a format that json excepts
+                        if type(value) == Matrix:
+                            constraint_attributes[attribute] = utilities.get_matrix_data(value)
 
                 constraints_data[bone.name].append(constraint_attributes)
 
@@ -218,7 +212,7 @@ def get_template_file_path(template_file_name, properties):
     """
     template_name = properties.selected_rig_template
 
-    # assign the new
+    # assign the new template name
     if properties.selected_rig_template == 'create_new':
         template_name = re.sub(r'\W+', '_', properties.new_template_name).lower()
 
@@ -250,17 +244,11 @@ def set_constraints_data(rig_object, properties):
 
                     # set the constraints attributes
                     for attribute, value in constraint_data.items():
-                        try:
-                            # change the value from a string name to an object for the target parameter
-                            if attribute == 'target':
-                                value = bpy.data.objects.get(value)
-
-                            # set the constraint attribute to the saved value
-                            setattr(constraint, attribute, value)
-
-                        except AttributeError as error:
-                            if 'read-only' not in str(error):
-                                raise AttributeError(error)
+                        current_value = getattr(constraint, attribute)
+                        if type(current_value) == bpy.types.bpy_prop_collection:
+                            utilities.set_collection(current_value, value)
+                        else:
+                            utilities.set_property_group_value(constraint, attribute, value)
 
 
 def set_template_files(properties, mode_override=None):

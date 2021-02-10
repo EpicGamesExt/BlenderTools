@@ -3,7 +3,7 @@ import os
 import bpy
 import json
 import unittest
-from mathutils import Matrix
+from mathutils import Color, Euler, Matrix, Quaternion, Vector
 
 
 class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
@@ -27,6 +27,61 @@ class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
             'resources',
             'rig_templates'
         )
+
+    @staticmethod
+    def get_matrix_data(matrix_object):
+        """
+        This function destructures a matrix object into a list of lists.
+
+        :param object matrix_object:
+        :return list: A list of lists that represents a matrix.
+        """
+        matrix_data = []
+        for column in matrix_object.col:
+            col_values = []
+            for col_value in column:
+                col_values.append(col_value)
+
+            matrix_data.append(col_values)
+
+        return matrix_data
+
+    @staticmethod
+    def get_array_data(array_object):
+        """
+        This function destructures any of the array object data types into a list.
+
+        :param object array_object: A object array such as Color, Euler, Quaternion, Vector.
+        :return list: A list of values.
+        """
+        array_data = []
+        for value in array_object:
+            array_data.append(value)
+
+        return array_data
+
+    @staticmethod
+    def get_property_collections_data(collections):
+        """
+        This function goes through each of the givens collections and return their data as a list of dictionaries.
+
+        :param list collections: A list a property groups.
+        :return list: A list of dictionaries that contains the given property group values.
+        """
+        collections_data = []
+        for collection in collections:
+            property_collection = {}
+            for collection_attribute in dir(collection):
+                collection_value = getattr(collection, collection_attribute)
+                if collection_value is not None and not collection_attribute.startswith('__'):
+                    if type(collection_value) in [str, bool, int, float]:
+                        property_collection[collection_attribute] = collection_value
+
+                    if type(collection_value) == bpy.types.Object:
+                        property_collection[collection_attribute] = collection_value.name
+            collections_data.append(property_collection)
+
+        return collections_data
 
     def get_saved_metarig_constraints(self):
         """
@@ -116,11 +171,17 @@ class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
             bone = metarig_object.pose.bones[index]
             constraint = bone.constraints.new(constraint_type)
 
+            # if it is an armature constraint create a target
+            if constraint_type == 'ARMATURE':
+                constraint.targets.new()
+                constraint.targets[0].target = source_object
+                constraint.targets[0].subtarget = 'ball_l'
+
             if hasattr(constraint_types, 'target'):
                 constraint.target = source_object
 
             if hasattr(constraint_types, 'subtarget'):
-                constraint.target = 'ball_l'
+                constraint.subtarget = 'ball_l'
 
         # switch to source mode
         bpy.ops.ue2rigify.switch_modes(mode='SOURCE')
@@ -141,25 +202,16 @@ class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
                         if not type(value).__name__.endswith('Constraint'):
                             # destructure the matrix object into a list of lists
                             if type(value) == Matrix:
-                                destructured_matrix = []
-                                for col in value.col:
-                                    col_values = []
-                                    for col_value in col:
-                                        col_values.append(col_value)
-
-                                    destructured_matrix.append(col_values)
-
-                                value = destructured_matrix
+                                value = self.get_matrix_data(value)
 
                             if attribute == 'target':
                                 value = value.name
 
-                            # destructure other data types
-                            if type(value) not in [str, bool, int, float]:
-                                data = []
-                                for sub_value in value:
-                                    data.append(sub_value)
-                                value = data
+                            if type(value) in [Color, Euler, Quaternion, Vector]:
+                                value = self.get_array_data(value)
+
+                            if type(value) == bpy.types.bpy_prop_collection:
+                                value = self.get_property_collections_data(value)
 
                             saved_value = constraint_data.get(attribute)
                             if saved_value:

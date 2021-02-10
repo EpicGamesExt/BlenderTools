@@ -137,6 +137,61 @@ def get_action_transform_offset(action, bone_name=None):
     return offset
 
 
+def get_matrix_data(matrix_object):
+    """
+    This function destructures a matrix object into a list of lists.
+
+    :param object matrix_object:
+    :return list: A list of lists that represents a matrix.
+    """
+    matrix_data = []
+    for column in matrix_object.col:
+        col_values = []
+        for col_value in column:
+            col_values.append(col_value)
+
+        matrix_data.append(col_values)
+
+    return matrix_data
+
+
+def get_array_data(array_object):
+    """
+    This function destructures any of the array object data types into a list.
+
+    :param object array_object: A object array such as Color, Euler, Quaternion, Vector.
+    :return list: A list of values.
+    """
+    array_data = []
+    for value in array_object:
+        array_data.append(value)
+
+    return array_data
+
+
+def get_property_collections_data(collections):
+    """
+    This function goes through each of the givens collections and return their data as a list of dictionaries.
+
+    :param list collections: A list a property groups.
+    :return list: A list of dictionaries that contains the given property group values.
+    """
+    collections_data = []
+    for collection in collections:
+        property_collection = {}
+        for collection_attribute in dir(collection):
+            collection_value = getattr(collection, collection_attribute)
+            if collection_value is not None and not collection_attribute.startswith('__'):
+                if type(collection_value) in [str, bool, int, float]:
+                    property_collection[collection_attribute] = collection_value
+
+                if type(collection_value) == bpy.types.Object:
+                    property_collection[collection_attribute] = collection_value.name
+        collections_data.append(property_collection)
+
+    return collections_data
+
+
 def set_action_transform_offsets(action, offset, operation, bone_name=None):
     """
     This function modifies each keyframe in the given action by applying the provided offset.
@@ -379,6 +434,43 @@ def set_viewport_settings(viewport_settings, properties):
                 # store the previous viewport values in a dictionary in the tool properties
                 bpy.context.window_manager.ue2rigify.previous_viewport_settings[rig_object_name] = previous_settings
 
+
+def set_property_group_value(property_group, attribute, value):
+    """
+    This function sets the given attribute and value in a property group.
+
+    :param object property_group: A group of properties.
+    :param str attribute: The name of the attribute to set.
+    :param value: Any value
+    """
+    try:
+        # change the value from a string name to an object for the target parameter
+        if attribute == 'target':
+            value = bpy.data.objects.get(value)
+
+        # set the constraint attribute to the saved value
+        setattr(property_group, attribute, value)
+
+    except AttributeError as error:
+        if 'read-only' not in str(error):
+            raise AttributeError(error)
+
+
+def set_collection(collection, collections_data):
+    """
+    This function creates and sets the collection data on the given collection object.
+
+    :param object collection: A collection object
+    :param dict collections_data: A dictionary of collection attributes and values.
+    """
+    for index, collection_data in enumerate(collections_data):
+        collection.new()
+        for collection_attribute, collection_value in collection_data.items():
+            set_property_group_value(
+                collection[index],
+                collection_attribute,
+                collection_value
+            )
 
 def remove_nla_tracks(nla_tracks):
     """
