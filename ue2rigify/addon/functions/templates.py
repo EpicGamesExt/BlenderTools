@@ -5,6 +5,7 @@ import re
 import bpy
 import json
 import shutil
+from mathutils import Matrix
 
 from . import scene
 from . import utilities
@@ -72,6 +73,72 @@ def get_saved_links_data(properties, reverse=False):
         return saved_links_data
     else:
         return []
+
+
+def get_saved_constraints_data(properties):
+    """
+    This function reads from disk a list of dictionaries that are saved constraints on the rig.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    saved_constraints_data = {}
+    constraints_path = get_template_file_path(f'{properties.selected_mode.lower()}_constraints.json', properties)
+    if os.path.exists(constraints_path):
+        saved_constraints_file = open(constraints_path)
+        saved_constraints_data = json.load(saved_constraints_file)
+        saved_constraints_file.close()
+
+    return saved_constraints_data
+
+
+def get_constraints_data(rig_object):
+    """
+    This function reads the constraints on the bones of the given rig object.
+
+    :param object rig_object: An object of type rig.
+    :return dict: A dictionary of constraint attributes and values.
+    """
+    constraints_data = {}
+    if rig_object:
+
+        for bone in rig_object.pose.bones:
+            constraints_data[bone.name] = []
+            for constraint in bone.constraints:
+
+                constraint_attributes = {}
+                # save all the constraint attributes
+                for attribute in dir(constraint):
+                    value = getattr(constraint, attribute)
+                    if value is not None and not attribute.startswith('__'):
+                        # dont save the attributes that are a type of constraint object
+                        if not type(value).__name__.endswith('Constraint'):
+                            # save all the basic types
+                            if type(value) in [str, bool, int, float]:
+                                constraint_attributes[attribute] = value
+
+                            else:
+                                # save objects as their name values
+                                if type(value) == bpy.types.Object:
+                                    constraint_attributes[attribute] = value.name
+
+                                # save all the mathutils data types in a format that json excepts
+                                else:
+                                    constraint_attributes[attribute] = []
+                                    if type(value) == Matrix:
+                                        for col in value.col:
+                                            col_values = []
+                                            for col_value in col:
+                                                col_values.append(col_value)
+
+                                            constraint_attributes[attribute].append(col_values)
+
+                                    else:
+                                        for sub_value in value:
+                                            constraint_attributes[attribute].append(sub_value)
+
+                constraints_data[bone.name].append(constraint_attributes)
+
+    return constraints_data
 
 
 def get_metarig_data(properties):
@@ -160,6 +227,40 @@ def get_template_file_path(template_file_name, properties):
         template_name,
         template_file_name
     )
+
+
+def set_constraints_data(rig_object, properties):
+    """
+    This function gets the constraints from the template and creates them on the given rig object.
+
+    :param object rig_object: An object of type rig.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    constraints_data = get_saved_constraints_data(properties)
+
+    if rig_object:
+        for bone_name, constraints_data in constraints_data.items():
+            if constraints_data:
+                bone = rig_object.pose.bones.get(bone_name)
+
+                for constraint_data in constraints_data:
+                    # create the constraint
+                    constraint_type = constraint_data.pop('type')
+                    constraint = bone.constraints.new(constraint_type)
+
+                    # set the constraints attributes
+                    for attribute, value in constraint_data.items():
+                        try:
+                            # change the value from a string name to an object for the target parameter
+                            if attribute == 'target':
+                                value = bpy.data.objects.get(value)
+
+                            # set the constraint attribute to the saved value
+                            setattr(constraint, attribute, value)
+
+                        except AttributeError as error:
+                            if 'read-only' not in str(error):
+                                raise AttributeError(error)
 
 
 def set_template_files(properties, mode_override=None):
@@ -310,6 +411,17 @@ def save_json_file(data, file_path):
             os.umask(original_umask)
         json.dump(data, file, indent=1)
         file.close()
+
+
+def save_constraints(constraints_data, properties):
+    """
+    This function writes the given rig objects constraints to a file on disk.
+
+    :param dict constraints_data: A dictionary of saved rig constraints.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    saved_constraints_path = get_template_file_path(f'{properties.previous_mode.lower()}_constraints.json', properties)
+    save_json_file(constraints_data, saved_constraints_path)
 
 
 # TODO move to a shared location and define as a generic zip import
