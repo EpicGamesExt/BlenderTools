@@ -756,6 +756,9 @@ def create_meta_rig(properties):
         'OBJECT'
     )
 
+    # creates all the saved constraints on the metarig
+    templates.set_constraints_data(metarig_object, properties)
+
     return metarig_object
 
 
@@ -1272,6 +1275,11 @@ def save_meta_rig(properties):
                 metarig_object,
                 'OBJECT'
             )
+
+        # save the constraints data if there is any
+        constraints_data = templates.get_constraints_data(metarig_object)
+        if constraints_data:
+            templates.save_constraints(constraints_data, properties)
 
         # save the metarig data if there is any
         metarig_data = templates.get_metarig_data(properties)
