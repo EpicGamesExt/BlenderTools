@@ -3,6 +3,8 @@ layout: default
 ---
 
 # Relink Constraints
+<iframe src="https://blender-tools-documentation.s3.amazonaws.com/ue2rigify/advanced/relink-constraints.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 [UE to Rigify Costumization](https://docs.blender.org/manual/en/latest/addons/rigging/rigify/rig_types/basic.html)
 
 Allows retargeting constraints belonging to the bone to point at bones created in the process of generating the rig, thus allowing custom rigging to integrate with generated bones.
@@ -17,5 +19,3 @@ If the field is not empty, applies the same name substitution logic to the paren
 ![2]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/2.jpg' | relative_url }} )
 
 When this feature is enabled, the bone will not be automatically parented to the root bone even if it has no parent; enter root in the Parent field if that is necessary.
-
-
