@@ -19,3 +19,16 @@ If the field is not empty, applies the same name substitution logic to the paren
 ![2]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/2.jpg' | relative_url }} )
 
 When this feature is enabled, the bone will not be automatically parented to the root bone even if it has no parent; enter root in the Parent field if that is necessary.
+
+
+# How to use the Relink constraints step by step
+1. Set the UEToRigify mode to "Edit Metarig" 
+![3]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/rlc1.jpg' | relative_url }} )
+2. Wile edit mode is enabled, create the new bone you want to rig "rigBone". In this case it is a bone that will help the pants deform. We need to have it constrained between the legs once the Rigify rig is built.
+![4]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/rlc2.jpg' | relative_url }}
+3. Setup the Rigify type on the new bone. Switch to Pose mode and with the "rigBone" selected go to the Bone Properites tab. In the Rigify Type-Rig Type, selct raw copy or super_copy as these settings will allow us to use the relink constraint feature.
+![5]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/rlc3.jpg' | relative_url }}
+4. Now add an armature constraint to the "rigBone" and pick your constraint targets from the metarig. To have the relink setting work, the constraint name must match the bone name it is on, "rigBone" and for the targets you must add a prefix. In this example @DEF is the prefix for the bones created in the Rigify Rig. Right now the target will be the Metarig armature and bones.
+![6]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/rlc4.jpg' | relative_url }}
+5. Save the Metarig and switch to Control mode. Select the "rigBone" and notice that the target armatre and bones have changed to be the newly created control Rigify rig and bones, DEF-Leg_00.L as an example. This means that the target for the constraint has switched to the DEF bone created when the rig was built. The custom rig is complete and remaines part of the Metarig template so that you don't loose the custom rigging created using constraints.
+![7]( {{ '/assets/images/ue2rigify/advanced/relink-constraints/rlc5.jpg' | relative_url }}
