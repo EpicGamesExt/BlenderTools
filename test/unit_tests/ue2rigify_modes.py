@@ -43,6 +43,9 @@ class Ue2RigifyModesTestCases(unittest.TestCase):
             'CONTROL',
         ]
 
+        # un freeze the rig
+        bpy.ops.ue2rigify.un_freeze_rig()
+
         # set the source rig object
         bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
 
