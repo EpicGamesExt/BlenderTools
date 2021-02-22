@@ -1276,11 +1276,6 @@ def save_meta_rig(properties):
                 'OBJECT'
             )
 
-        # save the constraints data if there is any
-        constraints_data = templates.get_constraints_data(metarig_object)
-        if constraints_data:
-            templates.save_constraints(constraints_data, properties)
-
         # save the metarig data if there is any
         metarig_data = templates.get_metarig_data(properties)
         if metarig_data:
@@ -1301,6 +1296,12 @@ def save_meta_rig(properties):
             # otherwise just save the active template
             else:
                 templates.save_text_file(metarig_data, properties.saved_metarig_data)
+
+        # save the constraints data if there is any
+        metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+        constraints_data = templates.get_constraints_data(metarig_object)
+        if constraints_data:
+            templates.save_constraints(constraints_data, properties)
 
 
 def save_rig_nodes(properties):

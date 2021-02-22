@@ -159,6 +159,9 @@ class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
         # set the source rig object
         bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
 
+        # un freeze the rig
+        bpy.ops.ue2rigify.un_freeze_rig()
+
         # switch to metarig mode
         bpy.ops.ue2rigify.switch_modes(mode='METARIG')
 
