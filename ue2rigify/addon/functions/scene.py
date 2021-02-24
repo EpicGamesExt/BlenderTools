@@ -845,6 +845,17 @@ def move_collection_to_collection(collection, to_collection):
             to_collection.children.link(collection)
 
 
+def select_ik_bones(rig_object):
+    """
+    This function selects all ik bones on the given rig.
+
+    :param object rig_object: A object of type armature.
+    """
+    for bone in rig_object.data.bones:
+        if 'ik' in bone.name.lower():
+            bone.select = True
+
+
 def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
     """
     This function selected all the bones that need to keyed in the action bake.
@@ -1157,6 +1168,9 @@ def bake_pose_animation(to_rig_object, from_rig_action_data, links_data):
     """
     # select the bones on the to rig which have related keyed bones on the from rig
     select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
+
+    # select the ik bones on the rig if it has any
+    select_ik_bones(to_rig_object)
 
     # bake the visual transforms of the selected bones to the current action
     bpy.ops.nla.bake(
