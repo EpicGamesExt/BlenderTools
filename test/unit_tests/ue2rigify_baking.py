@@ -4,11 +4,11 @@ import bpy
 import unittest
 
 
-class Ue2RigifyTemplates(unittest.TestCase):
+class Ue2RigifyBaking(unittest.TestCase):
     """
     related issue:
     https://github.com/EpicGames/BlenderTools/issues/238
-    This tests that the tools template system
+    This tests that the tool is baking correctly system
     """
 
     @staticmethod
@@ -75,7 +75,7 @@ class Ue2RigifyTemplates(unittest.TestCase):
 
     def test_create_new_template(self):
         """
-        This method creates a new template and checks that it saved correctly.
+        This method switches to control mode then bakes, and check of the bone positions have changed.
         """
         properties = bpy.context.window_manager.ue2rigify
 
