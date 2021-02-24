@@ -747,12 +747,13 @@ def show_bone_setting(bone_name, tab):
         bpy.ops.pose.select_all(action='DESELECT')
 
         bone = metarig_object.data.bones.get(bone_name)
-        bone.select = True
-        metarig_object.data.bones.active = bone
+        if bone:
+            bone.select = True
+            metarig_object.data.bones.active = bone
 
-        focus_on_selected()
+            focus_on_selected()
 
-        set_active_properties_panel(tab)
+            set_active_properties_panel(tab)
 
 
 def report_error(error_header, error_message, confirm_message=None, clean_up_action=None, width=500):
