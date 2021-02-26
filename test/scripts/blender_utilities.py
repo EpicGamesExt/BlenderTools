@@ -103,6 +103,11 @@ def run_tests(test_cases_folder):
     unit_test_files.remove('main.py')
     unit_test_modules = [test_case_file.replace('.py', '') for test_case_file in unit_test_files]
 
+    # use environment variable to override test cases
+    test_cases = os.environ.get('TEST_CASES')
+    if test_cases:
+        unit_test_modules = [test_case_file.replace('.py', '') for test_case_file in test_cases.split(',')]
+
     suite = unittest.TestSuite()
 
     for unit_test_module in unit_test_modules:

@@ -66,6 +66,15 @@ class Ue2RigifyBaking(unittest.TestCase):
         # enable the ue2rigify addon
         bpy.ops.preferences.addon_enable(module='ue2rigify')
 
+        # un freeze the rig
+        bpy.ops.ue2rigify.un_freeze_rig()
+
+        # set the source rig object
+        bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
+
+        # switch to source mode
+        bpy.ops.ue2rigify.switch_modes(mode='SOURCE')
+
     def tearDown(self):
         # enable the send2ue addon
         bpy.ops.preferences.addon_enable(module='send2ue')
@@ -73,26 +82,86 @@ class Ue2RigifyBaking(unittest.TestCase):
         # restore blend file to the default test file
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
 
-    def test_create_new_template(self):
+    def test_basic_bake(self):
         """
-        This method switches to control mode then bakes, and check of the bone positions have changed.
+        This method switches to control mode then bakes, and checks if the bone positions have changed.
         """
-        properties = bpy.context.window_manager.ue2rigify
+        # get the bone positions
+        source_mode_bone_positions1 = self.get_bone_positions()
 
-        # un freeze the rig
-        bpy.ops.ue2rigify.un_freeze_rig()
+        # switch to control mode
+        bpy.ops.ue2rigify.switch_modes(mode='CONTROL')
 
-        # set the source rig object
-        properties.source_rig_name = 'root'
+        # get the bone positions
+        control_mode_bone_positions = self.get_bone_positions()
+
+        # make sure the bones haven't moved
+        self.check_bone_positions(source_mode_bone_positions1, control_mode_bone_positions)
 
         # switch to source mode
-        bpy.ops.ue2rigify.switch_modes(mode='SOURCE')
+        bpy.ops.ue2rigify.bake_from_rig_to_rig()
+
+        # get the bone positions
+        source_mode_bone_positions2 = self.get_bone_positions()
+
+        # make sure the bones haven't moved after the bake
+        self.check_bone_positions(source_mode_bone_positions1, source_mode_bone_positions2)
+
+    def test_ik_bake(self):
+        """
+        This method switches to control mode then activates an ik and bakes, and checks if the bone positions have
+        changed.
+        """
+        # get the bone positions
+        source_mode_bone_positions1 = self.get_bone_positions()
+
+        # switch to control mode
+        bpy.ops.ue2rigify.switch_modes(mode='CONTROL')
+
+        # turn on hand ik control
+        bpy.data.armatures['rig'].bones['hand_ik.L']['IK_FK'] = 0.0
+
+        # get the bone positions
+        control_mode_bone_positions = self.get_bone_positions()
+
+        # make sure the bones haven't moved
+        self.check_bone_positions(source_mode_bone_positions1, control_mode_bone_positions)
+
+        # switch to source mode
+        bpy.ops.ue2rigify.bake_from_rig_to_rig()
+
+        # get the bone positions
+        source_mode_bone_positions2 = self.get_bone_positions()
+
+        # make sure the bones haven't moved after the bake
+        self.check_bone_positions(source_mode_bone_positions1, source_mode_bone_positions2)
+
+    def test_new_ik_animation_bake(self):
+        """
+        This method switches to control mode, creates a new action, then activates an ik and bakes, then checks if
+        the bone positions have changed.
+        """
+        # clear the source rig animation data
+        source_rig = bpy.data.objects['root']
+        source_rig.animation_data_clear()
 
         # get the bone positions
         source_mode_bone_positions1 = self.get_bone_positions()
 
         # switch to control mode
         bpy.ops.ue2rigify.switch_modes(mode='CONTROL')
+
+        # create a new action on the control rig
+        control_rig = bpy.data.objects['rig']
+        new_action = bpy.data.actions.new('New_Action')
+        control_rig.animation_data.action = new_action
+
+        # insert a keyframe
+        control_rig.pose.bones['hand_ik.L'].location = [-0.2, -0.2, -0.2]
+        control_rig.keyframe_insert(data_path='pose.bones["hand_ik.L"].location', frame=1)
+
+        # turn on hand ik control
+        control_rig.pose.bones['hand_ik.L']['IK_FK'] = 0.0
 
         # get the bone positions
         control_mode_bone_positions = self.get_bone_positions()
