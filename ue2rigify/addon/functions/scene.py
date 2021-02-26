@@ -188,7 +188,7 @@ def get_to_rig_action(from_rig_action, from_rig_object, to_rig_object, bake_to_s
     # get the to rig action
     to_rig_action = bpy.data.actions.get(to_rig_action_name)
 
-    # if it already exists and the bake to not to the source rig and overwrite animations is false
+    # if it already exists and the bake is to not to the source rig and overwrite animations is false
     # return and don't bake the animation.
     if to_rig_action and not bake_to_source and not properties.overwrite_control_animations:
         return None
@@ -845,15 +845,17 @@ def move_collection_to_collection(collection, to_collection):
             to_collection.children.link(collection)
 
 
-def select_ik_bones(rig_object):
+def has_iks_on(rig_object):
     """
-    This function selects all ik bones on the given rig.
+    This function check to see if any IK switches are on.
 
     :param object rig_object: A object of type armature.
     """
-    for bone in rig_object.data.bones:
-        if 'ik' in bone.name.lower():
-            bone.select = True
+    for bone in rig_object.pose.bones:
+        if isinstance(bone.get("IK_FK"), float):
+            if bone['IK_FK'] != 1.000:
+                return True
+    return False
 
 
 def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
@@ -1158,7 +1160,7 @@ def sync_actions(control_rig_object, source_rig_object, properties):
     sync_nla_track_data(control_rig_object, source_rig_object, properties)
 
 
-def bake_pose_animation(to_rig_object, from_rig_action_data, links_data):
+def bake_pose_animation(to_rig_object, from_rig_action_data, links_data, only_selected):
     """
     This function bakes the visual pose bone transform data to the rig driven by constraints.
 
@@ -1169,15 +1171,12 @@ def bake_pose_animation(to_rig_object, from_rig_action_data, links_data):
     # select the bones on the to rig which have related keyed bones on the from rig
     select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
 
-    # select the ik bones on the rig if it has any
-    select_ik_bones(to_rig_object)
-
     # bake the visual transforms of the selected bones to the current action
     bpy.ops.nla.bake(
         frame_start=from_rig_action_data['action_frame_start'],
         frame_end=from_rig_action_data['action_frame_end'],
         step=1,
-        only_selected=True,
+        only_selected=only_selected,
         visual_keying=True,
         use_current_action=True,
         bake_types={'POSE'}
@@ -1257,9 +1256,11 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
                 for fcurve in to_rig_action.fcurves:
                     to_rig_action.fcurves.remove(fcurve)
 
-            if from_rig_action_data['data']:
+            # check if iks are on
+            iks_on = has_iks_on(from_rig_object)
+            if from_rig_action_data['data'] or iks_on:
                 # bake the visual pose transforms of the bones to the current action
-                bake_pose_animation(to_rig_object, from_rig_action_data, links_data)
+                bake_pose_animation(to_rig_object, from_rig_action_data, links_data, only_selected=not iks_on)
 
                 # remove the control rig action when baking to source
                 if bake_to_source:
@@ -1527,9 +1528,6 @@ def switch_modes(self=None, context=None):
     :param object context: The context of the object this function is appended to.
     """
     properties = bpy.context.window_manager.ue2rigify
-
-    # save the current state of the tool properties
-    utilities.save_properties()
 
     # save the current context
     utilities.save_context(properties)

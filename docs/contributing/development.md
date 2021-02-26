@@ -55,14 +55,14 @@ blender_utilities.install_addons(addons=['send2ue', 'ue2rigify'])
 ## Running the Unit Tests
 All files containing a TestCase class in `./test/unit_tests` will be run when the unit testing is run. (Note that any new features require an accompanying unit test for it to be approved.)
 
-For the unit testing to work correctly, you will need to add both Blender and Unreal Engine to your system `PATH` variable. 
+For the unit testing to work correctly, you will need to add both Blender and Unreal Engine to your system `PATH` variable.
 
 #### Windows:
 Here are some example paths you might add:
 
 `C:\Program Files\Blender Foundation\Blender <version>`
 
-`C:\Program Files\Epic Games\UE_<version>\Engine\Binaries\Win64` 
+`C:\Program Files\Epic Games\UE_<version>\Engine\Binaries\Win64`
 
 You can add these by searching `Edit the system enviroment variables` in the quick search menu, then selecting it, then  `Environment Variables > Path > Edit..`
 
@@ -79,12 +79,19 @@ Now click 'Ok' to all the dialogs. Open a new terminal at the root of the Blende
 
 If all went well you should see output similar to this:
 
-```txt    
+```txt
 ----------------------------------------------------------------------
-Ran 11 tests in 33.714s
+Ran 31 tests in 120.009s
 
 OK
 ```
+
+
+
+### Environment Variables
+`run_unit_tests.py` can be given several environment variables:
+* `TEST_CASES` can be used to specify which only which unitest you would like to run. `TEST_CASES=ue2rigify_baking.py,ue2rigify_modes.py,send2ue_collision_meshes.py`
+* `ONLY_BLENDER` can be used to specify whether to launch unreal or just run the tests in blender. `ONLY_BLENDER=True`
 
 ## Our Standards
 Our primary standard for code is [PEP 8](https://www.python.org/dev/peps/pep-0008/), overridden by any specific naming conventions recommended by the [blender python API](https://docs.blender.org/api/current/index.html):

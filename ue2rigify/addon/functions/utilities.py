@@ -350,9 +350,12 @@ def set_viewport_settings(viewport_settings, properties):
                 previous_settings['selected'] = rig_object.select_get()
                 rig_object.select_set(rig_object_settings['selected'])
 
-                # set if object is hidden or not
+                # set if object is hidden or not unless it is source mode
                 previous_settings['hidden'] = rig_object.hide_get()
-                rig_object.hide_set(rig_object_settings['hidden'])
+                if rig_object.name == properties.source_rig_name and properties.selected_mode == properties.source_mode:
+                    rig_object.hide_set(False)
+                else:
+                    rig_object.hide_set(rig_object_settings['hidden'])
 
                 # set the objects mode
                 previous_settings['mode'] = bpy.context.mode
@@ -471,6 +474,7 @@ def set_collection(collection, collections_data):
                 collection_attribute,
                 collection_value
             )
+
 
 def remove_nla_tracks(nla_tracks):
     """
@@ -936,23 +940,29 @@ def save_source_mode_context(properties):
     """
     source_rig = bpy.data.objects.get(properties.source_rig_name)
     if source_rig:
-        if not properties.context.get('source_rig'):
-            properties.context['source_rig'] = {}
+        if not properties.context.get(properties.source_mode):
+            properties.context[properties.source_mode] = {}
+            properties.context[properties.source_mode][source_rig.name] = {}
 
         # if the object has actions then save their first frames transform offset values
         actions = get_actions(source_rig)
         if actions:
-            properties.context['source_rig']['action_offsets'] = {}
+            properties.context[properties.source_mode][source_rig.name] = {}
             for action in actions:
                 offset = get_action_transform_offset(action)
-                properties.context['source_rig']['action_offsets'][action.name] = offset
+                if properties.context[properties.source_mode][source_rig.name].get('action_offsets'):
+                    properties.context[properties.source_mode][source_rig.name]['action_offsets'][action.name] = offset
+                else:
+                    properties.context[properties.source_mode][source_rig.name]['action_offsets'] = {}
 
                 # subtract the transform offsets of the first frame on the action
                 set_action_transform_offsets(action, offset, 'SUBTRACT')
 
         # otherwise save the objects transform values
         else:
-            properties.context['source_rig']['transforms'] = get_object_transforms(source_rig)
+            properties.context[properties.source_mode][source_rig.name]['transforms'] = get_object_transforms(
+                source_rig
+            )
             # set the object transforms to their applied transforms
             clear_object_transforms(source_rig)
 
@@ -1007,23 +1017,24 @@ def load_source_mode_context(properties):
     source_rig = bpy.data.objects.get(properties.source_rig_name)
 
     # restore the source rig object to its previous transform values
-    if source_rig and properties.context.get('source_rig'):
-        if properties.context['source_rig'].get('action_offsets'):
-            # restore the actions to their original values
-            for action_name, offset in properties.context['source_rig']['action_offsets'].items():
-                # add the offset to all the source rig actions
-                action = bpy.data.actions.get(action_name)
-                if action:
-                    set_action_transform_offsets(action, offset, 'ADD')
-                action = bpy.data.actions.get(f'{properties.source_mode}_{action_name}')
-                if action:
-                    set_action_transform_offsets(action, offset, 'ADD')
+    if source_rig and properties.context.get(properties.source_mode):
+        if properties.context[properties.source_mode].get(source_rig.name):
+            if properties.context[properties.source_mode][source_rig.name].get('action_offsets'):
+                # restore the actions to their original values
+                for action_name, offset in properties.context[properties.source_mode][source_rig.name]['action_offsets'].items():
+                    # add the offset to all the source rig actions
+                    action = bpy.data.actions.get(action_name)
+                    if action:
+                        set_action_transform_offsets(action, offset, 'ADD')
+                    action = bpy.data.actions.get(f'{properties.source_mode}_{action_name}')
+                    if action:
+                        set_action_transform_offsets(action, offset, 'ADD')
 
-            # remove the saved offsets from the context
-            bpy.context.window_manager.ue2rigify.context['source_rig']['action_offsets'] = {}
+                # remove the saved offsets from the context
+                bpy.context.window_manager.ue2rigify.context[properties.source_mode][source_rig.name]['action_offsets'] = {}
 
         else:
-            set_object_transforms(source_rig, properties.context['source_rig'].get('transforms'))
+            set_object_transforms(source_rig, properties.context[properties.source_mode][source_rig.name].get('transforms'))
 
 
 def load_control_mode_context(properties):
@@ -1032,12 +1043,23 @@ def load_control_mode_context(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # get control rig object and context
     control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-    control_rig_context = properties.context.get(properties.control_rig_name)
+    control_mode_context = properties.context.get(properties.control_mode)
+    control_rig_context = None
+    if control_mode_context:
+        control_rig_context = control_mode_context.get(control_rig_object.name)
+
+    # get source rig object and context
+    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    source_mode_context = properties.context.get(properties.source_mode)
+    source_rig_context = None
+    if source_mode_context:
+        source_rig_context = properties.context.get(source_rig_object.name)
 
     # move the control rig actions back to counter the offsets to the source rig actions
-    if properties.context.get('source_rig'):
-        if properties.context['source_rig'].get('action_offsets'):
+    if source_rig_context:
+        if source_rig_context.get('action_offsets'):
 
             # get the link that maps the bone to the source rig object
             root_bone = None
@@ -1129,6 +1151,13 @@ def load_properties(*args):
 
     # make sure that the rig is frozen
     window_manager_properties.freeze_rig = True
+
+    # remove the selected rig template from the values to be set and set it first
+    selected_rig_template = scene_properties.pop('selected_rig_template', None)
+    if selected_rig_template:
+        setattr(window_manager_properties, 'selected_rig_template', selected_rig_template)
+    else:
+        setattr(window_manager_properties, 'selected_rig_template', window_manager_properties.default_template)
 
     # assign all the scene property values to the addon property values
     for attribute in scene_properties.keys():
