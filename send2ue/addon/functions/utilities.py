@@ -237,16 +237,21 @@ def get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties):
     return unique_parent_mesh_objects
 
 
-def remove_objects(scene_object_names):
+def remove_data(data):
     """
-    This function removes the list of provided objects.
+    This function removes the provided data.
 
-    :param list scene_object_names: A list of object names.
+    :param dict data: A dictionary of data names.
     """
-    for scene_object_name in scene_object_names:
+    for scene_object_name in data.get('objects', []):
         scene_object = bpy.data.objects.get(scene_object_name)
         if scene_object:
             bpy.data.objects.remove(scene_object)
+
+    for armature_name in data.get('armatures', []):
+        armature = bpy.data.armatures.get(armature_name)
+        if armature:
+            bpy.data.armatures.remove(armature)
 
 
 def remove_extra_data(data_blocks, original_data_blocks):
@@ -529,7 +534,7 @@ def combine_child_meshes(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     selected_object_names = [selected_object.name for selected_object in bpy.context.selected_objects]
-    duplicate_object_names = []
+    duplicate_data = {}
 
     if properties.combine_child_meshes:
         selected_objects = bpy.context.selected_objects.copy()
@@ -544,7 +549,12 @@ def combine_child_meshes(properties):
         # duplicate the selection
         bpy.ops.object.duplicate()
 
-        duplicate_object_names = [selected_object.name for selected_object in bpy.context.selected_objects]
+        duplicate_data['objects'] = [selected_object.name for selected_object in bpy.context.selected_objects]
+        duplicate_data['armatures'] = []
+        for selected_object in bpy.context.selected_objects:
+            if selected_object.type == 'ARMATURE':
+                duplicate_data['armatures'].append(selected_object.data.name)
+
         duplicate_objects = bpy.context.selected_objects.copy()
 
         # apply all modifiers on the duplicates
@@ -566,12 +576,12 @@ def combine_child_meshes(properties):
             bpy.ops.object.join()
 
         # now select all the duplicate objects by their name
-        for duplicate_object_name in duplicate_object_names:
+        for duplicate_object_name in duplicate_data['objects']:
             duplicate_object = bpy.data.objects.get(duplicate_object_name)
             if duplicate_object:
                 duplicate_object.select_set(True)
 
-    return selected_object_names, duplicate_object_names
+    return selected_object_names, duplicate_data
 
 
 def apply_all_mesh_modifiers(scene_object):

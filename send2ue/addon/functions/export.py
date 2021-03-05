@@ -484,7 +484,7 @@ def export_fbx_files(file_paths, properties):
     context = scale_rig_objects(properties)
 
     # combine all child meshes if option is on
-    selected_object_names, duplicate_object_names = utilities.combine_child_meshes(properties)
+    selected_object_names, duplicate_data = utilities.combine_child_meshes(properties)
 
     for file_path in file_paths.values():
         # if the folder does not exists create it
@@ -525,7 +525,7 @@ def export_fbx_files(file_paths, properties):
         )
 
     # remove duplicate objects
-    utilities.remove_objects(duplicate_object_names)
+    utilities.remove_data(duplicate_data)
 
     # restore selection
     utilities.set_selected_objects(selected_object_names)
