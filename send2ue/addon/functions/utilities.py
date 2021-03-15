@@ -689,6 +689,7 @@ def format_folder_path(game_reference):
     :param str game_reference: The game reference copied to the clipboard from the unreal asset.
     :return str: The formatted game folder path.
     """
+    game_reference = game_reference.replace('\\', '/').replace(r'\\', '/').replace('//', '/')
     if game_reference[-1] == "'":
         asset_name = format_asset_path(game_reference).split('/')[-1]
         return format_asset_path(game_reference).replace(asset_name, '')
