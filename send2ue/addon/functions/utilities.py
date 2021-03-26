@@ -688,7 +688,7 @@ def select_all_children(scene_object, object_type, properties):
         if child_object.type == object_type:
             child_object.select_set(True)
             if child_object.children:
-                select_all_children(child_object, object_type)
+                select_all_children(child_object, object_type, properties)
 
 
 def combine_child_meshes(properties):
