@@ -1,7 +1,9 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import re
 import bpy
+import math
 import shutil
 import tempfile
 from mathutils import Vector, Quaternion
@@ -124,6 +126,141 @@ def get_pose(rig_object):
     return pose
 
 
+def get_from_collection(collection_name, object_type, properties):
+    """
+    This function fetches the objects inside each collection according to type and returns the
+    the list of object references.
+
+    :param str collection_name: The collection that you would like to retrieve objects from.
+    :param str object_type: The object type you would like to get.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return list: A list of objects
+    """
+    collection_objects = []
+
+    # get the collection with the given name
+    collection = bpy.data.collections.get(collection_name)
+    if collection:
+
+        # get all the objects in the collection
+        for collection_object in collection.all_objects:
+            # dont select an object if it has a parent and combine child meshes option is on
+            if properties.combine_child_meshes:
+                if collection_object.parent:
+                    if collection_object.parent.type == 'MESH':
+                        continue
+
+            # if the object is the correct type
+            if collection_object.type == object_type:
+
+                # if the object is visible
+                if collection_object.visible_get():
+                    # add it to the group of objects
+                    collection_objects.append(collection_object)
+
+    return collection_objects
+
+
+def get_meshes_using_armature_modifier(rig_object, properties):
+    """
+    This function get the objects using the given rig in an armature modifier.
+
+    :param object rig_object: An object of type armature.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return list: A list of objects using the given rig in an armature modifier.
+    """
+    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+    child_meshes = []
+    for mesh_object in mesh_objects:
+        if rig_object == get_armature_modifier_rig_object(mesh_object):
+            child_meshes.append(mesh_object)
+    return child_meshes
+
+
+def get_unreal_asset_name(asset_name, properties):
+    """
+    This function takes a given asset name and removes the postfix _LOD and other non-alpha numeric characters
+    that unreal won't except.
+
+    :param str asset_name: The original name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The formatted name of the asset to export.
+    """
+    if properties.use_ue2rigify:
+        return get_action_name(re.sub(r"\W+", "_", re.sub(r'(_LOD\d)', '', asset_name)), properties)
+
+    if properties.use_immediate_parent_collection_name:
+        asset_object = bpy.data.objects.get(asset_name)
+        mesh_collection = bpy.data.collections.get(properties.mesh_collection_name)
+        if asset_object and mesh_collection:
+            parent_collection = get_parent_collection(asset_object, mesh_collection)
+            if parent_collection and parent_collection.name != properties.mesh_collection_name:
+                return re.sub(r"\W+", "_", re.sub(r'(_LOD\d)', '', parent_collection.name))
+
+    return re.sub(r"\W+", "_", re.sub(r'(_LOD\d)', '', asset_name))
+
+
+def get_parent_collection(scene_object, collection):
+    """
+    This function walks the collection tree to find the collection parent of the given object.
+
+    :param object scene_object: A object.
+    :param object collection: A collection.
+    :return str: The collection name.
+    """
+    for child_collection in collection.children:
+        parent_collection = get_parent_collection(scene_object, child_collection)
+        if parent_collection:
+            return parent_collection
+
+    if scene_object in collection.objects.values():
+        return collection
+
+
+def get_skeleton_game_path(rig_object, properties):
+    """
+    This function gets the game path to the skeleton.
+
+    :param object rig_object: A object of type armature.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The game path to the unreal skeleton asset.
+    """
+    # if a skeleton path is provided
+    if properties.unreal_skeleton_asset_path:
+        return properties.unreal_skeleton_asset_path
+
+    children = rig_object.children or get_meshes_using_armature_modifier(rig_object, properties)
+
+    if children:
+        # get all meshes from the mesh collection
+        mesh_collection = bpy.data.collections.get(properties.mesh_collection_name)
+        mesh_collection_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+
+        if properties.use_immediate_parent_collection_name and mesh_collection:
+            # use the collection that is the parent of a child mesh to build the skeleton game path
+            for child in children:
+                parent_collection = get_parent_collection(child, mesh_collection)
+                if parent_collection and parent_collection.name != properties.mesh_collection_name:
+                    return f'{properties.unreal_mesh_folder_path}{parent_collection.name}_Skeleton'
+
+        # use the child mesh that is in the mesh collection to build the skeleton game path
+        for child in children:
+            if child in mesh_collection_objects:
+                asset_name = get_unreal_asset_name(child.name, properties)
+                return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
+        # otherwise just use the first child mesh
+        for child in children:
+            if child in [mesh_object for mesh_object in bpy.data.objects if mesh_object.type == 'MESH']:
+                asset_name = get_unreal_asset_name(child.name, properties)
+                return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
+    report_error(
+        f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
+        f'so it can be imported correctly!'
+    )
+
+
 def set_selected_objects(scene_object_names):
     """
     This function selects only the give objects.
@@ -211,6 +348,31 @@ def set_ue2rigify_state(properties):
     return properties.use_ue2rigify
 
 
+def get_transform_in_degrees(transform, decimals=2):
+    """
+    This function convert the given transform from radians to degrees.
+
+    :param list transform: A list of radians.
+    :param int decimals: The number of decimals to round the values to.
+    :return list: A list of degrees.
+    """
+    return tuple([round(math.degrees(number), decimals) for number in transform])
+
+
+def get_armature_modifier_rig_object(mesh_object):
+    """
+    This function gets the armature associated with a mesh via its armature modifier.
+
+    :param object mesh_object: A object of type mesh.
+    :return object: A object of type armature.
+    """
+    for modifier in mesh_object.modifiers:
+        if modifier.type == 'ARMATURE':
+            return modifier.object
+
+    return None
+
+
 def get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties):
     """
     This function get only meshes that have a unique same armature parent.
@@ -226,7 +388,7 @@ def get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties):
         for rig_object in rig_objects:
             parent_count = 0
             for mesh_object in mesh_objects:
-                if mesh_object.parent == rig_object:
+                if mesh_object.parent == rig_object or rig_object == get_armature_modifier_rig_object(mesh_object):
                     if parent_count < 1:
                         unique_parent_mesh_objects.append(mesh_object)
                     parent_count += 1
@@ -513,14 +675,16 @@ def report_path_error_message(layout, send2ue_property, report_text):
         row.label(text=report_text)
 
 
-def select_all_children(scene_object, object_type):
+def select_all_children(scene_object, object_type, properties):
     """
     This function selects all of an objects children.
 
     :param object scene_object: A object.
     :param str object_type: The type of object to select.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    for child_object in scene_object.children:
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object, properties)
+    for child_object in children:
         if child_object.type == object_type:
             child_object.select_set(True)
             if child_object.children:
@@ -544,7 +708,7 @@ def combine_child_meshes(properties):
 
         # select all children
         for selected_object in selected_objects:
-            select_all_children(selected_object, object_type='MESH')
+            select_all_children(selected_object, 'MESH', properties)
 
         # duplicate the selection
         bpy.ops.object.duplicate()
@@ -1020,12 +1184,13 @@ def unpack_textures():
                 # check for packed textures
                 if node.type == 'TEX_IMAGE':
                     image = node.image
-                    if image.source == 'FILE':
-                        if image.packed_file:
-                            # if the unpacked image does not exist on disk
-                            if not os.path.exists(image.filepath_from_user()):
-                                # unpack the image
-                                image.unpack()
-                                file_paths.append(image.filepath_from_user())
+                    if image:
+                        if image.source == 'FILE':
+                            if image.packed_file:
+                                # if the unpacked image does not exist on disk
+                                if not os.path.exists(image.filepath_from_user()):
+                                    # unpack the image
+                                    image.unpack()
+                                    file_paths.append(image.filepath_from_user())
 
     return file_paths

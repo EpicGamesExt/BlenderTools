@@ -8,7 +8,7 @@ folder: ""
 
 
 
-First, let's talk about the settings under the ‘Paths’ section. You'll see that there is this drop down, and it gives you three options: ‘Send to Unreal’, ‘Export to Disk’ or ‘Both’. 
+First, let's talk about the settings under the ‘Paths’ section. You'll see that there is this drop down, and it gives you three options: ‘Send to Unreal’, ‘Export to Disk’ or ‘Both’.
 
 ![1]( {{ '/assets/images/send2ue/preferences/paths/1.jpg' | relative_url }} )
 
@@ -24,9 +24,13 @@ When using ‘Export to Disk’, the path is the full path to the folder where t
 
 When using ‘Both’, it will export to the specified folders on disk and import to the specified folders in your project.
 
+### Use immediate parent collection name:
+
+This makes the immediate parent collection the name of the asset.
+
 ### Mesh Folder (Unreal):
 
-This is the mesh import path. All your static and skeletal meshes will be imported to this location in your open unreal project.  
+This is the mesh import path. All your static and skeletal meshes will be imported to this location in your open unreal project.
 
 
 ### Animation Folder (Unreal):
