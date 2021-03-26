@@ -9,6 +9,21 @@ from . import utilities
 from . import validations
 
 
+def get_unreal_asset_name(asset_name, properties):
+    """
+    This function takes a given asset name and removes the postfix _LOD and other non-alpha numeric characters
+    that unreal won't except.
+
+    :param str asset_name: The original name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The formatted name of the asset to export.
+    """
+    if properties.use_ue2rigify:
+        return utilities.get_action_name(re.sub(r"\W+", "_", re.sub(r'(_LOD\d)', '', asset_name)), properties)
+
+    return re.sub(r"\W+", "_", re.sub(r'(_LOD\d)', '', asset_name))
+
+
 def get_fbx_paths(asset_name, asset_type):
     """
     This function gets the export path if it doesn't already exist.  Then it returns the full path.
@@ -25,7 +40,7 @@ def get_fbx_paths(asset_name, asset_type):
         fbx_paths['unreal'] = os.path.join(
             tempfile.gettempdir(),
             properties_window_manger.module_name,
-            f'{utilities.get_unreal_asset_name(asset_name, properties)}.fbx'
+            f'{get_unreal_asset_name(asset_name, properties)}.fbx'
         )
 
     if properties.path_mode in ['export_to_disk', 'both']:
@@ -34,15 +49,85 @@ def get_fbx_paths(asset_name, asset_type):
             export_dir = utilities.resolve_path(properties.disk_mesh_folder_path)
             fbx_paths['disk'] = os.path.join(
                 export_dir,
-                f'{utilities.get_unreal_asset_name(asset_name, properties)}.fbx'
+                f'{get_unreal_asset_name(asset_name, properties)}.fbx'
             )
         if asset_type == 'ACTION':
             export_dir = utilities.resolve_path(properties.disk_animation_folder_path)
             fbx_paths['disk'] = os.path.join(
                 export_dir,
-                f'{utilities.get_unreal_asset_name(asset_name, properties)}.fbx'
+                f'{get_unreal_asset_name(asset_name, properties)}.fbx'
             )
     return fbx_paths
+
+
+def get_from_collection(collection_name, object_type, properties):
+    """
+    This function fetches the objects inside each collection according to type and returns the
+    the list of object references.
+
+    :param str collection_name: The collection that you would like to retrieve objects from.
+    :param str object_type: The object type you would like to get.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return list: A list of objects
+    """
+    collection_objects = []
+
+    # get the collection with the given name
+    collection = bpy.data.collections.get(collection_name)
+    if collection:
+
+        # get all the objects in the collection
+        for collection_object in collection.all_objects:
+            # dont select an object if it has a parent and combine child meshes option is on
+            if properties.combine_child_meshes:
+                if collection_object.parent:
+                    if collection_object.parent.type == 'MESH':
+                        continue
+
+            # if the object is the correct type
+            if collection_object.type == object_type:
+
+                # if the object is visible
+                if collection_object.visible_get():
+                    # add it to the group of objects
+                    collection_objects.append(collection_object)
+
+    return collection_objects
+
+
+def get_skeleton_game_path(rig_object, properties):
+    """
+    This function gets the game path to the skeleton.
+
+    :param object rig_object: A object of type armature.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The game path to the unreal skeleton asset.
+    """
+    # if a skeleton path is provided
+    if properties.unreal_skeleton_asset_path:
+        return properties.unreal_skeleton_asset_path
+
+    else:
+        if rig_object.children:
+            # get all meshes from the mesh collection
+            mesh_collection = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+
+            # use the child mesh that is in the mesh collection to build the skeleton game path
+            for child in rig_object.children:
+                if child in mesh_collection:
+                    asset_name = get_unreal_asset_name(child.name, properties)
+                    return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
+            # otherwise just use the first child mesh
+            for child in rig_object.children:
+                if child in [mesh_object for mesh_object in bpy.data.objects if mesh_object.type == 'MESH']:
+                    asset_name = get_unreal_asset_name(child.name, properties)
+                    return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+
+        utilities.report_error(
+            f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
+            f'so it can be imported correctly!'
+        )
 
 
 def get_pre_scaled_context():
@@ -125,22 +210,20 @@ def set_parent_rig_selection(mesh_object, properties):
     :param object mesh_object: A object of type mesh.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    rig_object = utilities.get_armature_modifier_rig_object(mesh_object) or mesh_object.parent
-
     # if the scene object has a parent
-    if rig_object:
+    if mesh_object.parent:
 
         # if the scene object's parent is in the rig collection
-        if rig_object in utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties):
+        if mesh_object.parent in get_from_collection(properties.rig_collection_name, 'ARMATURE', properties):
             # select the parent object
-            rig_object.select_set(True)
+            mesh_object.parent.select_set(True)
 
             # if the combine child meshes option is on, then select all the rigs children that are meshes
             if properties.combine_child_meshes:
-                utilities.select_all_children(rig_object, 'MESH', properties)
+                utilities.select_all_children(mesh_object.parent, 'MESH')
 
             # call the function again to see if this object has a parent that
-            set_parent_rig_selection(rig_object, properties)
+            set_parent_rig_selection(mesh_object.parent, properties)
 
 
 def set_selected_objects_to_center(properties):
@@ -197,20 +280,6 @@ def set_object_positions(original_positions):
             selected_object.location.x = original_positions[index][0]
             selected_object.location.y = original_positions[index][1]
             selected_object.location.z = original_positions[index][2]
-
-
-def set_armatures_as_parents(properties):
-    """
-    This function sets the armature in a mesh modifier as a rig's parent.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    mesh_objects = utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties)
-
-    for mesh_object in mesh_objects:
-        rig_object = utilities.get_armature_modifier_rig_object(mesh_object)
-        if rig_object and not mesh_object.parent:
-            mesh_object.parent = rig_object
 
 
 def scale_control_rig(scale_factor, properties):
@@ -344,9 +413,6 @@ def scale_rig_objects(properties):
             if duplicate_object.type == 'ARMATURE':
                 # rename the duplicated objects and save the original object references to the context
                 context = rename_duplicate_object(duplicate_object, context, properties)
-
-                # set each object in a armature modifier to a parent
-                set_armatures_as_parents(properties)
 
                 # fix the armature scale and its animation and save that information to the context
                 context = fix_armature_scale(duplicate_object, scale_factor, context, properties)
@@ -488,7 +554,7 @@ def select_asset_collisions(asset_name, properties):
     :param str asset_name: The name of the asset to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    collision_objects = utilities.get_from_collection(properties.collision_collection_name, 'MESH', properties)
+    collision_objects = get_from_collection(properties.collision_collection_name, 'MESH', properties)
     for mesh_object in collision_objects:
         if is_collision_of(asset_name, mesh_object.name):
             mesh_object.select_set(True)
@@ -535,7 +601,7 @@ def export_mesh_lods(asset_name, properties):
         empty_object.select_set(True)
 
         # get all the lod mesh objects that contain the same name as the asset
-        for mesh_object in utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties):
+        for mesh_object in get_from_collection(properties.mesh_collection_name, 'MESH', properties):
             if asset_name in mesh_object.name:
                 # add it to the list of lod objects
                 lod_objects.append((mesh_object, mesh_object.parent))
@@ -728,7 +794,7 @@ def create_action_data(rig_objects, properties):
                 action_data.append({
                     'fbx_file_path': fbx_file_paths.get('unreal'),
                     'game_path': properties.unreal_animation_folder_path,
-                    'skeleton_game_path': utilities.get_skeleton_game_path(rig_object, properties),
+                    'skeleton_game_path': get_skeleton_game_path(rig_object, properties),
                     'animation': True
                 })
 
@@ -766,7 +832,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
             for mesh_object in mesh_objects:
                 # get the name of the asset without the lod postfix
-                asset_name = utilities.get_unreal_asset_name(mesh_object.name, properties)
+                asset_name = get_unreal_asset_name(mesh_object.name, properties)
 
                 # if this asset name is not in the list of exported assets names
                 if asset_name not in exported_asset_names:
@@ -815,8 +881,8 @@ def create_import_data(properties):
         set_source_rig_hide_value(False)
 
     # get the mesh and rig objects from their collections
-    mesh_objects = utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties)
-    rig_objects = utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
+    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+    rig_objects = get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
 
     # if the combine meshes option is on, get only meshes with unique armature parents
     mesh_objects = utilities.get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties)
@@ -842,8 +908,7 @@ def validate(properties):
     :return bool: True if the assets pass all the validations.
     """
     # get the objects that will be exported
-    mesh_objects = utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties)
-    rig_objects = utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
+    mesh_objects = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
 
     # run through the selected validations
     if not validations.validate_collections_exist(properties):
@@ -867,10 +932,6 @@ def validate(properties):
 
     if properties.validate_textures:
         if not validations.validate_texture_references(mesh_objects):
-            return False
-
-    if properties.validate_armature_transforms:
-        if not validations.validate_applied_armature_scale(rig_objects):
             return False
 
     if properties.import_lods:

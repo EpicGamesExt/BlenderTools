@@ -7,9 +7,7 @@ folder: ""
 
 <iframe src="https://www.youtube.com/embed/1MrE2PMDkqg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
-### Check armatures for un-applied transforms:
 
-If an armature object has un-applied transforms a message is thrown to the user
 
 ### Check if asset has unused materials:
 

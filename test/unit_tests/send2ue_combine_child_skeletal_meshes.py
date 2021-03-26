@@ -67,9 +67,6 @@ class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
         self.split_up_object(mannequin_mesh)
 
     def tearDown(self):
-        # delete all the assets created by the import
-        unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
-
         # restore blend file to the default test file
         bpy.ops.wm.open_mainfile(filepath=os.path.join(os.environ['BLENDS'], 'default_startup.blend'))
 
@@ -85,7 +82,7 @@ class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
         # run the send to unreal operation
         bpy.ops.wm.send2ue()
 
-        # check if both the mannequin meshes exist in the unreal project
+        # check if both the mannequin and cube exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists(
             '/Game/untitled_category/untitled_asset/SK_Mannequin'
         ))
@@ -99,6 +96,9 @@ class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
         self.assertTrue(unreal_utilities.asset_exists(
             '/Game/untitled_category/untitled_asset/SK_Mannequin_001_Skeleton'
         ))
+
+        # delete all the assets created by the import
+        unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
 
     def test_combine_child_meshes_true(self):
         """
@@ -106,77 +106,13 @@ class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
         """
         properties = bpy.context.preferences.addons['send2ue'].preferences
 
-        # turn the property on
-        properties.combine_child_meshes = True
-
-        # run the send to unreal operation
-        bpy.ops.wm.send2ue()
-
-        # check if only one of the mannequin meshes exists in the unreal project
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin'
-        ))
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_Skeleton'
-        ))
-
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001'
-        ))
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001_Skeleton'
-        ))
-
-    def test_combine_non_child_meshes_false(self):
-        """
-        Sends a multi non-child mesh character over with the combine_child_meshes property off.
-        """
-        properties = bpy.context.preferences.addons['send2ue'].preferences
-
         # turn the property off
-        properties.combine_child_meshes = False
-
-        # remove all parents from the meshes while still keeping the armature modifier
-        for scene_object in bpy.data.objects:
-            if scene_object.type == 'MESH':
-                scene_object.parent = None
-
-        # run the send to unreal operation
-        bpy.ops.wm.send2ue()
-
-        # check if both the mannequin meshes exist in the unreal project
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin'
-        ))
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_Skeleton'
-        ))
-
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001'
-        ))
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001_Skeleton'
-        ))
-
-    def test_combine_non_child_meshes_true(self):
-        """
-        Sends a multi non-child mesh character over with the combine_child_meshes property on.
-        """
-        properties = bpy.context.preferences.addons['send2ue'].preferences
-
-        # turn the property on
         properties.combine_child_meshes = True
 
-        # remove all parents from the meshes while still keeping the armature modifier
-        for scene_object in bpy.data.objects:
-            if scene_object.type == 'MESH':
-                scene_object.parent = None
-
         # run the send to unreal operation
         bpy.ops.wm.send2ue()
 
-        # check if only one of the mannequin meshes exists in the unreal project
+        # check if both the mannequin and cube exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists(
             '/Game/untitled_category/untitled_asset/SK_Mannequin'
         ))
@@ -191,50 +127,5 @@ class Send2UeCombineChildSkeletalMeshesTestCases(unittest.TestCase):
             '/Game/untitled_category/untitled_asset/SK_Mannequin_001_Skeleton'
         ))
 
-    def test_combine_child_meshes_using_collection_name(self):
-        """
-        Sends a multi mesh character over with the combine_child_meshes and use_immediate_parent_collection_name
-        properties on.
-        """
-        properties = bpy.context.preferences.addons['send2ue'].preferences
-
-        # turn the properties on
-        properties.combine_child_meshes = True
-        properties.use_immediate_parent_collection_name = True
-
-        # get mannequin meshes
-        mannequin_mesh = bpy.data.objects['SK_Mannequin']
-        mannequin_mesh_001 = bpy.data.objects['SK_Mannequin.001']
-
-        # create a collection in the mesh collection
-        test_collection = bpy.data.collections.new('test')
-        bpy.data.collections['Mesh'].children.link(test_collection)
-
-        # move the mannequin meshes into the new collection
-        test_collection.objects.link(mannequin_mesh)
-        test_collection.objects.link(mannequin_mesh_001)
-
-        # run the send to unreal operation
-        bpy.ops.wm.send2ue()
-
-        # check if only one of the mannequin meshes exists in the unreal project
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/test'
-        ))
-        self.assertTrue(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/test_Skeleton'
-        ))
-
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin'
-        ))
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_Skeleton'
-        ))
-
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001'
-        ))
-        self.assertFalse(unreal_utilities.asset_exists(
-            '/Game/untitled_category/untitled_asset/SK_Mannequin_001_Skeleton'
-        ))
+        # delete all the assets created by the import
+        unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
