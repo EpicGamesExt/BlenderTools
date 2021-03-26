@@ -47,6 +47,13 @@ class Send2UeUIProperties:
         default="paths",
         description="Select which preferences you want to edit"
     )
+    use_immediate_parent_collection_name: bpy.props.BoolProperty(
+        name="Use immediate parent collection name",
+        default=False,
+        description=(
+            "This makes the immediate parent collection the name of the asset"
+        )
+    )
     path_mode: bpy.props.EnumProperty(
         name='Path Mode',
         items=[
@@ -204,6 +211,13 @@ class Send2UeUIProperties:
         description=(
             "If a texture referenced in an object’s material can not be found in the blend file data than a error "
             "message is thrown to the user"
+        )
+    )
+    validate_armature_transforms: bpy.props.BoolProperty(
+        name="Check armatures for un-applied transforms",
+        default=True,
+        description=(
+            "If an armature object has un-applied transforms a message is thrown to the user"
         )
     )
 

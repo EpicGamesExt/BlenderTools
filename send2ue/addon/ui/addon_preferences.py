@@ -27,6 +27,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
 
         if properties.options_type == 'paths':
             row = layout.row()
+            row.prop(properties, 'use_immediate_parent_collection_name')
+            row = layout.row()
             row.prop(properties, 'path_mode', text='')
             if properties.path_mode in ['send_to_unreal', 'both']:
 
@@ -218,6 +220,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                 row.prop(properties, 'use_metadata')
 
         if properties.options_type == 'validations':
+            row = layout.row()
+            row.prop(properties, 'validate_armature_transforms')
             row = layout.row()
             row.prop(properties, 'validate_materials')
             row = layout.row()
