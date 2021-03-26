@@ -57,8 +57,11 @@ class Ue2RigifyTemplates(unittest.TestCase):
             # 'source_to_deform_links.json',
             # 'source_to_deform_nodes.json',
             'metarig.py',
-            'metarig_constraints.json',
         ]
+
+        if bpy.app.version[0] <= 2 and bpy.app.version[1] < 92:
+            template_files.append('metarig_constraints.json')
+
         properties = bpy.context.window_manager.ue2rigify
 
         # un freeze the rig

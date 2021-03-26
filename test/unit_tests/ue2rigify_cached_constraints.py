@@ -124,98 +124,99 @@ class Ue2RigifyCachedConstraintsTestCases(unittest.TestCase):
         """
         This method goes through every constraint type and creates it on the metarig and checks if they saved correctly.
         """
-        # all the currently available constraints in blender that will be tested
-        constraint_types = [
-            'CAMERA_SOLVER',
-            'FOLLOW_TRACK',
-            'OBJECT_SOLVER',
-            'COPY_LOCATION',
-            'COPY_ROTATION',
-            'COPY_SCALE',
-            'COPY_TRANSFORMS',
-            'LIMIT_DISTANCE',
-            'LIMIT_LOCATION',
-            'LIMIT_ROTATION',
-            'LIMIT_SCALE',
-            'MAINTAIN_VOLUME',
-            'TRANSFORM',
-            'TRANSFORM_CACHE',
-            'CLAMP_TO',
-            'DAMPED_TRACK',
-            'IK',
-            'LOCKED_TRACK',
-            'SPLINE_IK',
-            'STRETCH_TO',
-            'TRACK_TO',
-            'ACTION',
-            'ARMATURE',
-            'CHILD_OF',
-            'FLOOR',
-            'FOLLOW_PATH',
-            'PIVOT',
-            'SHRINKWRAP'
-        ]
+        if bpy.app.version[0] <= 2 and bpy.app.version[1] < 92:
+            # all the currently available constraints in blender that will be tested
+            constraint_types = [
+                'CAMERA_SOLVER',
+                'FOLLOW_TRACK',
+                'OBJECT_SOLVER',
+                'COPY_LOCATION',
+                'COPY_ROTATION',
+                'COPY_SCALE',
+                'COPY_TRANSFORMS',
+                'LIMIT_DISTANCE',
+                'LIMIT_LOCATION',
+                'LIMIT_ROTATION',
+                'LIMIT_SCALE',
+                'MAINTAIN_VOLUME',
+                'TRANSFORM',
+                'TRANSFORM_CACHE',
+                'CLAMP_TO',
+                'DAMPED_TRACK',
+                'IK',
+                'LOCKED_TRACK',
+                'SPLINE_IK',
+                'STRETCH_TO',
+                'TRACK_TO',
+                'ACTION',
+                'ARMATURE',
+                'CHILD_OF',
+                'FLOOR',
+                'FOLLOW_PATH',
+                'PIVOT',
+                'SHRINKWRAP'
+            ]
 
-        # set the source rig object
-        bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
+            # set the source rig object
+            bpy.context.window_manager.ue2rigify.source_rig_name = 'root'
 
-        # un freeze the rig
-        bpy.ops.ue2rigify.un_freeze_rig()
+            # un freeze the rig
+            bpy.ops.ue2rigify.un_freeze_rig()
 
-        # switch to metarig mode
-        bpy.ops.ue2rigify.switch_modes(mode='METARIG')
+            # switch to metarig mode
+            bpy.ops.ue2rigify.switch_modes(mode='METARIG')
 
-        # get the metarig and source rig
-        metarig_object = bpy.data.objects['metarig']
-        source_object = bpy.data.objects['root']
+            # get the metarig and source rig
+            metarig_object = bpy.data.objects['metarig']
+            source_object = bpy.data.objects['root']
 
-        # create every type of constraint on the rigs bones
-        for index, constraint_type in enumerate(constraint_types):
-            bone = metarig_object.pose.bones[index]
-            constraint = bone.constraints.new(constraint_type)
+            # create every type of constraint on the rigs bones
+            for index, constraint_type in enumerate(constraint_types):
+                bone = metarig_object.pose.bones[index]
+                constraint = bone.constraints.new(constraint_type)
 
-            # if it is an armature constraint create a target
-            if constraint_type == 'ARMATURE':
-                constraint.targets.new()
-                constraint.targets[0].target = source_object
-                constraint.targets[0].subtarget = 'ball_l'
+                # if it is an armature constraint create a target
+                if constraint_type == 'ARMATURE':
+                    constraint.targets.new()
+                    constraint.targets[0].target = source_object
+                    constraint.targets[0].subtarget = 'ball_l'
 
-            if hasattr(constraint_types, 'target'):
-                constraint.target = source_object
+                if hasattr(constraint_types, 'target'):
+                    constraint.target = source_object
 
-            if hasattr(constraint_types, 'subtarget'):
-                constraint.subtarget = 'ball_l'
+                if hasattr(constraint_types, 'subtarget'):
+                    constraint.subtarget = 'ball_l'
 
-        # switch to source mode
-        bpy.ops.ue2rigify.switch_modes(mode='SOURCE')
+            # switch to source mode
+            bpy.ops.ue2rigify.switch_modes(mode='SOURCE')
 
-        # switch to metarig mode
-        bpy.ops.ue2rigify.switch_modes(mode='METARIG')
-        metarig_object = bpy.data.objects['metarig']
+            # switch to metarig mode
+            bpy.ops.ue2rigify.switch_modes(mode='METARIG')
+            metarig_object = bpy.data.objects['metarig']
 
-        for bone_name, constraints_data in self.get_saved_metarig_constraints().items():
-            print(bone_name, constraints_data)
-            bone = metarig_object.pose.bones[bone_name]
-            for constraint_data in constraints_data:
-                constraint = bone.constraints.get(constraint_data['name'])
-                for attribute in dir(constraint):
-                    value = getattr(constraint, attribute)
-                    if value is not None and not attribute.startswith('__'):
-                        # dont save the attributes that are a type of constraint object
-                        if not type(value).__name__.endswith('Constraint'):
-                            # destructure the matrix object into a list of lists
-                            if type(value) == Matrix:
-                                value = self.get_matrix_data(value)
+            for bone_name, constraints_data in self.get_saved_metarig_constraints().items():
+                print(bone_name, constraints_data)
+                bone = metarig_object.pose.bones[bone_name]
+                for constraint_data in constraints_data:
+                    constraint = bone.constraints.get(constraint_data['name'])
+                    for attribute in dir(constraint):
+                        value = getattr(constraint, attribute)
+                        if value is not None and not attribute.startswith('__'):
+                            # dont save the attributes that are a type of constraint object
+                            if not type(value).__name__.endswith('Constraint'):
+                                # destructure the matrix object into a list of lists
+                                if type(value) == Matrix:
+                                    value = self.get_matrix_data(value)
 
-                            if attribute == 'target':
-                                value = value.name
+                                if attribute == 'target':
+                                    value = value.name
 
-                            if type(value) in [Color, Euler, Quaternion, Vector]:
-                                value = self.get_array_data(value)
+                                if type(value) in [Color, Euler, Quaternion, Vector]:
+                                    value = self.get_array_data(value)
 
-                            if type(value) == bpy.types.bpy_prop_collection:
-                                value = self.get_property_collections_data(value)
+                                if type(value) == bpy.types.bpy_prop_collection:
+                                    value = self.get_property_collections_data(value)
 
-                            saved_value = constraint_data.get(attribute)
-                            if saved_value:
-                                self.assertEqual(value, saved_value)
+                                saved_value = constraint_data.get(attribute)
+                                if saved_value:
+                                    self.assertEqual(value, saved_value)
