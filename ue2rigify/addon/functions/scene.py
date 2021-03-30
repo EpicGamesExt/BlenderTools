@@ -756,8 +756,9 @@ def create_meta_rig(properties):
         'OBJECT'
     )
 
-    # creates all the saved constraints on the metarig
-    templates.set_constraints_data(metarig_object, properties)
+    if bpy.app.version[0] <= 2 and bpy.app.version[1] < 92:
+        # creates all the saved constraints on the metarig
+        templates.set_constraints_data(metarig_object, properties)
 
     return metarig_object
 
