@@ -28,6 +28,10 @@ When using ‘Both’, it will export to the specified folders on disk and impor
 
 This makes the immediate parent collection the name of the asset.
 
+### Use collections as folders:
+
+This uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your unreal project.
+
 ### Mesh Folder (Unreal):
 
 This is the mesh import path. All your static and skeletal meshes will be imported to this location in your open unreal project.

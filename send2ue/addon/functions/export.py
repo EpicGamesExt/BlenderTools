@@ -776,7 +776,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                     # save the asset data
                     mesh_data.append({
                         'fbx_file_path': fbx_file_paths.get('unreal'),
-                        'game_path': properties.unreal_mesh_folder_path,
+                        'game_path': utilities.get_full_import_path(mesh_object, properties),
                         'skeletal_mesh': bool(rig_objects),
                         'import_mesh': True,
                         'lods': True
@@ -795,7 +795,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 # save the asset data
                 mesh_data.append({
                     'fbx_file_path': fbx_file_paths.get('unreal'),
-                    'game_path': properties.unreal_mesh_folder_path,
+                    'game_path': utilities.get_full_import_path(mesh_object, properties),
                     'skeletal_mesh': bool(rig_objects),
                     'import_mesh': True
                 })
