@@ -25,6 +25,10 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row = layout.row()
         row.prop(properties, 'options_type', expand=True)
 
+        if properties.options_type == 'general':            
+            row = layout.row()
+            row.prop(properties, 'automatically_create_collections')
+
         if properties.options_type == 'paths':
             row = layout.row()
             row.prop(properties, 'use_immediate_parent_collection_name')

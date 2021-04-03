@@ -622,7 +622,10 @@ def setup_project(*args):
     # remove the cached files
     remove_temp_folder()
 
-    create_groups(properties)
+    preferences = bpy.context.preferences.addons[properties.module_name].preferences
+
+    if preferences.automatically_create_collections:
+        create_groups(properties)
 
     from ..ui import header_menu
     header_menu.add_pipeline_menu()
