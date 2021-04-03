@@ -24,6 +24,70 @@ def get_action_name(action_name, properties):
         return action_name
 
 
+def get_collections_as_path(scene_object, properties, collection, sub_path=''):
+    """
+    This function walks the collection hierarchy till it finds the given scene object.
+
+    :param object scene_object: A object.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param object collection: A collection.
+    :param str sub_path: The current sub path.
+    :return str: The sub path to the given scene object.
+    """
+    if not sub_path:
+        properties.sub_folder_path = sub_path
+
+    if properties.use_collections_as_folders:
+        for child in collection.children:
+            if sub_path:
+                sub_path = f'{sub_path}{child.name}/'
+            else:
+                sub_path = f'{child.name}/'
+
+            get_collections_as_path(scene_object, properties, child, sub_path)
+            if scene_object in child.objects.values():
+                properties.sub_folder_path = sub_path
+
+    return properties.sub_folder_path.split(f'/{properties.mesh_collection_name}/')[-1]
+
+
+def get_import_path(scene_object, properties):
+    """
+    This function builds unreal import path.
+
+    :param object scene_object: A object.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The full import path for the given asset.
+    """
+    game_path = properties.unreal_mesh_folder_path
+    sub_path = get_collections_as_path(scene_object, properties, bpy.context.scene.collection)
+    if sub_path:
+        game_path = f'{game_path}{sub_path}'
+
+    return game_path
+
+
+def get_full_import_path(scene_object, properties, parent_collection=None):
+    """
+    This function builds unreal import path when using the immediate collection name as the asset name.
+
+    :param object scene_object: A object.
+    :param object parent_collection: A collection.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The full import path for the given asset.
+    """
+    mesh_collection = bpy.data.collections.get(properties.mesh_collection_name)
+    parent_collection = get_parent_collection(scene_object, mesh_collection)
+    import_path = get_import_path(scene_object, properties)
+
+    # get the import path if the collection hierarchy sub folder path to the unreal asset
+    if properties.use_immediate_parent_collection_name and parent_collection:
+        if import_path:
+            import_path = import_path.replace(f'{parent_collection.name}/', '')
+
+    return import_path
+
+
 def get_action_names(rig_object, properties, all_actions=True):
     """
     This function gets a list of action names from the provided rig objects animation data.
@@ -241,19 +305,20 @@ def get_skeleton_game_path(rig_object, properties):
             for child in children:
                 parent_collection = get_parent_collection(child, mesh_collection)
                 if parent_collection and parent_collection.name != properties.mesh_collection_name:
-                    return f'{properties.unreal_mesh_folder_path}{parent_collection.name}_Skeleton'
+                    import_path = get_full_import_path(child, properties)
+                    return f'{import_path}{parent_collection.name}_Skeleton'
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_unreal_asset_name(child.name, properties)
-                return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+                return f'{get_full_import_path(child, properties)}{asset_name}_Skeleton'
 
         # otherwise just use the first child mesh
         for child in children:
             if child in [mesh_object for mesh_object in bpy.data.objects if mesh_object.type == 'MESH']:
                 asset_name = get_unreal_asset_name(child.name, properties)
-                return f'{properties.unreal_mesh_folder_path}{asset_name}_Skeleton'
+                return f'{get_full_import_path(child, properties)}{asset_name}_Skeleton'
 
     report_error(
         f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '

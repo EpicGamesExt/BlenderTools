@@ -20,6 +20,8 @@ class Send2UeProperties:
     error_message: bpy.props.StringProperty(default='')
     # whether to use ue2rigify or not
     use_ue2rigify: bpy.props.BoolProperty(default=False)
+    # the path made by the collection hierarchy
+    sub_folder_path: bpy.props.StringProperty(default='')
 
 
 class Send2UeUIProperties:
@@ -53,13 +55,6 @@ class Send2UeUIProperties:
         default=True,
         description=f"This automatically creates the pre-defined addon collections (Mesh, Rig, Collision, Extras)"
     )
-    use_immediate_parent_collection_name: bpy.props.BoolProperty(
-        name="Use immediate parent collection name",
-        default=False,
-        description=(
-            "This makes the immediate parent collection the name of the asset"
-        )
-    )
     path_mode: bpy.props.EnumProperty(
         name='Path Mode',
         items=[
@@ -69,6 +64,21 @@ class Send2UeUIProperties:
         ],
         default='send_to_unreal',
         description="Select which type of paths you want to export to"
+    )
+    use_immediate_parent_collection_name: bpy.props.BoolProperty(
+        name="Use immediate parent collection name",
+        default=False,
+        description=(
+            "This makes the immediate parent collection the name of the asset"
+        )
+    )
+    use_collections_as_folders: bpy.props.BoolProperty(
+        name="Use collections as folders",
+        default=False,
+        description=(
+            "This uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your "
+            "unreal project"
+        )
     )
     unreal_mesh_folder_path: bpy.props.StringProperty(
         name="Set the mesh import path",
@@ -312,7 +322,7 @@ class Send2UeUIProperties:
                ),
         description="Export smoothing information "
                     "(prefer 'Normals Only' option if your target importer understand split normals)",
-        default='FACE',
+        default='OFF',
     )
     use_subsurf: bpy.props.BoolProperty(
         name="Export Subdivision Surface",

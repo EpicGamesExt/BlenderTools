@@ -31,10 +31,13 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
 
         if properties.options_type == 'paths':
             row = layout.row()
-            row.prop(properties, 'use_immediate_parent_collection_name')
-            row = layout.row()
             row.prop(properties, 'path_mode', text='')
+            row = layout.row()
+            row.prop(properties, 'use_immediate_parent_collection_name')
+
             if properties.path_mode in ['send_to_unreal', 'both']:
+                row = layout.row()
+                row.prop(properties, 'use_collections_as_folders')
 
                 # Mesh Folder (Unreal)
                 row = layout.row()
