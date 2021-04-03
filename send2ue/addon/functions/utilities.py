@@ -598,7 +598,7 @@ def load_properties(*args):
 
 def addon_enabled():
     """
-    This function to designed to be called once after the addon is activated. Since the scene context
+    This function is designed to be called once after the addon is activated. Since the scene context
     is not accessible from inside a addon's register function, this function can be added to the event
     timer, then make function calls that use the scene context, and then is removed.
     """
