@@ -682,14 +682,14 @@ def setup_project(*args):
 
     :param args: This soaks up the extra arguments for the app handler.
     """
-    properties = bpy.context.window_manager.send2ue
 
     # remove the cached files
     remove_temp_folder()
 
-    preferences = bpy.context.preferences.addons[properties.module_name].preferences
+    properties = bpy.context.window_manager.send2ue
+    addon = bpy.context.preferences.addons.get(properties.module_name)
 
-    if preferences.automatically_create_collections:
+    if addon and addon.preferences.automatically_create_collections:
         create_groups(properties)
 
     from ..ui import header_menu
