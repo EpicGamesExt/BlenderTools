@@ -41,6 +41,7 @@ classes = [
     operators.Send2Ue,
     operators.AdvancedSend2Ue,
     operators.ImportAsset,
+    operators.CreatePredefinedCollections,
     operators.NullOperator,
     addon_preferences.SendToUnrealPreferences,
     header_menu.TOPBAR_MT_Export,

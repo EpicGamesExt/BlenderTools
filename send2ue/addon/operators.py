@@ -48,6 +48,17 @@ class ImportAsset(bpy.types.Operator, importer.ImportAsset):
         return {'FINISHED'}
 
 
+class CreatePredefinedCollections(bpy.types.Operator):
+    """Create the pre-defined addon collections (Mesh, Rig, Collision, Extras)"""
+    bl_idname = "wm.create_predefined_collections"
+    bl_label = "Create Pre-defined Collections"
+
+    def execute(self, context):
+        properties = bpy.context.window_manager.send2ue
+        utilities.create_groups(properties)
+        return {'FINISHED'}        
+
+
 class NullOperator(bpy.types.Operator):
     """This is an operator that changes nothing, but it used to clear the undo stack"""
     bl_idname = "send2ue.null_operator"
