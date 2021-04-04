@@ -15,7 +15,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         """
         This defines the draw method, which is in all Blender UI types that create interfaces.
         :param context: The context of this interface.
-        :param properties: The context of this interface.
+        :param properties: The add-on properties to use.
         """
         layout = self.layout
 
@@ -24,6 +24,10 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
 
         row = layout.row()
         row.prop(properties, 'options_type', expand=True)
+
+        if properties.options_type == 'general':            
+            row = layout.row()
+            row.prop(properties, 'automatically_create_collections')
 
         if properties.options_type == 'paths':
             row = layout.row()

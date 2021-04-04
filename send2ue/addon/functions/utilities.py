@@ -663,7 +663,7 @@ def load_properties(*args):
 
 def addon_enabled():
     """
-    This function to designed to be called once after the addon is activated. Since the scene context
+    This function is designed to be called once after the addon is activated. Since the scene context
     is not accessible from inside a addon's register function, this function can be added to the event
     timer, then make function calls that use the scene context, and then is removed.
     """
@@ -687,7 +687,10 @@ def setup_project(*args):
     # remove the cached files
     remove_temp_folder()
 
-    create_groups(properties)
+    preferences = bpy.context.preferences.addons[properties.module_name].preferences
+
+    if preferences.automatically_create_collections:
+        create_groups(properties)
 
     from ..ui import header_menu
     header_menu.add_pipeline_menu()

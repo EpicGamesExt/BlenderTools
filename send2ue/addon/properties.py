@@ -41,13 +41,19 @@ class Send2UeUIProperties:
     # addon preferences user interface properties
     options_type: bpy.props.EnumProperty(
         items=[
-            ('paths', 'Paths', '', '', 0),
-            ('export', 'Export', '', '', 1),
-            ('import', 'Import', '', '', 2),
-            ('validations', 'Validations', '', '', 3)
+            ('general', 'General', '', '', 0),
+            ('paths', 'Paths', '', '', 1),
+            ('export', 'Export', '', '', 2),
+            ('import', 'Import', '', '', 3),
+            ('validations', 'Validations', '', '', 4)
         ],
         default="paths",
         description="Select which preferences you want to edit"
+    )    
+    automatically_create_collections: bpy.props.BoolProperty(
+        name="Automatically create pre-defined addon collections",
+        default=True,
+        description=f"This automatically creates the pre-defined addon collections (Mesh, Rig, Collision, Extras)"
     )
     path_mode: bpy.props.EnumProperty(
         name='Path Mode',
