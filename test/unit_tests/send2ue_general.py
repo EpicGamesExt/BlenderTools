@@ -2,12 +2,6 @@
 import os
 import bpy
 import unittest
-import unreal_utilities
-import logging
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 class Send2UeGeneralTestCases(unittest.TestCase):
