@@ -17,6 +17,9 @@ categories:
       - title: Preferences
         folder: preferences
         submenus:
+          - title: General
+            url: /send2ue/preferences/general.html
+
           - title: Paths
             url: /send2ue/preferences/paths.html
 

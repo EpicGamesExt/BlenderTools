@@ -24,31 +24,23 @@ def get_action_name(action_name, properties):
         return action_name
 
 
-def get_collections_as_path(scene_object, properties, collection, sub_path=''):
+def get_collections_as_path(scene_object, properties):
     """
     This function walks the collection hierarchy till it finds the given scene object.
 
     :param object scene_object: A object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param object collection: A collection.
-    :param str sub_path: The current sub path.
     :return str: The sub path to the given scene object.
     """
-    if not sub_path:
-        properties.sub_folder_path = sub_path
+    parent_names = []
+    if properties.use_collections_as_folders and len(scene_object.users_collection) > 0:
+        parent_collection = scene_object.users_collection[0]
+        parent_names.append(parent_collection.name)
+        set_parent_collection_names(parent_collection, parent_names)
+        parent_names.reverse()
+        return '/'.join(parent_names).replace(f'{properties.mesh_collection_name}/', '')
 
-    if properties.use_collections_as_folders:
-        for child in collection.children:
-            if sub_path:
-                sub_path = f'{sub_path}{child.name}/'
-            else:
-                sub_path = f'{child.name}/'
-
-            get_collections_as_path(scene_object, properties, child, sub_path)
-            if scene_object in child.objects.values():
-                properties.sub_folder_path = sub_path
-
-    return properties.sub_folder_path.split(f'/{properties.mesh_collection_name}/')[-1]
+    return ''
 
 
 def get_import_path(scene_object, properties):
@@ -60,9 +52,9 @@ def get_import_path(scene_object, properties):
     :return str: The full import path for the given asset.
     """
     game_path = properties.unreal_mesh_folder_path
-    sub_path = get_collections_as_path(scene_object, properties, bpy.context.scene.collection)
+    sub_path = get_collections_as_path(scene_object, properties)
     if sub_path:
-        game_path = f'{game_path}{sub_path}'
+        game_path = f'{game_path}{sub_path}/'
 
     return game_path
 
@@ -324,6 +316,21 @@ def get_skeleton_game_path(rig_object, properties):
         f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
         f'so it can be imported correctly!'
     )
+
+
+def set_parent_collection_names(collection, parent_names):
+    """
+    This function recursively adds the parent collection names to the given list until.
+
+    :param object collection: A collection.
+    :param list parent_names: A list of parent collection names.
+    :return list: A list of parent collection names.
+    """
+    for parent_collection in bpy.data.collections:
+        if collection.name in parent_collection.children.keys():
+            parent_names.append(parent_collection.name)
+            set_parent_collection_names(parent_collection, parent_names)
+            return None
 
 
 def set_selected_objects(scene_object_names):
@@ -682,13 +689,12 @@ def setup_project(*args):
 
     :param args: This soaks up the extra arguments for the app handler.
     """
+    properties = bpy.context.window_manager.send2ue
 
     # remove the cached files
     remove_temp_folder()
 
-    properties = bpy.context.window_manager.send2ue
     addon = bpy.context.preferences.addons.get(properties.module_name)
-
     if addon and addon.preferences.automatically_create_collections:
         create_groups(properties)
 

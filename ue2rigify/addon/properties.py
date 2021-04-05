@@ -41,7 +41,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
     picker_name = 'picker'
 
     # rigify constants
-    widgets_collection_name = 'Widgets'
+    widgets_collection_name = 'WGTS_rig'
     meta_rig_name = 'metarig'
     control_rig_name = 'rig'
     rig_ui_file_name = 'rig_ui.py'
