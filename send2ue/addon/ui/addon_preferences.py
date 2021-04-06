@@ -180,6 +180,21 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         if properties.show_animation_settings:
             self.draw_animation_settings(properties, box)
 
+        #  asset name affixes box
+        row = layout.row()
+        box = row.box()
+        row = box.row()
+        row.prop(
+                properties,
+                'show_name_affix_settings',
+                icon='TRIA_DOWN' if properties.show_name_affix_settings else 'TRIA_RIGHT',
+                icon_only=True,
+                emboss=False
+            )
+        row.label(text='Asset Name Affixes', icon='SYNTAX_OFF')
+        
+        if properties.show_name_affix_settings:
+            self.draw_asset_affix_settings(properties, box)
 
         # fbx export settings box
         row = layout.row()
@@ -214,6 +229,30 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row = layout.row()
         row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
         row.prop(properties, 'auto_sync_control_nla_to_source')
+
+    def draw_asset_affix_settings(self, properties, layout):
+        """
+        Draws all the properties in the Name Affix Settings box.
+        :param properties: The add-on properties to use.
+        :param layout: The layout container for this tab.
+        """
+        row = layout.row()
+        row.prop(properties, 'add_asset_name_affixes')
+
+        row = layout.row()
+        row.prop(self, 'static_mesh_name_affix')
+        row = layout.row()
+        row.prop(self, 'texture_name_affix')
+        row = layout.row()
+        row.prop(self, 'material_name_affix')
+        row = layout.row()
+        row.prop(self, 'skeletal_mesh_name_affix')
+        row = layout.row()
+        row.prop(self, 'skeleton_name_affix')
+        row = layout.row()
+        row.prop(self, 'physics_asset_name_affix')
+        row = layout.row()
+        row.prop(self, 'animation_sequence_name_affix')
 
     def draw_fbx_settings(self, properties, layout):
         """
