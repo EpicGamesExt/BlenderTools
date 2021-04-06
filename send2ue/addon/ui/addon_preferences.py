@@ -160,23 +160,29 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         :param layout: The layout container for this tab.
         """
         row = layout.row()
-        row.prop(properties, 'automatically_scale_bones')
-        row = layout.row()
-        row.prop(properties, 'export_all_actions')
-        row = layout.row()
-        row.prop(properties, 'auto_stash_active_action')
-
-        # this option is greyed out unless ue2rigify is active
-        row = layout.row()
-        row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
-        row.prop(properties, 'auto_sync_control_nla_to_source')
-        row = layout.row()
         row.prop(properties, 'use_object_origin')
         row = layout.row()
         row.prop(properties, 'combine_child_meshes')
+
+        #  animation settings box
         row = layout.row()
+        box = row.box()
+        row = box.row()
+        row.prop(
+                properties,
+                'show_animation_settings',
+                icon='TRIA_DOWN' if properties.show_animation_settings else 'TRIA_RIGHT',
+                icon_only=True,
+                emboss=False
+            )
+        row.label(text='Animation Settings', icon='ARMATURE_DATA')   
+        
+        if properties.show_animation_settings:
+            self.draw_animation_settings(properties, box)
+
 
         # fbx export settings box
+        row = layout.row()
         box = row.box()
         row = box.row()
         row.prop(
@@ -191,9 +197,27 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         if properties.show_fbx_settings:
             self.draw_fbx_settings(properties, box)
 
+    def draw_animation_settings(self, properties, layout):
+        """
+        Draws all the properties in the Animation Settings box.
+        :param properties: The add-on properties to use.
+        :param layout: The layout container for this tab.
+        """
+        row = layout.row()
+        row.prop(properties, 'automatically_scale_bones')
+        row = layout.row()
+        row.prop(properties, 'export_all_actions')
+        row = layout.row()
+        row.prop(properties, 'auto_stash_active_action')
+
+        # this option is greyed out unless ue2rigify is active
+        row = layout.row()
+        row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
+        row.prop(properties, 'auto_sync_control_nla_to_source')
+
     def draw_fbx_settings(self, properties, layout):
         """
-        Draws all the properties in the FBX Settings panel.
+        Draws all the properties in the FBX Settings box.
         :param properties: The add-on properties to use.
         :param layout: The layout container for this tab.
         """

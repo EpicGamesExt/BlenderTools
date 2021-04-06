@@ -238,6 +238,7 @@ class Send2UeUIProperties:
     )
 
     # ----------- read/write variables -----------
+    show_animation_settings: bpy.props.BoolProperty(default=False)
     show_fbx_settings: bpy.props.BoolProperty(default=False)
     incorrect_unreal_mesh_folder_path: bpy.props.BoolProperty(default=False)
     incorrect_unreal_animation_folder_path: bpy.props.BoolProperty(default=False)
