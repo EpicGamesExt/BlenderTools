@@ -29,7 +29,7 @@ def validate_collections_exist(properties):
 
 def validate_object_names(mesh_objects, rig_objects):
     """
-    This function checks each object to see if the name of the object matches the supplied regex expression.
+    This function checks each object for invalid names.
 
     :param list mesh_objects: The list of mesh objects to be validated.
     :param list rig_objects: The list of armature objects to be validated.
@@ -47,7 +47,7 @@ def validate_object_names(mesh_objects, rig_objects):
 
 def validate_scene_units(properties):
     """
-    This function checks each object to see if the name of the object matches the supplied regex expression.
+    This function checks that the unit settings are correct.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return bool: True if the objects passed the validation.
