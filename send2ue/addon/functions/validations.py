@@ -27,6 +27,49 @@ def validate_collections_exist(properties):
     return True
 
 
+def validate_object_names(mesh_objects, rig_objects):
+    """
+    This function checks each object to see if the name of the object matches the supplied regex expression.
+
+    :param list mesh_objects: The list of mesh objects to be validated.
+    :param list rig_objects: The list of armature objects to be validated.
+    :return bool: True if the objects passed the validation.
+    """
+    for scene_object in mesh_objects + rig_objects:
+        # check if the object name is none
+        if scene_object.name.lower() in ['none']:
+            utilities.report_error(
+                f'Object "{scene_object.name}" has an invalid name. Please rename it.'
+            )
+            return False
+    return True
+
+
+def validate_scene_units(properties):
+    """
+    This function checks each object to see if the name of the object matches the supplied regex expression.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return bool: True if the objects passed the validation.
+    """
+    if properties.validate_unit_settings:
+        unit_settings = bpy.context.scene.unit_settings
+        if unit_settings.system != 'METRIC':
+            utilities.report_error(
+                f'"{unit_settings.system}" unit system is not recommended. Please change to "METRIC", or disable '
+                f'this validation.'
+            )
+            return False
+
+        if round(unit_settings.scale_length, 2) != 1.00:
+            utilities.report_error(
+                f'Unit scale {round(unit_settings.scale_length, 2)} is not recommended. Please change to 1.0, '
+                f'or disable this validation.'
+            )
+            return False
+    return True
+
+
 def validate_geometry_exists(mesh_objects):
     """
     This function checks the geometry of each object to see if it has vertices.
@@ -212,31 +255,14 @@ def validate_unreal_path_by_property(properties, property_name, detailed_message
 
         if property_name == "incorrect_unreal_skeleton_path":
             if getattr(properties, property_name):
-                message = f'The skeleton asset name "{properties.unreal_skeleton_asset_path}" needs to start with "/Game`". '
+                message = f'The skeleton asset "{properties.unreal_skeleton_asset_path}" does not exist in unreal.'
 
                 if detailed_message:
-                    message += f'Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly.'
+                    message += f' Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly.'
 
             return message
 
     return message
-
-
-def validate_unreal_skeleton_path(unreal, properties):
-    """
-    This function checks to make sure this skeleton exists in unreal.
-
-    :param object unreal: The unreal utilities module.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return bool: True if the objects passed the validation.
-    """
-    if properties.unreal_skeleton_asset_path:
-        if not unreal.asset_exists(properties.unreal_skeleton_asset_path):
-            utilities.report_error(
-                f'There is no skeleton in your unreal project at: "{properties.unreal_skeleton_asset_path}".'
-            )
-            return False
-    return True
 
 
 def validate_geometry_materials(mesh_objects):

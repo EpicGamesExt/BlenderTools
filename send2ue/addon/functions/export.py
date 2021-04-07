@@ -755,50 +755,50 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
     :return list: A list of dictionaries containing the mesh import data.
     """
     mesh_data = []
-    # don't import meshes if importing onto an existing skeleton
-    if not properties.unreal_skeleton_asset_path:
-        # if importing lods
-        if properties.import_lods:
-            exported_asset_names = []
+    # if importing lods
+    if properties.import_lods:
+        exported_asset_names = []
 
-            # recreate the lod meshes to ensure the correct order
-            mesh_objects = utilities.recreate_lod_meshes(mesh_objects)
+        # recreate the lod meshes to ensure the correct order
+        mesh_objects = utilities.recreate_lod_meshes(mesh_objects)
 
-            for mesh_object in mesh_objects:
-                # get the name of the asset without the lod postfix
-                asset_name = utilities.get_unreal_asset_name(mesh_object.name, properties)
+        for mesh_object in mesh_objects:
+            # get the name of the asset without the lod postfix
+            asset_name = utilities.get_unreal_asset_name(mesh_object.name, properties)
 
-                # if this asset name is not in the list of exported assets names
-                if asset_name not in exported_asset_names:
-                    # export the asset's lod meshes
-                    fbx_file_paths = export_mesh_lods(asset_name, properties)
-
-                    # save the asset data
-                    mesh_data.append({
-                        'fbx_file_path': fbx_file_paths.get('unreal'),
-                        'game_path': utilities.get_full_import_path(mesh_object, properties),
-                        'skeletal_mesh': bool(rig_objects),
-                        'import_mesh': True,
-                        'lods': True
-                    })
-
-                    # add this asset to the list of exported assets
-                    exported_asset_names.append(asset_name)
-
-        # otherwise if not importing lods
-        else:
-            # get the asset data for the scene objects
-            for mesh_object in mesh_objects:
-                # export the object
-                fbx_file_paths = export_mesh(mesh_object, properties)
+            # if this asset name is not in the list of exported assets names
+            if asset_name not in exported_asset_names:
+                # export the asset's lod meshes
+                fbx_file_paths = export_mesh_lods(asset_name, properties)
 
                 # save the asset data
                 mesh_data.append({
                     'fbx_file_path': fbx_file_paths.get('unreal'),
                     'game_path': utilities.get_full_import_path(mesh_object, properties),
                     'skeletal_mesh': bool(rig_objects),
-                    'import_mesh': True
+                    'skeleton_game_path': properties.unreal_skeleton_asset_path,
+                    'import_mesh': True,
+                    'lods': True
                 })
+
+                # add this asset to the list of exported assets
+                exported_asset_names.append(asset_name)
+
+    # otherwise if not importing lods
+    else:
+        # get the asset data for the scene objects
+        for mesh_object in mesh_objects:
+            # export the object
+            fbx_file_paths = export_mesh(mesh_object, properties)
+
+            # save the asset data
+            mesh_data.append({
+                'fbx_file_path': fbx_file_paths.get('unreal'),
+                'game_path': utilities.get_full_import_path(mesh_object, properties),
+                'skeletal_mesh': bool(rig_objects),
+                'skeleton_game_path': properties.unreal_skeleton_asset_path,
+                'import_mesh': True
+            })
 
     return mesh_data
 
@@ -849,6 +849,12 @@ def validate(properties):
     if not validations.validate_collections_exist(properties):
         return False
 
+    if not validations.validate_object_names(mesh_objects, rig_objects):
+        return False
+
+    if not validations.validate_scene_units(properties):
+        return False
+
     if not validations.validate_geometry_exists(mesh_objects):
         return False
 
@@ -856,9 +862,6 @@ def validate(properties):
         return False
 
     if not validations.validate_unreal_paths(properties):
-        return False
-
-    if not validations.validate_unreal_skeleton_path(unreal, properties):
         return False
 
     if properties.validate_materials:

@@ -34,7 +34,6 @@ class Send2UeGeneralTestCases(unittest.TestCase):
         for coll in properties.collection_names:
             self.assertTrue(bpy.data.collections.get(coll))
 
-
     def test_predefined_collections_not_created(self):
         """
         Checks that the pre-defined collections haven't been automatically created by the addon.
