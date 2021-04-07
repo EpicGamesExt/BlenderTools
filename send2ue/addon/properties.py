@@ -49,7 +49,7 @@ class Send2UeUIProperties:
         ],
         default="paths",
         description="Select which preferences you want to edit"
-    )    
+    )
     automatically_create_collections: bpy.props.BoolProperty(
         name="Automatically create pre-defined addon collections",
         default=True,
@@ -212,6 +212,20 @@ class Send2UeUIProperties:
         default=False,
         description="When enabled this option launches the FBX import UI in Unreal"
     )
+    validate_unit_settings: bpy.props.BoolProperty(
+        name="Check scene units",
+        default=True,
+        description=(
+            "This checks the scene units and ensures they are set to metric, and the scene scale is 1"
+        )
+    )
+    validate_armature_transforms: bpy.props.BoolProperty(
+        name="Check armatures for un-applied transforms",
+        default=True,
+        description=(
+            "If an armature object has un-applied transforms a message is thrown to the user"
+        )
+    )
     validate_materials: bpy.props.BoolProperty(
         name="Check if asset has unused materials",
         default=False,
@@ -227,13 +241,6 @@ class Send2UeUIProperties:
         description=(
             "If a texture referenced in an object’s material can not be found in the blend file data than a error "
             "message is thrown to the user"
-        )
-    )
-    validate_armature_transforms: bpy.props.BoolProperty(
-        name="Check armatures for un-applied transforms",
-        default=True,
-        description=(
-            "If an armature object has un-applied transforms a message is thrown to the user"
         )
     )
 

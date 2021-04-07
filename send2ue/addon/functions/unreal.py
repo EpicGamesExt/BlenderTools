@@ -83,18 +83,16 @@ def import_asset(asset_data, properties):
             f'\toptions.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH',
             f'\toptions.static_mesh_import_data.import_mesh_lo_ds = {bool(asset_data.get("lods"))}',
 
+            # try to load the provided skeleton
+            f'skeleton_asset = unreal.load_asset(r"{asset_data.get("skeleton_game_path")}")',
+            f'if skeleton_asset:',
+            f'\toptions.set_editor_property("skeleton", skeleton_asset)',
+
             # if this is an animation import
             f'if {bool(asset_data.get("animation"))}:',
-            f'\tskeleton_asset = unreal.load_asset(r"{asset_data.get("skeleton_game_path")}")',
-
-            # if a skeleton can be loaded from the provided path
-            f'\tif skeleton_asset:',
-            f'\t\toptions.set_editor_property("skeleton", skeleton_asset)',
-            f'\t\toptions.set_editor_property("original_import_type", unreal.FBXImportType.FBXIT_ANIMATION)',
-            f'\t\toptions.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)',
-            f'\t\toptions.anim_sequence_import_data.set_editor_property("preserve_local_transform", True)',
-            f'\telse:',
-            f'\t\traise RuntimeError("Unreal could not find a skeleton here: {asset_data.get("skeleton_game_path")}")',
+            f'\toptions.set_editor_property("original_import_type", unreal.FBXImportType.FBXIT_ANIMATION)',
+            f'\toptions.set_editor_property("mesh_type_to_import", unreal.FBXImportType.FBXIT_ANIMATION)',
+            f'\toptions.anim_sequence_import_data.set_editor_property("preserve_local_transform", True)',
 
             # assign the options object to the import task and import the asset
             f'import_task.options = options',

@@ -185,6 +185,27 @@ def delete_directory(directory_path):
         raise RuntimeError(f"delete_directory failed to delete {directory_path}")
 
 
+def delete_asset(asset_path):
+    """
+    This function deletes an unreal asset from the project.
+
+    :param str asset_path: The game path to the unreal project folder.
+    """
+    # start a connection to the engine that lets you send python strings
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+
+    # send over the python code as a string
+    run_unreal_python_commands(
+        remote_exec,
+        '\n'.join([
+            f'unreal.EditorAssetLibrary.delete_asset(r"{asset_path}")',
+        ]))
+
+    if unreal_response is None or not unreal_response['success']:
+        raise RuntimeError(f"delete_asset failed to delete {asset_path}")
+
+
 def is_unreal_running(attempts, ping):
     """
     This function suspends the program execution until unreal remote execution socket responds.

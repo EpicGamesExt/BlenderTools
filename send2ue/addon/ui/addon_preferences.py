@@ -25,7 +25,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row = layout.row()
         row.prop(properties, 'options_type', expand=True)
 
-        if properties.options_type == 'general':            
+        if properties.options_type == 'general':
             row = layout.row()
             row.prop(properties, 'automatically_create_collections')
 
@@ -45,7 +45,6 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
 
                 # disable the mesh folder path input if a skeleton path is provided
                 row = layout.row()
-                row.enabled = not bool(properties.unreal_skeleton_asset_path)
                 row.alert = properties.incorrect_unreal_mesh_folder_path
                 row.prop(properties, 'unreal_mesh_folder_path', text='')
                 utilities.report_path_error_message(
@@ -227,6 +226,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                 row.prop(properties, 'use_metadata')
 
         if properties.options_type == 'validations':
+            row = layout.row()
+            row.prop(properties, 'validate_unit_settings')
             row = layout.row()
             row.prop(properties, 'validate_armature_transforms')
             row = layout.row()
