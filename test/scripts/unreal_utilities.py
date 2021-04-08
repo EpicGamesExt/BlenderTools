@@ -67,6 +67,36 @@ def run_unreal_python_commands(remote_exec, commands, attempts=50, ping=0.1):
         remote_exec.stop()
 
 
+def get_lod_count(game_path):
+    """
+    This function gets the number of lods on the given asset.
+
+    :param str game_path: The game path to the unreal asset.
+    :return int: The number of lods on the asset.
+    """
+    # start a connection to the engine that lets you send python strings
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+
+    # send over the python code as a string
+    run_unreal_python_commands(
+        remote_exec,
+        '\n'.join([
+            f'lod_count=0',
+            f'game_asset = unreal.load_asset(r"{game_path}")',
+            f'if game_asset and game_asset.__class__.__name__ == "SkeletalMesh":',
+            f'\tlod_count = unreal.EditorSkeletalMeshLibrary.get_lod_count(game_asset)',
+
+            f'if game_asset and game_asset.__class__.__name__ == "StaticMesh":',
+            f'\tlod_count = unreal.EditorStaticMeshLibrary.get_lod_count(game_asset)',
+            f'print(lod_count)'
+        ]))
+
+    if unreal_response:
+        if unreal_response['success']:
+            return int(unreal_response['output'][0]['output'])
+
+
 def asset_exists(game_path):
     """
     This function checks to see if an asset exist in unreal.
