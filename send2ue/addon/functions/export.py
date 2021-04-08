@@ -478,7 +478,14 @@ def is_collision_of(asset_name, mesh_object_name):
     :param str asset_name: The name of the asset to export.
     :param str mesh_object_name: The name of the collision mesh.
     """
-    return bool(re.fullmatch(r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?", mesh_object_name))
+    return bool(
+        re.fullmatch(
+            r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?",
+            mesh_object_name
+        ) or re.fullmatch(
+            r"U(BX|CP|SP|CX)_" + asset_name + r"_LOD\d+(_\d+)?", mesh_object_name
+        )
+    )
 
 
 def select_asset_collisions(asset_name, properties):
@@ -549,7 +556,7 @@ def export_mesh_lods(asset_name, properties):
                 # select the lod mesh
                 mesh_object.select_set(True)
 
-        # select collsion meshes
+        # select collision meshes
         select_asset_collisions(asset_name, properties)
 
         # select sockets
@@ -558,6 +565,8 @@ def export_mesh_lods(asset_name, properties):
         # export the selected lod meshes and empty
         fbx_file_paths = get_fbx_paths(asset_name, 'MESH')
         export_fbx_files(fbx_file_paths, properties)
+
+        # raise RuntimeError('Stop!!')
 
         # un-parent the empty from the lod objects and deselect them
         for lod_object, lod_object_parent in lod_objects:

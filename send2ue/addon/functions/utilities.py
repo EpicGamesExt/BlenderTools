@@ -1171,6 +1171,8 @@ def recreate_lod_meshes(mesh_objects):
 
     for mesh_object in mesh_objects:
         if 'LOD' in mesh_object.name:
+            if bpy.context.mode != 'OBJECT':
+                bpy.ops.object.mode_set(mode='OBJECT')
 
             previous_object_name = mesh_object.name
             previous_mesh_name = mesh_object.data.name
