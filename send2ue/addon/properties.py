@@ -50,11 +50,15 @@ class Send2UeUIProperties:
         default="paths",
         description="Select which preferences you want to edit"
     )
+    
+    # ---------------------------- General Tab --------------------------------
     automatically_create_collections: bpy.props.BoolProperty(
         name="Automatically create pre-defined addon collections",
         default=True,
         description=f"This automatically creates the pre-defined addon collections (Mesh, Rig, Collision, Extras)"
     )
+    
+    # ---------------------------- Paths Tab -----------------------------------
     path_mode: bpy.props.EnumProperty(
         name='Path Mode',
         items=[
@@ -106,7 +110,7 @@ class Send2UeUIProperties:
             "This is the direct path to the Skeleton you want to import animation on. You can get this path by "
             "right-clicking on the skeleton asset in Unreal and selecting ‘Copy Reference’"
         )
-    )
+    )    
     disk_mesh_folder_path: bpy.props.StringProperty(
         name="Set the mesh import path",
         default=r"C:/",
@@ -126,6 +130,24 @@ class Send2UeUIProperties:
             "action names in Blender"
         )
     )
+    
+    # ---------------------------- Export Tab ---------------------------------
+    use_object_origin: bpy.props.BoolProperty(
+        name="Use object origin",
+        default=False,
+        description=(
+            "When active, this option will center each object at world origin before it is exported to an FBX, then it "
+            "will move each object back to its original position"
+        )
+    )
+    combine_child_meshes: bpy.props.BoolProperty(
+        name="Combine child meshes",
+        default=False,
+        description=(
+            "This combines all children mesh of an object into as a single mesh when exported"
+        )
+    )
+    # Animation Settings
     automatically_scale_bones: bpy.props.BoolProperty(
         name="Automatically scale bones",
         default=True,
@@ -159,103 +181,8 @@ class Send2UeUIProperties:
             "are: nla track name, nla track mute value, strip name, strip start frame, strip end frame, and strip scale"
         )
     )
-    use_object_origin: bpy.props.BoolProperty(
-        name="Use object origin",
-        default=False,
-        description=(
-            "When active, this option will center each object at world origin before it is exported to an FBX, then it "
-            "will move each object back to its original position"
-        )
-    )
-    combine_child_meshes: bpy.props.BoolProperty(
-        name="Combine child meshes",
-        default=False,
-        description=(
-            "This combines all children mesh of an object into as a single mesh when exported"
-        )
-    )
-    import_materials: bpy.props.BoolProperty(
-        name="Materials",
-        default=True,
-        description="Whether or not to import the materials from the FBX file"
-    )
-    import_textures: bpy.props.BoolProperty(
-        name="Textures",
-        default=True,
-        description="Whether or not to import the Textures from the FBX file"
-    )
-    import_animations: bpy.props.BoolProperty(
-        name="Animations",
-        default=True,
-        description="Whether or not to import the animation from the FBX file"
-    )
-    import_lods: bpy.props.BoolProperty(
-        name="LODs",
-        default=False,
-        description="Whether or not to import the custom LODs from the FBX file"
-    )
-    import_sockets: bpy.props.BoolProperty(
-        name="Sockets",
-        default=False,
-        description="Imports an empty as a socket as long as it is a child of a mesh and its name starts with 'SOCKET_'."
-                    "(Only works on static meshes)"
-    )
-    import_object_name_as_root: bpy.props.BoolProperty(
-        name="Object name as root bone",
-        default=True,
-        description=(
-            "This uses the armature object's name in blender as the root bone name in Unreal"
-        )
-    )
-    advanced_ui_import: bpy.props.BoolProperty(
-        name="Launch FBX Import UI",
-        default=False,
-        description="When enabled this option launches the FBX import UI in Unreal"
-    )
-    validate_unit_settings: bpy.props.BoolProperty(
-        name="Check scene units",
-        default=True,
-        description=(
-            "This checks the scene units and ensures they are set to metric, and the scene scale is 1"
-        )
-    )
-    validate_armature_transforms: bpy.props.BoolProperty(
-        name="Check armatures for un-applied transforms",
-        default=True,
-        description=(
-            "If an armature object has un-applied transforms a message is thrown to the user"
-        )
-    )
-    validate_materials: bpy.props.BoolProperty(
-        name="Check if asset has unused materials",
-        default=False,
-        description=(
-            "If this option is on it looks at each material index on the object and it checks if that material is "
-            "assigned to a vertex on the mesh object. If there is a unused material, then an error message is thrown "
-            "to the user"
-        )
-    )
-    validate_textures: bpy.props.BoolProperty(
-        name="Check texture references",
-        default=False,
-        description=(
-            "If a texture referenced in an object’s material can not be found in the blend file data than a error "
-            "message is thrown to the user"
-        )
-    )
-
-    # ----------- read/write variables -----------
-    show_animation_settings: bpy.props.BoolProperty(default=False)
-    show_fbx_settings: bpy.props.BoolProperty(default=False)
-    incorrect_unreal_mesh_folder_path: bpy.props.BoolProperty(default=False)
-    incorrect_unreal_animation_folder_path: bpy.props.BoolProperty(default=False)
-    incorrect_unreal_skeleton_path: bpy.props.BoolProperty(default=False)
-    incorrect_disk_mesh_folder_path: bpy.props.BoolProperty(default=False)
-    incorrect_disk_animation_folder_path: bpy.props.BoolProperty(default=False)
-    mesh_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
-    animation_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
-
-    # ---------------------------- fbx file settings --------------------------------
+    
+    # FBX Settings
     # Include
     use_custom_props: bpy.props.BoolProperty(
         name="Custom Properties",
@@ -438,6 +365,91 @@ class Send2UeUIProperties:
         default=True,
         options={'HIDDEN'},
     )
+
+    # ---------------------------- Import Tab ---------------------------------
+    import_materials: bpy.props.BoolProperty(
+        name="Materials",
+        default=True,
+        description="Whether or not to import the materials from the FBX file"
+    )
+    import_textures: bpy.props.BoolProperty(
+        name="Textures",
+        default=True,
+        description="Whether or not to import the Textures from the FBX file"
+    )
+    import_animations: bpy.props.BoolProperty(
+        name="Animations",
+        default=True,
+        description="Whether or not to import the animation from the FBX file"
+    )
+    import_lods: bpy.props.BoolProperty(
+        name="LODs",
+        default=False,
+        description="Whether or not to import the custom LODs from the FBX file"
+    )
+    import_sockets: bpy.props.BoolProperty(
+        name="Sockets",
+        default=False,
+        description="Imports an empty as a socket as long as it is a child of a mesh and its name starts with 'SOCKET_'."
+                    "(Only works on static meshes)"
+    )
+    import_object_name_as_root: bpy.props.BoolProperty(
+        name="Object name as root bone",
+        default=True,
+        description=(
+            "This uses the armature object's name in blender as the root bone name in Unreal"
+        )
+    )
+    advanced_ui_import: bpy.props.BoolProperty(
+        name="Launch FBX Import UI",
+        default=False,
+        description="When enabled this option launches the FBX import UI in Unreal"
+    )
+
+    # ---------------------------- Validate Tab -------------------------------
+    validate_unit_settings: bpy.props.BoolProperty(
+        name="Check scene units",
+        default=True,
+        description=(
+            "This checks the scene units and ensures they are set to metric, and the scene scale is 1"
+        )
+    )
+    validate_armature_transforms: bpy.props.BoolProperty(
+        name="Check armatures for un-applied transforms",
+        default=True,
+        description=(
+            "If an armature object has un-applied transforms a message is thrown to the user"
+        )
+    )
+    validate_materials: bpy.props.BoolProperty(
+        name="Check if asset has unused materials",
+        default=False,
+        description=(
+            "If this option is on it looks at each material index on the object and it checks if that material is "
+            "assigned to a vertex on the mesh object. If there is a unused material, then an error message is thrown "
+            "to the user"
+        )
+    )
+    validate_textures: bpy.props.BoolProperty(
+        name="Check texture references",
+        default=False,
+        description=(
+            "If a texture referenced in an object’s material can not be found in the blend file data than a error "
+            "message is thrown to the user"
+        )
+    )
+
+    # ----------- read/write variables -----------
+    show_animation_settings: bpy.props.BoolProperty(default=False)
+    show_name_affix_settings: bpy.props.BoolProperty(default=False)
+    show_fbx_settings: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_mesh_folder_path: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_animation_folder_path: bpy.props.BoolProperty(default=False)
+    incorrect_unreal_skeleton_path: bpy.props.BoolProperty(default=False)
+    incorrect_disk_mesh_folder_path: bpy.props.BoolProperty(default=False)
+    incorrect_disk_animation_folder_path: bpy.props.BoolProperty(default=False)
+    mesh_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
+    animation_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
 
 
 class Send2UeWindowMangerPropertyGroup(bpy.types.PropertyGroup, Send2UeProperties):

@@ -25,7 +25,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row = layout.row()
         row.prop(properties, 'options_type', expand=True)
 
-        if properties.options_type == 'general':            
+        if properties.options_type == 'general':
             self.draw_general_tab(properties, layout)
         elif properties.options_type == 'paths':
             self.draw_paths_tab(properties, layout)
@@ -67,13 +67,14 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
             row.alert = properties.incorrect_unreal_mesh_folder_path
             row.prop(properties, 'unreal_mesh_folder_path', text='')
             utilities.report_path_error_message(
-                    layout,
-                    properties.incorrect_unreal_mesh_folder_path,
-                    validations.validate_unreal_path_by_property(
-                        properties,
-                        "incorrect_unreal_mesh_folder_path"
-                    )
+                layout,
+                properties.incorrect_unreal_mesh_folder_path,
+                validations.validate_unreal_path_by_property(
+                    properties,
+                    "incorrect_unreal_mesh_folder_path"
                 )
+            )
+
             # Animation Folder (Unreal)
             row = layout.row()
             row.label(text='Animation Folder (Unreal)')
@@ -88,6 +89,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                         "incorrect_unreal_animation_folder_path"
                     )
                 )
+
             # Skeleton Asset (Unreal)
             row = layout.row()
             row.label(text='Skeleton Asset (Unreal)')
@@ -177,8 +179,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row.label(text='Animation Settings', icon='ARMATURE_DATA')   
         
         if properties.show_animation_settings:
-            self.draw_animation_settings(properties, box)
-
+            self.draw_animation_box(properties, box)
 
         # fbx export settings box
         row = layout.row()
@@ -191,12 +192,12 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                 icon_only=True,
                 emboss=False
             )
-        row.label(text='FBX Settings', icon='EXPORT')     
-
+        row.label(text='FBX Settings', icon='EXPORT')
+        
         if properties.show_fbx_settings:
-            self.draw_fbx_settings(properties, box)
+            self.draw_fbx_box(properties, box)
 
-    def draw_animation_settings(self, properties, layout):
+    def draw_animation_box(self, properties, layout):
         """
         Draws all the properties in the Animation Settings box.
         :param properties: The add-on properties to use.
@@ -214,7 +215,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
         row.prop(properties, 'auto_sync_control_nla_to_source')
 
-    def draw_fbx_settings(self, properties, layout):
+    def draw_fbx_box(self, properties, layout):
         """
         Draws all the properties in the FBX Settings box.
         :param properties: The add-on properties to use.
@@ -312,6 +313,8 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         :param properties: The add-on properties to use.
         :param layout: The layout container for this tab.
         """
+        row = layout.row()
+        row.prop(properties, 'validate_unit_settings')
         row = layout.row()
         row.prop(properties, 'validate_armature_transforms')
         row = layout.row()
