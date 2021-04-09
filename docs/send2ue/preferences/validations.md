@@ -7,9 +7,13 @@ folder: ""
 
 <iframe src="https://www.youtube.com/embed/1MrE2PMDkqg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+### Check scene units:
+
+This checks the scene units and ensures they are set to metric, and the scene scale is 1.
+
 ### Check armatures for un-applied transforms:
 
-If an armature object has un-applied transforms a message is thrown to the user
+If an armature object has un-applied transforms a message is thrown to the user.
 
 ### Check if asset has unused materials:
 

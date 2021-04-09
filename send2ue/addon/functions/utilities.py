@@ -7,6 +7,7 @@ import math
 import shutil
 import tempfile
 from mathutils import Vector, Quaternion
+from . import unreal
 
 
 def get_action_name(action_name, properties):
@@ -986,7 +987,7 @@ def auto_format_unreal_skeleton_asset_path(self, value):
     # Make sure the skeleton path to unreal is correct as the engine will
     # hard crash if passed an incorrect path
     self.incorrect_unreal_skeleton_path = False
-    if self.unreal_skeleton_asset_path and not self.unreal_skeleton_asset_path.lower().startswith("/game"):
+    if self.unreal_skeleton_asset_path and not unreal.asset_exists(self.unreal_skeleton_asset_path):
         self.incorrect_unreal_skeleton_path = True
 
 
@@ -1170,6 +1171,8 @@ def recreate_lod_meshes(mesh_objects):
 
     for mesh_object in mesh_objects:
         if 'LOD' in mesh_object.name:
+            if bpy.context.mode != 'OBJECT':
+                bpy.ops.object.mode_set(mode='OBJECT')
 
             previous_object_name = mesh_object.name
             previous_mesh_name = mesh_object.data.name
