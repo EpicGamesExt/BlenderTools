@@ -378,3 +378,42 @@ def validate_applied_armature_scale(scene_objects):
             )
             return False
     return True
+
+def show_asset_affix_message(properties, property_name):    
+    """
+    This function returns a validation message about the affix property passed in.
+    
+    :param object properties: The property group that contains variables that maintain the addons correct state.
+    :param str property_name: Property name to check
+    :return str: The message from validation
+    """
+
+    message = ""
+    invalid_affix = getattr(properties, property_name)
+
+    if invalid_affix:
+        message = f'The affix must either start or end with an underscore _ character (e.g. Prefix_ or _Suffix).'
+    
+    return message
+
+def validate_asset_affixes(self, context):
+    """
+    This function is called every time the unreal affix text field is updated.
+
+    :param object self: This is a reference to the property group class this functions in appended to.
+    :param object value: The value of the property group class this update function is assigned to.
+    """
+
+    self.incorrect_static_mesh_name_affix = is_invalid_asset_affix_format(self.static_mesh_name_affix)
+    self.incorrect_texture_name_affix = is_invalid_asset_affix_format(self.texture_name_affix)
+    self.incorrect_material_name_affix = is_invalid_asset_affix_format(self.material_name_affix)
+    self.incorrect_skeletal_mesh_name_affix = is_invalid_asset_affix_format(self.skeletal_mesh_name_affix)
+    self.incorrect_skeleton_name_affix = is_invalid_asset_affix_format(self.skeleton_name_affix)
+    self.incorrect_physics_asset_name_affix = is_invalid_asset_affix_format(self.physics_asset_name_affix)
+    self.incorrect_animation_sequence_name_affix = is_invalid_asset_affix_format(self.animation_sequence_name_affix)
+
+def is_invalid_asset_affix_format(affix_value):
+    no_underscore = not affix_value.startswith("_") and not affix_value.endswith("_")
+    both_underscores = affix_value.startswith("_") and affix_value.endswith("_")
+
+    return no_underscore or both_underscores
