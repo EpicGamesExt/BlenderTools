@@ -392,7 +392,7 @@ def show_asset_affix_message(properties, property_name):
     invalid_affix = getattr(properties, property_name)
 
     if invalid_affix:
-        message = f'The affix must either start or end with an underscore _ character (e.g. Prefix_ or _Suffix).'
+        message = f'The affix must not be empty and either start or end with an underscore _ character (e.g. Prefix_ or _Suffix).'
     
     return message
 
@@ -413,7 +413,14 @@ def validate_asset_affixes(self, context):
     self.incorrect_animation_sequence_name_affix = is_invalid_asset_affix_format(self.animation_sequence_name_affix)
 
 def is_invalid_asset_affix_format(affix_value):
+    """
+    Checks whether the given value is an invalid asset name affix.
+
+    :param str affix_value: The value of the affix.
+    """
+
+    is_empty = not affix_value
     no_underscore = not affix_value.startswith("_") and not affix_value.endswith("_")
     both_underscores = affix_value.startswith("_") and affix_value.endswith("_")
 
-    return no_underscore or both_underscores
+    return is_empty or no_underscore or both_underscores
