@@ -244,28 +244,77 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         :param layout: The layout container for this tab.
         """
 
+        # Add Asset Affixes
         column = layout.column()
         row = column.split(factor=0.3)
-
         row.prop(properties, 'add_asset_name_affixes')
         if properties.add_asset_name_affixes:
             row.label(text='Warning: This will rename the exported assets, which could potentially break existing references.',
                 icon='ERROR')
 
+        # Static Mesh Affix
         row = layout.row()
+        row.alert = properties.incorrect_static_mesh_name_affix
         row.prop(self, 'static_mesh_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_static_mesh_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_static_mesh_name_affix')
+            )
+        # Texture Affix
         row = layout.row()
+        row.alert = properties.incorrect_texture_name_affix
         row.prop(self, 'texture_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_texture_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
+            )
+        # Material Affix
         row = layout.row()
+        row.alert = properties.incorrect_material_name_affix
         row.prop(self, 'material_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_material_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_material_name_affix')
+            )
+        # Skeletal Mesh Affix
         row = layout.row()
+        row.alert = properties.incorrect_skeletal_mesh_name_affix
         row.prop(self, 'skeletal_mesh_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_skeletal_mesh_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_skeletal_mesh_name_affix')
+            )
+        # Skeleton Affix
         row = layout.row()
+        row.alert = properties.incorrect_skeleton_name_affix
         row.prop(self, 'skeleton_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_skeleton_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_skeleton_name_affix')
+            )
+        # Physics Asset Affix
         row = layout.row()
+        row.alert = properties.incorrect_physics_asset_name_affix
         row.prop(self, 'physics_asset_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_physics_asset_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_physics_asset_name_affix')
+            )
+        # Animation Sequence Affix
         row = layout.row()
+        row.alert = properties.incorrect_animation_sequence_name_affix
         row.prop(self, 'animation_sequence_name_affix')
+        utilities.report_path_error_message(
+                layout,
+                properties.incorrect_animation_sequence_name_affix,
+                validations.show_asset_affix_message(properties, 'incorrect_animation_sequence_name_affix')
+            )
 
 
     def draw_fbx_settings(self, properties, layout):
