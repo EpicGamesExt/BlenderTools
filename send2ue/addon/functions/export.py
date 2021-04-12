@@ -918,8 +918,9 @@ def send2ue(properties):
         if assets_data:
             # check path mode to see if exported assets should be imported to unreal
             if properties.path_mode in ['send_to_unreal', 'both']:
-                for assets_data in assets_data:
-                    result = unreal.import_asset(assets_data, properties)
+                for asset_data in assets_data:
+                    result = unreal.import_asset(asset_data, properties)
+                    
                     if not result:
                         break
 
