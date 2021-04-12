@@ -258,7 +258,7 @@ class Send2UeUIProperties:
 
     # ---------------------------- name affix settings --------------------------------
     add_asset_name_affixes: bpy.props.BoolProperty(
-        name="Add affixes to asset names",
+        name="Add affixes to assets",
         description= (
             "Whether or not to add affixes (prefix, suffix) to the asset names on export. Prefixes end with an "
             "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"

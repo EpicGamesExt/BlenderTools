@@ -11,6 +11,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
     """
     bl_idname = __package__.split('.')[0]
 
+
     def draw(self, context, properties=None):
         """
         This defines the draw method, which is in all Blender UI types that create interfaces.
@@ -36,6 +37,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         elif properties.options_type == 'validations':
             self.draw_validations_tab(properties, layout)
 
+
     def draw_general_tab(self, properties, layout):
         """
         Draws all the properties in the General tab.
@@ -44,6 +46,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         """
         row = layout.row()
         row.prop(properties, 'automatically_create_collections')
+
 
     def draw_paths_tab(self, properties, layout):
         """
@@ -154,6 +157,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
                     )
                 )
 
+
     def draw_export_tab(self, properties, layout):
         """
         Draws all the properties in the Export tab.
@@ -213,6 +217,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         if properties.show_fbx_settings:
             self.draw_fbx_settings(properties, box)
 
+
     def draw_animation_settings(self, properties, layout):
         """
         Draws all the properties in the Animation Settings box.
@@ -231,14 +236,21 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
         row.prop(properties, 'auto_sync_control_nla_to_source')
 
+
     def draw_asset_affix_settings(self, properties, layout):
         """
         Draws all the properties in the Name Affix Settings box.
         :param properties: The add-on properties to use.
         :param layout: The layout container for this tab.
         """
-        row = layout.row()
+
+        column = layout.column()
+        row = column.split(factor=0.3)
+
         row.prop(properties, 'add_asset_name_affixes')
+        if properties.add_asset_name_affixes:
+            row.label(text='Warning: This will rename the exported assets, which could potentially break existing references.',
+                icon='ERROR')
 
         row = layout.row()
         row.prop(self, 'static_mesh_name_affix')
@@ -254,6 +266,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row.prop(self, 'physics_asset_name_affix')
         row = layout.row()
         row.prop(self, 'animation_sequence_name_affix')
+
 
     def draw_fbx_settings(self, properties, layout):
         """
@@ -326,6 +339,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row = layout.row()
         row.prop(properties, 'use_metadata')
 
+
     def draw_import_tab(self, properties, layout):
         """
         Draws all the properties in the Import tab.
@@ -346,6 +360,7 @@ class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.
         row.prop(properties, 'import_object_name_as_root')
         row = layout.row()
         row.prop(properties, 'advanced_ui_import')
+
 
     def draw_validations_tab(self, properties, layout):
         """
