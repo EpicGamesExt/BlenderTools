@@ -378,3 +378,29 @@ def validate_applied_armature_scale(scene_objects):
             )
             return False
     return True
+
+
+def validate_file_permissions(folder_path, ui=False):
+    """
+    This function checks the file permissions of the given folder.
+
+    :param str folder_path: A path to a folder on disk.
+    :param bool ui: Whether or not the is used in a ui.
+    :return bool: True if the objects passed the validation.
+    """
+    full_path = os.path.join(folder_path, 'test.txt')
+    try:
+        with open(full_path, 'w') as test:
+            test.write('test')
+    except PermissionError:
+        message = f'The permissions of "{folder_path}" will not allow files to write to it.'
+        if ui:
+            return message
+        else:
+            utilities.report_error(message)
+            return False
+
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    return True
