@@ -743,7 +743,7 @@ def report_path_error_message(layout, send2ue_property, report_text):
     """
 
     # Only create the row  if the value of the property True
-    if send2ue_property:
+    if send2ue_property and type(report_text) == str:
         row = layout.row()
 
         row.alert = True

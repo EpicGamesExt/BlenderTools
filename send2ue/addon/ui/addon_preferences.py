@@ -106,6 +106,7 @@ def draw_paths_tab(properties, layout):
             properties.disk_mesh_folder_path,
             validations.validate_file_permissions(
                 properties.disk_mesh_folder_path,
+                properties,
                 ui=True
             )
         )
@@ -137,6 +138,7 @@ def draw_paths_tab(properties, layout):
             properties.disk_animation_folder_path,
             validations.validate_file_permissions(
                 properties.disk_animation_folder_path,
+                properties,
                 ui=True
             )
         )

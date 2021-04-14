@@ -871,10 +871,10 @@ def validate(properties):
     if not validations.validate_disk_paths(properties):
         return False
 
-    if not validations.validate_file_permissions(properties.disk_mesh_folder_path):
+    if not validations.validate_file_permissions(properties.disk_mesh_folder_path, properties):
         return False
 
-    if not validations.validate_file_permissions(properties.disk_animation_folder_path):
+    if not validations.validate_file_permissions(properties.disk_animation_folder_path, properties):
         return False
 
     if not validations.validate_unreal_paths(properties):

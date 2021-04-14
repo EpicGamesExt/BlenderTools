@@ -77,11 +77,13 @@ def import_asset(asset_data, properties):
             f'if {bool(asset_data.get("skeletal_mesh"))}:',
             f'\toptions.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH',
             f'\toptions.skeletal_mesh_import_data.import_mesh_lo_ds = {bool(asset_data.get("lods"))}',
+            f'\toptions.skeletal_mesh_import_data.normal_import_method = unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS',
 
             # if this is an static mesh import
             f'if {not bool(asset_data.get("skeletal_mesh"))}:',
             f'\toptions.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH',
             f'\toptions.static_mesh_import_data.import_mesh_lo_ds = {bool(asset_data.get("lods"))}',
+            f'\toptions.static_mesh_import_data.normal_import_method = unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS',
 
             # try to load the provided skeleton
             f'skeleton_asset = unreal.load_asset(r"{asset_data.get("skeleton_game_path")}")',
