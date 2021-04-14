@@ -499,9 +499,9 @@ def select_asset_collisions(asset_name, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     collision_objects = utilities.get_from_collection(properties.collision_collection_name, 'MESH', properties)
-    for mesh_object in collision_objects:
-        if is_collision_of(asset_name, mesh_object.name):
-            mesh_object.select_set(True)
+    for collision_object in collision_objects:
+        if is_collision_of(asset_name, collision_object.name):
+            collision_object.select_set(True)
 
 
 def select_asset_sockets(asset_name, properties):
