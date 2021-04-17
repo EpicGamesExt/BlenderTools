@@ -1295,3 +1295,21 @@ def unpack_textures():
                                     file_paths.append(image.filepath_from_user())
 
     return file_paths
+
+
+def get_texture_names(mesh_object):
+    """
+    This function iterates over all materials of the mesh object and returns the names of its textures.
+
+    :return list: A list of textures used in the materials.
+    """
+    texture_names = []
+
+    for material_slot in mesh_object.material_slots:
+        if material_slot.material.node_tree:
+            for node in material_slot.material.node_tree.nodes:
+                if node.type == 'TEX_IMAGE':
+                    image_name = os.path.splitext(node.image.name)[0]
+                    texture_names.append(image_name)
+    
+    return texture_names

@@ -289,15 +289,6 @@ def draw_asset_affix_settings(properties, layout):
             properties.incorrect_static_mesh_name_affix,
             validations.show_asset_affix_message(properties, 'incorrect_static_mesh_name_affix')
         )
-    # Texture Affix
-    row = layout.row()
-    row.alert = properties.incorrect_texture_name_affix
-    row.prop(properties, 'texture_name_affix')
-    utilities.report_path_error_message(
-            layout,
-            properties.incorrect_texture_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
-        )
     # Material Affix
     row = layout.row()
     row.alert = properties.incorrect_material_name_affix
@@ -306,6 +297,15 @@ def draw_asset_affix_settings(properties, layout):
             layout,
             properties.incorrect_material_name_affix,
             validations.show_asset_affix_message(properties, 'incorrect_material_name_affix')
+        )
+    # Texture Affix
+    row = layout.row()
+    row.alert = properties.incorrect_texture_name_affix
+    row.prop(properties, 'texture_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_texture_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
         )
     # Skeletal Mesh Affix
     row = layout.row()

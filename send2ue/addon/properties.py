@@ -271,7 +271,7 @@ class Send2UeUIProperties:
             "Whether or not to add affixes (prefix, suffix) to the asset names on export. Prefixes end with an "
             "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
         ),
-        default=True,
+        default=False,
     )
     static_mesh_name_affix: bpy.props.StringProperty(
         name="Static Mesh Affix",
@@ -280,18 +280,18 @@ class Send2UeUIProperties:
         description="The prefix or suffix to use for exported static mesh assets. Prefixes end with an "
             "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
-    texture_name_affix: bpy.props.StringProperty(
-        name="Texture Affix",
-        default="T_",
-        update=validations.validate_asset_affixes,
-        description="The prefix or suffix to use for exported texture assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
-    )
     material_name_affix: bpy.props.StringProperty(
         name="Material Affix",
         default="M_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported material assets. Prefixes end with an "
+            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+    )
+    texture_name_affix: bpy.props.StringProperty(
+        name="Texture Affix",
+        default="T_",
+        update=validations.validate_asset_affixes,
+        description="The prefix or suffix to use for exported texture assets. Prefixes end with an "
             "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
     skeletal_mesh_name_affix: bpy.props.StringProperty(

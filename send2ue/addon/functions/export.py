@@ -754,8 +754,8 @@ def create_action_data(rig_objects, properties):
 
     return action_data
 
-
 def create_mesh_data(mesh_objects, rig_objects, properties):
+
     """
     This function collects and creates all the asset data needed for the import process.
 
@@ -788,7 +788,10 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                     'skeletal_mesh': bool(rig_objects),
                     'skeleton_game_path': properties.unreal_skeleton_asset_path,
                     'import_mesh': True,
-                    'lods': True
+                    'lods': True,
+                    'mesh_name': mesh_object.name,
+                    'material_names': [ m.name for m in mesh_object.material_slots ],
+                    'texture_names': utilities.get_texture_names(mesh_object),
                 })
 
                 # add this asset to the list of exported assets
@@ -807,7 +810,10 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 'game_path': utilities.get_full_import_path(mesh_object, properties),
                 'skeletal_mesh': bool(rig_objects),
                 'skeleton_game_path': properties.unreal_skeleton_asset_path,
-                'import_mesh': True
+                'import_mesh': True,
+                'mesh_name': mesh_object.name,
+                'material_names': [ m.name for m in mesh_object.material_slots ],
+                'texture_names': utilities.get_texture_names(mesh_object),
             })
 
     return mesh_data
@@ -930,6 +936,10 @@ def send2ue(properties):
                     
                     if not result:
                         break
+                
+                if properties.add_asset_name_affixes:
+                    renames = get_affix_renames(assets_data, properties)
+                    unreal.rename_assets(renames)
 
             # remove unpacked files
             utilities.remove_unpacked_files(unpacked_files)
@@ -942,3 +952,79 @@ def send2ue(properties):
                 f'"{properties.rig_collection_name}" collections or your rig does not have any '
                 f'actions to export!'
             )
+
+
+def get_affix_renames(assets_data, properties):
+    """
+    This function goes through all the assets sent to unreal and gets the renames for them to apply the affixes.
+
+    :param object assets_data: Data about all the assets being sent to unreal.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+
+    renames = {}
+
+    for asset_data in assets_data:
+        mesh_name = asset_data.get("mesh_name")
+        game_path = asset_data.get("game_path")
+
+        # Mesh
+        if asset_data.get("skeletal_mesh"):
+            append_affixed_asset_name(renames, game_path, mesh_name, properties.skeletal_mesh_name_affix)
+            append_affixed_asset_name(renames, game_path, mesh_name, properties.skeleton_name_affix, 
+                defaultAffix="_Skeleton")
+            append_affixed_asset_name(renames, game_path, mesh_name, properties.physics_asset_name_affix, 
+                defaultAffix="_PhysicsAsset")
+        else:
+            append_affixed_asset_name(renames, game_path, mesh_name, properties.static_mesh_name_affix)
+
+        # Materials
+        material_names = asset_data.get("material_names")
+        if material_names:
+            for material_name in material_names:
+                append_affixed_asset_name(renames, game_path, material_name, properties.material_name_affix)
+        
+        # Textures
+        texture_names = asset_data.get("texture_names")
+        if texture_names:
+            for texture_name in texture_names:
+                append_affixed_asset_name(renames, game_path, texture_name, properties.texture_name_affix)
+            
+
+    return renames
+
+
+def append_affixed_asset_name(renames, game_path, asset_name, affix, defaultAffix=None):
+    """
+    Generates the renames where needed and appends it to the dict.
+
+    :param dict renames: Dictionary containing all the renames that should be executed after the export.
+    :param str game_path: The game path for the export.
+    :param str asset_name: The name of the asset to export.
+    :param str affix: The affix to either prepend or append, depending on whether it's a prefix or suffix.
+    :param str removeDefaultAffix: A default affix that has to be removed from the asset name.
+    """
+    if not asset_name:
+        return
+
+    new_asset_name = asset_name
+
+    # Skeleton and PhysicsAssets automatically get a suffix by Unreal
+    if defaultAffix:
+        if defaultAffix.endswith("_"):
+            asset_name = asset_name + defaultAffix
+        else:
+            asset_name = asset_name + defaultAffix
+
+    asset_path = game_path + asset_name
+
+    # Prefix
+    if affix.endswith("_"):
+        if asset_name.startswith(affix):
+            return  # Do not add prefix when its already present
+        renames[asset_path] = affix + new_asset_name
+    # Suffix
+    else:
+        if asset_name.endswith(affix):
+            return  # Do not add suffix when its already present
+        renames[asset_path] = new_asset_name + affix
