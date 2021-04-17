@@ -576,6 +576,25 @@ def create_groups(properties):
             bpy.context.scene.collection.children.link(new_collection)
 
 
+def match_collision_name_to_mesh_name(properties):
+    """
+    This function matches the selected collison to the selected mesh.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return str: The changed collision name.
+    """
+    collisions = get_from_collection(properties.collision_collection_name, 'MESH', properties)
+    meshes = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
+
+    if collisions and meshes:
+        selected_mesh = [mesh for mesh in meshes if mesh.select_get()][0]
+        selected_collision = [collision for collision in collisions if collision.select_get()][0]
+        name = f'{selected_collision.name.split("_")[0]}_{selected_mesh.name}'
+        selected_collision.name = name
+        return name
+    return ''
+
+
 def clear_pose(rig_object):
     """
     This function sets the transforms of the pose bones on the provided rig object to the resting position.
@@ -742,8 +761,8 @@ def report_path_error_message(layout, send2ue_property, report_text):
     :param str report_text: The text to report in the row label
     """
 
-    # Only create the row  if the value of the property True
-    if send2ue_property:
+    # only create the row if the value of the property is true and a string
+    if send2ue_property and type(report_text) == str:
         row = layout.row()
 
         row.alert = True
@@ -804,8 +823,9 @@ def combine_child_meshes(properties):
 
         # select all the duplicate objects that are meshes
         mesh_count = 0
+        mesh_objects = bpy.data.collections[properties.mesh_collection_name].all_objects.values()
         for duplicate_object in duplicate_objects:
-            if duplicate_object.type == 'MESH':
+            if duplicate_object.type == 'MESH' and duplicate_object in mesh_objects:
                 bpy.context.view_layer.objects.active = duplicate_object
                 duplicate_object.select_set(True)
                 mesh_count += 1
@@ -819,6 +839,10 @@ def combine_child_meshes(properties):
             duplicate_object = bpy.data.objects.get(duplicate_object_name)
             if duplicate_object:
                 duplicate_object.select_set(True)
+
+        # match the collision name to the new joined mesh
+        matched_collision_name = match_collision_name_to_mesh_name(properties)
+        duplicate_data['objects'].append(matched_collision_name)
 
     return selected_object_names, duplicate_data
 

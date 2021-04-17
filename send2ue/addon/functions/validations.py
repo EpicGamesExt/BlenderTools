@@ -379,6 +379,36 @@ def validate_applied_armature_scale(scene_objects):
             return False
     return True
 
+
+def validate_file_permissions(folder_path, properties, ui=False):
+    """
+    This function checks the file permissions of the given folder.
+
+    :param str folder_path: A path to a folder on disk.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool ui: Whether or not the is used in a ui.
+    :return bool: True if the objects passed the validation.
+    """
+    full_path = os.path.join(folder_path, 'test.txt')
+    if properties.path_mode in ['export_to_disk', 'both']:
+        if os.path.exists(folder_path):
+            try:
+                with open(full_path, 'w') as test:
+                    test.write('test')
+            except PermissionError:
+                message = f'The permissions of "{folder_path}" will not allow files to write to it.'
+                if ui:
+                    return message
+                else:
+                    utilities.report_error(message)
+                    return False
+
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    return True
+
+
 def show_asset_affix_message(properties, property_name):    
     """
     This function returns a validation message about the affix property passed in.
@@ -396,6 +426,7 @@ def show_asset_affix_message(properties, property_name):
     
     return message
 
+
 def validate_asset_affixes(self, context):
     """
     This function is called every time the unreal affix text field is updated.
@@ -411,6 +442,7 @@ def validate_asset_affixes(self, context):
     self.incorrect_skeleton_name_affix = is_invalid_asset_affix_format(self.skeleton_name_affix)
     self.incorrect_physics_asset_name_affix = is_invalid_asset_affix_format(self.physics_asset_name_affix)
     self.incorrect_animation_sequence_name_affix = is_invalid_asset_affix_format(self.animation_sequence_name_affix)
+
 
 def is_invalid_asset_affix_format(affix_value):
     """

@@ -420,7 +420,10 @@ def export_fbx_files(file_paths, properties):
     # combine all child meshes if option is on
     selected_object_names, duplicate_data = utilities.combine_child_meshes(properties)
 
-    for file_path in file_paths.values():
+    for path_type, file_path in file_paths.items():
+        if properties.path_mode == 'both' and path_type != 'disk':
+            continue
+
         # if the folder does not exists create it
         folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
         if not os.path.exists(folder_path):
@@ -496,9 +499,9 @@ def select_asset_collisions(asset_name, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     collision_objects = utilities.get_from_collection(properties.collision_collection_name, 'MESH', properties)
-    for mesh_object in collision_objects:
-        if is_collision_of(asset_name, mesh_object.name):
-            mesh_object.select_set(True)
+    for collision_object in collision_objects:
+        if is_collision_of(asset_name, collision_object.name):
+            collision_object.select_set(True)
 
 
 def select_asset_sockets(asset_name, properties):
@@ -565,8 +568,6 @@ def export_mesh_lods(asset_name, properties):
         # export the selected lod meshes and empty
         fbx_file_paths = get_fbx_paths(asset_name, 'MESH')
         export_fbx_files(fbx_file_paths, properties)
-
-        # raise RuntimeError('Stop!!')
 
         # un-parent the empty from the lod objects and deselect them
         for lod_object, lod_object_parent in lod_objects:
@@ -735,7 +736,7 @@ def create_action_data(rig_objects, properties):
 
                 # save the import data
                 action_data.append({
-                    'fbx_file_path': fbx_file_paths.get('unreal'),
+                    'fbx_file_path': fbx_file_paths.get('disk') or fbx_file_paths.get('unreal'),
                     'game_path': properties.unreal_animation_folder_path,
                     'skeleton_game_path': utilities.get_skeleton_game_path(rig_object, properties),
                     'animation': True
@@ -782,7 +783,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
                 # save the asset data
                 mesh_data.append({
-                    'fbx_file_path': fbx_file_paths.get('unreal'),
+                    'fbx_file_path': fbx_file_paths.get('disk') or fbx_file_paths.get('unreal'),
                     'game_path': utilities.get_full_import_path(mesh_object, properties),
                     'skeletal_mesh': bool(rig_objects),
                     'skeleton_game_path': properties.unreal_skeleton_asset_path,
@@ -802,7 +803,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
             # save the asset data
             mesh_data.append({
-                'fbx_file_path': fbx_file_paths.get('unreal'),
+                'fbx_file_path': fbx_file_paths.get('disk') or fbx_file_paths.get('unreal'),
                 'game_path': utilities.get_full_import_path(mesh_object, properties),
                 'skeletal_mesh': bool(rig_objects),
                 'skeleton_game_path': properties.unreal_skeleton_asset_path,
@@ -868,6 +869,12 @@ def validate(properties):
         return False
 
     if not validations.validate_disk_paths(properties):
+        return False
+
+    if not validations.validate_file_permissions(properties.disk_mesh_folder_path, properties):
+        return False
+
+    if not validations.validate_file_permissions(properties.disk_animation_folder_path, properties):
         return False
 
     if not validations.validate_unreal_paths(properties):

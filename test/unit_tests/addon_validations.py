@@ -32,7 +32,9 @@ class AddonValidationTestCases(unittest.TestCase):
             'incorrect_unreal_mesh_folder_path',
             'incorrect_unreal_animation_folder_path',
             'incorrect_unreal_skeleton_path',
-            'sub_folder_path'
+            'sub_folder_path',
+            'show_animation_settings',
+            'show_name_affix_settings',
         ]
 
         # this is the list of send2ue properties not to validate
