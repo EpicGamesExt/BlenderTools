@@ -179,18 +179,7 @@ def rename_assets(renames):
     run_unreal_python_commands(
         remote_exec,
         '\n'.join([
-            'assets = {\n\t' + renames_str + '\n}',
-            'asset_registry: unreal.AssetRegistry = unreal.AssetRegistryHelpers.get_asset_registry()',
-            'renames = unreal.Array(unreal.AssetRenameData)',
-            'for asset_path, new_name in assets.items():',
-            '\tasset = asset_registry.get_asset_by_object_path(asset_path)',
-            '\tif not asset:',
-            '\t\traise RuntimeError(f"Failed to load asset {asset_path}")',
-            '\trename_data = unreal.AssetRenameData(asset.get_asset(), asset.package_path, new_name)',
-            '\trenames.append(rename_data)',
-            'asset_tools = unreal.AssetToolsHelpers.get_asset_tools()',
-            'result = asset_tools.rename_assets(renames)',
+            'assets = {\n\t' + renames_str + '\n}',          
+            'for source_path, destination_path in assets.items():',
+            '\tunreal.EditorAssetLibrary.rename_asset(source_path, destination_path)',            
         ]))
-
-
-
