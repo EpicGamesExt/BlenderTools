@@ -786,7 +786,6 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 mesh_data.append({
                     'fbx_file_path': fbx_file_paths.get('disk') or fbx_file_paths.get('unreal'),
                     'game_path': utilities.get_full_import_path(mesh_object, properties),
-                    'mesh_name': mesh_object.name,
                     'skeletal_mesh': bool(rig_objects),
                     'skeleton_game_path': properties.unreal_skeleton_asset_path,
                     'import_mesh': True,
@@ -807,7 +806,6 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
             mesh_data.append({
                 'fbx_file_path': fbx_file_paths.get('disk') or fbx_file_paths.get('unreal'),
                 'game_path': utilities.get_full_import_path(mesh_object, properties),
-                'mesh_name': mesh_object.name,
                 'skeletal_mesh': bool(rig_objects),
                 'skeleton_game_path': properties.unreal_skeleton_asset_path,
                 'import_mesh': True
@@ -917,7 +915,7 @@ def send2ue(properties):
         context = utilities.get_current_context()
 
         affix_applicator = affixes.AffixApplicator()
-        if properties.add_asset_name_affixes:
+        if properties.auto_apply_asset_name_affixes:
             affix_applicator.apply(properties)        
 
         # unpack the textures for export if needed
@@ -937,11 +935,6 @@ def send2ue(properties):
                     
                     if not result:
                         break
-                
-                if properties.add_asset_name_affixes and asset_data.get("skeletal_mesh"):
-                    # rename Skeletal and PhysicsAsset
-                    pass
-
         else:
             utilities.report_error(
                 f'You do not have the correct objects under the "{properties.mesh_collection_name}" or '
@@ -951,5 +944,5 @@ def send2ue(properties):
         
         utilities.remove_unpacked_files(unpacked_files)
 
-        if properties.add_asset_name_affixes:
-            affix_applicator.revert()
+        if properties.auto_restore_original_asset_names:
+            affix_applicator.restore_original_names()

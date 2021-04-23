@@ -439,8 +439,6 @@ def validate_asset_affixes(self, context):
     self.incorrect_texture_name_affix = is_invalid_asset_affix_format(self.texture_name_affix)
     self.incorrect_material_name_affix = is_invalid_asset_affix_format(self.material_name_affix)
     self.incorrect_skeletal_mesh_name_affix = is_invalid_asset_affix_format(self.skeletal_mesh_name_affix)
-    self.incorrect_skeleton_name_affix = is_invalid_asset_affix_format(self.skeleton_name_affix)
-    self.incorrect_physics_asset_name_affix = is_invalid_asset_affix_format(self.physics_asset_name_affix)
     self.incorrect_animation_sequence_name_affix = is_invalid_asset_affix_format(self.animation_sequence_name_affix)
 
 

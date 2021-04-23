@@ -272,13 +272,18 @@ def draw_asset_affix_settings(properties, layout):
     :param layout: The layout container for this tab.
     """
 
-    # Add Asset Affixes
+    # Auto Apply Asset Affixes
     column = layout.column()
-    row = column.split(factor=0.3)
-    row.prop(properties, 'add_asset_name_affixes')
-    if properties.add_asset_name_affixes:
-        row.label(text='Warning: This will rename the exported assets, which could potentially break existing references.',
+    row = column.split(factor=0.4)
+    row.prop(properties, 'auto_apply_asset_name_affixes')
+    if properties.auto_apply_asset_name_affixes:
+        row.label(text='Warning: This will rename the exported assets in Blender!',
             icon='ERROR')
+
+    # Auto Restore Asset Affixes
+    row = layout.row()
+    row.prop(properties, 'auto_restore_original_asset_names')
+
 
     # Static Mesh Affix
     row = layout.row()
@@ -315,24 +320,6 @@ def draw_asset_affix_settings(properties, layout):
             layout,
             properties.incorrect_skeletal_mesh_name_affix,
             validations.show_asset_affix_message(properties, 'incorrect_skeletal_mesh_name_affix')
-        )
-    # Skeleton Affix
-    row = layout.row()
-    row.alert = properties.incorrect_skeleton_name_affix
-    row.prop(properties, 'skeleton_name_affix')
-    utilities.report_path_error_message(
-            layout,
-            properties.incorrect_skeleton_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_skeleton_name_affix')
-        )
-    # Physics Asset Affix
-    row = layout.row()
-    row.alert = properties.incorrect_physics_asset_name_affix
-    row.prop(properties, 'physics_asset_name_affix')
-    utilities.report_path_error_message(
-            layout,
-            properties.incorrect_physics_asset_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_physics_asset_name_affix')
         )
     # Animation Sequence Affix
     row = layout.row()

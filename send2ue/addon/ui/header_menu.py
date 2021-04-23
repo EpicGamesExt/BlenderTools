@@ -81,7 +81,7 @@ def import_menu(self, context):
 
 def create_collections_operator(self, context):
     """
-    This function creates the import menu item. This will be referenced in other functions
+    This function creates the create collections menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -91,6 +91,20 @@ def create_collections_operator(self, context):
     or can be passed an explicit context.
     """
     self.layout.operator('wm.create_predefined_collections')
+
+
+def apply_asset_affixes_operator(self, context):
+    """
+    This function creates the apply affixes menu item. This will be referenced in other functions
+    as a means of appending and removing it's contents from the top bar editor class
+    definition.
+
+    :param object self: This refers the the Menu class definition that this function will
+    be appended to.
+    :param object context: This parameter will take the current blender context by default,
+    or can be passed an explicit context.
+    """
+    self.layout.operator('wm.apply_asset_affixes')
 
 
 def add_pipeline_menu():
@@ -106,12 +120,14 @@ def add_pipeline_menu():
         bpy.types.TOPBAR_MT_Pipeline.remove(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(export_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.remove(apply_asset_affixes_operator)
 
 
     finally:
         bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
         bpy.types.TOPBAR_MT_Pipeline.append(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.append(apply_asset_affixes_operator)
 
 
 def remove_parent_menu():

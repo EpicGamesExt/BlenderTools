@@ -253,8 +253,6 @@ class Send2UeUIProperties:
     incorrect_texture_name_affix: bpy.props.BoolProperty(default=False)
     incorrect_material_name_affix: bpy.props.BoolProperty(default=False)
     incorrect_skeletal_mesh_name_affix: bpy.props.BoolProperty(default=False)
-    incorrect_skeleton_name_affix: bpy.props.BoolProperty(default=False)
-    incorrect_physics_asset_name_affix: bpy.props.BoolProperty(default=False)
     incorrect_animation_sequence_name_affix: bpy.props.BoolProperty(default=False)
     incorrect_unreal_mesh_folder_path: bpy.props.BoolProperty(default=False)
     incorrect_unreal_animation_folder_path: bpy.props.BoolProperty(default=False)
@@ -265,11 +263,19 @@ class Send2UeUIProperties:
     animation_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
 
     # ---------------------------- name affix settings --------------------------------
-    add_asset_name_affixes: bpy.props.BoolProperty(
-        name="Add affixes to assets",
+    auto_apply_asset_name_affixes: bpy.props.BoolProperty(
+        name="Automatically apply affixes on export",
         description= (
-            "Whether or not to add affixes (prefix, suffix) to the asset names on export. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+            "Whether or not to apply the affixes (prefix, suffix) to the asset names before the export. "
+            "Prefixes end with an underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+        ),
+        default=False,
+    )
+    auto_restore_original_asset_names: bpy.props.BoolProperty(
+        name="Restore original names after export",
+        description= (
+            "Whether or not to restore the original names before any affixes (prefix, suffix) have been applied "
+            "to the objects in Blender."
         ),
         default=False,
     )
@@ -300,21 +306,7 @@ class Send2UeUIProperties:
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported skeletal mesh assets. Prefixes end with an "
             "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
-    )
-    skeleton_name_affix: bpy.props.StringProperty(
-        name="Skeleton Affix",
-        default="_Skeleton",
-        update=validations.validate_asset_affixes,
-        description="The prefix or suffix to use for exported skeleton assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
-    )
-    physics_asset_name_affix: bpy.props.StringProperty(
-        name="Physics Asset Affix",
-        default="_Physics",
-        update=validations.validate_asset_affixes,
-        description="The prefix or suffix to use for exported physics assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
-    )
+    )    
     animation_sequence_name_affix: bpy.props.StringProperty(
         name="Animation Sequence Affix",
         default="Anim_",

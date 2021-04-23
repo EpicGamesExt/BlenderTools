@@ -156,30 +156,3 @@ def delete_asset(game_path):
         '\n'.join([
             f'unreal.EditorAssetLibrary.delete_asset(r"{game_path}")',
         ]))
-
-
-def rename_assets(renames):
-    """
-    Renames the given assets in unreal.
-
-    :param dict renames: A dictionary containing the current asset path as key and the new name as value.
-    """
-    renames_list = []
-
-    for asset_path, new_name in renames.items():
-        renames_list.append(f'r"{asset_path}": "{new_name}",')
-
-    renames_str = '\n\t'.join(renames_list)
-
-    # start a connection to the engine that lets you send python strings
-    remote_exec = remote_execution.RemoteExecution()
-    remote_exec.start()
-
-    # send over the python code as a string
-    run_unreal_python_commands(
-        remote_exec,
-        '\n'.join([
-            'assets = {\n\t' + renames_str + '\n}',          
-            'for source_path, destination_path in assets.items():',
-            '\tunreal.EditorAssetLibrary.rename_asset(source_path, destination_path)',            
-        ]))

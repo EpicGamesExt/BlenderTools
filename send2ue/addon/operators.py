@@ -1,7 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
-from .functions import export, utilities
+from .functions import affixes, export, utilities
 from .ui import importer, addon_preferences
 
 
@@ -56,7 +56,20 @@ class CreatePredefinedCollections(bpy.types.Operator):
     def execute(self, context):
         properties = bpy.context.window_manager.send2ue
         utilities.create_groups(properties)
-        return {'FINISHED'}        
+        return {'FINISHED'}
+
+
+class ApplyAssetAffixes(bpy.types.Operator):
+    """Applies the defined asset name affixes to Meshes, Textures, Materials etc."""
+    bl_idname = "wm.apply_asset_affixes"
+    bl_label = "Apply Asset Affixes"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        properties = bpy.context.preferences.addons[__package__].preferences
+        affix_applicator = affixes.AffixApplicator()
+        affix_applicator.apply(properties)
+        return {'FINISHED'}
 
 
 class NullOperator(bpy.types.Operator):
