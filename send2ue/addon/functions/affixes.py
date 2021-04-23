@@ -107,6 +107,8 @@ class AffixApplicator:
         :param object properties: The property group that contains variables that maintain the addon's correct state.
         :return list: A list of textures used in the materials.
         """
+
+        errors = []
         
         for image in images:
             if image.source == 'FILE' and image.packed_file:
@@ -117,7 +119,14 @@ class AffixApplicator:
                     #file_paths.append(image.filepath_from_user())
                 
             new_name = self.append_affix(image, properties.texture_name_affix, is_image=True)
-            self.rename_texture(image, new_name)
+            try:
+                self.rename_texture(image, new_name)
+            except FileExistsError as ex:
+                errors.append(str(os.path.basename(ex.filename)))
+
+        if errors:
+            utilities.report_error("Failed to rename texture images because another file with the same name already exists!",
+                ', '.join(errors))
 
 
     def rename_texture(self, image, new_name):
@@ -136,8 +145,5 @@ class AffixApplicator:
         extension = os.path.splitext(filename)[1]
         new_path = os.path.join(path, new_name + extension)
 
-        try:
-            os.rename(current_path, new_path)
-            image.filepath = new_path
-        except FileExistsError as ex:
-            print(f"Failed to rename texture image:\n{str(ex)}")
+        os.rename(current_path, new_path)
+        image.filepath = new_path

@@ -19,6 +19,7 @@ class Send2UeProperties:
 
     # this stores the error messages
     error_message: bpy.props.StringProperty(default='')
+    error_message_details: bpy.props.StringProperty(default='')
     # whether to use ue2rigify or not
     use_ue2rigify: bpy.props.BoolProperty(default=False)
     # the path made by the collection hierarchy
