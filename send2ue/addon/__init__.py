@@ -47,7 +47,8 @@ classes = [
     operators.NullOperator,
     addon_preferences.SendToUnrealPreferences,
     header_menu.TOPBAR_MT_Export,
-    header_menu.TOPBAR_MT_Import
+    header_menu.TOPBAR_MT_Import,
+    header_menu.TOPBAR_MT_Affixes
 ]
 
 

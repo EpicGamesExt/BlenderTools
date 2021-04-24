@@ -33,6 +33,12 @@ class AffixApplicator:
             texture_images = self.__get_texture_images(mesh_object)
             self.__rename_all_textures(texture_images, self.__append_affix, properties)
 
+        if is_skeletal_asset:
+            actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
+            actions = [a for sublist in actions for a in sublist] # flatten list
+            for action in actions:
+                self.__append_affix(action, properties.animation_sequence_name_affix)
+
     def remove_affixes(self, properties):
         """
         Removes the defined affixes from the objects selected for export.
@@ -55,6 +61,12 @@ class AffixApplicator:
 
             texture_images = self.__get_texture_images(mesh_object)
             self.__rename_all_textures(texture_images, self.__discard_affix, properties)
+        
+        if is_skeletal_asset:
+            actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
+            actions = [a for sublist in actions for a in sublist] # flatten list
+            for action in actions:
+                self.__discard_affix(action, properties.animation_sequence_name_affix)
 
 
     def __append_affix(self, object, affix, is_image=False):
