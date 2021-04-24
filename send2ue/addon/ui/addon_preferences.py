@@ -272,17 +272,16 @@ def draw_asset_affix_settings(properties, layout):
     :param layout: The layout container for this tab.
     """
 
-    # Auto Apply Asset Affixes
+    # Automatically Add Asset Affixes on export
     column = layout.column()
     row = column.split(factor=0.4)
-    row.prop(properties, 'auto_apply_asset_name_affixes')
-    if properties.auto_apply_asset_name_affixes:
+    row.prop(properties, 'auto_add_asset_name_affixes')
+    if properties.auto_add_asset_name_affixes:
         row.label(text='Warning: This will rename the exported assets in Blender!',
             icon='ERROR')
-
-    # Auto Restore Asset Affixes
+    # Automatically Remove Asset Affixes after export
     row = layout.row()
-    row.prop(properties, 'auto_restore_original_asset_names')
+    row.prop(properties, 'auto_remove_original_asset_names')
 
 
     # Static Mesh Affix

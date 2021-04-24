@@ -59,16 +59,27 @@ class CreatePredefinedCollections(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class ApplyAssetAffixes(bpy.types.Operator):
-    """Applies the defined asset name affixes to Meshes, Textures, Materials etc."""
-    bl_idname = "wm.apply_asset_affixes"
-    bl_label = "Apply Asset Affixes"
-    bl_options = {'REGISTER', 'UNDO'}
+class AddAssetAffixes(bpy.types.Operator):
+    """Adds the defined asset name affixes to Meshes, Textures, Materials etc."""
+    bl_idname = "wm.add_asset_affixes"
+    bl_label = "Add Asset Affixes"
 
     def execute(self, context):
         properties = bpy.context.preferences.addons[__package__].preferences
         affix_applicator = affixes.AffixApplicator()
-        affix_applicator.apply(properties)
+        affix_applicator.add_affixes(properties)
+        return {'FINISHED'}
+
+
+class RemoveAssetAffixes(bpy.types.Operator):
+    """Removes the defined asset name affixes to Meshes, Textures, Materials etc."""
+    bl_idname = "wm.remove_asset_affixes"
+    bl_label = "Remove Asset Affixes"
+
+    def execute(self, context):
+        properties = bpy.context.preferences.addons[__package__].preferences
+        affix_applicator = affixes.AffixApplicator()
+        affix_applicator.remove_affixes(properties)
         return {'FINISHED'}
 
 

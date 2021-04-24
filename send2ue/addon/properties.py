@@ -264,19 +264,19 @@ class Send2UeUIProperties:
     animation_folder_untitled_blend_file: bpy.props.BoolProperty(default=False)
 
     # ---------------------------- name affix settings --------------------------------
-    auto_apply_asset_name_affixes: bpy.props.BoolProperty(
-        name="Automatically apply affixes on export",
+    auto_add_asset_name_affixes: bpy.props.BoolProperty(
+        name="Automatically add affixes on export",
         description= (
-            "Whether or not to apply the affixes (prefix, suffix) to the asset names before the export. "
+            "Whether or not to add the affixes (prefix, suffix) to the asset names before the export. "
             "Prefixes end with an underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
         ),
         default=False,
     )
-    auto_restore_original_asset_names: bpy.props.BoolProperty(
-        name="Restore original names after export",
+    auto_remove_original_asset_names: bpy.props.BoolProperty(
+        name="Remove affixes after export",
         description= (
-            "Whether or not to restore the original names before any affixes (prefix, suffix) have been applied "
-            "to the objects in Blender."
+            "Whether or not to remove the affixes (prefix, suffix) from the asset names after the export, "
+            + "basically restoring the original names."
         ),
         default=False,
     )
