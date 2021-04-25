@@ -916,7 +916,7 @@ def send2ue(properties):
 
         affix_applicator = affixes.AffixApplicator()
         if properties.auto_add_asset_name_affixes:
-            affix_applicator.add_affixes(properties)        
+            affix_applicator.add_affixes(properties)
 
         # unpack the textures for export if needed
         unpacked_files = utilities.unpack_textures()

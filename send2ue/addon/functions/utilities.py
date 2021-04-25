@@ -736,7 +736,7 @@ def draw_error_message(self, context):
         self.layout.label(text=bpy.context.window_manager.send2ue.error_message_details)
 
 
-def report_error(message, details):
+def report_error(message, details=''):
     """
     This function reports a given error message to the screen.
 
@@ -751,7 +751,7 @@ def report_error(message, details):
         bpy.context.window_manager.send2ue.error_message_details = details
         bpy.context.window_manager.popup_menu(draw_error_message, title="Error", icon='ERROR')
     else:
-        raise RuntimeError(message)
+        raise RuntimeError(message + details)
 
 
 def report_path_error_message(layout, send2ue_property, report_text):
