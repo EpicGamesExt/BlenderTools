@@ -79,18 +79,19 @@ class AffixApplicator:
         :param bool is_image: Indicates whether the object is an image.
         :return str: The new object name.
         """
-        asset_name = os.path.splitext(object.name)[0] if is_image else object.name
+        filename, ext = os.path.splitext(object.name)
+        asset_name = filename if is_image else object.name
 
         # Prefix
         if affix.endswith("_"):
             if object.name.startswith(affix):
                 return  # Do not add prefix when its already present
-            object.name = affix + asset_name
+            object.name = affix + asset_name + ext
         # Suffix
         else:
             if object.name.endswith(affix):
                 return  # Do not add suffix when its already present
-            object.name = asset_name + affix
+            object.name = asset_name + affix + ext
 
         return object.name
 
@@ -105,15 +106,17 @@ class AffixApplicator:
         :param bool is_image: Indicates whether the object is an image.
         :return str: The new object name.
         """
+        filename, ext = os.path.splitext(object.name)
+        asset_name = filename if is_image else object.name
 
         # Prefix
         if affix.endswith("_"):
             if object.name.startswith(affix):
-                object.name = object.name[len(affix):]
+                object.name = asset_name[len(affix):] + ext
         # Suffix
         else:
             if object.name.endswith(affix):
-                object.name = object.name[:-len(affix)]
+                object.name = asset_name[:-len(affix)] + ext
 
         return object.name
     
@@ -150,19 +153,13 @@ class AffixApplicator:
 
         errors = []
         
-        for image in images:
-            if image.source == 'FILE' and image.packed_file:
-                # if the unpacked image does not exist on disk
-                if not os.path.exists(image.filepath_from_user()):
-                    # unpack the image
-                    image.unpack()
-                
+        for image in images:            
             new_name = affixOperation(image, properties.texture_name_affix, is_image=True)
             try:
                 self.__rename_texture(image, new_name)
             except (FileExistsError, PermissionError) as ex:
                 print(str(ex))
-                errors.append(str(os.path.basename(ex.filename)))
+                errors.append(str(ex))
 
         if errors:
             utilities.report_error("Failed to rename the following texture images:",
@@ -180,10 +177,20 @@ class AffixApplicator:
         if not new_name:
             return
 
-        current_path = image.filepath_from_user()
-        path, filename = os.path.split(current_path)
-        extension = os.path.splitext(filename)[1]
-        new_path = os.path.join(path, new_name + extension)
+        is_packed = image.source == 'FILE' and image.packed_file and not os.path.exists(image.filepath_from_user())
 
-        os.rename(current_path, new_path)
+        if is_packed:
+            image.unpack()
+
+        path, filename = os.path.split(image.filepath_from_user())
+        filename, ext = os.path.splitext(filename)
+
+        if not new_name.endswith(ext):
+            new_name = new_name + ext
+
+        new_path = os.path.join(path, new_name)        
+        os.rename(image.filepath_from_user(), new_path)
         image.filepath = new_path
+
+        if is_packed and os.path.exists(image.filepath_from_user()):
+            utilities.remove_unpacked_files([image.filepath_from_user()])
