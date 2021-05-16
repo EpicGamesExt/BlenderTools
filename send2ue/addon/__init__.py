@@ -48,7 +48,7 @@ classes = [
     addon_preferences.SendToUnrealPreferences,
     header_menu.TOPBAR_MT_Export,
     header_menu.TOPBAR_MT_Import,
-    header_menu.TOPBAR_MT_Affixes
+    header_menu.TOPBAR_MT_Utilities
 ]
 
 

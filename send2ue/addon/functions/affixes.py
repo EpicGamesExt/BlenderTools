@@ -23,21 +23,21 @@ class AffixApplicator:
 
         for mesh_object in mesh_objects:
             if is_skeletal_asset:
-                self.__append_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                self.append_affix(mesh_object, properties.skeletal_mesh_name_affix)
             else:
-                self.__append_affix(mesh_object, properties.static_mesh_name_affix)
+                self.append_affix(mesh_object, properties.static_mesh_name_affix)
 
             for slot in mesh_object.material_slots:
-                self.__append_affix(slot.material, properties.material_name_affix)
+                self.append_affix(slot.material, properties.material_name_affix)
 
-            texture_images = self.__get_texture_images(mesh_object)
-            self.__rename_all_textures(texture_images, self.__append_affix, properties)
+            texture_images = self.get_texture_images(mesh_object)
+            self.rename_all_textures(texture_images, self.append_affix, properties)
 
         if is_skeletal_asset:
             actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
             actions = [a for sublist in actions for a in sublist] # flatten list
             for action in actions:
-                self.__append_affix(action, properties.animation_sequence_name_affix)
+                self.append_affix(action, properties.animation_sequence_name_affix)
 
     def remove_affixes(self, properties):
         """
@@ -52,24 +52,24 @@ class AffixApplicator:
 
         for mesh_object in mesh_objects:
             if is_skeletal_asset:
-                self.__discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
             else:
-                self.__discard_affix(mesh_object, properties.static_mesh_name_affix)
+                self.discard_affix(mesh_object, properties.static_mesh_name_affix)
 
             for slot in mesh_object.material_slots:
-                self.__discard_affix(slot.material, properties.material_name_affix)
+                self.discard_affix(slot.material, properties.material_name_affix)
 
-            texture_images = self.__get_texture_images(mesh_object)
-            self.__rename_all_textures(texture_images, self.__discard_affix, properties)
+            texture_images = self.get_texture_images(mesh_object)
+            self.rename_all_textures(texture_images, self.discard_affix, properties)
         
         if is_skeletal_asset:
             actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
             actions = [a for sublist in actions for a in sublist] # flatten list
             for action in actions:
-                self.__discard_affix(action, properties.animation_sequence_name_affix)
+                self.discard_affix(action, properties.animation_sequence_name_affix)
 
 
-    def __append_affix(self, object, affix, is_image=False):
+    def append_affix(self, object, affix, is_image=False):
         """
         Generates the renames where needed and appends it to the dict.
 
@@ -96,7 +96,7 @@ class AffixApplicator:
         return object.name
 
 
-    def __discard_affix(self, object, affix, is_image=False):
+    def discard_affix(self, object, affix, is_image=False):
         """
         Generates the renames where needed and appends it to the dict.
 
@@ -121,7 +121,7 @@ class AffixApplicator:
         return object.name
     
 
-    def __get_texture_images(self, mesh_object):
+    def get_texture_images(self, mesh_object):
         """
         This function iterates over all materials of the mesh object and returns the names of its textures.
 
@@ -140,7 +140,7 @@ class AffixApplicator:
         return images
 
 
-    def __rename_all_textures(self, images, affixOperation, properties):
+    def rename_all_textures(self, images, affixOperation, properties):
         """
         Prepares the textures by unpacking and renaming them for the export.
         
@@ -156,7 +156,7 @@ class AffixApplicator:
         for image in images:            
             new_name = affixOperation(image, properties.texture_name_affix, is_image=True)
             try:
-                self.__rename_texture(image, new_name)
+                self.rename_texture(image, new_name)
             except (FileExistsError, PermissionError) as ex:
                 print(str(ex))
                 errors.append(str(ex))
@@ -166,7 +166,7 @@ class AffixApplicator:
                 ', '.join(errors))
 
 
-    def __rename_texture(self, image, new_name):
+    def rename_texture(self, image, new_name):
         """
         This function renames the texture object in blender and the referenced image file on the hard disk.
 

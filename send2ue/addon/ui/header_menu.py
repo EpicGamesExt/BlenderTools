@@ -25,16 +25,17 @@ class TOPBAR_MT_Export(bpy.types.Menu):
         self.layout.operator('wm.advanced_send2ue')
 
 
-class TOPBAR_MT_Affixes(bpy.types.Menu):
+class TOPBAR_MT_Utilities(bpy.types.Menu):
     """
-    This defines a new class that will be the menu, "Affixes".
+    This defines a new class that will be the menu, "Utilities".
     """
-    bl_idname = "TOPBAR_MT_Affixes"
-    bl_label = "Affixes"
+    bl_idname = "TOPBAR_MT_Utilities"
+    bl_label = "Utilities"
 
     def draw(self, context):
         self.layout.operator('wm.add_asset_affixes')
         self.layout.operator('wm.remove_asset_affixes')
+        self.layout.operator('wm.create_predefined_collections')
 
 
 class TOPBAR_MT_Pipeline(bpy.types.Menu):
@@ -91,9 +92,9 @@ def export_menu(self, context):
     self.layout.menu(TOPBAR_MT_Export.bl_idname)
 
 
-def affixes_menu(self, context):
+def utilities_menu(self, context):
     """
-    This function creates the affixes menu item. This will be referenced in other functions
+    This function creates the utilities menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -102,21 +103,7 @@ def affixes_menu(self, context):
     :param object context: This parameter will take the current blender context by default,
     or can be passed an explicit context.
     """
-    self.layout.menu(TOPBAR_MT_Affixes.bl_idname)
-
-
-def create_collections_operator(self, context):
-    """
-    This function creates the create collections menu item. This will be referenced in other functions
-    as a means of appending and removing it's contents from the top bar editor class
-    definition.
-
-    :param object self: This refers the the Menu class definition that this function will
-    be appended to.
-    :param object context: This parameter will take the current blender context by default,
-    or can be passed an explicit context.
-    """
-    self.layout.operator('wm.create_predefined_collections')
+    self.layout.menu(TOPBAR_MT_Utilities.bl_idname)
 
 
 def add_pipeline_menu():
@@ -131,15 +118,13 @@ def add_pipeline_menu():
     try:
         bpy.types.TOPBAR_MT_Pipeline.remove(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(export_menu)
-        bpy.types.TOPBAR_MT_Pipeline.remove(affixes_menu)
-        bpy.types.TOPBAR_MT_Pipeline.remove(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.remove(utilities_menu)
 
 
     finally:
         bpy.types.TOPBAR_MT_Pipeline.append(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.append(export_menu)
-        bpy.types.TOPBAR_MT_Pipeline.append(affixes_menu)
-        bpy.types.TOPBAR_MT_Pipeline.append(create_collections_operator)
+        bpy.types.TOPBAR_MT_Pipeline.append(utilities_menu)
 
 
 def remove_parent_menu():
