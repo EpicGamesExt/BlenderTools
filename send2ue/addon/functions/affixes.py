@@ -2,6 +2,7 @@
 
 import bpy
 import os
+import tempfile
 from . import utilities
 
 
@@ -178,7 +179,6 @@ class AffixApplicator:
             return
 
         is_packed = image.source == 'FILE' and image.packed_file and not os.path.exists(image.filepath_from_user())
-
         if is_packed:
             image.unpack()
 
@@ -187,8 +187,10 @@ class AffixApplicator:
 
         if not new_name.endswith(ext):
             new_name = new_name + ext
+        
+        tempdir = tempfile.mkdtemp(prefix='Send2Unreal_')
+        new_path = os.path.join(tempdir, new_name)
 
-        new_path = os.path.join(path, new_name)        
         os.rename(image.filepath_from_user(), new_path)
         image.filepath = new_path
 
