@@ -68,6 +68,99 @@ class Send2UeMaterialTextureTestCases(unittest.TestCase):
         bpy.context.scene.collection.objects.link(cube)
         bpy.data.collections['Mesh'].objects.unlink(cube)
 
+    def test_material_with_affixed_texture_true(self):
+        """
+        This method sends a cube with a material and texture to unreal where the texture has been renamed.
+        """
+        properties = bpy.context.preferences.addons['send2ue'].preferences
+        properties.import_materials = True
+        properties.import_materials = True
+
+        cube = bpy.data.objects['Cube']
+
+        # move the cube to the mesh collection
+        bpy.data.collections['Mesh'].objects.link(cube)
+        bpy.context.scene.collection.objects.unlink(cube)
+
+        # turn on the use affixes option
+        properties.auto_add_asset_name_affixes = True
+
+        # run the send to unreal operation
+        bpy.ops.wm.send2ue()
+
+        # check if the cube and material and its texture exists in the unreal project
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Cube'))
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/M_Material'))
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/T_unreal-engine-logo'))
+
+        # check to make sure the image file created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures',
+            'T_unreal-engine-logo.jpg'
+        )))
+
+        # check to make sure the texture folder created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures'
+        )))
+
+        # move the cube out of the mesh collection
+        bpy.context.scene.collection.objects.link(cube)
+        bpy.data.collections['Mesh'].objects.unlink(cube)
+
+        # turn off the use affixes option
+        properties.auto_add_asset_name_affixes = False
+
+    def test_material_with_affixed_texture_true_affix_removed_after_export(self):
+        """
+        This method sends a cube with a material and texture to unreal where the texture has been renamed and the
+        rename reverted back after the export.
+        """
+        properties = bpy.context.preferences.addons['send2ue'].preferences
+        properties.import_materials = True
+        properties.import_materials = True
+
+        cube = bpy.data.objects['Cube']
+
+        # move the cube to the mesh collection
+        bpy.data.collections['Mesh'].objects.link(cube)
+        bpy.context.scene.collection.objects.unlink(cube)
+
+        # turn on the use affixes option
+        properties.auto_add_asset_name_affixes = True
+        properties.auto_remove_original_asset_names = True
+
+        # run the send to unreal operation
+        bpy.ops.wm.send2ue()
+
+        # check if the cube and material and its texture exists in the unreal project
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Cube'))
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/M_Material'))
+        self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/T_unreal-engine-logo'))
+
+        # check to make sure the image file created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures',
+            'unreal-engine-logo.jpg'
+        )))
+
+        # check to make sure the texture folder created from unpacking was removed
+        self.assertFalse(os.path.exists(os.path.join(
+            bpy.data.filepath,
+            'textures'
+        )))
+
+        # move the cube out of the mesh collection
+        bpy.context.scene.collection.objects.link(cube)
+        bpy.data.collections['Mesh'].objects.unlink(cube)
+
+        # turn off the use affixes option
+        properties.auto_add_asset_name_affixes = False
+        properties.auto_remove_original_asset_names = False
+
     def test_material_with_texture_false(self):
         """
         This method sends a cube without a material and without a texture to unreal

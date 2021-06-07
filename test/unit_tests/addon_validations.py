@@ -18,6 +18,7 @@ class AddonValidationTestCases(unittest.TestCase):
         self.send2ue_excluded_properties = [
             'bl_idname',
             'error_message',
+            'error_message_details',
             'use_ue2rigify',
             'show_fbx_settings',
             'incorrect_disk_mesh_folder_path',
@@ -29,6 +30,11 @@ class AddonValidationTestCases(unittest.TestCase):
             'use_metadata',
             'mesh_folder_untitled_blend_file',
             'animation_folder_untitled_blend_file',
+            'incorrect_static_mesh_name_affix',
+            'incorrect_texture_name_affix',
+            'incorrect_material_name_affix',
+            'incorrect_skeletal_mesh_name_affix',
+            'incorrect_animation_sequence_name_affix',
             'incorrect_unreal_mesh_folder_path',
             'incorrect_unreal_animation_folder_path',
             'incorrect_unreal_skeleton_path',
@@ -37,7 +43,7 @@ class AddonValidationTestCases(unittest.TestCase):
             'show_name_affix_settings',
         ]
 
-        # this is the list of send2ue properties not to validate
+        # this is the list of ue2rigify properties not to validate
         self.ue2rigify_excluded_properties = [
             'saved_metarig_data',
             'saved_links_data',

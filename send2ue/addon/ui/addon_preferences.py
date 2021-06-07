@@ -172,6 +172,22 @@ def draw_export_tab(properties, layout):
     if properties.show_animation_settings:
         draw_animation_box(properties, box)
 
+    #  asset name affixes box
+    row = layout.row()
+    box = row.box()
+    row = box.row()
+    row.prop(
+            properties,
+            'show_name_affix_settings',
+            icon='TRIA_DOWN' if properties.show_name_affix_settings else 'TRIA_RIGHT',
+            icon_only=True,
+            emboss=False
+        )
+    row.label(text='Asset Name Affixes', icon='SYNTAX_OFF')
+    
+    if properties.show_name_affix_settings:
+        draw_asset_affix_settings(properties, box)
+
     # fbx export settings box
     row = layout.row()
     box = row.box()
@@ -227,6 +243,92 @@ def draw_validations_tab(properties, layout):
     row.prop(properties, 'validate_materials')
     row = layout.row()
     row.prop(properties, 'validate_textures')
+
+
+def draw_animation_box(properties, layout):
+    """
+    Draws all the properties in the Animation Settings box.
+
+    :param properties: The add-on properties to use.
+    :param layout: The layout container for this tab.
+    """
+    row = layout.row()
+    row.prop(properties, 'automatically_scale_bones')
+    row = layout.row()
+    row.prop(properties, 'export_all_actions')
+    row = layout.row()
+    row.prop(properties, 'auto_stash_active_action')
+
+    # this option is greyed out unless ue2rigify is active
+    row = layout.row()
+    row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
+    row.prop(properties, 'auto_sync_control_nla_to_source')
+
+
+def draw_asset_affix_settings(properties, layout):
+    """
+    Draws all the properties in the Name Affix Settings box.
+    :param properties: The add-on properties to use.
+    :param layout: The layout container for this tab.
+    """
+
+    # Automatically Add Asset Affixes on export
+    column = layout.column()
+    row = column.split(factor=0.4)
+    row.prop(properties, 'auto_add_asset_name_affixes')
+    if properties.auto_add_asset_name_affixes:
+        row.label(text='Warning: This will rename the exported assets in Blender!',
+            icon='ERROR')
+    # Automatically Remove Asset Affixes after export
+    row = layout.row()
+    row.prop(properties, 'auto_remove_original_asset_names')
+
+
+    # Static Mesh Affix
+    row = layout.row()
+    row.alert = properties.incorrect_static_mesh_name_affix
+    row.prop(properties, 'static_mesh_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_static_mesh_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_static_mesh_name_affix')
+        )
+    # Material Affix
+    row = layout.row()
+    row.alert = properties.incorrect_material_name_affix
+    row.prop(properties, 'material_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_material_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_material_name_affix')
+        )
+    # Texture Affix
+    row = layout.row()
+    row.alert = properties.incorrect_texture_name_affix
+    row.prop(properties, 'texture_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_texture_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
+        )
+    # Skeletal Mesh Affix
+    row = layout.row()
+    row.alert = properties.incorrect_skeletal_mesh_name_affix
+    row.prop(properties, 'skeletal_mesh_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_skeletal_mesh_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_skeletal_mesh_name_affix')
+        )
+    # Animation Sequence Affix
+    row = layout.row()
+    row.alert = properties.incorrect_animation_sequence_name_affix
+    row.prop(properties, 'animation_sequence_name_affix')
+    utilities.report_path_error_message(
+            layout,
+            properties.incorrect_animation_sequence_name_affix,
+            validations.show_asset_affix_message(properties, 'incorrect_animation_sequence_name_affix')
+        )
 
 
 def draw_fbx_box(properties, layout):
@@ -300,26 +402,6 @@ def draw_fbx_box(properties, layout):
     row.label(text='Extras:')
     row = layout.row()
     row.prop(properties, 'use_metadata')
-
-
-def draw_animation_box(properties, layout):
-    """
-    Draws all the properties in the Animation Settings box.
-
-    :param properties: The add-on properties to use.
-    :param layout: The layout container for this tab.
-    """
-    row = layout.row()
-    row.prop(properties, 'automatically_scale_bones')
-    row = layout.row()
-    row.prop(properties, 'export_all_actions')
-    row = layout.row()
-    row.prop(properties, 'auto_stash_active_action')
-
-    # this option is greyed out unless ue2rigify is active
-    row = layout.row()
-    row.enabled = bool(bpy.context.preferences.addons.get('ue2rigify'))
-    row.prop(properties, 'auto_sync_control_nla_to_source')
 
 
 class SendToUnrealPreferences(Send2UeProperties, Send2UeUIProperties, bpy.types.AddonPreferences):

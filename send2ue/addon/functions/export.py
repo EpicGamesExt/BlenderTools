@@ -4,6 +4,7 @@ import os
 import re
 import bpy
 import tempfile
+from . import affixes
 from . import unreal
 from . import utilities
 from . import validations
@@ -754,8 +755,8 @@ def create_action_data(rig_objects, properties):
 
     return action_data
 
-
 def create_mesh_data(mesh_objects, rig_objects, properties):
+
     """
     This function collects and creates all the asset data needed for the import process.
 
@@ -913,6 +914,10 @@ def send2ue(properties):
         # first get the current state of the scene and its objects
         context = utilities.get_current_context()
 
+        affix_applicator = affixes.AffixApplicator()
+        if properties.auto_add_asset_name_affixes:
+            affix_applicator.add_affixes(properties)
+
         # unpack the textures for export if needed
         unpacked_files = utilities.unpack_textures()
 
@@ -925,19 +930,19 @@ def send2ue(properties):
         if assets_data:
             # check path mode to see if exported assets should be imported to unreal
             if properties.path_mode in ['send_to_unreal', 'both']:
-                for assets_data in assets_data:
-                    result = unreal.import_asset(assets_data, properties)
+                for asset_data in assets_data:
+                    result = unreal.import_asset(asset_data, properties)
+                    
                     if not result:
                         break
-
-            # remove unpacked files
-            utilities.remove_unpacked_files(unpacked_files)
-
         else:
-            utilities.remove_unpacked_files(unpacked_files)
-
             utilities.report_error(
                 f'You do not have the correct objects under the "{properties.mesh_collection_name}" or '
                 f'"{properties.rig_collection_name}" collections or your rig does not have any '
                 f'actions to export!'
             )
+        
+        utilities.remove_unpacked_files(unpacked_files)
+
+        if properties.auto_remove_original_asset_names:
+            affix_applicator.remove_affixes(properties)

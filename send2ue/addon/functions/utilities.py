@@ -732,9 +732,11 @@ def draw_error_message(self, context):
     or can be passed an explicit context.
     """
     self.layout.label(text=bpy.context.window_manager.send2ue.error_message)
+    if bpy.context.window_manager.send2ue.error_message_details:        
+        self.layout.label(text=bpy.context.window_manager.send2ue.error_message_details)
 
 
-def report_error(message):
+def report_error(message, details=''):
     """
     This function reports a given error message to the screen.
 
@@ -746,9 +748,10 @@ def report_error(message):
             message = message.split('RuntimeError: ')[-1][:-1]
 
         bpy.context.window_manager.send2ue.error_message = message
+        bpy.context.window_manager.send2ue.error_message_details = details
         bpy.context.window_manager.popup_menu(draw_error_message, title="Error", icon='ERROR')
     else:
-        raise RuntimeError(message)
+        raise RuntimeError(message + details)
 
 
 def report_path_error_message(layout, send2ue_property, report_text):
@@ -1295,3 +1298,5 @@ def unpack_textures():
                                     file_paths.append(image.filepath_from_user())
 
     return file_paths
+
+    
