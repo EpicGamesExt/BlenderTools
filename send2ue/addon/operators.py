@@ -28,7 +28,7 @@ class AdvancedSend2Ue(bpy.types.Operator):
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self)
+        return wm.invoke_props_dialog(self, width=600)
 
     def draw(self, context):
         # uses property group from

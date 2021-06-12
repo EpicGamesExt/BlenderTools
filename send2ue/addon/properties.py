@@ -139,8 +139,8 @@ class Send2UeUIProperties:
         name="Export all actions",
         default=True,
         description=(
-            "This setting ensures that regardless of the mute values on your NLA tracks, your actions will get "
-            "exported. It does this by un-muting all NLA tracks before the FBX export"
+            "This setting ensures that regardless of the mute values or the solo value (star) on your NLA tracks, your "
+            "actions will get exported. It does this by un-muting all NLA tracks before the FBX export"
         )
     )
     auto_stash_active_action: bpy.props.BoolProperty(
@@ -266,7 +266,7 @@ class Send2UeUIProperties:
     # ---------------------------- name affix settings --------------------------------
     auto_add_asset_name_affixes: bpy.props.BoolProperty(
         name="Automatically add affixes on export",
-        description= (
+        description=(
             "Whether or not to add the affixes (prefix, suffix) to the asset names before the export. "
             "Prefixes end with an underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
         ),
@@ -274,7 +274,7 @@ class Send2UeUIProperties:
     )
     auto_remove_original_asset_names: bpy.props.BoolProperty(
         name="Remove affixes after export",
-        description= (
+        description=(
             "Whether or not to remove the affixes (prefix, suffix) from the asset names after the export, "
             + "basically restoring the original names."
         ),
@@ -285,35 +285,35 @@ class Send2UeUIProperties:
         default="SM_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported static mesh assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+                    "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
     material_name_affix: bpy.props.StringProperty(
         name="Material Affix",
         default="M_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported material assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+                    "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
     texture_name_affix: bpy.props.StringProperty(
         name="Texture Affix",
         default="T_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported texture assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+                    "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
     skeletal_mesh_name_affix: bpy.props.StringProperty(
         name="Skeletal Mesh Affix",
         default="SK_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported skeletal mesh assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
-    )    
+                    "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+    )
     animation_sequence_name_affix: bpy.props.StringProperty(
         name="Animation Sequence Affix",
         default="Anim_",
         update=validations.validate_asset_affixes,
         description="The prefix or suffix to use for exported animation sequence assets. Prefixes end with an "
-            "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
+                    "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
 
     # ---------------------------- fbx file settings --------------------------------

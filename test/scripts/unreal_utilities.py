@@ -30,6 +30,8 @@ logger.setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+UNREAL = os.environ.get('UNREAL', 'UE4Editor-Cmd')
+
 
 def run_unreal_python_commands(remote_exec, commands, attempts=50, ping=0.1):
     """
@@ -67,17 +69,20 @@ def run_unreal_python_commands(remote_exec, commands, attempts=50, ping=0.1):
         remote_exec.stop()
 
 
-def get_lod_count(game_path):
+def get_lod_count(game_path, attempts=0):
     """
     This function gets the number of lods on the given asset.
 
     :param str game_path: The game path to the unreal asset.
+    :param str attempts: The number of attempts to get the correct response.
     :return int: The number of lods on the asset.
     """
     # start a connection to the engine that lets you send python strings
     remote_exec = RemoteExecution()
     remote_exec.start()
 
+    # TODO: EditorSkeletalMeshLibrary: Function 'get_lod_count' on 'EditorSkeletalMeshLibrary' is deprecated
+    # TODO: EditorStaticMeshLibrary: Function 'get_lod_count' on 'EditorStaticMeshLibrary' is deprecated
     # send over the python code as a string
     run_unreal_python_commands(
         remote_exec,
@@ -89,12 +94,22 @@ def get_lod_count(game_path):
 
             f'if game_asset and game_asset.__class__.__name__ == "StaticMesh":',
             f'\tlod_count = unreal.EditorStaticMeshLibrary.get_lod_count(game_asset)',
-            f'print(lod_count)'
+            f'if game_asset:',
+            f'\tprint(lod_count)'
         ]))
 
     if unreal_response:
         if unreal_response['success']:
-            return int(unreal_response['output'][0]['output'])
+            output = unreal_response['output']
+            if output:
+                for line in output:
+                    try:
+                        return int(line['output'])
+                    except ValueError as error:
+                        logger.warning(error)
+
+            if attempts < 10:
+                return get_lod_count(game_path, attempts=attempts+1)
 
 
 def asset_exists(game_path):
@@ -314,12 +329,12 @@ def launch_unreal():
         if sys.argv[-1].lower() == '--ci':
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
-                r'C:\UnrealEngine\Engine\Binaries\Win64\UE4Editor-Cmd.exe'
+                rf'C:\UnrealEngine\Engine\Binaries\Win64\{UNREAL}.exe'
             )
         else:
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
-                'UE4Editor-Cmd'
+                f'{UNREAL}'
             )
 
         command = rf'{unreal_executable} "{unreal_project}" {" ".join(flags)}'
@@ -333,12 +348,12 @@ def launch_unreal():
         if sys.argv[-1].lower() == '--ci':
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
-                '/home/ue4/UnrealEngine/Engine/Binaries/Linux/UE4Editor-Cmd'
+                f'/home/ue4/UnrealEngine/Engine/Binaries/Linux/{UNREAL}'
             )
         else:
             unreal_executable = os.environ.get(
                 'UNREAL_CMD_EXE',
-                'UE4Editor-Cmd'
+                f'{UNREAL}'
             )
 
         command = [unreal_executable, unreal_project] + flags

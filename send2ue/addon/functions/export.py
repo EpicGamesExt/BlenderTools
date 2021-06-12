@@ -95,14 +95,15 @@ def set_action_mute_values(rig_object, action_names):
     :param object rig_object: A object of type armature with animation data.
     :param list action_names: A list of action names to un-mute
     """
-    if rig_object.animation_data:
-        for nla_track in rig_object.animation_data.nla_tracks:
-            for strip in nla_track.strips:
-                if strip.action:
-                    if strip.action.name in action_names:
-                        nla_track.mute = False
-                    else:
-                        nla_track.mute = True
+    if rig_object:
+        if rig_object.animation_data:
+            for nla_track in rig_object.animation_data.nla_tracks:
+                for strip in nla_track.strips:
+                    if strip.action:
+                        if strip.action.name in action_names:
+                            nla_track.mute = False
+                        else:
+                            nla_track.mute = True
 
 
 def set_all_action_mute_values(rig_object, mute):
@@ -117,6 +118,21 @@ def set_all_action_mute_values(rig_object, mute):
         if rig_object.animation_data:
             for nla_track in rig_object.animation_data.nla_tracks:
                 nla_track.mute = mute
+
+
+def set_solo_tracks(scene_object):
+    """
+    Mutes any nla track that is not a solo track.
+
+    :param object scene_object: A object.
+    """
+    if scene_object:
+        if scene_object.animation_data:
+            for nla_track in scene_object.animation_data.nla_tracks:
+                if nla_track.is_solo:
+                    set_all_action_mute_values(scene_object, True)
+                    nla_track.mute = False
+                    break
 
 
 def set_parent_rig_selection(mesh_object, properties):
@@ -154,7 +170,8 @@ def set_selected_objects_to_center(properties):
     original_positions = {}
 
     if properties.use_object_origin:
-        for index, selected_object in enumerate(bpy.context.selected_objects):
+
+        for selected_object in bpy.context.selected_objects:
             # get the original locations
             original_x = selected_object.location.x
             original_y = selected_object.location.y
@@ -165,7 +182,7 @@ def set_selected_objects_to_center(properties):
             selected_object.location.y = 0.0
             selected_object.location.z = 0.0
 
-            original_positions[index] = original_x, original_y, original_z
+            original_positions[selected_object.name] = original_x, original_y, original_z
 
     # return the original positions
     return original_positions
@@ -193,11 +210,12 @@ def set_object_positions(original_positions):
     :param object original_positions: A dictionary of tuple that are the original position values of the
     selected objects.
     """
-    if original_positions:
-        for index, selected_object in enumerate(bpy.context.selected_objects):
-            selected_object.location.x = original_positions[index][0]
-            selected_object.location.y = original_positions[index][1]
-            selected_object.location.z = original_positions[index][2]
+    for object_name, positions in original_positions.items():
+        scene_object = bpy.data.objects.get(object_name)
+        if scene_object:
+            scene_object.location.x = positions[0]
+            scene_object.location.y = positions[1]
+            scene_object.location.z = positions[2]
 
 
 def set_armatures_as_parents(properties):
@@ -285,7 +303,7 @@ def fix_armature_scale(armature_object, scale_factor, context, properties):
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
 
     # scale up the objects action location keyframes to fix the applied scale
-    actions = utilities.get_actions(armature_object, properties)
+    actions = utilities.get_actions(armature_object)
     context['source_object']['actions'] = actions
     utilities.scale_object_actions([armature_object], actions, scale_factor)
 
@@ -405,15 +423,19 @@ def restore_rig_objects(context, properties):
             bpy.ops.ue2rigify.constrain_source_to_deform()
 
 
-def export_fbx_files(file_paths, properties):
+def export_fbx_files(asset_name, file_paths, properties):
     """
     This function calls the blender fbx export operator with specific settings.
 
+    :param str asset_name: The name of the exported asset.
     :param dict file_paths: A dictionary of full file paths to be exported to FBX files.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # gets the original position and sets the objects position according to the selected properties.
     original_positions = set_selected_objects_to_center(properties)
+
+    # select sockets
+    select_asset_sockets(asset_name, True, properties)
 
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
@@ -505,11 +527,12 @@ def select_asset_collisions(asset_name, properties):
             collision_object.select_set(True)
 
 
-def select_asset_sockets(asset_name, properties):
+def select_asset_sockets(asset_name, selection, properties):
     """
     This function selects the socket under the given asset.
 
     :param str asset_name: The name of the asset to export.
+    :param bool selection: Whether to set select to true or false.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if properties.import_sockets:
@@ -518,7 +541,7 @@ def select_asset_sockets(asset_name, properties):
             for child in mesh_object.children:
                 if child.type == 'EMPTY':
                     if 'SOCKET_' in child.name:
-                        child.select_set(True)
+                        child.select_set(selection)
 
 
 def export_mesh_lods(asset_name, properties):
@@ -563,12 +586,9 @@ def export_mesh_lods(asset_name, properties):
         # select collision meshes
         select_asset_collisions(asset_name, properties)
 
-        # select sockets
-        select_asset_sockets(asset_name, properties)
-
         # export the selected lod meshes and empty
         fbx_file_paths = get_fbx_paths(asset_name, 'MESH')
-        export_fbx_files(fbx_file_paths, properties)
+        export_fbx_files(asset_name, fbx_file_paths, properties)
 
         # un-parent the empty from the lod objects and deselect them
         for lod_object, lod_object_parent in lod_objects:
@@ -606,11 +626,8 @@ def export_mesh(mesh_object, properties):
     # select collision meshes
     select_asset_collisions(mesh_object_name, properties)
 
-    # select sockets
-    select_asset_sockets(mesh_object_name, properties)
-
     # export selection to an fbx file
-    export_fbx_files(fbx_file_paths, properties)
+    export_fbx_files(mesh_object_name, fbx_file_paths, properties)
 
     # deselect the exported object
     mesh_object = bpy.data.objects.get(mesh_object_name)
@@ -653,7 +670,7 @@ def export_action(rig_object, action_name, properties):
     set_action_mute_value(control_rig_object, utilities.get_action_name(action_name, properties), False)
 
     # export the action
-    export_fbx_files(fbx_file_paths, properties)
+    export_fbx_files(action_name, fbx_file_paths, properties)
 
     # ensure the rigs are in rest position before setting the mute values
     utilities.clear_pose(rig_object)
@@ -684,7 +701,6 @@ def create_action_data(rig_objects, properties):
         for rig_object in rig_objects:
 
             control_rig_object = None
-            unmuted_action_names = []
             current_pose = utilities.get_pose(rig_object)
             current_control_pose = None
 
@@ -701,35 +717,28 @@ def create_action_data(rig_objects, properties):
                         # create animation data on the source rig
                         rig_object.animation_data_create()
 
-                    # get the names of the un-muted actions
-                    unmuted_action_names = utilities.get_action_names(control_rig_object, properties, all_actions=False)
-            else:
-                # get the names of the un-muted actions
-                unmuted_action_names = utilities.get_action_names(rig_object, properties, all_actions=False)
+            # get the names of the un-muted actions
+            control_rig_object_unmuted_actions = utilities.get_action_names(control_rig_object, all_actions=False)
+            rig_object_unmuted_actions = utilities.get_action_names(rig_object, all_actions=False)
 
-            # if using ue2rigify and the auto sync nla strips option is on
+            # if auto sync nla strips option is on
             if properties.use_ue2rigify and properties.auto_sync_control_nla_to_source:
                 bpy.ops.ue2rigify.sync_rig_actions()
 
             # if using ue2rigify and the auto stash active action option is on
             if not properties.use_ue2rigify and properties.auto_stash_active_action:
                 # stash the active animation data in the rig object's nla strips
-                utilities.stash_animation_data(rig_object, properties)
+                utilities.stash_animation_data(rig_object)
 
-            # mute all actions on the control and source rigs
-            if properties.export_all_actions:
-                set_all_action_mute_values(control_rig_object, True)
-                set_all_action_mute_values(rig_object, True)
+            # adjust mute values to account for solo tracks
+            set_solo_tracks(rig_object)
 
             # get the names of all the actions to export
-            action_names = utilities.get_action_names(
-                rig_object,
-                properties,
-                all_actions=properties.export_all_actions
-            )
+            action_names = utilities.get_action_names(rig_object, all_actions=properties.export_all_actions)
 
             # mute all actions
             set_all_action_mute_values(rig_object, mute=True)
+            set_all_action_mute_values(control_rig_object, mute=True)
 
             # export the actions and create the action import data
             for action_name in action_names:
@@ -744,16 +753,15 @@ def create_action_data(rig_objects, properties):
                 })
 
             # set the action mute values back to their original state
-            if properties.use_ue2rigify:
-                set_action_mute_values(control_rig_object, unmuted_action_names)
-            else:
-                set_action_mute_values(rig_object, unmuted_action_names)
+            set_action_mute_values(control_rig_object, control_rig_object_unmuted_actions)
+            set_action_mute_values(rig_object, rig_object_unmuted_actions)
 
             # set the rig poses back to their original states
             utilities.set_pose(rig_object, current_pose)
             utilities.set_pose(control_rig_object, current_control_pose)
 
     return action_data
+
 
 def create_mesh_data(mesh_objects, rig_objects, properties):
 
@@ -872,6 +880,9 @@ def validate(properties):
     if not validations.validate_disk_paths(properties):
         return False
 
+    if not validations.validate_unreal_skeleton_path(rig_objects, mesh_objects, properties):
+        return False
+
     if not validations.validate_file_permissions(properties.disk_mesh_folder_path, properties):
         return False
 
@@ -924,15 +935,12 @@ def send2ue(properties):
         # get the asset data for the import
         assets_data = create_import_data(properties)
 
-        # restore the previous context
-        utilities.set_context(context)
-
         if assets_data:
             # check path mode to see if exported assets should be imported to unreal
             if properties.path_mode in ['send_to_unreal', 'both']:
                 for asset_data in assets_data:
                     result = unreal.import_asset(asset_data, properties)
-                    
+
                     if not result:
                         break
         else:
@@ -941,8 +949,11 @@ def send2ue(properties):
                 f'"{properties.rig_collection_name}" collections or your rig does not have any '
                 f'actions to export!'
             )
-        
+
         utilities.remove_unpacked_files(unpacked_files)
 
         if properties.auto_remove_original_asset_names:
             affix_applicator.remove_affixes(properties)
+
+        # restore the previous context
+        utilities.set_context(context)
