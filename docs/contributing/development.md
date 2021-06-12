@@ -92,6 +92,7 @@ OK
 `run_unit_tests.py` can be given several environment variables:
 * `TEST_CASES` can be used to specify which only which unitest you would like to run. `TEST_CASES=ue2rigify_baking.py,ue2rigify_modes.py,send2ue_collision_meshes.py`
 * `ONLY_BLENDER` can be used to specify whether to launch unreal or just run the tests in blender. `ONLY_BLENDER=True`
+* `UNREAL` can be used to specify which Unreal executable name to use. The default is `UE4Editor-Cmd` for Unreal Engine 4 versions. For Unreal 5 set the variable like so `UNREAL=UnrealEditor-Cmd`.
 
 ## Our Standards
 Our primary standard for code is [PEP 8](https://www.python.org/dev/peps/pep-0008/), overridden by any specific naming conventions recommended by the [blender python API](https://docs.blender.org/api/current/index.html):

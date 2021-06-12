@@ -135,6 +135,7 @@ def get_keyframe_data(rig_object, socket_direction=None, links_data=None):
                     animation_data[strip.action.name]['strip_frame_start'] = strip.frame_start
                     animation_data[strip.action.name]['strip_frame_end'] = strip.frame_end
                     animation_data[strip.action.name]['mute'] = nla_track.mute
+                    animation_data[strip.action.name]['is_solo'] = nla_track.is_solo
                     keyed_values = []
 
                     # go through the strips fcurves
@@ -309,6 +310,8 @@ def set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, 
     to_rig_nla_track = to_rig_object.animation_data.nla_tracks.new()
     to_rig_nla_track.name = to_rig_nla_track_name.replace(f'{properties.source_mode}_', '')
     to_rig_nla_track.mute = from_rig_action_data['mute']
+    if from_rig_action_data['is_solo']:
+        to_rig_nla_track.is_solo = from_rig_action_data['is_solo']
 
     # create a new nla strip and set the strip start and end values
     to_rig_strip_name = to_rig_strip_name.replace(f'{properties.source_mode}_', '')
@@ -1116,6 +1119,8 @@ def sync_nla_track_data(control_rig_object, source_rig_object, properties):
 
             # set the nla track mute value and deselect it
             source_nla_track.mute = control_nla_track.mute
+            if control_nla_track.is_solo:
+                source_nla_track.is_solo = control_nla_track.is_solo
             source_nla_track.select = False
 
             for control_strip in control_nla_track.strips:
@@ -1237,6 +1242,12 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
         # get the from rig's animation data
         from_rig_animation_data = get_from_rig_animation_data(from_rig_object, to_rig_object, links_data, properties)
 
+        # get the from rig action attributes
+        from_rig_action_attributes = utilities.get_all_action_attributes(from_rig_object)
+
+        # remove all solo track values
+        utilities.set_solo_track_values(from_rig_object, False)
+
         # go through the from rig's animation data
         for action_name, from_rig_action_data in from_rig_animation_data.items():
 
@@ -1272,6 +1283,9 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
                     to_rig_action.name = to_rig_action.name.replace(f'{properties.source_mode}_', '')
 
                 set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, properties)
+
+            # restore the from rig action attributes
+            utilities.set_all_action_attributes(from_rig_object, from_rig_action_attributes)
 
 
 def save_meta_rig(properties):

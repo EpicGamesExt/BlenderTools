@@ -1,6 +1,5 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
-import bpy
 import os
 import tempfile
 from . import utilities
@@ -35,8 +34,9 @@ class AffixApplicator:
             self.rename_all_textures(texture_images, self.append_affix, properties)
 
         if is_skeletal_asset:
-            actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
-            actions = [a for sublist in actions for a in sublist] # flatten list
+            actions = [utilities.get_actions(rig_object, properties.export_all_actions) for rig_object in
+                       rig_objects]
+            actions = [a for sublist in actions for a in sublist]  # flatten list
             for action in actions:
                 self.append_affix(action, properties.animation_sequence_name_affix)
 
@@ -62,71 +62,69 @@ class AffixApplicator:
 
             texture_images = self.get_texture_images(mesh_object)
             self.rename_all_textures(texture_images, self.discard_affix, properties)
-        
+
         if is_skeletal_asset:
-            actions = [utilities.get_actions(rig_object, properties, properties.export_all_actions) for rig_object in rig_objects]
-            actions = [a for sublist in actions for a in sublist] # flatten list
+            actions = [utilities.get_actions(rig_object, properties.export_all_actions) for rig_object in
+                       rig_objects]
+            actions = [a for sublist in actions for a in sublist]  # flatten list
             for action in actions:
                 self.discard_affix(action, properties.animation_sequence_name_affix)
 
-
-    def append_affix(self, object, affix, is_image=False):
+    @staticmethod
+    def append_affix(scene_object, affix, is_image=False):
         """
         Generates the renames where needed and appends it to the dict.
 
-        :param object self: This refers the the AffixApplicator class instance.
-        :param object object: The export object to be renamed with the affix added.
+        :param object scene_object: The export object to be renamed with the affix added.
         :param str affix: The affix to either prepend or append, depending on whether it's a prefix or suffix.
         :param bool is_image: Indicates whether the object is an image.
         :return str: The new object name.
         """
-        filename, ext = os.path.splitext(object.name)
-        asset_name = filename if is_image else object.name
+        filename, ext = os.path.splitext(scene_object.name)
+        asset_name = filename if is_image else scene_object.name
 
         # Prefix
         if affix.endswith("_"):
-            if object.name.startswith(affix):
+            if scene_object.name.startswith(affix):
                 return  # Do not add prefix when its already present
-            object.name = affix + asset_name + ext
+            scene_object.name = affix + asset_name + ext
         # Suffix
         else:
-            if object.name.endswith(affix):
+            if scene_object.name.endswith(affix):
                 return  # Do not add suffix when its already present
-            object.name = asset_name + affix + ext
+            scene_object.name = asset_name + affix + ext
 
-        return object.name
+        return scene_object.name
 
-
-    def discard_affix(self, object, affix, is_image=False):
+    @staticmethod
+    def discard_affix(scene_object, affix, is_image=False):
         """
         Generates the renames where needed and appends it to the dict.
 
-        :param object self: This refers the the AffixApplicator class instance.
-        :param object object: The export object to be renamed with the affix added.
+        :param object scene_object: The export object to be renamed with the affix added.
         :param str affix: The affix to either prepend or append, depending on whether it's a prefix or suffix.
         :param bool is_image: Indicates whether the object is an image.
         :return str: The new object name.
         """
-        filename, ext = os.path.splitext(object.name)
-        asset_name = filename if is_image else object.name
+        filename, ext = os.path.splitext(scene_object.name)
+        asset_name = filename if is_image else scene_object.name
 
         # Prefix
         if affix.endswith("_"):
-            if object.name.startswith(affix):
-                object.name = asset_name[len(affix):] + ext
+            if scene_object.name.startswith(affix):
+                scene_object.name = asset_name[len(affix):] + ext
         # Suffix
         else:
-            if object.name.endswith(affix):
-                object.name = asset_name[:-len(affix)] + ext
+            if scene_object.name.endswith(affix):
+                scene_object.name = asset_name[:-len(affix)] + ext
 
-        return object.name
-    
+        return scene_object.name
 
-    def get_texture_images(self, mesh_object):
+    @staticmethod
+    def get_texture_images(mesh_object):
         """
         This function iterates over all materials of the mesh object and returns the names of its textures.
 
-        :param object self: This refers the the AffixApplicator class instance.
         :param object mesh_object: A mesh object selected for export.
         :return list: A list of textures used in the materials.
         """
@@ -137,41 +135,39 @@ class AffixApplicator:
                 for node in material_slot.material.node_tree.nodes:
                     if node.type == 'TEX_IMAGE':
                         images.append(node.image)
-        
+
         return images
 
-
-    def rename_all_textures(self, images, affixOperation, properties):
+    def rename_all_textures(self, images, affix_operation, properties):
         """
         Prepares the textures by unpacking and renaming them for the export.
-        
-        :param object self: This refers the the AffixApplicator class instance.
+
         :param list images: A list of texture images referenced selected for export.
-        :param method affixOperation: The affix operation to run on the name, either appending or discarding the affix.
+        :param method affix_operation: The affix operation to run on the name, either appending or discarding the affix.
         :param object properties: The property group that contains variables that maintain the addon's correct state.
         :return list: A list of textures used in the materials.
         """
 
         errors = []
-        
-        for image in images:            
-            new_name = affixOperation(image, properties.texture_name_affix, is_image=True)
+
+        for image in images:
+            new_name = affix_operation(image, properties.texture_name_affix, is_image=True)
             try:
                 self.rename_texture(image, new_name)
             except (FileExistsError, PermissionError) as ex:
-                print(str(ex))
                 errors.append(str(ex))
 
         if errors:
-            utilities.report_error("Failed to rename the following texture images:",
-                ', '.join(errors))
+            utilities.report_error(
+                "Failed to rename the following texture images:",
+                ', '.join(errors)
+            )
 
-
-    def rename_texture(self, image, new_name):
+    @staticmethod
+    def rename_texture(image, new_name):
         """
         This function renames the texture object in blender and the referenced image file on the hard disk.
 
-        :param object self: This refers the the AffixApplicator class instance.
         :param object image: A texture image referenced selected for export.
         :param str new_name: New name for the texture including the affix.
         """
@@ -187,7 +183,7 @@ class AffixApplicator:
 
         if not new_name.endswith(ext):
             new_name = new_name + ext
-        
+
         tempdir = tempfile.mkdtemp(prefix='Send2Unreal_')
         new_path = os.path.join(tempdir, new_name)
 

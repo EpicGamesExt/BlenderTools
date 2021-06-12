@@ -99,6 +99,27 @@ def get_actions(scene_object):
     return actions
 
 
+def get_all_action_attributes(rig_object):
+    """
+    This function gets all the action attributes on the provided rig.
+
+    :param object rig_object: A object of type armature with animation data.
+    :return dict: The action attributes on the provided rig.
+    """
+    attributes = {}
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            for strip in nla_track.strips:
+                if strip.action:
+                    attributes[strip.action.name] = {
+                        'mute': nla_track.mute,
+                        'is_solo': nla_track.is_solo,
+                        'frame_start': strip.frame_start,
+                        'frame_end': strip.frame_end
+                    }
+    return attributes
+
+
 def get_action_transform_offset(action, bone_name=None):
     """
     This function gets the amount the first frame of the given action is offset from the applied
@@ -240,6 +261,42 @@ def set_object_transforms(scene_object, transform_values):
         scene_object.rotation_quaternion = transform_values['rotation_quaternion']
         scene_object.rotation_euler = transform_values['rotation_euler']
         scene_object.scale = transform_values['scale']
+
+
+def set_solo_track_values(rig_object, value):
+    """
+    This function sets all is_solo attributes on the nla tracks of the provided object to the given value.
+
+    :param object rig_object: A object of type armature with animation data.
+    :param bool value: Whether the tracks should be solo or not.
+    """
+    if rig_object:
+        if rig_object.animation_data:
+            for nla_track in rig_object.animation_data.nla_tracks:
+                if value:
+                    nla_track.is_solo = value
+
+
+def set_all_action_attributes(rig_object, attributes):
+    """
+    This function sets the action attributes to the provided values.
+
+    :param object rig_object: A object of type armature with animation data.
+    :param dict attributes: The values of the of the action attributes.
+    """
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            for strip in nla_track.strips:
+                if strip.action:
+                    action_attributes = attributes.get(strip.action.name)
+                    if action_attributes:
+                        nla_track.mute = action_attributes['mute']
+                        strip.frame_start = action_attributes['frame_start']
+                        strip.frame_end = action_attributes['frame_end']
+
+                        # only set the solo value if it is true
+                        if action_attributes['is_solo']:
+                            nla_track.is_solo = action_attributes['is_solo']
 
 
 def set_to_title(text):
@@ -622,21 +679,24 @@ def stash_animation_data(rig_object):
         # if there is an active action on the rig object
         active_action = rig_object.animation_data.action
 
+        attributes = get_all_action_attributes(rig_object)
+
         # remove any nla tracks that have the active action, have duplicate names, or no strips
         clean_nla_tracks(rig_object, active_action)
 
         if active_action:
             # create a new nla track
-            rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
-            rig_object_nla_track.name = active_action.name
+            nla_track = rig_object.animation_data.nla_tracks.new()
+            nla_track.name = active_action.name
 
             # create a strip with the active action as the strip action
-            rig_object_nla_track.strips.new(
+            nla_track.strips.new(
                 name=active_action.name,
                 start=1,
                 action=rig_object.animation_data.action
             )
-            rig_object_nla_track.mute = False
+
+        set_all_action_attributes(rig_object, attributes)
 
 
 def clear_object_transforms(scene_object):
@@ -1034,7 +1094,9 @@ def load_source_mode_context(properties):
                 bpy.context.window_manager.ue2rigify.context[properties.source_mode][source_rig.name]['action_offsets'] = {}
 
         else:
-            set_object_transforms(source_rig, properties.context[properties.source_mode][source_rig.name].get('transforms'))
+            source_rig_context = properties.context[properties.source_mode].get(source_rig.name)
+            if source_rig_context:
+                set_object_transforms(source_rig, source_rig_context.get('transforms'))
 
 
 def load_control_mode_context(properties):

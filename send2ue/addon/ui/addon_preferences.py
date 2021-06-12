@@ -177,14 +177,14 @@ def draw_export_tab(properties, layout):
     box = row.box()
     row = box.row()
     row.prop(
-            properties,
-            'show_name_affix_settings',
-            icon='TRIA_DOWN' if properties.show_name_affix_settings else 'TRIA_RIGHT',
-            icon_only=True,
-            emboss=False
-        )
+        properties,
+        'show_name_affix_settings',
+        icon='TRIA_DOWN' if properties.show_name_affix_settings else 'TRIA_RIGHT',
+        icon_only=True,
+        emboss=False
+    )
     row.label(text='Asset Name Affixes', icon='SYNTAX_OFF')
-    
+
     if properties.show_name_affix_settings:
         draw_asset_affix_settings(properties, box)
 
@@ -278,57 +278,56 @@ def draw_asset_affix_settings(properties, layout):
     row.prop(properties, 'auto_add_asset_name_affixes')
     if properties.auto_add_asset_name_affixes:
         row.label(text='Warning: This will rename the exported assets in Blender!',
-            icon='ERROR')
+                  icon='ERROR')
     # Automatically Remove Asset Affixes after export
     row = layout.row()
     row.prop(properties, 'auto_remove_original_asset_names')
-
 
     # Static Mesh Affix
     row = layout.row()
     row.alert = properties.incorrect_static_mesh_name_affix
     row.prop(properties, 'static_mesh_name_affix')
     utilities.report_path_error_message(
-            layout,
-            properties.incorrect_static_mesh_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_static_mesh_name_affix')
-        )
+        layout,
+        properties.incorrect_static_mesh_name_affix,
+        validations.show_asset_affix_message(properties, 'incorrect_static_mesh_name_affix')
+    )
     # Material Affix
     row = layout.row()
     row.alert = properties.incorrect_material_name_affix
     row.prop(properties, 'material_name_affix')
     utilities.report_path_error_message(
-            layout,
-            properties.incorrect_material_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_material_name_affix')
-        )
+        layout,
+        properties.incorrect_material_name_affix,
+        validations.show_asset_affix_message(properties, 'incorrect_material_name_affix')
+    )
     # Texture Affix
     row = layout.row()
     row.alert = properties.incorrect_texture_name_affix
     row.prop(properties, 'texture_name_affix')
     utilities.report_path_error_message(
-            layout,
-            properties.incorrect_texture_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
-        )
+        layout,
+        properties.incorrect_texture_name_affix,
+        validations.show_asset_affix_message(properties, 'incorrect_texture_name_affix')
+    )
     # Skeletal Mesh Affix
     row = layout.row()
     row.alert = properties.incorrect_skeletal_mesh_name_affix
     row.prop(properties, 'skeletal_mesh_name_affix')
     utilities.report_path_error_message(
-            layout,
-            properties.incorrect_skeletal_mesh_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_skeletal_mesh_name_affix')
-        )
+        layout,
+        properties.incorrect_skeletal_mesh_name_affix,
+        validations.show_asset_affix_message(properties, 'incorrect_skeletal_mesh_name_affix')
+    )
     # Animation Sequence Affix
     row = layout.row()
     row.alert = properties.incorrect_animation_sequence_name_affix
     row.prop(properties, 'animation_sequence_name_affix')
     utilities.report_path_error_message(
-            layout,
-            properties.incorrect_animation_sequence_name_affix,
-            validations.show_asset_affix_message(properties, 'incorrect_animation_sequence_name_affix')
-        )
+        layout,
+        properties.incorrect_animation_sequence_name_affix,
+        validations.show_asset_affix_message(properties, 'incorrect_animation_sequence_name_affix')
+    )
 
 
 def draw_fbx_box(properties, layout):

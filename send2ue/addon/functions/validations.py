@@ -2,7 +2,7 @@
 import bpy
 import re
 import os
-from . import utilities
+from . import utilities, unreal
 
 
 def validate_collections_exist(properties):
@@ -224,9 +224,62 @@ def validate_unreal_paths(properties):
     return True
 
 
+def validate_unreal_skeleton_path(rig_objects, mesh_objects, properties):
+    """
+    This function checks each if the unreal skeleton path is correct.
+
+    :param list rig_objects: A list of armature objects.
+    :param list mesh_objects: A list of mesh objects.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return bool: True if the objects passed the validation.
+    """
+    properties.incorrect_unreal_skeleton_path = False
+    if not mesh_objects:
+        if properties.path_mode in ['send_to_unreal', 'both']:
+            for rig_object in rig_objects:
+                skeleton_path = utilities.get_skeleton_game_path(rig_object, properties)
+                if not unreal.asset_exists(skeleton_path):
+                    properties.incorrect_unreal_skeleton_path = True
+                    error_message = validate_unreal_skeleton_path_property(
+                        properties,
+                        "incorrect_unreal_skeleton_path",
+                        False,
+                        skeleton_path=skeleton_path
+                    )
+                    if error_message:
+                        utilities.report_error(error_message)
+                        return False
+
+    return True
+
+
+def validate_unreal_skeleton_path_property(properties, property_name, detailed_message=False, skeleton_path=None):
+    """
+    This function returns a validation message about the unreal skeleton path.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str property_name: Property Name to check
+    :param bool detailed_message: Boolean to determine whether to return a detailed message
+    :param str skeleton_path: The skeleton path to display in the message.
+    :return str: The message from validation
+    """
+    message = ""
+    if not skeleton_path:
+        skeleton_path = properties.unreal_skeleton_asset_path
+
+    if getattr(properties, property_name):
+        message = f'The skeleton asset "{skeleton_path}" does not exist in unreal.'
+
+        if detailed_message:
+            message += f' Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly.'
+
+    return message
+
+
 def validate_unreal_path_by_property(properties, property_name, detailed_message=False):
     """
     This function returns a validation message about the property passed in
+
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param str property_name: Property Name to check
     :param bool detailed_message: Boolean to determine whether to return a detailed message
@@ -254,13 +307,12 @@ def validate_unreal_path_by_property(properties, property_name, detailed_message
             return message
 
         if property_name == "incorrect_unreal_skeleton_path":
-            if getattr(properties, property_name):
-                message = f'The skeleton asset "{properties.unreal_skeleton_asset_path}" does not exist in unreal.'
+            return validate_unreal_skeleton_path_property(
+                properties,
+                property_name,
+                detailed_message=detailed_message,
 
-                if detailed_message:
-                    message += f' Please make sure that the path under "Skeleton Asset (Unreal)" was entered correctly.'
-
-            return message
+            )
 
     return message
 
@@ -409,10 +461,10 @@ def validate_file_permissions(folder_path, properties, ui=False):
     return True
 
 
-def show_asset_affix_message(properties, property_name):    
+def show_asset_affix_message(properties, property_name):
     """
     This function returns a validation message about the affix property passed in.
-    
+
     :param object properties: The property group that contains variables that maintain the addons correct state.
     :param str property_name: Property name to check
     :return str: The message from validation
@@ -422,8 +474,11 @@ def show_asset_affix_message(properties, property_name):
     invalid_affix = getattr(properties, property_name)
 
     if invalid_affix:
-        message = f'The affix must not be empty and either start or end with an underscore _ character (e.g. Prefix_ or _Suffix).'
-    
+        message = (
+            'The affix must not be empty and either start or end with an underscore _ character '
+            '(e.g. Prefix_ or _Suffix).'
+        )
+
     return message
 
 

@@ -27,7 +27,7 @@ This automatically scales your armature objects so they import at scale of 1
 
 #### Export all actions
 
-This setting ensures that regardless of the mute values on your NLA tracks, your actions will get exported. It does this by un-muting all NLA tracks before the FBX export.
+This setting ensures that regardless of the mute values or the solo value (star) on your NLA tracks, your actions will get exported. It does this by un-muting all NLA tracks before the FBX export.
 
 #### Auto stash active action
 

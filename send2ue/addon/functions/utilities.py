@@ -16,6 +16,7 @@ def get_action_name(action_name, properties):
 
     :param str action_name: A source rig's action name.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool source_name: Whether to get the source action names.
     :return str: A control rig's action name.
     """
     if properties.use_ue2rigify:
@@ -81,44 +82,43 @@ def get_full_import_path(scene_object, properties, parent_collection=None):
     return import_path
 
 
-def get_action_names(rig_object, properties, all_actions=True):
+def get_action_names(rig_object, all_actions=True):
     """
     This function gets a list of action names from the provided rig objects animation data.
 
     :param object rig_object: A object of type armature with animation data.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool all_actions: Whether to get all action names, or just the un-muted actions.
     :return list: A list of action names.
     """
     action_names = []
-    if rig_object.animation_data:
-        for nla_track in rig_object.animation_data.nla_tracks:
-            # get all the action names if the all flag is set
-            if all_actions:
-                for strip in nla_track.strips:
-                    if strip.action:
-                        action_names.append(strip.action.name)
-
-            # otherwise get only the un-muted actions
-            else:
-                if not nla_track.mute:
+    if rig_object:
+        if rig_object.animation_data:
+            for nla_track in rig_object.animation_data.nla_tracks:
+                # get all the action names if the all flag is set
+                if all_actions:
                     for strip in nla_track.strips:
                         if strip.action:
-                            action_names.append(get_action_name(strip.action.name, properties))
+                            action_names.append(strip.action.name)
+
+                # otherwise get only the un-muted actions
+                else:
+                    if not nla_track.mute:
+                        for strip in nla_track.strips:
+                            if strip.action:
+                                action_names.append(strip.action.name)
     return action_names
 
 
-def get_actions(rig_object, properties, all_actions=True):
+def get_actions(rig_object, all_actions=True):
     """
     This function gets a list of action objects from the provided rig objects animation data.
 
     :param object rig_object: A object of type armature with animation data.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool all_actions: Whether to get all action names, or just the un-muted actions.
     :return list: A list of action objects.
     """
     actions = []
-    action_names = get_action_names(rig_object, properties, all_actions)
+    action_names = get_action_names(rig_object, all_actions)
 
     for action_name in action_names:
         action = bpy.data.actions.get(action_name)
@@ -126,6 +126,27 @@ def get_actions(rig_object, properties, all_actions=True):
             actions.append(action)
 
     return actions
+
+
+def get_all_action_attributes(rig_object):
+    """
+    This function gets all the action attributes on the provided rig.
+
+    :param object rig_object: A object of type armature with animation data.
+    :return dict: The action attributes on the provided rig.
+    """
+    attributes = {}
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            for strip in nla_track.strips:
+                if strip.action:
+                    attributes[strip.action.name] = {
+                        'mute': nla_track.mute,
+                        'is_solo': nla_track.is_solo,
+                        'frame_start': strip.frame_start,
+                        'frame_end': strip.frame_end
+                    }
+    return attributes
 
 
 def get_current_context():
@@ -472,6 +493,28 @@ def get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties):
     return unique_parent_mesh_objects
 
 
+def set_all_action_attributes(rig_object, attributes):
+    """
+    This function sets the action attributes to the provided values.
+
+    :param object rig_object: A object of type armature with animation data.
+    :param dict attributes: The values of the of the action attributes.
+    """
+    if rig_object.animation_data:
+        for nla_track in rig_object.animation_data.nla_tracks:
+            for strip in nla_track.strips:
+                if strip.action:
+                    action_attributes = attributes.get(strip.action.name)
+                    if action_attributes:
+                        nla_track.mute = action_attributes['mute']
+                        strip.frame_start = action_attributes['frame_start']
+                        strip.frame_end = action_attributes['frame_end']
+
+                        # only set the solo value if it is true
+                        if action_attributes['is_solo']:
+                            nla_track.is_solo = action_attributes['is_solo']
+
+
 def remove_data(data):
     """
     This function removes the provided data.
@@ -576,6 +619,46 @@ def create_groups(properties):
             bpy.context.scene.collection.children.link(new_collection)
 
 
+def join_collisions(collisions):
+    """
+    This function joins the given collisions into a single mesh.
+
+    :param object collisions: Mesh objects.
+    :return str: The name of the joined mesh.
+    """
+    joined_collision = None
+    selected_objects = bpy.context.selected_objects.copy()
+    active_object = bpy.context.active_object
+
+    deselect_all_objects()
+
+    # select just the collisions
+    for collision in collisions:
+        collision.select_set(True)
+
+    # duplicate the collisions
+    bpy.ops.object.duplicate()
+
+    # set the duplicates as active objects
+    for duplicate_object in bpy.context.selected_objects.copy():
+        bpy.context.view_layer.objects.active = duplicate_object
+        duplicate_object.select_set(True)
+
+    # join all the selected collisions
+    if len(bpy.context.selected_objects) > 1:
+        bpy.ops.object.join()
+        joined_collision = bpy.context.selected_objects[0]
+
+    # restore the selected objects
+    for selected_object in selected_objects:
+        selected_object.select_set(True)
+
+    # restore the active object
+    bpy.context.view_layer.objects.active = active_object
+
+    return joined_collision
+
+
 def match_collision_name_to_mesh_name(properties):
     """
     This function matches the selected collison to the selected mesh.
@@ -587,11 +670,16 @@ def match_collision_name_to_mesh_name(properties):
     meshes = get_from_collection(properties.mesh_collection_name, 'MESH', properties)
 
     if collisions and meshes:
-        selected_mesh = [mesh for mesh in meshes if mesh.select_get()][0]
-        selected_collision = [collision for collision in collisions if collision.select_get()][0]
-        name = f'{selected_collision.name.split("_")[0]}_{selected_mesh.name}'
-        selected_collision.name = name
-        return name
+        selected_meshes = [mesh for mesh in meshes if mesh.select_get()]
+        selected_collisions = [collision for collision in collisions if collision.select_get()]
+
+        if selected_meshes and selected_collisions:
+            selected_mesh = selected_meshes[0]
+            selected_collision = join_collisions(collisions)
+            if selected_collision:
+                name = f'{selected_collision.name.split("_")[0]}_{selected_mesh.name}'
+                selected_collision.name = name
+                return name
     return ''
 
 
@@ -732,7 +820,7 @@ def draw_error_message(self, context):
     or can be passed an explicit context.
     """
     self.layout.label(text=bpy.context.window_manager.send2ue.error_message)
-    if bpy.context.window_manager.send2ue.error_message_details:        
+    if bpy.context.window_manager.send2ue.error_message_details:
         self.layout.label(text=bpy.context.window_manager.send2ue.error_message_details)
 
 
@@ -879,7 +967,7 @@ def deselect_all_objects():
 
 
 # TODO add to Blender Integration library
-def clean_nla_tracks(rig_object, action, properties):
+def clean_nla_tracks(rig_object, action):
     """
     This function removes any nla tracks that have a action that matches the provided action. Also it removes
     any nla tracks that have actions in their strips that match other actions, or have no strips.
@@ -900,39 +988,40 @@ def clean_nla_tracks(rig_object, action, properties):
 
                 # remove nla strips with duplicate actions
                 if strip.action:
-                    action_names = get_action_names(rig_object, properties)
+                    action_names = get_action_names(rig_object)
                     if action_names.count(strip.action.name) > 1:
                         rig_object.animation_data.nla_tracks.remove(nla_track)
 
 
 # TODO add to Blender Integration library
-def stash_animation_data(rig_object, properties):
+def stash_animation_data(rig_object):
     """
     This function stashes the active action on an object into its nla strips.
 
     :param object rig_object: A object of type armature with animation data.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if rig_object.animation_data:
         # if there is an active action on the rig object
         active_action = rig_object.animation_data.action
 
+        attributes = get_all_action_attributes(rig_object)
+
         # remove any nla tracks that have the active action, have duplicate names, or no strips
-        clean_nla_tracks(rig_object, active_action, properties)
+        clean_nla_tracks(rig_object, active_action)
 
         if active_action:
-            action_name = get_action_name(active_action.name, properties)
             # create a new nla track
-            rig_object_nla_track = rig_object.animation_data.nla_tracks.new()
-            rig_object_nla_track.name = action_name
+            nla_track = rig_object.animation_data.nla_tracks.new()
+            nla_track.name = active_action.name
 
             # create a strip with the active action as the strip action
-            rig_object_nla_track.strips.new(
-                name=action_name,
+            nla_track.strips.new(
+                name=active_action.name,
                 start=1,
                 action=rig_object.animation_data.action
             )
-            rig_object_nla_track.mute = False
+
+        set_all_action_attributes(rig_object, attributes)
 
 
 def format_asset_path(game_reference):
@@ -1298,5 +1387,3 @@ def unpack_textures():
                                     file_paths.append(image.filepath_from_user())
 
     return file_paths
-
-    
