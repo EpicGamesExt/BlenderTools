@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import shutil
 import tempfile
 from . import utilities
 
@@ -56,6 +57,7 @@ class AffixApplicator:
         rig_objects = utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
         is_skeletal_asset = bool(rig_objects)
 
+        print(mesh_objects)
         for mesh_object in mesh_objects:
             if len(mesh_object.modifiers) > 0:
                 for modifier in mesh_object.modifiers:
@@ -201,7 +203,7 @@ class AffixApplicator:
         tempdir = tempfile.mkdtemp(prefix='Send2Unreal_')
         new_path = os.path.join(tempdir, new_name)
 
-        os.rename(image.filepath_from_user(), new_path)
+        shutil.move(image.filepath_from_user(), new_path)
         image.filepath = new_path
 
         if is_packed and os.path.exists(image.filepath_from_user()):

@@ -70,7 +70,7 @@ class Send2UeStaticMeshTestCases(unittest.TestCase):
         # check if the cube exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Cube'), "Cube static mesh was not prefixed by SM_")
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/M_Material'), "Material was not prefixed by M_")
-        self.assertTrue(cube.name == "SM_Cube", "Cube was not renamed to SM_Cube in Blender");
+        self.assertTrue(cube.name == "SM_Cube", "Cube was not renamed to SM_Cube in Blender")
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
@@ -103,7 +103,7 @@ class Send2UeStaticMeshTestCases(unittest.TestCase):
         # check if the cube exists in the unreal project
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/SM_Cube'), "Cube static mesh was not prefixed by SM_")
         self.assertTrue(unreal_utilities.asset_exists('/Game/untitled_category/untitled_asset/M_Material'), "Material was not prefixed by M_")
-        self.assertTrue(cube.name == "Cube", "Prefix of Cube was not removed after export in Blender");
+        self.assertTrue(cube.name == "Cube", "Prefix of Cube was not removed after export in Blender")
 
         # delete all the assets created by the import
         unreal_utilities.delete_directory('/Game/untitled_category/untitled_asset')
