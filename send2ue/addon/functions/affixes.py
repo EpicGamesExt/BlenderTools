@@ -22,8 +22,13 @@ class AffixApplicator:
         is_skeletal_asset = bool(rig_objects)
 
         for mesh_object in mesh_objects:
-            if is_skeletal_asset:
-                self.append_affix(mesh_object, properties.skeletal_mesh_name_affix)
+            if len(mesh_object.modifiers) > 0:
+                for modifier in mesh_object.modifiers:
+                    if modifier.type == "ARMATURE":
+                        if bool(modifier.object):
+                            self.append_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                        else:
+                            self.append_affix(mesh_object, properties.static_mesh_name_affix)
             else:
                 self.append_affix(mesh_object, properties.static_mesh_name_affix)
 
@@ -52,8 +57,17 @@ class AffixApplicator:
         is_skeletal_asset = bool(rig_objects)
 
         for mesh_object in mesh_objects:
-            if is_skeletal_asset:
-                self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
+            if len(mesh_object.modifiers) > 0:
+                for modifier in mesh_object.modifiers:
+                    if modifier.type == "ARMATURE":
+                        if bool(modifier.object):
+                            self.discard_affix(
+                                mesh_object, properties.skeletal_mesh_name_affix
+                            )
+                        else:
+                            self.discard_affix(
+                                mesh_object, properties.static_mesh_name_affix
+                            )
             else:
                 self.discard_affix(mesh_object, properties.static_mesh_name_affix)
 
