@@ -59,19 +59,12 @@ class AffixApplicator:
 
         print(mesh_objects)
         for mesh_object in mesh_objects:
-            if len(mesh_object.modifiers) > 0:
-                for modifier in mesh_object.modifiers:
-                    if modifier.type == "ARMATURE":
-                        if bool(modifier.object):
-                            self.discard_affix(
-                                mesh_object, properties.skeletal_mesh_name_affix
-                            )
-                        else:
-                            self.discard_affix(
-                                mesh_object, properties.static_mesh_name_affix
-                            )
-            else:
+            while True:
+                old_mesh_object_name = mesh_object.name
                 self.discard_affix(mesh_object, properties.static_mesh_name_affix)
+                self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                if old_mesh_object_name == mesh_object.name:
+                    break
 
             for slot in mesh_object.material_slots:
                 self.discard_affix(slot.material, properties.material_name_affix)
