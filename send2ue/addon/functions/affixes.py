@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import shutil
 import tempfile
 from . import utilities
 
@@ -22,8 +23,13 @@ class AffixApplicator:
         is_skeletal_asset = bool(rig_objects)
 
         for mesh_object in mesh_objects:
-            if is_skeletal_asset:
-                self.append_affix(mesh_object, properties.skeletal_mesh_name_affix)
+            if len(mesh_object.modifiers) > 0:
+                for modifier in mesh_object.modifiers:
+                    if modifier.type == "ARMATURE":
+                        if bool(modifier.object):
+                            self.append_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                        else:
+                            self.append_affix(mesh_object, properties.static_mesh_name_affix)
             else:
                 self.append_affix(mesh_object, properties.static_mesh_name_affix)
 
@@ -50,12 +56,16 @@ class AffixApplicator:
         mesh_objects = utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties)
         rig_objects = utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
         is_skeletal_asset = bool(rig_objects)
+        max_strip=30
 
+        print(mesh_objects)
         for mesh_object in mesh_objects:
-            if is_skeletal_asset:
-                self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
-            else:
+            for i in range(max_strip):
+                old_mesh_object_name = mesh_object.name
                 self.discard_affix(mesh_object, properties.static_mesh_name_affix)
+                self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
+                if old_mesh_object_name == mesh_object.name:
+                    break
 
             for slot in mesh_object.material_slots:
                 self.discard_affix(slot.material, properties.material_name_affix)
@@ -187,7 +197,7 @@ class AffixApplicator:
         tempdir = tempfile.mkdtemp(prefix='Send2Unreal_')
         new_path = os.path.join(tempdir, new_name)
 
-        os.rename(image.filepath_from_user(), new_path)
+        shutil.move(image.filepath_from_user(), new_path)
         image.filepath = new_path
 
         if is_packed and os.path.exists(image.filepath_from_user()):
