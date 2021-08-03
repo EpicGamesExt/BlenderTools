@@ -56,10 +56,11 @@ class AffixApplicator:
         mesh_objects = utilities.get_from_collection(properties.mesh_collection_name, 'MESH', properties)
         rig_objects = utilities.get_from_collection(properties.rig_collection_name, 'ARMATURE', properties)
         is_skeletal_asset = bool(rig_objects)
+        max_strip=30
 
         print(mesh_objects)
         for mesh_object in mesh_objects:
-            while True:
+            for i in range(max_strip):
                 old_mesh_object_name = mesh_object.name
                 self.discard_affix(mesh_object, properties.static_mesh_name_affix)
                 self.discard_affix(mesh_object, properties.skeletal_mesh_name_affix)
