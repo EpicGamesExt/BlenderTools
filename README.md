@@ -13,7 +13,7 @@ Here you can find the all the documentation for the addons in this repository.
 ### Get Notified on a New Release
 Never miss a new addon release! To do this, select 'Watch' then 'Custom'.
 
-![1](https://user-images.githubusercontent.com/67345633/130251830-9b0e0787-b973-4ea0-adc3-c3177dbeefa9.png)
+![1](https://user-images.githubusercontent.com/67345633/130252170-5e919e6c-b987-407e-9944-5ef281c765a4.png)
 
 Then check 'Releases' and click 'Apply'.
 
