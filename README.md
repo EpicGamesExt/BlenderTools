@@ -13,10 +13,10 @@ Here you can find the all the documentation for the addons in this repository.
 ### Get Notified on a New Release
 Never miss a new addon release! To do this, select 'Watch' then 'Custom'.
 
-![1](https://epicgames.github.io/BlenderTools/assets/images/readme/1.jpg)
+![1](https://user-images.githubusercontent.com/67345633/130251830-9b0e0787-b973-4ea0-adc3-c3177dbeefa9.png)
 
 Then check 'Releases' and click 'Apply'.
 
-![2](https://epicgames.github.io/BlenderTools/assets/images/readme/2.jpg)
+![2](https://user-images.githubusercontent.com/67345633/130251961-aacf0416-aa41-4dd5-a481-d6b478b2d690.png)
 
 You will now get an email notification everytime there is a new version of an addon released.
