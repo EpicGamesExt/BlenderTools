@@ -9,7 +9,7 @@ with the owners of this repository, before making a change. Each pull request mu
 
 ## Pull Request Process
 1. Fork the master repository.
-2. Create a branch in your fork that matches the name of the issue your are working on.
+2. Create a branch in your fork that matches the name of the issue you are working on.
 3. Add the new feature or fix.
 4. Run the unit tests and ensure that none fail.
 5. Submit a pull request from your forked branch back to the master branch of the BlenderTools repository.
