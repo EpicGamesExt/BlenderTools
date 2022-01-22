@@ -34,7 +34,7 @@ This mode is where you add or remove bones, edit bone positions, and edit the ri
 This mode is where you edit the nodes that constrain your FK bones to the original source bones. These node links are needed if you want to transfer the existing animation from the ‘Source’ rig to the control rig.
 
 
-**FK to Source Mode:**
+**Source to Deform Mode:**
 
 This mode is where you edit the nodes that constrain your original source bones to the deformation bones on your ‘Control’ rig.
 
