@@ -24,7 +24,7 @@ def get_rig_templates_path():
 
     :return str: The full path to the addons rig template directory.
     """
-    addons = bpy.utils.user_resource('SCRIPTS', 'addons')
+    addons = bpy.utils.user_resource('SCRIPTS', path='addons')
     return os.path.join(addons, __package__.split('.')[0], 'resources', 'rig_templates')
 
 
