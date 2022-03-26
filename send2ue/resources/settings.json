@@ -1,0 +1,1471 @@
+{
+  "unreal": {
+    "import_method": {
+      "fbx": {
+        "reset_to_fbx_on_material_conflict": {
+          "name": "Reset to Fbx on Material Conflict",
+          "description": "If true, the imported material sections will automatically be reset to the imported data in case of a reimport conflict",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "static_mesh_import_data": {
+          "auto_generate_collision": {
+            "name": "Generate Missing Collision",
+            "description": "If checked, collision will automatically be generated (ignored if custom collision is imported or used)",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "static_mesh_lod_group": {
+            "name": "Static Mesh LODGroup",
+            "description": "The LODGroup to associate with this mesh when it is imported",
+            "enum_items": [
+              [
+                "none",
+                "None",
+                "None",
+                "NONE",
+                0
+              ],
+              [
+                "deco",
+                "Deco",
+                "Deco",
+                "NONE",
+                1
+              ],
+              [
+                "foliage",
+                "Foliage",
+                "Foliage",
+                "NONE",
+                2
+              ],
+              [
+                "high_detail",
+                "HighDetail",
+                "HighDetail",
+                "NONE",
+                3
+              ],
+              [
+                "large_prop",
+                "LargeProp",
+                "LargeProp",
+                "NONE",
+                4
+              ],
+              [
+                "level_architecture",
+                "LevelArchitecture",
+                "LevelArchitecture",
+                "NONE",
+                5
+              ],
+              [
+                "small_prop",
+                "SmallProp",
+                "SmallProp",
+                "NONE",
+                6
+              ],
+              [
+                "vista",
+                "Vista",
+                "Vista",
+                "NONE",
+                7
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Name",
+            "default": "none"
+          },
+          "vertex_color_import_option": {
+            "name": "Vertex Color Import Option",
+            "description": "Specify how vertex colors should be imported",
+            "enum_items": [
+              [
+                "unreal.VertexColorImportOption.REPLACE",
+                "Replace",
+                "Import the static mesh using the vertex colors from the FBX file",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.VertexColorImportOption.IGNORE",
+                "Ignore",
+                "Ignore vertex colors from the FBX file, and keep the existing mesh vertex colors",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.VertexColorImportOption.OVERRIDE",
+                "Override",
+                "Override all vertex colors with the specified color.",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.VertexColorImportOption.REPLACE"
+          },
+          "vertex_override_color": {
+            "name": "Vertex Override Color (RGB)",
+            "description": "Specify override color in the case that VertexColorImportOption is set to Override",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Color",
+            "size": 4,
+            "subtype": "COLOR",
+            "default": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "remove_degenerates": {
+            "name": "Remove Degenerates",
+            "description": "Disabling this option will keep degenerate triangles found. In general you should leave this option on",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "build_reversed_index_buffer": {
+            "name": "Build Reversed Index Buffer",
+            "description": "Required to optimize mesh in mirrored transform. Double index buffer size",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "generate_lightmap_u_vs": {
+            "name": "Generate Lightmap UVs",
+            "description": "Generate Lightmap UVs",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "one_convex_hull_per_ucx": {
+            "name": "One Convex Hull Per UCX",
+            "description": "If checked, one convex hull per UCX_ prefixed collision mesh will be generated instead of decomposing into multiple hulls",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "combine_meshes": {
+            "name": "Combine Meshes",
+            "description": "If enabled, combines all meshes into a single mesh",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "transform_vertex_to_absolute": {
+            "name": "Transform Vertex to Absolute",
+            "description": "If this option is true the node absolute transform (transform, offset and pivot) will be apply to the mesh vertices",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_pivot_in_vertex": {
+            "name": "Bake Pivot in Vertex",
+            "description": "Experimental - If this option is true the inverse node rotation pivot will be apply to the mesh vertices. The pivot from the DCC will then be the origin of the mesh. Note: \u201cTransformVertexToAbsolute\u201d must be false",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "normal_import_method": {
+            "name": "Normal Import Method",
+            "description": "Enabling this option will read the tangents(tangent,binormal,normal) from FBX file instead of generating them automatically",
+            "enum_items": [
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_COMPUTE_NORMALS",
+                "Replace",
+                "Generates the normals on import",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS",
+                "Import Normals",
+                "Import Normals",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
+                "Import Normals and Tangents",
+                "Import Normals and Tangents",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS"
+          },
+          "normal_generation_method": {
+            "name": "Normal Generation Method",
+            "description": "Use the MikkTSpace tangent space generator for generating normals and tangents on the mesh",
+            "enum_items": [
+              [
+                "unreal.FBXNormalGenerationMethod.BUILT_IN",
+                "Built In",
+                "Use the legacy built in method to generate normals (faster in some cases)",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE",
+                "Mikk TSpace",
+                "Use MikkTSpace to generate normals and tangents",
+                "NONE",
+                1
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE"
+          },
+          "compute_weighted_normals": {
+            "name": "Compute Weighted Normals",
+            "description": "Enabling this option will use weighted normals algorithm (area and angle) when computing normals or tangents",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "convert_scene": {
+            "name": "Convert Scene",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "force_front_x_axis": {
+            "name": "Force Front X Axis",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system with front X axis instead of -Y",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "convert_scene_unit": {
+            "name": "Convert Scene Unit",
+            "description": "Convert the scene from FBX unit to UE unit (centimeter)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "import_translation": {
+            "name": "Import Translation",
+            "description": "Import Translation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "unit": "LENGTH",
+            "size": 3,
+            "subtype": "TRANSLATION",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_rotation": {
+            "name": "Import Rotation",
+            "description": "Import Rotation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Rotator",
+            "unit": "ROTATION",
+            "size": 3,
+            "subtype": "EULER",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_uniform_scale": {
+            "name": "Import Uniform Scale",
+            "description": "Import Uniform Scale",
+            "type": "FLOAT",
+            "default": 1.0
+          },
+          "reorder_material_to_fbx_order": {
+            "name": "Reorder Material to FBX Order",
+            "description": "The material list will be reorder to the same order has the FBX file",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        },
+        "skeletal_mesh_import_data": {
+          "import_content_type": {
+            "name": "Import Content Type",
+            "description": "Filter the content we want to import from the incoming skeletal mesh",
+            "enum_items": [
+              [
+                "unreal.FBXImportContentType.FBXICT_ALL",
+                "Geometry and Skinning Weights",
+                "Import all fbx content: geometry, skinning, and weights",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXImportContentType.FBXICT_GEOMETRY",
+                "Geometry Only",
+                "Import skeletal mesh geometry only (will create a default skeleton, or map the geometry to the existing one). Morph and LOD can be imported with it",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.FBXImportContentType.FBXICT_SKINNING_WEIGHTS",
+                "Skinning Weights Only",
+                "Import the skeletal mesh skinning and weights only. (no geometry will be imported). Morph and LOD will not be imported with this setting",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.FBXImportContentType.FBXICT_ALL"
+          },
+          "vertex_color_import_option": {
+            "name": "Vertex Color Import Option",
+            "description": "Specify how vertex colors should be imported",
+            "enum_items": [
+              [
+                "unreal.VertexColorImportOption.REPLACE",
+                "Replace",
+                "Import the static mesh using the vertex colors from the FBX file",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.VertexColorImportOption.IGNORE",
+                "Ignore",
+                "Ignore vertex colors from the FBX file, and keep the existing mesh vertex colors",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.VertexColorImportOption.OVERRIDE",
+                "Override",
+                "Override all vertex colors with the specified color.",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.VertexColorImportOption.REPLACE"
+          },
+          "vertex_override_color": {
+            "name": "Vertex Override Color (RGB)",
+            "description": "Specify override color in the case that VertexColorImportOption is set to Override",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Color",
+            "size": 4,
+            "subtype": "COLOR",
+            "default": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "update_skeleton_reference_pose": {
+            "name": "Update Skeleton Reference Pose",
+            "description": "If enabled, update the Skeleton (of the mesh being imported)\u2019s reference pose",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "import_morph_targets": {
+            "name": "Import Morph Targets",
+            "description": "If enabled, creates Unreal morph objects for the imported meshes",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "use_t0_as_ref_pose": {
+            "name": "Use TO As Ref Pose",
+            "description": "Enable this option to use frame 0 as reference pose",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "preserve_smoothing_groups": {
+            "name": "Preserve Smoothing Groups",
+            "description": "If checked, triangles with non-matching smoothing groups will be physically split",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "import_meshes_in_bone_hierarchy": {
+            "name": "Import Meshes in Bone Hierarchy",
+            "description": "If checked, meshes nested in bone hierarchies will be imported instead of being converted to bones",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "transform_vertex_to_absolute": {
+            "name": "Transform Vertex to Absolute",
+            "description": "If this option is true the node absolute transform (transform, offset and pivot) will be apply to the mesh vertices",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_pivot_in_vertex": {
+            "name": "Bake Pivot in Vertex",
+            "description": "Experimental - If this option is true the inverse node rotation pivot will be apply to the mesh vertices. The pivot from the DCC will then be the origin of the mesh. Note: \u201cTransformVertexToAbsolute\u201d must be false",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "normal_import_method": {
+            "name": "Normal Import Method",
+            "description": "Enabling this option will read the tangents(tangent,binormal,normal) from FBX file instead of generating them automatically",
+            "enum_items": [
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_COMPUTE_NORMALS",
+                "Replace",
+                "Generates the normals on import",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS",
+                "Import Normals",
+                "Import Normals",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
+                "Import Normals and Tangents",
+                "Import Normals and Tangents",
+                "NONE",
+                2
+              ]
+            ],
+            "unreal_type": "Enum",
+            "type": "ENUM",
+            "default": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS"
+          },
+          "normal_generation_method": {
+            "name": "Normal Generation Method",
+            "description": "Use the MikkTSpace tangent space generator for generating normals and tangents on the mesh",
+            "enum_items": [
+              [
+                "unreal.FBXNormalGenerationMethod.BUILT_IN",
+                "Built In",
+                "Use the legacy built in method to generate normals (faster in some cases)",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE",
+                "Mikk TSpace",
+                "Use MikkTSpace to generate normals and tangents",
+                "NONE",
+                1
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE"
+          },
+          "compute_weighted_normals": {
+            "name": "Compute Weighted Normals",
+            "description": "Enabling this option will use weighted normals algorithm (area and angle) when computing normals or tangents",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "threshold_position": {
+            "name": "Threshold Position",
+            "description": "Threshold to compare vertex position equality",
+            "type": "FLOAT",
+            "default": 1.9999999494757503e-05
+          },
+          "threshold_tangent_normal": {
+            "name": "Threshold Tangent Normal",
+            "description": "Threshold to compare normal, tangent or bi-normal equality",
+            "type": "FLOAT",
+            "default": 1.9999999494757503e-05
+          },
+          "threshold_uv": {
+            "name": "Threshold UV",
+            "description": "Threshold to compare UV equality",
+            "type": "FLOAT",
+            "default": 0.0009769999887794256
+          },
+          "morph_threshold_position": {
+            "name": "Morph Threshold Position",
+            "description": "Threshold to compare vertex position equality when computing morph target deltas",
+            "type": "FLOAT",
+            "default": 0.014999999664723873
+          },
+          "convert_scene": {
+            "name": "Convert Scene",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "force_front_x_axis": {
+            "name": "Force Front X Axis",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system with front X axis instead of -Y",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "convert_scene_unit": {
+            "name": "Convert Scene Unit",
+            "description": "Convert the scene from FBX unit to UE unit (centimeter)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "import_translation": {
+            "name": "Import Translation",
+            "description": "Import Translation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "unit": "LENGTH",
+            "size": 3,
+            "subtype": "TRANSLATION",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_rotation": {
+            "name": "Import Rotation",
+            "description": "Import Rotation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Rotator",
+            "unit": "ROTATION",
+            "size": 3,
+            "subtype": "EULER",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_uniform_scale": {
+            "name": "Import Uniform Scale",
+            "description": "Import Uniform Scale",
+            "type": "FLOAT",
+            "default": 1.0
+          },
+          "reorder_material_to_fbx_order": {
+            "name": "Reorder Material to FBX Order",
+            "description": "The material list will be reorder to the same order has the FBX file",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        },
+        "anim_sequence_import_data": {
+          "animation_length": {
+            "name": "Animation Length",
+            "description": "Which animation range to import. The one defined at Exported, at Animated time or define a range manually",
+            "enum_items": [
+              [
+                "unreal.FBXAnimationLengthImportType.FBXALIT_ANIMATED_KEY",
+                "Exported Time",
+                "This option imports animation frames based on what is defined at the time of export",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.FBXAnimationLengthImportType.FBXALIT_EXPORTED_TIME",
+                "Animated Time",
+                "Will import the range of frames that have animation. Can be useful if the exported range is longer than the actual animation in the FBX file",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.FBXAnimationLengthImportType.FBXALIT_SET_RANGE",
+                "Set Range",
+                "This will enable the Start Frame and End Frame properties for you to define the frames of animation to import",
+                "NONE",
+                2
+              ]
+            ],
+            "unreal_type": "Enum",
+            "type": "ENUM",
+            "default": "unreal.FBXAnimationLengthImportType.FBXALIT_EXPORTED_TIME"
+          },
+          "frame_import_range": {
+            "name": "Frame Import Range",
+            "description": "Frame range used when Set Range is used in Animation Length",
+            "type": "INTVECTOR",
+            "unreal_type": "Int32Interval",
+            "size": 2,
+            "default": [
+              0,
+              0
+            ],
+            "min": 0
+          },
+          "import_meshes_in_bone_hierarchy": {
+            "name": "Import Meshes in Bone Hierarchy",
+            "description": "If checked, meshes nested in bone hierarchies will be imported instead of being converted to bones",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "use_default_sample_rate": {
+            "name": "Use Default Sample Rate",
+            "description": "If enabled, samples all animation curves to 30 FPS",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "custom_sample_rate": {
+            "name": "Custom Sample Rate",
+            "description": "Sample fbx animation data at the specified sample rate, 0 find automatically the best sample rate",
+            "type": "INT",
+            "default": 0
+          },
+          "import_custom_attribute": {
+            "name": "Import Custom Attribute",
+            "description": "Import if custom attribute as a curve within the animation",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "delete_existing_custom_attribute_curves": {
+            "name": "Delete Existing Custom Attribute Curves",
+            "description": "If true, all previous custom attribute curves will be deleted when doing a re-import",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "import_bone_tracks": {
+            "name": "Import Bone Tracks",
+            "description": "Import bone transform tracks. If false, this will discard any bone transform tracks. (useful for curves only animations)",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "set_material_drive_parameter_on_custom_attribute": {
+            "name": "Set Material Curve Type",
+            "description": "Set Material Curve Type for all custom attributes that exists",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "material_curve_suffixes": {
+            "name": "Material Curve Suffixes",
+            "description": "Set Material Curve Type for the custom attribute with the following suffixes. This doesn\u2019t matter if Set Material Curve Type is true. This is a comma separated list of names",
+            "type": "STRING",
+            "unreal_type": "Array",
+            "default": ""
+          },
+          "remove_redundant_keys": {
+            "name": "Remove Redundant Keys",
+            "description": "When importing custom attribute as curve, remove redundant keys",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "delete_existing_morph_target_curves": {
+            "name": "Delete Existing Morph Target Curves",
+            "description": "If enabled, this will delete this type of asset from the FBX",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "do_not_import_curve_with_zero": {
+            "name": "Do not import curves with only 0 values",
+            "description": "When importing custom attribute or morphtarget as curve, do not import if it does not have any value other than zero. This is to avoid adding extra curves to evaluate",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "preserve_local_transform": {
+            "name": "Preserve Local Transform",
+            "description": "If enabled, this will import a curve within the animation",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "convert_scene": {
+            "name": "Convert Scene",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "force_front_x_axis": {
+            "name": "Force Front X Axis",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system with front X axis instead of -Y",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "convert_scene_unit": {
+            "name": "Convert Scene Unit",
+            "description": "Convert the scene from FBX unit to UE unit (centimeter)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "import_translation": {
+            "name": "Import Translation",
+            "description": "Import Translation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "unit": "LENGTH",
+            "size": 3,
+            "subtype": "TRANSLATION",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_rotation": {
+            "name": "Import Rotation",
+            "description": "Import Rotation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Rotator",
+            "unit": "ROTATION",
+            "size": 3,
+            "subtype": "EULER",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_uniform_scale": {
+            "name": "Import Uniform Scale",
+            "description": "Import Uniform Scale",
+            "type": "FLOAT",
+            "default": 1.0
+          }
+        },
+        "texture_import_data": {
+          "material_search_location": {
+            "name": "Search Location",
+            "description": "Specify where we should search for matching materials when importing",
+            "enum_items": [
+              [
+                "unreal.MaterialSearchLocation.LOCAL",
+                "Local",
+                "Search for matching material in local import folder only",
+                "NONE",
+                0
+              ],
+              [
+                "unreal.MaterialSearchLocation.UNDER_PARENT",
+                "Under Parent",
+                "Search for matching material recursively from parent folder",
+                "NONE",
+                1
+              ],
+              [
+                "unreal.MaterialSearchLocation.UNDER_ROOT",
+                "Under Root",
+                "Search for matching material recursively from root folder",
+                "NONE",
+                2
+              ],
+              [
+                "unreal.MaterialSearchLocation.ALL_ASSETS",
+                "All Assets",
+                "Search for matching material in all assets folders",
+                "NONE",
+                3
+              ],
+              [
+                "unreal.MaterialSearchLocation.DO_NOT_SEARCH",
+                "Do Not Search",
+                "Do not search for existing matching materials",
+                "NONE",
+                4
+              ]
+            ],
+            "type": "ENUM",
+            "unreal_type": "Enum",
+            "default": "unreal.MaterialSearchLocation.LOCAL"
+          },
+          "base_material_name": {
+            "name": "Base Material Name",
+            "description": "Base material to instance from when importing materials",
+            "type": "STRING",
+            "unreal_type": "SoftObjectPath",
+            "default": ""
+          },
+          "base_color_name": {
+            "name": "Base Color Name",
+            "description": "Base Color Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_emissive_color_name": {
+            "name": "Base Emissive Color Name",
+            "description": "Base Emissive Color Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_diffuse_texture_name": {
+            "name": "Base Diffuse Texture Name",
+            "description": "Base Diffuse Texture Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_emmisive_texture_name": {
+            "name": "Base Emmisive Texture Name",
+            "description": "Base Emmisive Texture Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_normal_texture_name": {
+            "name": "Base Normal Texture Name",
+            "description": "Base Normal Texture Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_opacity_texture_name": {
+            "name": "Base Opacity Texture Name",
+            "description": "Base Opacity Texture Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "base_specular_texture_name": {
+            "name": "Base Specular Texture Name",
+            "description": "Base Specular Texture Name",
+            "type": "STRING",
+            "unreal_type": "str",
+            "default": ""
+          },
+          "invert_normal_maps": {
+            "name": "Invert Normal Maps",
+            "description": "If importing textures is enabled, this option will cause normal map Y (Green) values to be inverted",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "convert_scene": {
+            "name": "Convert Scene",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "force_front_x_axis": {
+            "name": "Force Front X Axis",
+            "description": "Convert the scene from FBX coordinate system to Unreal Engine coordinate system with front X axis instead of -Y",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "convert_scene_unit": {
+            "name": "Convert Scene Unit",
+            "description": "Convert the scene from FBX unit to UE unit (centimeter)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "import_translation": {
+            "name": "Import Translation",
+            "description": "Import Translation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "unit": "LENGTH",
+            "size": 3,
+            "subtype": "TRANSLATION",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_rotation": {
+            "name": "Import Rotation",
+            "description": "Import Rotation",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Rotator",
+            "unit": "ROTATION",
+            "size": 3,
+            "subtype": "EULER",
+            "default": [
+              0.0,
+              0.0,
+              0.0
+            ]
+          },
+          "import_uniform_scale": {
+            "name": "Import Uniform Scale",
+            "description": "Import Uniform Scale",
+            "type": "FLOAT",
+            "default": 1.0
+          }
+        }
+      }
+    },
+    "editor_static_mesh_library": {
+      "lod_build_settings": {
+        "recompute_normals": {
+          "name": "Recompute Normals",
+          "description": "If true, normals in the raw mesh are ignored and recomputed",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "recompute_tangents": {
+          "name": "Recompute Tangents",
+          "description": "If true, tangents in the raw mesh are ignored and recomputed",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "use_mikk_t_space": {
+          "name": "Use Mikk T Space",
+          "description": "A common standard for tangent space used in baking tools to produce normal maps",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "compute_weighted_normals": {
+          "name": "Compute Weighted Normals",
+          "description": "If true, we will use the surface area and the corner angle of the triangle as a ratio when computing the normals",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "remove_degenerates": {
+          "name": "Remove Degenerates",
+          "description": "If true, degenerate triangles will be removed",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "build_reversed_index_buffer": {
+          "name": "Build Reversed Index Buffer",
+          "description": "Required to optimize mesh in mirrored transform. Double index buffer size",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "use_high_precision_tangent_basis": {
+          "name": "Use High Precision Tangent Basis",
+          "description": "If true, Tangents will be stored at 16 bit vs 8 bit precision",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "use_full_precision_u_vs": {
+          "name": "Use Full Precision UVs",
+          "description": "If true, UVs will be stored at full floating point precision",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "generate_lightmap_u_vs": {
+          "name": "Generate Lightmap UVs",
+          "description": "Generate Lightmap UVs",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "min_lightmap_resolution": {
+          "name": "Min Lightmap Resolution",
+          "description": "Min Lightmap Resolution",
+          "type": "INT",
+          "default": 64
+        },
+        "src_lightmap_index": {
+          "name": "Source Lightmap Index",
+          "description": "Source Lightmap Index",
+          "type": "INT",
+          "default": 0
+        },
+        "dst_lightmap_index": {
+          "name": "Destination Lightmap Index",
+          "description": "Destination Lightmap Index",
+          "type": "INT",
+          "default": 1
+        },
+        "build_scale3d": {
+          "name": "Build Scale",
+          "description": "The local scale applied when building the mesh",
+          "type": "FLOATVECTOR",
+          "unreal_type": "Vector",
+          "unit": "LENGTH",
+          "size": 3,
+          "subtype": "TRANSLATION",
+          "default": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "distance_field_resolution_scale": {
+          "name": "Distance Field Resolution Scale",
+          "description": "Distance Field Resolution Scale",
+          "type": "FLOAT",
+          "default": 1.0
+        },
+        "generate_distance_field_as_if_two_sided": {
+          "name": "Two-Sided Distance Field Generation",
+          "description": "Whether to generate the distance field treating every triangle hit as a front face. When enabled prevents the distance field from being discarded due to the mesh being open, but also lowers Distance Field AO quality",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "distance_field_replacement_mesh": {
+          "name": "Distance Field Replacement Mesh",
+          "description": "Distance Field Replacement Mesh",
+          "type": "STRING",
+          "unreal_type": "Asset",
+          "default": ""
+        }
+      }
+    },
+    "editor_skeletal_mesh_library": {
+      "lod_build_settings": {
+        "recompute_normals": {
+          "name": "Recompute Normals",
+          "description": "If true, normals in the raw mesh are ignored and recomputed",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "recompute_tangents": {
+          "name": "Recompute Tangents",
+          "description": "If true, tangents in the raw mesh are ignored and recomputed",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "use_mikk_t_space": {
+          "name": "Use Mikk T Space",
+          "description": "A common standard for tangent space used in baking tools to produce normal maps",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "compute_weighted_normals": {
+          "name": "Compute Weighted Normals",
+          "description": "If true, we will use the surface area and the corner angle of the triangle as a ratio when computing the normals",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "remove_degenerates": {
+          "name": "Remove Degenerates",
+          "description": "If true, degenerate triangles will be removed",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        "use_high_precision_tangent_basis": {
+          "name": "Use High Precision Tangent Basis",
+          "description": "If true, Tangents will be stored at 16 bit vs 8 bit precision",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "use_full_precision_u_vs": {
+          "name": "Use Full Precision UVs",
+          "description": "If true, UVs will be stored at full floating point precision",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        "threshold_position": {
+          "name": "Threshold Position",
+          "description": "Threshold to compare vertex position equality",
+          "type": "FLOAT",
+          "default": 1.9999999494757503e-05
+        },
+        "threshold_tangent_normal": {
+          "name": "Threshold Tangent Normal",
+          "description": "Threshold to compare normal, tangent or bi-normal equality",
+          "type": "FLOAT",
+          "default": 1.9999999494757503e-05
+        },
+        "threshold_uv": {
+          "name": "Threshold UV",
+          "description": "Threshold to compare UV equality",
+          "type": "FLOAT",
+          "default": 0.0009769999887794256
+        },
+        "morph_threshold_position": {
+          "name": "Morph Threshold Position",
+          "description": "Threshold to compare vertex position equality when computing morph target deltas",
+          "type": "FLOAT",
+          "default": 0.014999999664723873
+        }
+      }
+    }
+  },
+  "blender": {
+    "export_method": {
+      "fbx": {
+        "include": {
+          "use_custom_props": {
+            "name": "Custom Properties",
+            "description": "Export custom properties",
+            "type": "BOOLEAN",
+            "default": false
+          }
+        },
+        "transform": {
+          "global_scale": {
+            "name": "Scale",
+            "description": "Scale all data (Some importers do not support scaled armatures!)",
+            "type": "FLOAT",
+            "default": 1.0,
+            "min": 0.001,
+            "max": 1000.0
+          },
+          "apply_scale_options": {
+            "name": "Apply Scalings",
+            "description": "How to apply custom and units scalings in generated FBX file (Blender uses FBX scale to detect units on import, but many other applications do not handle the same way)",
+            "enum_items": [
+              [
+                "FBX_SCALE_NONE",
+                "All Local",
+                "Apply custom scaling and units scaling to each object transformation, FBX scale remains at 1.0",
+                "NONE",
+                0
+              ],
+              [
+                "FBX_SCALE_UNITS",
+                "FBX Units Scale",
+                "Apply custom scaling to each object transformation, and units scaling to FBX scale",
+                "NONE",
+                1
+              ],
+              [
+                "FBX_SCALE_CUSTOM",
+                "FBX Custom Scale",
+                "Apply custom scaling to FBX scale, and units scaling to each object transformation",
+                "NONE",
+                2
+              ],
+              [
+                "FBX_SCALE_ALL",
+                "FBX All",
+                "Apply custom scaling and units scaling to FBX scale",
+                "NONE",
+                3
+              ]
+            ],
+            "type": "ENUM",
+            "default": "FBX_SCALE_NONE"
+          },
+          "axis_forward": {
+            "name": "Forward",
+            "description": "",
+            "enum_items": [
+              [
+                "X",
+                "X Forward",
+                "",
+                "NONE",
+                0
+              ],
+              [
+                "Y",
+                "Y Forward",
+                "",
+                "NONE",
+                1
+              ],
+              [
+                "Z",
+                "Z Forward",
+                "",
+                "NONE",
+                2
+              ],
+              [
+                "-X",
+                "-X Forward",
+                "",
+                "NONE",
+                3
+              ],
+              [
+                "-Y",
+                "-Y Forward",
+                "",
+                "NONE",
+                4
+              ],
+              [
+                "-Z",
+                "-Z Forward",
+                "",
+                "NONE",
+                5
+              ]
+            ],
+            "type": "ENUM",
+            "default": "Y"
+          },
+          "axis_up": {
+            "name": "Up",
+            "description": "",
+            "enum_items": [
+              [
+                "X",
+                "X Up",
+                "",
+                "NONE",
+                0
+              ],
+              [
+                "Y",
+                "Y Up",
+                "",
+                "NONE",
+                1
+              ],
+              [
+                "Z",
+                "Z Up",
+                "",
+                "NONE",
+                2
+              ],
+              [
+                "-X",
+                "-X Up",
+                "",
+                "NONE",
+                3
+              ],
+              [
+                "-Y",
+                "-Y Up",
+                "",
+                "NONE",
+                4
+              ],
+              [
+                "-Z",
+                "-Z Up",
+                "",
+                "NONE",
+                5
+              ]
+            ],
+            "type": "ENUM",
+            "default": "Z"
+          },
+          "apply_unit_scale": {
+            "name": "Apply Unit",
+            "description": "Take into account current Blender units settings (if unset, raw Blender Units values are used as-is)",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_space_transform": {
+            "name": "!EXPERIMENTAL! Apply Transform",
+            "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risks, known broken with armatures/animations)",
+            "type": "BOOLEAN",
+            "default": false
+          }
+        },
+        "geometry": {
+          "mesh_smooth_type": {
+            "name": "Smoothing",
+            "description": "Export smoothing information (prefer 'Normals Only' option if your target importer understand split normals)",
+            "enum_items": [
+              [
+                "OFF",
+                "Normals Only",
+                "Export only normals instead of writing edge or face smoothing data",
+                "NONE",
+                0
+              ],
+              [
+                "FACE",
+                "Face",
+                "Write face smoothing",
+                "NONE",
+                1
+              ],
+              [
+                "EDGE",
+                "Edge",
+                "Write edge smoothing",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "default": "OFF"
+          },
+          "use_subsurf": {
+            "name": "Export Subdivision Surface",
+            "description": "Export the last Catmull-Rom subdivision modifier as FBX subdivision (does not apply the modifier even if 'Apply Modifiers' is enabled)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "use_mesh_modifiers": {
+            "name": "Apply Modifiers",
+            "description": "Apply modifiers to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "use_mesh_edges": {
+            "name": "Loose Edges",
+            "description": "Export loose edges (as two-vertices polygons)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "use_tspace": {
+            "name": "Tangent Space",
+            "description": "Add binormal and tangent vectors, together with normal they form the tangent space (will only work correctly with tris/quads only meshes!)",
+            "type": "BOOLEAN",
+            "default": false
+          }
+        },
+        "armature": {
+          "primary_bone_axis": {
+            "name": "Primary Bone Axis",
+            "description": "",
+            "enum_items": [
+              [
+                "X",
+                "X Axis",
+                "",
+                "NONE",
+                0
+              ],
+              [
+                "Y",
+                "Y Axis",
+                "",
+                "NONE",
+                1
+              ],
+              [
+                "Z",
+                "Z Axis",
+                "",
+                "NONE",
+                2
+              ],
+              [
+                "-X",
+                "-X Axis",
+                "",
+                "NONE",
+                3
+              ],
+              [
+                "-Y",
+                "-Y Axis",
+                "",
+                "NONE",
+                4
+              ],
+              [
+                "-Z",
+                "-Z Axis",
+                "",
+                "NONE",
+                5
+              ]
+            ],
+            "type": "ENUM",
+            "default": "Y"
+          },
+          "secondary_bone_axis": {
+            "name": "Secondary Bone Axis",
+            "description": "",
+            "enum_items": [
+              [
+                "X",
+                "X Axis",
+                "",
+                "NONE",
+                0
+              ],
+              [
+                "Y",
+                "Y Axis",
+                "",
+                "NONE",
+                1
+              ],
+              [
+                "Z",
+                "Z Axis",
+                "",
+                "NONE",
+                2
+              ],
+              [
+                "-X",
+                "-X Axis",
+                "",
+                "NONE",
+                3
+              ],
+              [
+                "-Y",
+                "-Y Axis",
+                "",
+                "NONE",
+                4
+              ],
+              [
+                "-Z",
+                "-Z Axis",
+                "",
+                "NONE",
+                5
+              ]
+            ],
+            "type": "ENUM",
+            "default": "X"
+          },
+          "armature_nodetype": {
+            "name": "Armature FBXNode Type",
+            "description": "FBX type of node (object) used to represent Blender's armatures (use Null one unless you experience issues with other app, other choices may no import back perfectly in Blender...)",
+            "enum_items": [
+              [
+                "NULL",
+                "Null",
+                "'Null' FBX node, similar to Blender's Empty (default)",
+                "NONE",
+                0
+              ],
+              [
+                "ROOT",
+                "Root",
+                "'Root' FBX node, supposed to be the root of chains of bones...",
+                "NONE",
+                1
+              ],
+              [
+                "LIMBNODE",
+                "LimbNode",
+                "'LimbNode' FBX node, a regular joint between two bones...",
+                "NONE",
+                2
+              ]
+            ],
+            "type": "ENUM",
+            "default": "NULL"
+          },
+          "use_armature_deform_only": {
+            "name": "Only Deform Bones",
+            "description": "Only write deforming bones (and non-deforming ones when they have deforming children)",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "add_leaf_bones": {
+            "name": "Add Leaf Bones",
+            "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data)",
+            "type": "BOOLEAN",
+            "default": false
+          }
+        },
+        "animation": {
+          "bake_anim": {
+            "name": "Baked Animation",
+            "description": "Export baked keyframe animation",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_anim_use_all_bones": {
+            "name": "Key All Bones",
+            "description": "Force exporting at least one key of animation for all bones (needed with some target applications, like Unreal Engine)",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_anim_force_startend_keying": {
+            "name": "Force Start/End Keying",
+            "description": "Always add a keyframe at start and end of actions for animated channels",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "bake_anim_step": {
+            "name": "Sampling Rate",
+            "description": "How often to evaluate animated values (in frames)",
+            "type": "FLOAT",
+            "default": 1.0,
+            "min": 0.01,
+            "max": 100.0
+          },
+          "bake_anim_simplify_factor": {
+            "name": "Simplify",
+            "description": "How much to simplify baked values (0.0 to disable, the higher the more simplified)",
+            "type": "FLOAT",
+            "default": 0.0,
+            "min": 0.0,
+            "max": 100.0
+          }
+        },
+        "extras": {
+          "use_metadata": {
+            "name": "Use Metadata",
+            "description": "",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        }
+      }
+    }
+  }
+}
