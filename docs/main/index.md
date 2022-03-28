@@ -9,7 +9,7 @@ home: false
 
 A one-click solution for sending assets from Blender to Unreal Engine.
 
-* [Read Docs](/send2ue/)
+* [Read Docs](/send2ue)
 * [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=Send+to+Unreal&expanded=true)
 
 ::: tip Note
@@ -24,9 +24,9 @@ Here is a [link with instructions](https://www.unrealengine.com/en-US/ue4-on-git
 
 A node based retargeting system for Blender's
 [Rigify](https://docs.blender.org/manual/en/latest/addons/rigging/rigify/index.html) addon. Quickly retarget and author
-new animation on any unreal marketplace asset and more!
+new animation on unreal marketplace assets and more!
 
-* [Read Docs](/ue2rigify/)
+* [Read Docs](/ue2rigify)
 * [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
 
 

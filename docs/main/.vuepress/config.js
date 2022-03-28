@@ -1,4 +1,5 @@
-const {description, repository} = require('../../package')
+const {description, repository, name} = require('../../package')
+
 
 module.exports = {
     /**
@@ -9,6 +10,8 @@ module.exports = {
      * Ref：https://v1.vuepress.vuejs.org/config/#description
      */
     description: description,
+
+    base: process.env.NODE_ENV !== 'development' ? `/${name}/` : '/',
 
     /**
      * Extra tags to be injected to the page HTML `<head>`

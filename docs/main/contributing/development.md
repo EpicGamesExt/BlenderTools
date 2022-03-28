@@ -59,6 +59,15 @@ dev_helpers.reload_addon_source_code(addons)
 #bpy.ops.send2ue.start_rpc_servers()
 ```
 
+In most cases you can get away with running `dev_helpers.reload_addon_source_code`, which reloads very fast and any
+stack traces get linked back to the repo code.
+
+However, the true test is running `dev_helpers.reload_addon_zips` this actually zips up the code and installs the
+addons. You will need to do this if you are testing features that rely on properties in the addon preferences.
+
+`bpy.ops.send2ue.start_rpc_servers()` Ensures that both unreal and blender rpc servers are running. This is needed if
+you want to run the unittests on the open app instances.
+
 ## Code Structure
 
 This is how the addon code is structured. You will see this primary file and folder structure in each of the addons.

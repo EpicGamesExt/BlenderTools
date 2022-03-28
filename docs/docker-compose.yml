@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  deploy_docs:
+    image: node:latest
+    volumes:
+      - ./:/home/docs
+    environment:
+      - GITHUB_TOKEN=$GITHUB_TOKEN
+      - USER=$USER
+      - ORG=$ORG
+      - REPO=$REPO
+      - NODE_OPTIONS=--openssl-legacy-provider
+    entrypoint: ['/home/docs/deploy.sh']

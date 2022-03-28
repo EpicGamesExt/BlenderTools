@@ -12,7 +12,8 @@
     "dev-main": "vuepress dev main",
     "dev-send2ue": "vuepress dev send2ue",
     "dev-ue2rigify": "vuepress dev ue2rigify",
-    "build": "vuepress build main && vuepress build send2ue && vuepress build ue2rigify",
+    "build-windows": "rd /q /s dist 2>nul && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && xcopy /E /I .\\main\\.vuepress\\dist .\\dist && xcopy /E /I .\\ue2rigify\\.vuepress\\dist .\\dist\\ue2rigify && xcopy /E /I .\\send2ue\\.vuepress\\dist .\\dist\\send2ue",
+    "build-linux": "rm -f -r dist && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && cp -r ./main/.vuepress/dist ./dist && cp -r ./ue2rigify/.vuepress/dist ./dist/ue2rigify && cp -r ./send2ue/.vuepress/dist ./dist/send2ue"
   },
   "license": "MIT",
   "devDependencies": {

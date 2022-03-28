@@ -5,6 +5,7 @@ module.exports = {
      * Ref：https://v1.vuepress.vuejs.org/config/#title
      */
     title: 'Send to Unreal',
+    base: process.env.NODE_ENV !== 'development' ? `/${name}/send2ue/` : '/',
     /**
      * Ref：https://v1.vuepress.vuejs.org/config/#description
      */
@@ -34,12 +35,8 @@ module.exports = {
         lastUpdated: false,
         nav: [
             {
-                text: 'Quick Start',
-                link: '/introduction/quickstart',
-            },
-            {
-                text: 'FAQ',
-                link: '/trouble-shooting/faq',
+                text: 'Home',
+                link: '/',
             }
         ],
         sidebar: {

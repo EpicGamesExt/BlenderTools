@@ -36,17 +36,20 @@ The site should now be available to preview at:
 [http://localhost:8080/](http://localhost:8080/)
 
 There are multiple sites in the `docs` folder each site can be run like so:
-```shell
-npm run dev-main
-```
-
-```shell
-npm run dev-send2ue
-```
-
-```shell
-npm run dev-ue2rigify
-```
+* `npm run dev-main`
+* `npm run dev-send2ue`
+* `npm run dev-ue2rigify`
 
 For further information on how to customize this site check out
 the [vuepress documentation](https://vuepress.vuejs.org/)
+
+# Building
+All the sites get built into a single static html site when running these commands:
+* `npm run build-windows`
+* `npm run build-linux`
+
+If successful, a `dist` folder should now exist in `docs`. These files are what is deployed to the server.
+You can serve them locally with:
+```shell
+python -m http.server --directory ./dist
+```

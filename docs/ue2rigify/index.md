@@ -17,4 +17,4 @@ footer: Copyright © Epic Games Inc.
 ## Help us document
 Our goal is for this documentation to be completely comprehensive so that it can be fully self-serving. If you notice
 any part of it to be incorrect, unclear, outdated, or missing
-information please consider contributing to our [documentation](./contributing/documentation).
+information please consider contributing to our [documentation](/contributing/documentation).
