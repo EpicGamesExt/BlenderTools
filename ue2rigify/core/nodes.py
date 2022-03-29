@@ -1,15 +1,19 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import re
+import sys
 import bpy
 import nodeitems_utils
 
 from . import scene
 from . import utilities
 from ..ui import node_editor
+from ..constants import ToolInfo, Nodes, Modes, Rigify
 from bpy.types import NodeTree, NodeSocket
 from nodeitems_utils import NodeCategory, NodeItem
 
+addon_key_maps = []
+pie_menu_classes = []
 node_tree_classes = []
 node_classes = []
 
@@ -47,12 +51,12 @@ def get_inputs(rig_object, socket_names, properties):
     inputs = []
 
     # get the bone inputs based on the rig object name and current mode
-    if properties.selected_mode == properties.fk_to_source_mode:
-        if rig_object.name == properties.source_rig_name:
+    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
+        if rig_object.name == properties.source_rig.name:
             inputs = socket_names
 
-    if properties.selected_mode == properties.source_to_deform_mode:
-        if rig_object.name == properties.control_rig_name:
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
+        if rig_object.name == Rigify.CONTROL_RIG_NAME:
             inputs = socket_names
 
     return inputs
@@ -70,12 +74,12 @@ def get_outputs(rig_object, socket_names, properties):
     outputs = []
 
     # get the bone outputs based on the rig object name and current mode
-    if properties.selected_mode == properties.fk_to_source_mode:
-        if rig_object.name == properties.control_rig_name:
+    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
+        if rig_object.name == Rigify.CONTROL_RIG_NAME:
             outputs = socket_names
 
-    if properties.selected_mode == properties.source_to_deform_mode:
-        if rig_object.name == properties.source_rig_name:
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
+        if rig_object.name == properties.source_rig.name:
             outputs = socket_names
 
     return outputs
@@ -90,22 +94,22 @@ def get_mirrored_socket_names(control_socket, source_socket, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return tuple: A tuple of the control socket name and source socket name as strings.
     """
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
+    source_rig_object = bpy.data.objects.get(properties.source_rig.name)
 
     mirrored_control_socket = ''
     mirrored_source_socket = ''
 
     # get the mirrored bone names based on the rig type and the tokens in the bone name
     if properties.left_x_mirror_token and properties.right_x_mirror_token:
-        if '.R' in control_socket.name:
-            mirrored_control_socket = control_socket.name.replace('.R', '.L')
+        if Rigify.RIGHT_TOKEN in control_socket.name:
+            mirrored_control_socket = control_socket.name.replace(Rigify.RIGHT_TOKEN, Rigify.LEFT_TOKEN)
             mirrored_source_socket = source_socket.name.replace(
                 properties.right_x_mirror_token,
                 properties.left_x_mirror_token
             )
-        if '.L' in control_socket.name:
-            mirrored_control_socket = control_socket.name.replace('.L', '.R')
+        if Rigify.LEFT_TOKEN in control_socket.name:
+            mirrored_control_socket = control_socket.name.replace(Rigify.LEFT_TOKEN, Rigify.RIGHT_TOKEN)
             mirrored_source_socket = source_socket.name.replace(
                 properties.left_x_mirror_token,
                 properties.right_x_mirror_token
@@ -122,31 +126,29 @@ def get_mirrored_socket_names(control_socket, source_socket, properties):
     return None, None
 
 
-def get_node_tree(properties):
+def get_node_tree():
     """
-    This function gets or creates a new node tree by its name in the properties.
+    Gets or creates a new node tree by its name in the properties.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return object: node tree object
     """
-    bone_mapping_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
+    bone_mapping_node_tree = bpy.data.node_groups.get(Nodes.BONE_TREE_NAME)
     if not bone_mapping_node_tree:
         bone_mapping_node_tree = bpy.data.node_groups.new(
-            properties.bone_tree_name,
-            properties.bone_tree_name.replace(' ', '')
+            Nodes.BONE_TREE_NAME,
+            Nodes.BONE_TREE_NAME.replace(' ', '')
         )
 
     return bone_mapping_node_tree
 
 
-def get_node_data(properties):
+def get_node_data():
     """
-    This function gets all the node instances from the node tree and stores their attributes in a dictionary.
+    Gets all the node instances from the node tree and stores their attributes in a dictionary.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of dictionaries that contain node attributes.
     """
-    node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
+    node_tree = bpy.data.node_groups.get(Nodes.BONE_TREE_NAME)
     node_tree_data = []
     if node_tree:
         for node in node_tree.nodes:
@@ -174,7 +176,7 @@ def get_node_data(properties):
             node_data['type'] = node.type
             node_data['inputs'] = [node_input.name for node_input in node.inputs]
             node_data['outputs'] = [node_output.name for node_output in node.outputs]
-            node_data['mode'] = properties.previous_mode
+            node_data['mode'] = bpy.context.scene.ue2rigify.previous_mode
 
             # after all the transforms of been saved reattach the parent
             node_parent = node_data.get('parent')
@@ -186,15 +188,14 @@ def get_node_data(properties):
     return node_tree_data
 
 
-def get_links_data(properties, reverse=False):
+def get_links_data(reverse=False):
     """
-    This function gets all the links from the node tree and store their attributes in a dictionary.
+    Gets all the links from the node tree and store their attributes in a dictionary.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool reverse: If true it flips the from and to nodes and sockets
     :return list: A list of dictionaries that contain link attributes.
     """
-    node_tree = get_node_tree(properties)
+    node_tree = get_node_tree()
     node_tree_links = []
 
     for link in node_tree.links:
@@ -216,14 +217,13 @@ def get_links_data(properties, reverse=False):
     return node_tree_links
 
 
-def get_top_node_position(properties):
+def get_top_node_position():
     """
-    This function gets the top node position from the node tree.
+    Gets the top node position from the node tree.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return int: The y location for the top node
     """
-    node_tree = get_node_tree(properties)
+    node_tree = get_node_tree()
     top_position = 0
 
     for node in node_tree.nodes:
@@ -234,51 +234,78 @@ def get_top_node_position(properties):
     return top_position
 
 
-def set_active_node_tree(node_tree, properties):
+def set_active_node_tree(node_tree):
     """
-    This function makes the given node tree object the active node tree in any area on the current screen.
+    Sets the given node tree object to the active node tree in any area on the current screen.
 
     :param object node_tree: A node tree object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    for area in bpy.context.screen.areas:
-        if area.ui_type == properties.bone_tree_name.replace(' ', ''):
-            for space in area.spaces:
-                if space.type == 'NODE_EDITOR':
-                    space.node_tree = node_tree
+    if bpy.context.screen:
+        for area in bpy.context.screen.areas:
+            if area.ui_type == Nodes.BONE_TREE_NAME.replace(' ', ''):
+                for space in area.spaces:
+                    if space.type == 'NODE_EDITOR':
+                        space.node_tree = node_tree
 
 
-def remove_node_setup(properties):
+def create_pie_menu_hot_key(pie_menu_class, key, category, alt=True):
     """
-    This function removes the entire node tree and all its nodes from the node editor.
+    Creates the pie menu hot keys and saves the keymap to be remove later.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param class pie_menu_class: A reference to the pie menu class.
+    :param str key: The blender identifier for which key to use.
+    :param str category: The category where the keymap will be created in preferences > keymaps
+    :param bool alt: Whether or not to use the alt key.
+    """
+    if pie_menu_class not in pie_menu_classes:
+        # register the new pie menu
+        bpy.utils.register_class(pie_menu_class)
+
+        # get an existing key map or create a new one
+        key_maps = bpy.context.window_manager.keyconfigs.addon.keymaps
+        key_map = key_maps.get(category)
+        if not key_map:
+            key_map = key_maps.new(name=category)
+
+        # add a key map instance with a hot key that invokes a pie menu
+        key_map_instance = key_map.keymap_items.new('wm.call_menu_pie', key, 'PRESS', alt=alt)
+
+        # specify which pie menu to invoke
+        key_map_instance.properties.name = pie_menu_class.bl_idname
+
+        # save the references to pie menu class and key map so they can be deleted later
+        pie_menu_classes.append(pie_menu_class)
+        addon_key_maps.append(key_map)
+
+
+def remove_node_setup():
+    """
+    Removes the entire node tree and all its nodes from the node editor.
     """
     node_groups = bpy.data.node_groups
 
     # set the active node tree to none
-    set_active_node_tree(None, properties)
+    set_active_node_tree(None)
 
     # remove all the node groups
     for node_group in node_groups:
-        if node_group.bl_idname == properties.bone_tree_name.replace(' ', ''):
+        if node_group.bl_idname == Nodes.BONE_TREE_NAME.replace(' ', ''):
             for node in node_group.nodes:
                 node_group.nodes.remove(node)
             node_groups.remove(node_group)
 
 
-def remove_duplicate_socket_links(properties):
+def remove_duplicate_socket_links():
     """
-    This functions goes through the links in the node tree and removes a linked socket pair that is the same.
+    Goes through the links in the node tree and removes a linked socket pair that is the same.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return bool: True or False whether or not a link was removed.
     """
     linked_sockets = []
     removed_sockets = False
 
     # get the node tree and sockets
-    rig_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
+    rig_node_tree = bpy.data.node_groups.get(Nodes.BONE_TREE_NAME)
     if rig_node_tree:
         if rig_node_tree.links:
             linked_sockets = [(link.from_socket.name, link.to_socket.name.replace('DEF', '')) for link in rig_node_tree.links]
@@ -297,19 +324,18 @@ def remove_duplicate_socket_links(properties):
 
 def remove_socket_links_to_null_bones(properties):
     """
-    This functions goes through the links in the node tree and removes a link that has a socket that contains a bone
-    name that doesn't exist.
+    Removes a link that has a socket that contains a bone name that doesn't exist.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return bool: True or False whether or not a link was removed.
     """
     # get the rig objects
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    control_rig = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
+    source_rig = properties.source_rig
     removed_sockets = False
 
     # get the node tree and sockets
-    rig_node_tree = bpy.data.node_groups.get(properties.bone_tree_name)
+    rig_node_tree = bpy.data.node_groups.get(Nodes.BONE_TREE_NAME)
     if rig_node_tree:
         linked_sockets = [(link.from_socket.name, link.to_socket.name) for link in rig_node_tree.links]
 
@@ -322,12 +348,12 @@ def remove_socket_links_to_null_bones(properties):
                 continue
 
             # check if the socket names in the links are bones that exist on the rigs
-            if control_rig_object and source_rig_object:
-                from_source_bone = source_rig_object.pose.bones.get(socket_pair[0])
-                to_source_bone = source_rig_object.pose.bones.get(socket_pair[1])
+            if control_rig and source_rig:
+                from_source_bone = source_rig.pose.bones.get(socket_pair[0])
+                to_source_bone = source_rig.pose.bones.get(socket_pair[1])
 
-                from_control_bone = control_rig_object.pose.bones.get(socket_pair[0])
-                to_control_bone = control_rig_object.pose.bones.get(socket_pair[1])
+                from_control_bone = control_rig.pose.bones.get(socket_pair[0])
+                to_control_bone = control_rig.pose.bones.get(socket_pair[1])
 
                 # if the both bones are in neither of the rigs remove the link
                 if not ((from_source_bone or to_source_bone) and (from_control_bone or to_control_bone)):
@@ -391,40 +417,37 @@ def remove_added_node_class(classes):
 
     :param list classes: A list of class references that will be unregistered.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    remove_node_setup(properties)
+    properties = bpy.context.scene.ue2rigify
+    remove_node_setup()
 
     for cls in classes:
         bpy.utils.unregister_class(cls)
 
 
-def remove_node_categories(properties):
+def remove_node_categories():
     """
-    This function removes the node category that is defined in the addon's properties.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    Removes the node category that is defined in the addon's properties.
     """
     try:
         nodeitems_utils.unregister_node_categories(
-            utilities.set_to_bl_idname(properties.bone_tree_name).upper()
+            utilities.set_to_bl_idname(Nodes.BONE_TREE_NAME).upper()
         )
     except KeyError:
         pass
 
 
-def instantiate_node(node_data, properties):
+def instantiate_node(node_data):
     """
     This function instantiates a node given its attributes in a dictionary.
 
     :param dict node_data: A dictionary of node attributes.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return object: A node object
     """
     # get the node tree instance
-    node_tree = get_node_tree(properties)
+    node_tree = get_node_tree()
 
     # set this node tree to the active node tree in the dropdown
-    set_active_node_tree(node_tree, properties)
+    set_active_node_tree(node_tree)
 
     # if a node class is given instantiate that class
     if node_data.get('node_class'):
@@ -489,13 +512,13 @@ def instantiate_node(node_data, properties):
 
 def update_node_tree(node_tree):
     """
-    This function updates the tracked number of nodes and links in the node tree.
+    Updates the tracked number of nodes and links in the node tree.
 
     :param object node_tree: A node tree object.
     """
     # get the properties on every update
-    properties = bpy.context.window_manager.ue2rigify
-    if remove_duplicate_socket_links(properties):
+    properties = bpy.context.scene.ue2rigify
+    if remove_duplicate_socket_links():
         return None
 
     if remove_socket_links_to_null_bones(properties):
@@ -510,12 +533,11 @@ def update_node_tree(node_tree):
             properties.current_nodes_and_links = len(node_tree.links) + len(node_tree.nodes)
 
 
-def create_node_tree_class(classes, properties):
+def create_node_tree_class(classes):
     """
     This function dynamically defines a node tree class from the addon's properties by subclassing type.
 
     :param list classes: A list of class references.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     def update(self):
         """
@@ -528,23 +550,22 @@ def create_node_tree_class(classes, properties):
         update_node_tree(self)
 
     classes.append(type(
-        properties.bone_tree_name.replace(' ', ''),
+        Nodes.BONE_TREE_NAME.replace(' ', ''),
         (NodeTree,),
         {
-            'bl_idname': properties.bone_tree_name.replace(' ', ''),
-            'bl_label': properties.bone_tree_name,
+            'bl_idname': Nodes.BONE_TREE_NAME.replace(' ', ''),
+            'bl_label': Nodes.BONE_TREE_NAME,
             'bl_icon': 'NODETREE',
             'update': update
         }
     ))
 
 
-def create_socket_class(classes, properties):
+def create_socket_class(classes):
     """
     This function dynamically defines a node tree class from the addon's properties by subclassing type.
 
     :param list classes: A list of class references.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     def draw(self, context, layout, node, socket_name):
         """
@@ -581,26 +602,25 @@ def create_socket_class(classes, properties):
             return 0.314, 0.784, 1.0, 0.5
 
     classes.append(type(
-        properties.node_socket_name.replace(' ', ''),
+        Nodes.NODE_SOCKET_NAME.replace(' ', ''),
         (NodeSocket,),
         {
-            'bl_idname': properties.node_socket_name.replace(' ', ''),
-            'bl_label': properties.node_socket_name,
+            'bl_idname': Nodes.NODE_SOCKET_NAME.replace(' ', ''),
+            'bl_label': Nodes.NODE_SOCKET_NAME,
             'draw': draw,
             'draw_color': draw_color,
         }
     ))
 
 
-def create_socket_links(links_data, properties):
+def create_socket_links(links_data):
     """
-    This function creates the socket links in the node tree provided a dictionary of links data.
+    Creates the socket links in the node tree provided a dictionary of links data.
 
     :param list links_data: A list of dictionaries that contains link attributes.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the node tree
-    node_tree = get_node_tree(properties)
+    node_tree = get_node_tree()
 
     # links the nodes using the values in the links data dictionary
     for link in links_data:
@@ -615,12 +635,11 @@ def create_socket_links(links_data, properties):
                 node_tree.links.new(to_socket, from_socket)
 
 
-def create_node_class(node_class_data, properties):
+def create_node_class(node_class_data):
     """
     This function dynamically defines a node class from the provided node_class_data dictionary by subclassing type.
 
     :param object node_class_data: A dictionary of class attribute names.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return type: A reference to this node class definition.
     """
     def init(self, context):
@@ -632,11 +651,11 @@ def create_node_class(node_class_data, properties):
         reference to the class.
         :param object context: The current object's context.
         """
-        for socket_name in node_class_data['outputs']:
-            self.outputs.new(properties.node_socket_name.replace(' ', ''), socket_name)
+        for socket_name in node_class_data.get('outputs', []):
+            self.outputs.new(Nodes.NODE_SOCKET_NAME.replace(' ', ''), socket_name)
 
-        for socket_name in node_class_data['inputs']:
-            self.inputs.new(properties.node_socket_name.replace(' ', ''), socket_name)
+        for socket_name in node_class_data.get('inputs', []):
+            self.inputs.new(Nodes.NODE_SOCKET_NAME.replace(' ', ''), socket_name)
 
     def free(self):
         """
@@ -657,7 +676,7 @@ def create_node_class(node_class_data, properties):
         {
             'bl_idname': node_class_data['bl_idname'],
             'bl_label': bl_label,
-            'bl_icon': 'OBJECT_DATA' if bl_label == properties.source_rig_object_name else 'BONE_DATA',
+            'bl_icon': 'OBJECT_DATA' if bl_label == Nodes.SOURCE_RIG_OBJECT_NAME else 'BONE_DATA',
             'init': init,
             'free': free,
         }
@@ -678,33 +697,33 @@ def create_node_class(node_class_data, properties):
     return node_class_definition
 
 
-def create_node(node_data, properties, instantiate=True, add_to_category=False):
+def create_node(node_data, instantiate=True, add_to_category=False):
     """
     This function creates a node based on the provided node data dictionary.
 
     :param dict node_data: A dictionary of node attributes.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool instantiate: An optional argument to specify whether to instantiate the node or not.
     :param bool add_to_category: An optional argument to specify whether to categorize the node or not.
     :return object: A node object
     """
+    properties = bpy.context.scene.ue2rigify
     node_class = None
     category = ''
 
     # set the node category based on the tool mode and whether or not the node has outputs.
-    if node_data['mode'] == properties.fk_to_source_mode and not node_data['outputs']:
-        category = properties.source_rig_category
+    if node_data['mode'] == Modes.FK_TO_SOURCE.name and not node_data['outputs']:
+        category = Nodes.SOURCE_RIG_CATEGORY
 
-    if node_data['mode'] == properties.source_to_deform_mode and node_data['outputs']:
-        category = properties.source_rig_category
+    if node_data['mode'] == Modes.SOURCE_TO_DEFORM.name and node_data['outputs']:
+        category = Nodes.SOURCE_RIG_CATEGORY
 
-    if node_data['mode'] == properties.fk_to_source_mode and node_data['outputs']:
-        category = properties.control_rig_fk_category
+    if node_data['mode'] == Modes.FK_TO_SOURCE.name and node_data['outputs']:
+        category = Nodes.CONTROL_RIG_FK_CATEGORY
 
-    if node_data['mode'] == properties.source_to_deform_mode and not node_data['outputs']:
-        category = properties.control_rig_deform_category
+    if node_data['mode'] == Modes.SOURCE_TO_DEFORM.name and not node_data['outputs']:
+        category = Nodes.CONTROL_RIG_DEFORM_CATEGORY
 
-    if node_data['name'] == properties.source_rig_object_name:
+    if node_data['name'] == Nodes.SOURCE_RIG_OBJECT_NAME:
         category = 'Object'
 
     # if the node is a custom node, define the node class
@@ -715,7 +734,6 @@ def create_node(node_data, properties, instantiate=True, add_to_category=False):
             'bl_idname': utilities.set_to_bl_idname(node_data.get('name')),
             'inputs': node_data.get('inputs'),
             'outputs': node_data.get('outputs')},
-            properties
         )
 
     if add_to_category:
@@ -724,9 +742,9 @@ def create_node(node_data, properties, instantiate=True, add_to_category=False):
         nodes = []
         if node_category:
             nodes = node_category
-        bpy.context.window_manager.ue2rigify.categorized_nodes[category] = nodes + [
+        properties.categorized_nodes[category] = nodes + [
             NodeItem(
-                utilities.set_to_bl_idname(node_data.get('name'))
+                utilities.set_to_bl_idname(node_data.get('name', ''))
             )]
 
     if instantiate:
@@ -743,8 +761,7 @@ def create_node(node_data, properties, instantiate=True, add_to_category=False):
             'parent': node_data.get('parent'),
             'shrink': node_data.get('shrink'),
             'label_size': node_data.get('label_size'),
-            'text': node_data.get('text')},
-            properties
+            'text': node_data.get('text')}
         )
 
         return rig_node
@@ -758,10 +775,10 @@ def create_nodes_from_selected_bones(properties):
     """
     node_name = 'untitled'
     location_x = 0
-    location_y = get_top_node_position(properties)
+    location_y = get_top_node_position()
 
     # stop checking the node tree for updates
-    properties.check_node_tree_for_updates = False
+    bpy.context.scene.ue2rigify.check_node_tree_for_updates = False
 
     for rig_object in bpy.context.selected_objects:
         if rig_object.type == 'ARMATURE':
@@ -770,11 +787,11 @@ def create_nodes_from_selected_bones(properties):
                 if bone.bone.select:
                     socket_names.append(bone.name)
 
-                    if rig_object.name == properties.control_rig_name:
-                        node_name = f'{utilities.set_to_title(properties.control_mode)} Rig {bone.name}'
+                    if rig_object.name == Rigify.CONTROL_RIG_NAME:
+                        node_name = f'{utilities.set_to_title(Modes.CONTROL.name)} Rig {bone.name}'
 
-                    if rig_object.name == properties.source_rig_name:
-                        node_name = f'{utilities.set_to_title(properties.source_mode)} Rig {bone.name}'
+                    if rig_object.name == properties.source_rig.name:
+                        node_name = f'{utilities.set_to_title(Modes.SOURCE.name)} Rig {bone.name}'
 
             inputs = get_inputs(rig_object, socket_names, properties)
             outputs = get_outputs(rig_object, socket_names, properties)
@@ -815,7 +832,7 @@ def create_node_link(node_output, node_input, node_tree, properties):
     node_tree.links.new(node_output, node_input)
 
     if properties.mirror_constraints:
-        control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+        control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
         mirrored_output_name = None
         mirrored_input_name = None
 
@@ -829,7 +846,7 @@ def create_node_link(node_output, node_input, node_tree, properties):
 
         # if there is a mirrored bone name for the mirrored output and input
         if mirrored_input_name and mirrored_output_name:
-            socket_type = properties.node_socket_name.replace(' ', '')
+            socket_type = Nodes.NODE_SOCKET_NAME.replace(' ', '')
 
             # create a new sockets on the associated nodes
             mirrored_output = node_output.node.outputs.new(
@@ -847,12 +864,12 @@ def create_node_link(node_output, node_input, node_tree, properties):
 
 def create_link_from_selected_bones(properties):
     """
-    This function creates a pair of nodes and the links between them.
+    Creates a pair of nodes and the links between them.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     node_name = 'untitled'
-    location_y = get_top_node_position(properties)
+    location_y = get_top_node_position()
     from_node = None
     to_node = None
 
@@ -865,11 +882,11 @@ def create_link_from_selected_bones(properties):
             for bone in rig_object.pose.bones:
                 if bone.bone.select:
                     socket_name = bone.name
-                    if rig_object.name == properties.control_rig_name:
-                        node_name = f'{utilities.set_to_title(properties.control_mode)} Rig {bone.name}'
+                    if rig_object.name == Rigify.CONTROL_RIG_NAME:
+                        node_name = f'{utilities.set_to_title(Modes.CONTROL.name)} Rig {bone.name}'
 
-                    if rig_object.name == properties.source_rig_name:
-                        node_name = f'{utilities.set_to_title(properties.source_mode)} Rig {bone.name}'
+                    if rig_object == properties.source_rig:
+                        node_name = f'{utilities.set_to_title(Modes.SOURCE.name)} Rig {bone.name}'
 
             inputs = get_inputs(rig_object, [socket_name], properties)
             outputs = get_outputs(rig_object, [socket_name], properties)
@@ -882,7 +899,6 @@ def create_link_from_selected_bones(properties):
                     'inputs': inputs,
                     'outputs': outputs,
                     'mode': properties.selected_mode},
-                    properties
                 )
             if len(outputs) == 1:
                 from_node = create_node({
@@ -892,12 +908,11 @@ def create_link_from_selected_bones(properties):
                     'inputs': inputs,
                     'outputs': outputs,
                     'mode': properties.selected_mode},
-                    properties
                 )
 
             # if the nodes exist link them
             if from_node and to_node:
-                node_tree = get_node_tree(properties)
+                node_tree = get_node_tree()
                 if len(from_node.outputs) == 1 and len(to_node.inputs):
                     create_node_link(from_node.outputs[0], to_node.inputs[0], node_tree, properties)
 
@@ -908,13 +923,12 @@ def create_link_from_selected_bones(properties):
     properties.check_node_tree_for_updates = True
 
 
-def populate_node_categories(properties):
+def populate_node_categories():
     """
-    This function populates the node categories in the node tree. Nodes in categories can be instantiated using the
+    Populates the node categories in the node tree. Nodes in categories can be instantiated using the
     built in add node operator.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    properties = bpy.context.scene.ue2rigify
     node_categories = []
 
     for category, nodes in properties.categorized_nodes.items():
@@ -924,16 +938,37 @@ def populate_node_categories(properties):
             items=nodes
         ))
 
-    remove_node_categories(properties)
+    remove_node_categories()
     nodeitems_utils.register_node_categories(
-        utilities.set_to_bl_idname(properties.bone_tree_name).upper(),
+        utilities.set_to_bl_idname(Nodes.BONE_TREE_NAME).upper(),
         node_categories
     )
 
 
+def remove_pie_menu_hot_keys():
+    """
+    Removes all the added the pie menu hot keys.
+    """
+    # unregister all the pie menu classes
+    for pie_menu_class in pie_menu_classes:
+        bpy.utils.unregister_class(pie_menu_class)
+
+    # remove all the added key maps
+    for key_map in addon_key_maps:
+        # remove all the key map instances in each key map
+        for key_map_instance in key_map.keymap_items:
+            key_map.keymap_items.remove(key_map_instance)
+
+        bpy.context.window_manager.keyconfigs.addon.keymaps.remove(key_map)
+
+    # clear the lists of references to the pie menu classes and key maps
+    pie_menu_classes.clear()
+    addon_key_maps.clear()
+
+
 def populate_node_tree(node_data, links_data, properties):
     """
-    This function populates the node tree with nodes. If there is saved node data and links data, it creates the nodes
+    Populates the node tree with nodes. If there is saved node data and links data, it creates the nodes
     and links. It also defines a node class for each bone on the source and control rig.
 
     :param dict node_data: A dictionary of node attributes.
@@ -944,50 +979,47 @@ def populate_node_tree(node_data, links_data, properties):
     properties.check_node_tree_for_updates = False
 
     # create the node tree instance
-    bone_node_tree = get_node_tree(properties)
+    bone_node_tree = get_node_tree()
 
     # set this node tree as the active tree
-    set_active_node_tree(bone_node_tree, properties)
+    set_active_node_tree(bone_node_tree)
 
     # create the saved nodes
     if node_data:
         for node in node_data:
-            create_node(node, properties)
+            create_node(node)
 
     # create the saved links
     if links_data:
-        create_socket_links(links_data, properties)
+        create_socket_links(links_data)
 
     # get the source rig object and control rig object
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+    control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
 
     # get the bone name regex
     regex = []
-    if properties.selected_mode == properties.fk_to_source_mode:
+    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
         regex = re.compile(r'^(?!VIS|DEF|ORG|MCH|ik).*$')
-    if properties.selected_mode == properties.source_to_deform_mode:
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
         regex = re.compile(r'(DEF|ORG-eye|root)')
 
     # add the source rig object as a node
     create_node({
-        'name': properties.source_rig_object_name,
-        'inputs': ['object'] if properties.selected_mode == properties.fk_to_source_mode else [],
-        'outputs': ['object'] if properties.selected_mode == properties.source_to_deform_mode else [],
+        'name': properties.source_rig.name,
+        'inputs': ['object'] if properties.selected_mode == Modes.FK_TO_SOURCE.name else [],
+        'outputs': ['object'] if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name else [],
         'mode': properties.selected_mode},
-        properties,
         instantiate=False,
         add_to_category=True
     )
 
     # add the source rig bones
-    for socket_name in get_socket_names(source_rig_object):
+    for socket_name in get_socket_names(properties.source_rig):
         create_node({
-            'name': f'{utilities.set_to_title(properties.source_mode)} Rig {socket_name}',
-            'inputs': get_inputs(source_rig_object, [socket_name], properties),
-            'outputs': get_outputs(source_rig_object, [socket_name], properties),
+            'name': f'{utilities.set_to_title(Modes.SOURCE.name)} Rig {socket_name}',
+            'inputs': get_inputs(properties.source_rig, [socket_name], properties),
+            'outputs': get_outputs(properties.source_rig, [socket_name], properties),
             'mode': properties.selected_mode},
-            properties,
             instantiate=False,
             add_to_category=True
         )
@@ -995,17 +1027,16 @@ def populate_node_tree(node_data, links_data, properties):
     # add the control rig bones
     for socket_name in get_socket_names(control_rig_object, regex=regex):
         create_node({
-            'name': f'{utilities.set_to_title(properties.control_mode)} Rig {socket_name}',
+            'name': f'{utilities.set_to_title(Modes.CONTROL.name)} Rig {socket_name}',
             'inputs': get_inputs(control_rig_object, [socket_name], properties),
             'outputs': get_outputs(control_rig_object, [socket_name], properties),
             'mode': properties.selected_mode},
-            properties,
             instantiate=False,
             add_to_category=True
         )
 
     # populate the node categories with both of the rigs bone names
-    populate_node_categories(properties)
+    populate_node_categories()
 
     # add the rig node tools ui
     node_editor.register()
@@ -1045,7 +1076,7 @@ def combine_selected_nodes(operator, context, properties):
     active_node = context.active_node
 
     # stop checking the node tree for updates
-    properties.check_node_tree_for_updates = False
+    bpy.context.scene.ue2rigify.check_node_tree_for_updates = False
 
     if context.active_node:
         outputs = []
@@ -1101,8 +1132,7 @@ def combine_selected_nodes(operator, context, properties):
             'width': 200,
             'inputs': inputs,
             'outputs': outputs,
-            'mode': properties.selected_mode},
-            properties
+            'mode': properties.selected_mode}
         )
 
         # select the new node
@@ -1110,7 +1140,7 @@ def combine_selected_nodes(operator, context, properties):
 
         # if there are links relink the sockets
         if links_data:
-            create_socket_links(links_data, properties)
+            create_socket_links(links_data)
 
         # reorder the sockets so they line up
         reorder_sockets(links_data, bone_node_tree)
@@ -1122,18 +1152,17 @@ def combine_selected_nodes(operator, context, properties):
     properties.check_node_tree_for_updates = True
 
 
-def align_active_node_sockets(context, properties):
+def align_active_node_sockets(context):
     """
-    This function aligns the sockets of the active node to the sockets of its attached links.
+    Aligns the sockets of the active node to the sockets of its attached links.
 
     :param context: The node operators context.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     bone_node_tree = context.space_data.node_tree
     active_node = context.active_node
 
     # stop checking the node tree for updates
-    properties.check_node_tree_for_updates = False
+    bpy.context.scene.ue2rigify.check_node_tree_for_updates = False
 
     if context.active_node:
         links_data = []
@@ -1162,28 +1191,32 @@ def align_active_node_sockets(context, properties):
             reorder_sockets(links_data, bone_node_tree)
 
     # start checking the node tree for updates
-    properties.check_node_tree_for_updates = True
+    bpy.context.scene.ue2rigify.check_node_tree_for_updates = True
 
 
 def register():
     """
-    This function registers the node classes when the addon is enabled.
+    Registers the node classes when the addon is enabled.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    create_node_tree_class(node_tree_classes, properties)
-    create_socket_class(node_tree_classes, properties)
+    create_node_tree_class(node_tree_classes)
+    create_socket_class(node_tree_classes)
 
-    for cls in node_tree_classes:
-        bpy.utils.register_class(cls)
+    try:
+        for cls in node_tree_classes:
+            bpy.utils.register_class(cls)
+    except (RuntimeError, ValueError) as error:
+        sys.stderr.write(str(error))
 
 
 def unregister():
     """
-    This function unregisters the node classes when the addon is disabled.
+    Unregisters the node classes when the addon is disabled.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    remove_node_setup(properties)
-    remove_node_categories(properties)
+    remove_node_setup()
+    remove_node_categories()
 
-    for cls in reversed(node_tree_classes):
-        bpy.utils.unregister_class(cls)
+    try:
+        for cls in reversed(node_tree_classes):
+            bpy.utils.unregister_class(cls)
+    except (RuntimeError, ValueError) as error:
+        sys.stderr.write(str(error))

@@ -1,0 +1,598 @@
+[
+ {
+  "name": "FK Legs",
+  "label": "FK Legs",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   180.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "toe.L",
+   "toe.R",
+   "foot_fk.L",
+   "foot_fk.R",
+   "shin_fk.L",
+   "shin_fk.R",
+   "thigh_fk.L",
+   "thigh_fk.R"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Legs",
+  "label": "Source Legs",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   180.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "ball_l",
+   "ball_r",
+   "foot_l",
+   "foot_r",
+   "calf_l",
+   "calf_r",
+   "thigh_l",
+   "thigh_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Legs Tweak",
+  "label": "FK Legs Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   474.12603759765625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "thigh_tweak.L",
+   "thigh_tweak.R",
+   "foot_tweak.L",
+   "foot_tweak.R",
+   "shin_tweak.L.001",
+   "shin_tweak.R.001",
+   "shin_tweak.L",
+   "shin_tweak.R",
+   "thigh_tweak.L.001",
+   "thigh_tweak.R.001"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Arm",
+  "label": "FK Arm",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   702.3451538085938
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "forearm_fk.L",
+   "forearm_fk.R",
+   "upper_arm_fk.L",
+   "upper_arm_fk.R",
+   "hand_fk.L",
+   "hand_fk.R"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Arm",
+  "label": "Source Arm",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   299.9999694824219,
+   702.3451538085938
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "lowerarm_l",
+   "lowerarm_r",
+   "upperarm_l",
+   "upperarm_r",
+   "hand_l",
+   "hand_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Legs Tweak",
+  "label": "Source Legs Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0000305175781,
+   474.12603759765625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "thigh_l",
+   "thigh_r",
+   "foot_l",
+   "foot_r",
+   "calf_twist_01_l",
+   "calf_twist_01_r",
+   "calf_l",
+   "calf_r",
+   "thigh_twist_01_l",
+   "thigh_twist_01_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Arm Tweak",
+  "label": "FK Arm Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   1062.34521484375
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "hand_tweak.L",
+   "hand_tweak.R",
+   "forearm_tweak.L.001",
+   "forearm_tweak.R.001",
+   "forearm_tweak.L",
+   "forearm_tweak.R",
+   "upper_arm_tweak.L.001",
+   "upper_arm_tweak.R.001",
+   "upper_arm_tweak.L",
+   "upper_arm_tweak.R"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Arm Tweak",
+  "label": "Source Arm Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   1062.34521484375
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "hand_l",
+   "hand_r",
+   "lowerarm_twist_01_l",
+   "lowerarm_twist_01_r",
+   "lowerarm_l",
+   "lowerarm_r",
+   "upperarm_twist_01_l",
+   "upperarm_twist_01_r",
+   "upperarm_l",
+   "upperarm_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Rig pelvis.001",
+  "label": "Source Rig pelvis",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   309.4255676269531,
+   -76.4423828125
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "pelvis"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Control Rig torso",
+  "label": "Control Rig torso",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -290.574462890625,
+   -76.4423828125
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "torso"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Shoulder",
+  "label": "FK Shoulder",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   801.0189819335938
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "shoulder.R",
+   "shoulder.L"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Shoulder",
+  "label": "Source Shoulder",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   801.0189819335938
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "clavicle_r",
+   "clavicle_l"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Spine",
+  "label": "FK Spine",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -297.4525451660156,
+   1296.658447265625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "head",
+   "neck",
+   "chest",
+   "spine_fk.002",
+   "spine_fk.001",
+   "hips"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Spine",
+  "label": "Source Spine",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   302.5474853515625,
+   1296.658447265625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "head",
+   "neck_01",
+   "spine_03",
+   "spine_02",
+   "spine_01",
+   "pelvis"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Spine Tweak",
+  "label": "FK Spine Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   1504.038818359375
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "tweak_spine.004",
+   "tweak_spine.003",
+   "tweak_spine.002",
+   "tweak_spine.001",
+   "tweak_spine"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Spine Tweak",
+  "label": "Source Spine Tweak",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   1504.038818359375
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "neck_01",
+   "spine_03",
+   "spine_02",
+   "spine_01",
+   "pelvis"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Hand",
+  "label": "Source Hand",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.00006103515625,
+   2288.437744140625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "pinky_03_l",
+   "pinky_03_r",
+   "pinky_02_l",
+   "pinky_02_r",
+   "pinky_01_l",
+   "pinky_01_r",
+   "ring_03_l",
+   "ring_03_r",
+   "ring_02_l",
+   "ring_02_r",
+   "ring_01_l",
+   "ring_01_r",
+   "middle_03_l",
+   "middle_03_r",
+   "middle_02_l",
+   "middle_02_r",
+   "middle_01_l",
+   "middle_01_r",
+   "index_03_l",
+   "index_03_r",
+   "index_02_l",
+   "index_02_r",
+   "index_01_l",
+   "index_01_r",
+   "thumb_03_l",
+   "thumb_03_r",
+   "thumb_02_l",
+   "thumb_02_r",
+   "thumb_01_l",
+   "thumb_01_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Hand",
+  "label": "FK Hand",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   2288.437744140625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "f_pinky.03.L",
+   "f_pinky.03.R",
+   "f_pinky.02.L",
+   "f_pinky.02.R",
+   "f_pinky.01.L",
+   "f_pinky.01.R",
+   "f_ring.03.L",
+   "f_ring.03.R",
+   "f_ring.02.L",
+   "f_ring.02.R",
+   "f_ring.01.L",
+   "f_ring.01.R",
+   "f_middle.03.L",
+   "f_middle.03.R",
+   "f_middle.02.L",
+   "f_middle.02.R",
+   "f_middle.01.L",
+   "f_middle.01.R",
+   "f_index.03.L",
+   "f_index.03.R",
+   "f_index.02.L",
+   "f_index.02.R",
+   "f_index.01.L",
+   "f_index.01.R",
+   "thumb.03.L",
+   "thumb.03.R",
+   "thumb.02.L",
+   "thumb.02.R",
+   "thumb.01.L",
+   "thumb.01.R"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "FK Hand Controls",
+  "label": "FK Hand Controls",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -305.9546203613281,
+   2651.373046875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "f_pinky.01_master.L",
+   "f_pinky.01_master.R",
+   "f_ring.01_master.L",
+   "f_ring.01_master.R",
+   "f_middle.01_master.L",
+   "f_middle.01_master.R",
+   "f_index.01_master.L",
+   "f_index.01_master.R",
+   "thumb.01_master.L",
+   "thumb.01_master.R"
+  ],
+  "mode": "FK_TO_SOURCE"
+ },
+ {
+  "name": "Source Hand Controls",
+  "label": "Source Hand Controls",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   305.95465087890625,
+   2648.400390625
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "pinky_01_l",
+   "pinky_01_r",
+   "ring_01_l",
+   "ring_01_r",
+   "middle_01_l",
+   "middle_01_r",
+   "index_01_l",
+   "index_01_r",
+   "thumb_01_l",
+   "thumb_01_r"
+  ],
+  "outputs": [],
+  "mode": "FK_TO_SOURCE"
+ }
+]

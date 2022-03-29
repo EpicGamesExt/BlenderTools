@@ -1,7 +1,9 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
+import sys
 import nodeitems_utils
+from ..constants import Nodes
 
 
 class UE_RIGIFY_PT_NodeToolsPanel(bpy.types.Panel):
@@ -20,7 +22,7 @@ class UE_RIGIFY_PT_NodeToolsPanel(bpy.types.Panel):
 
         :param object context: The node editor context.
         """
-        properties = bpy.context.window_manager.ue2rigify
+        properties = bpy.context.scene.ue2rigify
 
         layout = self.layout
 
@@ -61,8 +63,7 @@ class BoneRemappingTreeNode:
         :return bool: True or false depending on whether the bl_idname of the provided node tree matches the
         bl_idname in the properties.
         """
-        properties = bpy.context.window_manager.ue2rigify
-        return node_tree.bl_idname == properties.bone_tree_name.replace(' ', '')
+        return node_tree.bl_idname == Nodes.BONE_TREE_NAME.replace(' ', '')
 
 
 class BoneRemappingTreeCategory(nodeitems_utils.NodeCategory):
@@ -75,8 +76,7 @@ class BoneRemappingTreeCategory(nodeitems_utils.NodeCategory):
         :return bool: True or false depending on whether the type of the node tree in the context matches the
         type in the properties.
         """
-        properties = bpy.context.window_manager.ue2rigify
-        return context.space_data.tree_type == properties.bone_tree_name.replace(' ', '')
+        return context.space_data.tree_type == Nodes.BONE_TREE_NAME.replace(' ', '')
 
 
 class BaseRigBonesNode(bpy.types.Node, BoneRemappingTreeNode):
@@ -99,8 +99,8 @@ def register():
     """
     try:
         bpy.utils.register_class(UE_RIGIFY_PT_NodeToolsPanel)
-    except ValueError:
-        pass
+    except (RuntimeError, ValueError) as error:
+        sys.stderr.write(str(error))
 
 
 def unregister():
@@ -109,5 +109,5 @@ def unregister():
     """
     try:
         bpy.utils.unregister_class(UE_RIGIFY_PT_NodeToolsPanel)
-    except RuntimeError:
-        pass
+    except (RuntimeError, ValueError) as error:
+        sys.stderr.write(str(error))
