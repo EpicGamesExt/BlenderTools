@@ -18,7 +18,7 @@ bl_info = {
     "location": "Header > Pipeline > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
     "warning": "",
-    "wiki_url": "https://epicgames.github.io/BlenderTools/send2ue/quickstart.html",
+    "wiki_url": "https://epicgames.github.io/BlenderTools/send2ue",
     "category": "Pipeline",
 }
 
