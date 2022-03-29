@@ -19,10 +19,10 @@ class ExportRigTemplate(ExportHelper):
 
         :param object context: The window context.
         """
-        properties = bpy.context.window_manager.ue2rigify
+        properties = bpy.context.scene.ue2rigify
 
         layout = self.layout
         row = layout.row()
-        row.label(text="Exported Template:")
+        row.label(text='Export Template:')
         row = layout.row()
-        row.prop(properties, "selected_export_template", text='')
+        row.prop(properties, 'selected_export_template', text='')

@@ -5,8 +5,10 @@ import re
 import bpy
 import json
 import shutil
+import tempfile
 from mathutils import Color, Euler, Matrix, Quaternion, Vector
 
+from ..constants import Template, Modes, Rigify
 from . import scene
 from . import utilities
 from ..settings.tool_tips import *
@@ -17,15 +19,12 @@ _result_reference_get_modes = []
 _result_reference_get_rig_templates = []
 
 
-# -------------- functions that handle the rig templating --------------
-def get_rig_templates_path():
+def copy_default_templates():
     """
-    This function returns the path to the addons rig template directory.
-
-    :return str: The full path to the addons rig template directory.
+    Copies the default addon templates to the user location.
     """
-    addons = bpy.utils.user_resource('SCRIPTS', path='addons')
-    return os.path.join(addons, __package__.split('.')[0], 'resources', 'rig_templates')
+    template_location = os.path.join(os.path.dirname(__file__), os.path.pardir, 'resources', 'rig_templates')
+    shutil.copytree(template_location, Template.RIG_TEMPLATES_PATH, dirs_exist_ok=True)
 
 
 def get_saved_node_data(properties):
@@ -46,16 +45,15 @@ def get_saved_node_data(properties):
 
 def get_saved_links_data(properties, reverse=False):
     """
-    This function reads from disk a list of dictionaries that are saved link attributes.
+    Gets from disk a list of dictionaries that are saved link attributes.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool reverse: If true it flips the from and to nodes and sockets
     :return list: A list of dictionaries that contains link attributes.
     """
     if os.path.exists(properties.saved_links_data):
-        saved_links_file = open(properties.saved_links_data)
-        saved_links_data = json.load(saved_links_file)
-        saved_links_file.close()
+        with open(properties.saved_links_data) as saved_links_file:
+            saved_links_data = json.load(saved_links_file)
 
         if reverse:
             reversed_saved_links_data = []
@@ -143,15 +141,13 @@ def get_metarig_data(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return object: A blender text object.
     """
-    metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+    metarig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
     if metarig_object:
-
         utilities.operator_on_object_in_mode(
             lambda: bpy.ops.armature.rigify_encode_metarig(),
             metarig_object,
             'EDIT'
         )
-
         metarig_text_object = bpy.data.texts.get(os.path.basename(properties.saved_metarig_data))
 
         if metarig_text_object:
@@ -178,34 +174,53 @@ def get_starter_metarig_templates(self=None, context=None):
         ('bpy.ops.object.armature_horse_metarig_add()', 'Horse', starter_metarig_tool_tip, icon, 5),
         ('bpy.ops.object.armature_shark_metarig_add()', 'Shark', starter_metarig_tool_tip, icon, 6),
         ('bpy.ops.object.armature_wolf_metarig_add()', 'Wolf', starter_metarig_tool_tip, icon, 7),
-    ]
+    ] + get_rig_templates(index_offset=8)
 
 
-def get_rig_templates(self=None, context=None):
+def get_rig_templates(self=None, context=None, index_offset=0):
     """
-    This function gets the enumeration for the rig template selection.
+    Gets the enumeration for the rig template selection.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
+    :param int index_offset: How much to offset the index by.
     :return list: A list of tuples that define the rig template enumeration.
     """
     rig_templates = []
-    rig_template_directories = next(os.walk(get_rig_templates_path()))[1]
+    rig_template_directories = next(os.walk(Template.RIG_TEMPLATES_PATH))[1]
 
-    for index, rig_template in enumerate(rig_template_directories):
-        rig_templates.append((
-            rig_template,
-            utilities.set_to_title(rig_template),
-            template_tool_tip.format(template_name=utilities.set_to_title(rig_template)),
-            'OUTLINER_OB_ARMATURE',
-            index
-        ))
+    # ensure that the male and female template are first
+    rig_templates.append((
+        Template.DEFAULT_MALE_TEMPLATE,
+        utilities.set_to_title(Template.DEFAULT_MALE_TEMPLATE),
+        template_tool_tip.format(template_name=utilities.set_to_title(Template.DEFAULT_MALE_TEMPLATE)),
+        'OUTLINER_OB_ARMATURE',
+        index_offset
+    ))
+
+    rig_templates.append((
+        Template.DEFAULT_FEMALE_TEMPLATE,
+        utilities.set_to_title(Template.DEFAULT_FEMALE_TEMPLATE),
+        template_tool_tip.format(template_name=utilities.set_to_title(Template.DEFAULT_FEMALE_TEMPLATE)),
+        'OUTLINER_OB_ARMATURE',
+        1 + index_offset
+    ))
+
+    for index, rig_template in enumerate(rig_template_directories, 2):
+        if rig_template not in [Template.DEFAULT_MALE_TEMPLATE, Template.DEFAULT_FEMALE_TEMPLATE]:
+            rig_templates.append((
+                rig_template,
+                utilities.set_to_title(rig_template),
+                template_tool_tip.format(template_name=utilities.set_to_title(rig_template)),
+                'OUTLINER_OB_ARMATURE',
+                index + index_offset
+            ))
     return rig_templates
 
 
 def get_template_file_path(template_file_name, properties):
     """
-    This function get the the full path to a template file based on the provided template file name.
+    Get the the full path to a template file based on the provided template file name.
 
     :param str template_file_name: The name of the template file.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -218,43 +233,15 @@ def get_template_file_path(template_file_name, properties):
         template_name = re.sub(r'\W+', '_', properties.new_template_name).lower()
 
     return os.path.join(
-        properties.rig_templates_path,
+        Template.RIG_TEMPLATES_PATH,
         template_name,
         template_file_name
     )
 
 
-def set_constraints_data(rig_object, properties):
-    """
-    This function gets the constraints from the template and creates them on the given rig object.
-
-    :param object rig_object: An object of type rig.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    constraints_data = get_saved_constraints_data(properties.metarig_mode, properties)
-
-    if rig_object:
-        for bone_name, constraints_data in constraints_data.items():
-            if constraints_data:
-                bone = rig_object.pose.bones.get(bone_name)
-
-                for constraint_data in constraints_data:
-                    # create the constraint
-                    constraint_type = constraint_data.pop('type')
-                    constraint = bone.constraints.new(constraint_type)
-
-                    # set the constraints attributes
-                    for attribute, value in constraint_data.items():
-                        current_value = getattr(constraint, attribute)
-                        if type(current_value) == bpy.types.bpy_prop_collection:
-                            utilities.set_collection(current_value, value)
-                        else:
-                            utilities.set_property_group_value(constraint, attribute, value)
-
-
 def set_template_files(properties, mode_override=None):
     """
-    This function sets the correct template file paths based on the mode the addon is in.
+    Sets the correct template file paths based on the mode the addon is in.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param str mode_override: This is an optional parameter that can be used to override the addon's current mode to
@@ -265,64 +252,46 @@ def set_template_files(properties, mode_override=None):
     if mode_override:
         mode = mode_override.lower()
 
-    properties.saved_metarig_data = get_template_file_path(f'{properties.meta_rig_name}.py', properties)
+    properties.saved_metarig_data = get_template_file_path(f'{Rigify.META_RIG_NAME}.py', properties)
     properties.saved_links_data = get_template_file_path(f'{mode}_links.json', properties)
     properties.saved_node_data = get_template_file_path(f'{mode}_nodes.json', properties)
 
 
 def set_template(self=None, context=None):
     """
-    This function is called every time a new template is selected. If create new is selected it switch to edit metarig
+    Called every time a new template is selected. If create new is selected it switch to edit metarig
     mode, but if anything else is selected it defaults to source mode.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
     """
-    properties = bpy.context.window_manager.ue2rigify
-
-    if hasattr(bpy.context, 'scene'):
+    properties = getattr(bpy.context.scene, 'ue2rigify', None)
+    if properties:
         if properties.selected_rig_template == 'create_new':
-            properties.selected_mode = properties.metarig_mode
+            properties.selected_mode = Modes.METARIG.name
         else:
-            properties.selected_mode = properties.source_mode
+            properties.selected_mode = Modes.SOURCE.name
 
 
-@bpy.app.handlers.persistent
-def set_default_rig_template(*args):
+def remove_template_folder(properties, template):
     """
-    This function sets the default rig template every time a new file loads and on the first dependency graph update
-    right after the addon is registered.
+    Removes the active template from the addon's rig templates folder.
 
-    :param args: This soaks up the extra arguments for the app handler.
-    """
-    properties = bpy.context.window_manager.ue2rigify
-    properties.selected_rig_template = properties.default_template
-
-    if set_default_rig_template in bpy.app.handlers.depsgraph_update_pre:
-        bpy.app.handlers.depsgraph_update_pre.remove(set_default_rig_template)
-
-
-def remove_template_folder(properties):
-    """
-    This function removes the active template from the addon's rig templates folder.
-
+    :param str template: The name of the template to delete.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # switch back to source mode
-    properties.selected_mode = properties.source_mode
+    properties.selected_mode = Modes.SOURCE.name
 
     # delete the selected rig template folder
-    selected_template_path = os.path.join(properties.rig_templates_path, properties.selected_rig_template)
-    try:
-        original_umask = os.umask(0)
-        if os.path.exists(selected_template_path):
-            os.chmod(selected_template_path, 0o777)
-        shutil.rmtree(selected_template_path)
-    finally:
-        os.umask(original_umask)
+    selected_template_path = os.path.join(Template.RIG_TEMPLATES_PATH, template)
+
+    import logging
+    logging.info(selected_template_path)
+    shutil.rmtree(selected_template_path, ignore_errors=True)
 
     # set the selected rig template to the default
-    properties.selected_rig_template = properties.default_template
+    properties.selected_rig_template = Template.DEFAULT_MALE_TEMPLATE
 
 
 def create_template_folder(template_name, properties):
@@ -336,7 +305,7 @@ def create_template_folder(template_name, properties):
     template_name = re.sub(r'\W+', '_', template_name.strip()).lower()
 
     # create the template folder
-    template_path = os.path.join(properties.rig_templates_path, template_name)
+    template_path = os.path.join(Template.RIG_TEMPLATES_PATH, template_name)
     if not os.path.exists(template_path):
         try:
             original_umask = os.umask(0)
@@ -423,7 +392,7 @@ def import_zip(zip_file_path, properties):
     """
     # get the template name and path from the zip file
     template_name = os.path.basename(zip_file_path).replace('.zip', '')
-    template_folder_path = os.path.join(properties.rig_templates_path, template_name)
+    template_folder_path = os.path.join(Template.RIG_TEMPLATES_PATH, template_name)
 
     # create the template folder
     create_template_folder(template_name, properties)
@@ -444,7 +413,7 @@ def export_zip(zip_file_path, properties):
     no_extension_file_path = zip_file_path.replace('.zip', '')
 
     # zip up the folder and save it to the given path
-    template_folder_path = os.path.join(properties.rig_templates_path, properties.selected_export_template)
+    template_folder_path = os.path.join(Template.RIG_TEMPLATES_PATH, properties.selected_export_template)
     shutil.make_archive(no_extension_file_path, 'zip', template_folder_path)
 
 #
@@ -459,7 +428,7 @@ def export_zip(zip_file_path, properties):
 
 def safe_get_starter_metarig_templates(self, context):
     """
-    This function is an EnumProperty safe wrapper for get_starter_metarig_templates.
+    EnumProperty safe wrapper for get_starter_metarig_templates.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
@@ -473,7 +442,7 @@ def safe_get_starter_metarig_templates(self, context):
 
 def safe_populate_templates_dropdown(self, context):
     """
-    This function is an EnumProperty safe wrapper for populate_templates_dropdown.
+    EnumProperty safe wrapper for populate_templates_dropdown.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
@@ -487,7 +456,7 @@ def safe_populate_templates_dropdown(self, context):
 
 def safe_get_modes(self, context):
     """
-    This function is an EnumProperty safe wrapper for scene.get_modes.
+    EnumProperty safe wrapper for scene.get_modes.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
@@ -501,7 +470,7 @@ def safe_get_modes(self, context):
 
 def safe_get_rig_templates(self, context):
     """
-    This function is an EnumProperty safe wrapper for get_rig_templates.
+    EnumProperty safe wrapper for get_rig_templates.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.

@@ -2,39 +2,15 @@
 import bpy
 import re
 from . import scene, templates
+from ..constants import Viewport, Modes, Rigify
 from mathutils import Vector, Quaternion
-
-addon_key_maps = []
-pie_menu_classes = []
 
 
 def get_modes():
     """
-    This function gets all the ue2rigify modes
+    Gets all the ue2rigify modes
     """
-    properties = bpy.context.window_manager.ue2rigify
-    return [
-        properties.source_mode,
-        properties.metarig_mode,
-        properties.fk_to_source_mode,
-        properties.source_to_deform_mode,
-        properties.control_mode
-    ]
-
-
-def get_picker_object():
-    """
-    This function gets or creates a new picker object if needed.
-
-    :return object: The blender picker object.
-    """
-    properties = bpy.context.window_manager.ue2rigify
-    picker_object = bpy.data.objects.get(properties.picker_name)
-    if not picker_object:
-        picker_object = bpy.data.objects.new(properties.picker_name, None)
-        picker_object.constraints.new('COPY_TRANSFORMS')
-
-    return picker_object
+    return [mode.name for mode in Modes]
 
 
 def get_action_names(rig_object, all_actions=True):
@@ -213,6 +189,16 @@ def get_property_collections_data(collections):
     return collections_data
 
 
+def get_operator_class_by_bl_idname(bl_idname):
+    """
+    Gets a operator class from its bl_idname.
+
+    :return class: The operator class.
+    """
+    context, name = bl_idname.split('.')
+    return getattr(bpy.types, f'{context.upper()}_OT_{name}', None)
+
+
 def set_action_transform_offsets(action, offset, operation, bone_name=None):
     """
     This function modifies each keyframe in the given action by applying the provided offset.
@@ -379,7 +365,7 @@ def set_rig_color(rig_object, theme, show):
         rig_object.pose.bone_groups.remove(bone_group)
 
 
-# TODO implement a bunch of functions so some of this logic can be reused
+# TODO implement a more functions so some of this logic can be reused and more organized
 def set_viewport_settings(viewport_settings, properties):
     """
     This function sets the viewport settings and object settings to the values provided in the viewport_settings and
@@ -409,7 +395,7 @@ def set_viewport_settings(viewport_settings, properties):
 
                 # set if object is hidden or not unless it is source mode
                 previous_settings['hidden'] = rig_object.hide_get()
-                if rig_object.name == properties.source_rig_name and properties.selected_mode == properties.source_mode:
+                if rig_object.name == properties.source_rig.name and properties.selected_mode == Modes.SOURCE.name:
                     rig_object.hide_set(False)
                 else:
                     rig_object.hide_set(rig_object_settings['hidden'])
@@ -464,21 +450,31 @@ def set_viewport_settings(viewport_settings, properties):
                     # set a give the rig a custom color
                     set_rig_color(rig_object, 'THEME01', True)
 
-                    display_object = get_picker_object()
+                    # create the display object for the bones
+                    display_object = bpy.data.objects.get(Viewport.DISPLAY_SPHERE)
+                    if not display_object:
+                        display_object = bpy.data.objects.new(Viewport.DISPLAY_SPHERE, None)
+
                     for bone in rig_object.pose.bones:
                         display_object.empty_display_type = 'SPHERE'
                         bone.custom_shape = display_object
-                        bone.custom_shape_scale = 0.1
+                        if bpy.app.version[0] > 2:
+                            bone.custom_shape_scale_xyz = [0.1, 0.1, 0.1]
+                        else:
+                            bone.custom_shape_scale = 0.1
 
                 # remove custom bone shapes from all the bones
                 if not rig_object_settings['custom_bone_shape']:
-                    if rig_object.name != properties.control_rig_name:
+                    if rig_object.name != Rigify.CONTROL_RIG_NAME:
 
                         # remove the custom rig color
                         set_rig_color(rig_object, 'THEME01', False)
                         for bone in rig_object.pose.bones:
                             bone.custom_shape = None
-                            bone.custom_shape_scale = 1
+                            if bpy.app.version[0] > 2:
+                                bone.custom_shape_scale_xyz = [1, 1, 1]
+                            else:
+                                bone.custom_shape_scale = 1
 
                 # set the visible bone layers
                 if rig_object_settings.get('visible_bone_layers'):
@@ -492,12 +488,12 @@ def set_viewport_settings(viewport_settings, properties):
                     previous_settings['visible_bone_layers'] = visible_bone_layers
 
                 # store the previous viewport values in a dictionary in the tool properties
-                bpy.context.window_manager.ue2rigify.previous_viewport_settings[rig_object_name] = previous_settings
+                bpy.context.scene.ue2rigify.previous_viewport_settings[rig_object_name] = previous_settings
 
 
 def set_property_group_value(property_group, attribute, value):
     """
-    This function sets the given attribute and value in a property group.
+    Sets the given attribute and value in a property group.
 
     :param object property_group: A group of properties.
     :param str attribute: The name of the attribute to set.
@@ -543,70 +539,20 @@ def remove_nla_tracks(nla_tracks):
         nla_tracks.remove(nla_track)
 
 
-def remove_picker_object():
+def initialize_template_paths(self=None, context=None):
     """
-    This function removes the picker object.
+    Initializes the template file paths.
+
+    :param object self: This is a reference to the property this functions in appended to.
+    :param object context: The context of the object this function is appended to.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    picker_object = bpy.data.objects.get(properties.picker_name)
-    if picker_object:
-        bpy.data.objects.remove(picker_object)
-
-
-def remove_pie_menu_hot_keys():
-    """
-    This function removes all the added the pie menu hot keys.
-    """
-    # unregister all the pie menu classes
-    for pie_menu_class in pie_menu_classes:
-        bpy.utils.unregister_class(pie_menu_class)
-
-    # remove all the added key maps
-    for key_map in addon_key_maps:
-        # remove all the key map instances in each key map
-        for key_map_instance in key_map.keymap_items:
-            key_map.keymap_items.remove(key_map_instance)
-
-        bpy.context.window_manager.keyconfigs.addon.keymaps.remove(key_map)
-
-    # clear the lists of references to the pie menu classes and key maps
-    pie_menu_classes.clear()
-    addon_key_maps.clear()
-
-
-def create_pie_menu_hot_key(pie_menu_class, key, category, alt=True):
-    """
-    This function creates the pie menu hot keys and saves the keymap to be remove later.
-
-    :param class pie_menu_class: A reference to the pie menu class.
-    :param str key: The blender identifier for which key to use.
-    :param str category: The category where the keymap will be created in preferences > keymaps
-    :param bool alt: Whether or not to use the alt key.
-    """
-    if pie_menu_class not in pie_menu_classes:
-        # register the new pie menu
-        bpy.utils.register_class(pie_menu_class)
-
-        # get an existing key map or create a new one
-        key_maps = bpy.context.window_manager.keyconfigs.addon.keymaps
-        key_map = key_maps.get(category)
-        if not key_map:
-            key_map = key_maps.new(name=category)
-
-        # add a key map instance with a hot key that invokes a pie menu
-        key_map_instance = key_map.keymap_items.new('wm.call_menu_pie', key, 'PRESS', alt=alt)
-
-        # specify which pie menu to invoke
-        key_map_instance.properties.name = pie_menu_class.bl_idname
-
-        # save the references to pie menu class and key map so they can be deleted later
-        pie_menu_classes.append(pie_menu_class)
-        addon_key_maps.append(key_map)
+    properties = bpy.context.scene.ue2rigify
+    templates.set_template_files(properties)
 
 
 def operator_on_object_in_mode(operator, operated_on_object, mode):
     """
-    This a function that wraps operators by getting the current context, doing the operation on an object in a mode,
+    Wraps operators by getting the current context, doing the operation on an object in a mode,
     then restores the context back to its previous state.
 
     :param lambda operator: A blender operator function reference.
@@ -722,62 +668,32 @@ def clear_pose_location():
     bpy.ops.pose.loc_clear()
 
 
-def validate_source_rig_object(properties):
-    """
-    This function checks to see if the selected source rig is an object with armature data.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return bool: True or False depending on whether the selected source rig is an object with armature data.
-    """
-    # check if rigify is enabled
-    rigify = bpy.context.preferences.addons.get('rigify')
-    if rigify:
-        # check if the source rig is the right type
-        source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-        is_armature = False
-
-        if source_rig_object:
-            if source_rig_object.type == 'ARMATURE':
-                is_armature = True
-
-        return is_armature
-    else:
-        return False
-
-
 def restore_viewport_settings():
     """
-    This function restores the previous viewport and object settings.
+    Restores the previous viewport and object settings.
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
     previous_viewport_settings = properties.previous_viewport_settings
     set_viewport_settings(previous_viewport_settings, properties)
-    bpy.context.window_manager.ue2rigify.previous_viewport_settings.clear()
+    properties.previous_viewport_settings.clear()
 
 
-def collapse_collections_in_outliner():
+def toggle_expand_in_outliner(state=2):
     """
-    This function collapses the collections in any outliner region on the current screen.
+    Collapses or expands the collections in any outliner region on the current screen.
+
+    :param int state: 1 will expand all collections, 2 will collapse them.
     """
-    for window in bpy.context.window_manager.windows:
-        screen = window.screen
-        for area in screen.areas:
-            if area.type == 'OUTLINER':
-                for region in area.regions:
-                    if region.type == 'WINDOW':
-                        if hasattr(area, 'spaces'):
-                            for space in area.spaces:
-                                if hasattr(space, 'display_mode'):
-                                    if space.display_mode == 'VIEW_LAYER':
-                                        override = {'window': window, 'screen': screen, 'area': area, 'region': region}
-                                        bpy.ops.outliner.expanded_toggle(override)
-                                        bpy.ops.outliner.expanded_toggle(override)
-                                        break
+    area = next(a for a in bpy.context.screen.areas if a.type == 'OUTLINER')
+    bpy.ops.outliner.show_hierarchy({'area': area}, 'INVOKE_DEFAULT')
+    for i in range(state):
+        bpy.ops.outliner.expanded_toggle({'area': area})
+    area.tag_redraw()
 
 
 def focus_on_selected():
     """
-    This function focuses any 3D view region on the current screen to the selected object.
+    Focuses any 3D view region on the current screen to the selected object.
     """
     for window in bpy.context.window_manager.windows:
         screen = window.screen
@@ -791,18 +707,18 @@ def focus_on_selected():
 
 def show_bone_setting(bone_name, tab):
     """
-    This function shows the user what bone is causing the rigify type error.
+    Shows the user what bone is causing the rigify type error.
 
     :param str bone_name: The name of the bone to show.
     :param str tab: The tab identifier.
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
 
     # set tool mode to edit metarig mode
-    properties.selected_mode = properties.metarig_mode
+    properties.selected_mode = Modes.METARIG.name
 
     # get the metarig
-    metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+    metarig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
 
     if metarig_object:
         # switch to pose mode and deselect everything
@@ -814,10 +730,18 @@ def show_bone_setting(bone_name, tab):
         if bone:
             bone.select = True
             metarig_object.data.bones.active = bone
-
             focus_on_selected()
-
             set_active_properties_panel(tab)
+
+
+def armature_poll(self, scene_object):
+    """
+    Polls to check if the object is of type armature.
+
+    :param object self: A pointer property.
+    :param object scene_object: A object.
+    """
+    return scene_object.type == 'ARMATURE'
 
 
 def report_error(error_header, error_message, confirm_message=None, clean_up_action=None, width=500):
@@ -904,7 +828,7 @@ def report_missing_bone_error(link, socket_direction):
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     :return:
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
 
     # get the bone name and node name from the link
     bone_name = link.get(socket_direction)
@@ -918,15 +842,15 @@ def report_missing_bone_error(link, socket_direction):
     rig_name = ''
     if properties.selected_mode == properties.fk_to_source_mode:
         if socket_direction == 'from_socket':
-            rig_name = properties.control_rig_name
+            rig_name = Rigify.CONTROL_RIG_NAME
         else:
-            rig_name = properties.source_rig_name
+            rig_name = properties.source_rig.name
 
     if properties.selected_mode == properties.source_to_deform_mode:
         if socket_direction == 'from_socket':
-            rig_name = properties.source_rig_name
+            rig_name = properties.source_rig.name
         else:
-            rig_name = properties.control_rig_name
+            rig_name = Rigify.CONTROL_RIG_NAME
 
     # define the error message parameters
     error_header = 'MISSING BONE ERROR:'
@@ -941,20 +865,6 @@ def report_missing_bone_error(link, socket_direction):
     report_error(error_header, error_message, confirm_message, remove_socket, width=700)
 
 
-def source_rig_picker_update(self=None, context=None):
-    """
-    This function is called every time the source rig picker value updates. It updates the available modes
-    in the mode selection and sets the picker object to have a fake user so it won't get deleted when the
-    file is closed.
-
-    :param object self: This is a reference to the class this functions in appended to.
-    :param object context: The context of the object this function is appended to.
-    """
-    scene.switch_modes()
-    picker_object = get_picker_object()
-    picker_object.use_fake_user = True
-
-
 def save_control_mode_context(properties):
     """
     This function saves the current context of control mode to the addon's properties.
@@ -964,7 +874,7 @@ def save_control_mode_context(properties):
     control_mode_context = {}
 
     # get the control rig
-    control_rig = bpy.data.objects.get(properties.control_rig_name)
+    control_rig = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
     if control_rig:
         control_rig_context = {}
 
@@ -986,41 +896,41 @@ def save_control_mode_context(properties):
             control_rig_context[bone.name] = bone_context
 
         # save the control rig context in the control mode context
-        control_mode_context[properties.control_rig_name] = control_rig_context
+        control_mode_context[Rigify.CONTROL_RIG_NAME] = control_rig_context
 
     # save the control mode context in the context
-    properties.context[properties.control_mode] = control_mode_context
+    properties.context[Modes.CONTROL.name] = control_mode_context
 
 
 def save_source_mode_context(properties):
     """
-    This function saves the current context of source mode to the addon's properties.
+    Saves the current context of source mode to the addon's properties.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    source_rig = properties.source_rig
     if source_rig:
-        if not properties.context.get(properties.source_mode):
-            properties.context[properties.source_mode] = {}
-            properties.context[properties.source_mode][source_rig.name] = {}
+        if not properties.context.get(Modes.SOURCE.name):
+            properties.context[Modes.SOURCE.name] = {}
+            properties.context[Modes.SOURCE.name][source_rig.name] = {}
 
         # if the object has actions then save their first frames transform offset values
         actions = get_actions(source_rig)
         if actions:
-            properties.context[properties.source_mode][source_rig.name] = {}
+            properties.context[Modes.SOURCE.name][source_rig.name] = {}
             for action in actions:
                 offset = get_action_transform_offset(action)
-                if properties.context[properties.source_mode][source_rig.name].get('action_offsets'):
-                    properties.context[properties.source_mode][source_rig.name]['action_offsets'][action.name] = offset
+                if properties.context[Modes.SOURCE.name][source_rig.name].get('action_offsets'):
+                    properties.context[Modes.SOURCE.name][source_rig.name]['action_offsets'][action.name] = offset
                 else:
-                    properties.context[properties.source_mode][source_rig.name]['action_offsets'] = {}
+                    properties.context[Modes.SOURCE.name][source_rig.name]['action_offsets'] = {}
 
                 # subtract the transform offsets of the first frame on the action
                 set_action_transform_offsets(action, offset, 'SUBTRACT')
 
         # otherwise save the objects transform values
         else:
-            properties.context[properties.source_mode][source_rig.name]['transforms'] = get_object_transforms(
+            properties.context[Modes.SOURCE.name][source_rig.name]['transforms'] = get_object_transforms(
                 source_rig
             )
             # set the object transforms to their applied transforms
@@ -1029,7 +939,7 @@ def save_source_mode_context(properties):
 
 def save_context(properties):
     """
-    This function saves the current context of a particular mode to the addon's properties.
+    Saves the current context of a particular mode to the addon's properties.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
@@ -1040,32 +950,11 @@ def save_context(properties):
     bpy.context.scene.frame_set(frame=0)
 
     # -------- mode specific properties --------
-    if properties.previous_mode == properties.source_mode and properties.selected_mode == properties.control_mode:
+    if properties.previous_mode == Modes.SOURCE.name and properties.selected_mode == Modes.CONTROL.name:
         save_source_mode_context(properties)
 
-    if properties.previous_mode == properties.control_mode:
+    if properties.previous_mode == Modes.CONTROL.name:
         save_control_mode_context(properties)
-
-
-@bpy.app.handlers.persistent
-def save_properties(*args):
-    """
-    This function saves the window manger properties to the scene properties.
-
-    :param args: This soaks up the extra arguments for the app handler.
-    """
-    # get both the scene and addon property groups
-    window_manager_properties = bpy.context.window_manager.ue2rigify
-    scene_properties = bpy.context.scene.ue2rigify
-
-    # assign all the addon property values to the scene property values
-    for attribute in dir(window_manager_properties):
-        if not attribute.startswith(('__', 'bl_', 'rna_type', 'group', 'idp_array')):
-            value = getattr(window_manager_properties, attribute)
-            try:
-                scene_properties[attribute] = value
-            except TypeError:
-                scene_properties[attribute] = str(value)
 
 
 def load_source_mode_context(properties):
@@ -1074,27 +963,27 @@ def load_source_mode_context(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    source_rig = properties.source_rig
 
     # restore the source rig object to its previous transform values
-    if source_rig and properties.context.get(properties.source_mode):
-        if properties.context[properties.source_mode].get(source_rig.name):
-            if properties.context[properties.source_mode][source_rig.name].get('action_offsets'):
+    if source_rig and properties.context.get(Modes.SOURCE.name):
+        if properties.context[Modes.SOURCE.name].get(source_rig.name):
+            if properties.context[Modes.SOURCE.name][source_rig.name].get('action_offsets'):
                 # restore the actions to their original values
-                for action_name, offset in properties.context[properties.source_mode][source_rig.name]['action_offsets'].items():
+                for action_name, offset in properties.context[Modes.SOURCE.name][source_rig.name]['action_offsets'].items():
                     # add the offset to all the source rig actions
                     action = bpy.data.actions.get(action_name)
                     if action:
                         set_action_transform_offsets(action, offset, 'ADD')
-                    action = bpy.data.actions.get(f'{properties.source_mode}_{action_name}')
+                    action = bpy.data.actions.get(f'{Modes.SOURCE.name}_{action_name}')
                     if action:
                         set_action_transform_offsets(action, offset, 'ADD')
 
                 # remove the saved offsets from the context
-                bpy.context.window_manager.ue2rigify.context[properties.source_mode][source_rig.name]['action_offsets'] = {}
+                bpy.context.scene.ue2rigify.context[Modes.SOURCE.name][source_rig.name]['action_offsets'] = {}
 
         else:
-            source_rig_context = properties.context[properties.source_mode].get(source_rig.name)
+            source_rig_context = properties.context[Modes.SOURCE.name].get(source_rig.name)
             if source_rig_context:
                 set_object_transforms(source_rig, source_rig_context.get('transforms'))
 
@@ -1106,18 +995,17 @@ def load_control_mode_context(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get control rig object and context
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-    control_mode_context = properties.context.get(properties.control_mode)
+    control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
+    control_mode_context = properties.context.get(Modes.CONTROL.name)
     control_rig_context = None
     if control_mode_context:
         control_rig_context = control_mode_context.get(control_rig_object.name)
 
     # get source rig object and context
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-    source_mode_context = properties.context.get(properties.source_mode)
+    source_mode_context = properties.context.get(Modes.SOURCE.name)
     source_rig_context = None
     if source_mode_context:
-        source_rig_context = properties.context.get(source_rig_object.name)
+        source_rig_context = properties.context.get(properties.source_rig.name)
 
     # move the control rig actions back to counter the offsets to the source rig actions
     if source_rig_context:
@@ -1137,7 +1025,7 @@ def load_control_mode_context(properties):
             if root_bone:
                 # restore the actions to their original values
                 for action_name, offset in properties.context['source_rig']['action_offsets'].items():
-                    action = bpy.data.actions.get(action_name.replace(f'{properties.source_mode}_', ''))
+                    action = bpy.data.actions.get(action_name.replace(f'{Modes.SOURCE.name}_', ''))
                     if action:
                         set_action_transform_offsets(action, offset, 'ADD', root_bone)
 
@@ -1174,68 +1062,11 @@ def load_context(properties):
             bpy.context.scene.frame_set(frame=frame_current)
 
         # -------- mode specific properties --------
-        if properties.selected_mode == properties.source_mode:
+        if properties.selected_mode == Modes.SOURCE.name:
             load_source_mode_context(properties)
 
-        if properties.selected_mode == properties.control_mode:
+        if properties.selected_mode == Modes.CONTROL.name:
             load_control_mode_context(properties)
-
-
-@bpy.app.handlers.persistent
-def pre_file_load(*args):
-    """
-    This function executes before a file load.
-
-    :param args: This soaks up the extra arguments for the app handler.
-    """
-    properties = bpy.context.window_manager.ue2rigify
-
-    # make sure that the node tree is not checking for updates
-    properties.check_node_tree_for_updates = False
-
-    # make sure that the rig is frozen
-    properties.freeze_rig = True
-
-
-@bpy.app.handlers.persistent
-def load_properties(*args):
-    """
-    This function loads the saved scene properties into the window manger properties.
-
-    :param args: This soaks up the extra arguments for the app handler.
-    """
-    # get both the scene and addon property groups
-    window_manager_properties = bpy.context.window_manager.ue2rigify
-    scene_properties = bpy.context.scene.ue2rigify
-
-    # make sure that the node tree is not checking for updates
-    window_manager_properties.check_node_tree_for_updates = False
-
-    # make sure that the rig is frozen
-    window_manager_properties.freeze_rig = True
-
-    # remove the selected rig template from the values to be set and set it first
-    selected_rig_template = scene_properties.pop('selected_rig_template', None)
-    if selected_rig_template:
-        setattr(window_manager_properties, 'selected_rig_template', selected_rig_template)
-    else:
-        setattr(window_manager_properties, 'selected_rig_template', window_manager_properties.default_template)
-
-    # assign all the scene property values to the addon property values
-    for attribute in scene_properties.keys():
-        if hasattr(window_manager_properties, attribute):
-            if attribute not in ['freeze_rig', 'check_node_tree_for_updates']:
-                scene_value = scene_properties.get(attribute)
-                window_manger_value = str(getattr(window_manager_properties, attribute))
-
-                # if the scene and window manger value are not the same
-                if window_manger_value != str(scene_value):
-                    setattr(window_manager_properties, attribute, scene_value)
-
-    # get the updated window manager properties
-    properties = bpy.context.window_manager.ue2rigify
-    if properties.selected_mode in [properties.fk_to_source_mode, properties.source_to_deform_mode]:
-        properties.check_node_tree_for_updates = True
 
 
 def clear_undo_history():
@@ -1254,15 +1085,14 @@ def clear_undo_history():
 
 def match_rotation_modes(properties):
     """
-    This function matches the rotation mode on the source rig object and it corresponding bone.
+    Matches the rotation mode on the source rig object and it corresponding bone.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    control_rig = bpy.data.objects.get(properties.control_rig_name)
-    source_rig = bpy.data.objects.get(properties.source_rig_name)
+    control_rig = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
 
     # get the source to deform links
-    templates.set_template_files(properties, mode_override=properties.source_to_deform_mode)
+    templates.set_template_files(properties, mode_override=Modes.SOURCE_TO_DEFORM.name)
     links_data = templates.get_saved_links_data(properties)
 
     # match the rotation mode to the objects rotation mode
@@ -1270,7 +1100,7 @@ def match_rotation_modes(properties):
         if link_data['from_socket'] == 'object':
             bone = control_rig.pose.bones.get(link_data['to_socket'])
             if bone:
-                bone.rotation_mode = source_rig.rotation_mode
+                bone.rotation_mode = properties.source_rig.rotation_mode
 
 
 def get_formatted_operator_parameter(parameter_name, regex, code_line):

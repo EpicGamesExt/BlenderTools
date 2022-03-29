@@ -6,32 +6,30 @@ import sys
 import bpy
 import importlib
 
-from . import nodes
-from . import utilities
-from . import templates
-from ..ui import view_3d
-from ..ui import node_editor
+from ..constants import Modes, Collections, Rigify, Template
+from . import nodes, utilities, templates
+from ..ui import view_3d, node_editor
 from ..settings.tool_tips import *
 from ..settings.viewport_settings import *
 
 
 def get_modes(self=None, context=None):
     """
-    This function gets the enumeration for mode selection.
+    Gets the enumeration for mode selection.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
     :return list: A list of tuples that define the modes enumeration.
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
 
     # the modes only contain source mode initially
     modes = [
-        (properties.source_mode, 'Source', source_mode_tool_tip, 'USER', 0),
-        (properties.metarig_mode, 'Edit Metarig', metarig_mode_tool_tip, 'CON_ARMATURE', 1),
-        (properties.fk_to_source_mode, 'FK to Source', fk_to_source_mode_tool_tip, 'BACK', 2),
-        (properties.source_to_deform_mode, 'Source to Deform', source_to_deform_mode_tool_tip, 'FORWARD', 3),
-        (properties.control_mode, 'Control', control_mode_tool_tip, 'ARMATURE_DATA', 4)
+        (Modes.SOURCE.name, Modes.SOURCE.value, source_mode_tool_tip, 'USER', 0),
+        (Modes.METARIG.name, Modes.METARIG.value, metarig_mode_tool_tip, 'CON_ARMATURE', 1),
+        (Modes.FK_TO_SOURCE.name, Modes.FK_TO_SOURCE.value, fk_to_source_mode_tool_tip, 'BACK', 2),
+        (Modes.SOURCE_TO_DEFORM.name, Modes.SOURCE_TO_DEFORM.value, source_to_deform_mode_tool_tip, 'FORWARD', 3),
+        (Modes.CONTROL.name, Modes.CONTROL.value, control_mode_tool_tip, 'ARMATURE_DATA', 4)
     ]
 
     # if there is a not a saved metarig file remove the last 3 modes
@@ -43,7 +41,7 @@ def get_modes(self=None, context=None):
 
 def get_keyframes(rig_object, fcurve, socket_name, data_path, keyed_values):
     """
-    This function gets the bones keyed frames and data paths.
+    Gets the bones keyed frames and data paths.
 
     :param object rig_object: A blender object that contains armature data.
     :param object fcurve: A fcurve.
@@ -81,7 +79,7 @@ def get_keyframes(rig_object, fcurve, socket_name, data_path, keyed_values):
 
 def get_keyframes_by_socket_links(rig_object, fcurve, socket_name, data_path, socket_direction, links_data, keyed_values):
     """
-    This function gets the keyed bone data from the corresponding bone that is linked by nodes.
+    Gets the keyed bone data from the corresponding bone that is linked by nodes.
 
     :param object rig_object: A blender object that contains armature data.
     :param object fcurve: A curve.
@@ -181,10 +179,10 @@ def get_to_rig_action(from_rig_action, from_rig_object, to_rig_object, bake_to_s
     """
     # when baking back to the source rig
     if bake_to_source:
-        to_rig_action_name = f'{properties.source_mode}_{from_rig_action.name}'
+        to_rig_action_name = f'{Modes.SOURCE.name}_{from_rig_action.name}'
     else:
-        to_rig_action_name = from_rig_action.name.replace(f'{properties.source_mode}_', '')
-        from_rig_action.name = f'{properties.source_mode}_{to_rig_action_name}'
+        to_rig_action_name = from_rig_action.name.replace(f'{Modes.SOURCE.name}_', '')
+        from_rig_action.name = f'{Modes.SOURCE.name}_{to_rig_action_name}'
 
     # get the to rig action
     to_rig_action = bpy.data.actions.get(to_rig_action_name)
@@ -255,34 +253,43 @@ def get_from_rig_animation_data(from_rig_object, to_rig_object, links_data, prop
     return from_rig_animation_data
 
 
-def set_meta_rig(self=None, value=None):
+def set_meta_rig(self=None, context=None):
     """
-    This function gets the enumeration for mode selection.
+    Sets the enumeration for mode selection.
 
     :param object self: This is a reference to the property this functions in appended to.
-    :param object value: The value of the property this update function is assigned to.
+    :param object context: The context of the object this function is appended to.
     """
-    properties = bpy.context.window_manager.ue2rigify
-    create_starter_metarig_template(properties)
+    # create from the default rigify operators
+    if self.selected_starter_metarig_template.startswith('bpy.ops'):
+        create_starter_metarig_template(self)
+    # or create from an existing rig
+    else:
+        remove_metarig()
+        create_meta_rig(self, file_path=os.path.join(
+            Template.RIG_TEMPLATES_PATH,
+            self.selected_starter_metarig_template,
+            f'{Rigify.META_RIG_NAME}.py'
+        ))
 
 
 def set_fk_ik_switch_values(rig_object, value):
     """
-    This function sets the rigify IK values to FK, and set the IK solver properties.
+    Sets the rigify IK values to FK, and set the IK solver properties.
 
     :param object rig_object: A blender object that contains armature data.
     :param float value: The floating point value of the FK to IK slider.
     """
     for bone in rig_object.pose.bones:
-        if isinstance(bone.get("IK_FK"), float):
+        if isinstance(bone.get('IK_FK'), float):
             bone['IK_FK'] = value
 
 
 def set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, properties):
     """
-    This function sets the to rig's action in a nla strip to the from rig's action.
+    Sets the to rig's action in a nla strip to the from rig's action.
 
-    :param object from_rig_object: The rig that is driving another rig by using constraints.
+    :param object to_rig_action: The action on the rig that is driving another rig by using constraints.
     :param object to_rig_object: The rig that is being driven by constraints.
     :param dict from_rig_action_data: A dictionary of animation data from the from rig.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -308,13 +315,13 @@ def set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, 
 
     # create the nla tracks and strips for the new actions
     to_rig_nla_track = to_rig_object.animation_data.nla_tracks.new()
-    to_rig_nla_track.name = to_rig_nla_track_name.replace(f'{properties.source_mode}_', '')
+    to_rig_nla_track.name = to_rig_nla_track_name.replace(f'{Modes.SOURCE.name}_', '')
     to_rig_nla_track.mute = from_rig_action_data['mute']
     if from_rig_action_data['is_solo']:
         to_rig_nla_track.is_solo = from_rig_action_data['is_solo']
 
     # create a new nla strip and set the strip start and end values
-    to_rig_strip_name = to_rig_strip_name.replace(f'{properties.source_mode}_', '')
+    to_rig_strip_name = to_rig_strip_name.replace(f'{Modes.SOURCE.name}_', '')
     to_rig_strip = to_rig_nla_track.strips.new(to_rig_strip_name, 0, to_rig_action)
     to_rig_strip.frame_start = from_rig_action_data['strip_frame_start']
     to_rig_strip.frame_end = from_rig_action_data['strip_frame_end']
@@ -322,7 +329,7 @@ def set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, 
 
 def remove_missing_bone_socket(node_name, socket_name, properties):
     """
-    This function removes a missing bone socket from a node provide the socket and node name.
+    Removes a missing bone socket from a node provide the socket and node name.
 
     :param str node_name: The name of the node to remove the socket from.
     :param str socket_name: The name of the socket to remove.
@@ -341,7 +348,7 @@ def remove_missing_bone_socket(node_name, socket_name, properties):
     templates.save_json_file(edited_links_data, properties.saved_links_data)
 
     # default the mode to source mode
-    mode = properties.source_mode
+    mode = Modes.SOURCE.name
 
     # if there is saved node data get the mode
     if node_data:
@@ -351,37 +358,29 @@ def remove_missing_bone_socket(node_name, socket_name, properties):
     properties.selected_mode = mode
 
 
-def remove_metarig(properties):
+def remove_metarig():
     """
-    This function removes the metarig and its data.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    Removes the metarig and its data.
     """
     # remove the metarig object
-    metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+    metarig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
     if metarig_object:
         bpy.data.objects.remove(metarig_object)
 
-    # remove the metarig armature
-    metarig_armature = bpy.data.armatures.get(properties.meta_rig_name)
-    if metarig_armature:
-        bpy.data.armatures.remove(metarig_armature)
-
-    # remove the metarig armature duplicate
-    metarig_armature_duplicate = bpy.data.armatures.get(f'{properties.meta_rig_name}.001')
-    if metarig_armature_duplicate:
-        bpy.data.armatures.remove(metarig_armature_duplicate)
+    # remove the metarig object duplicates
+    for scene_object in bpy.data.objects:
+        if scene_object.name.startswith(f'{Rigify.META_RIG_NAME}.'):
+            bpy.data.objects.remove(scene_object)
 
 
-def remove_object_constraint(scene_object, properties):
+def remove_object_constraint(scene_object):
     """
-    This function removes a constraint provided a object.
+    Removes a constraint provided a object.
 
     :param object scene_object: A scene object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     for constraint in scene_object.constraints:
-        if constraint.name.startswith(properties.constraints_collection_name):
+        if constraint.name.startswith(Collections.CONSTRAINTS_COLLECTION_NAME):
             if constraint:
                 # remove the parent and child bone constraints
                 if constraint.target:
@@ -394,14 +393,13 @@ def remove_object_constraint(scene_object, properties):
                 scene_object.constraints.remove(constraint)
 
 
-def remove_bone_constraint(bone, properties):
+def remove_bone_constraint(bone):
     """
     This function removes a constraint provided a bone object.
 
     :param object bone: A pose bone object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    constraint = bone.constraints.get(properties.constraints_collection_name)
+    constraint = bone.constraints.get(Collections.CONSTRAINTS_COLLECTION_NAME)
     if constraint:
         # remove the parent and child bone constraints
         if constraint.target:
@@ -416,7 +414,7 @@ def remove_bone_constraint(bone, properties):
 
 def remove_constraints(rig_object, properties, socket_direction='', links_data=None):
     """
-    This function removes all constraints from a rig object.
+    Removes all constraints from a rig object.
 
     :param object rig_object: A blender object that contains armature data.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -433,20 +431,19 @@ def remove_constraints(rig_object, properties, socket_direction='', links_data=N
                     # removes the constraint if it is on a bone
                     bone = rig_object.pose.bones.get(socket_name)
                     if bone:
-                        remove_bone_constraint(bone, properties)
+                        remove_bone_constraint(bone)
 
             # if no links data is provided
             else:
                 # remove all constraints on all bones of the rig object
                 for bone in rig_object.pose.bones:
-                    remove_bone_constraint(bone, properties)
+                    remove_bone_constraint(bone)
 
             # remove object constraints on the source_rig object
-            source_rig = bpy.data.objects.get(properties.source_rig_name)
-            if source_rig:
-                remove_object_constraint(source_rig, properties)
+            if properties.source_rig:
+                remove_object_constraint(properties.source_rig)
 
-    constraints_collection = bpy.data.collections.get(properties.constraints_collection_name)
+    constraints_collection = bpy.data.collections.get(Collections.CONSTRAINTS_COLLECTION_NAME)
     if constraints_collection:
         # remove the objects in the constraints collection
         for empty_object in constraints_collection.objects:
@@ -532,17 +529,17 @@ def remove_rig_object_actions(rig_object, action_name):
 
 def create_constraints_collection(properties):
     """
-    This function creates the scene collection for the constraints and empties.
+    Creates the scene collection for the constraints and empties.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # create a new collection
-    constraints_collection = bpy.data.collections.new(properties.constraints_collection_name)
+    constraints_collection = bpy.data.collections.new(Collections.CONSTRAINTS_COLLECTION_NAME)
 
     # get the extras collection
-    extras_collection = bpy.data.collections.get(properties.extras_collection_name)
+    extras_collection = bpy.data.collections.get(Collections.EXTRAS_COLLECTION_NAME)
     if not extras_collection:
-        extras_collection = bpy.data.collections.new(properties.extras_collection_name)
+        extras_collection = bpy.data.collections.new(Collections.EXTRAS_COLLECTION_NAME)
         bpy.context.scene.collection.children.link(extras_collection)
 
     # link the new collection to the extras collection
@@ -572,7 +569,7 @@ def create_empty(bone_name, empty_prefix, constraints_collection):
 
 def create_empties(rig_object, empty_prefix, constraints_collection, links_data, socket_direction):
     """
-    This function creates empties based on an armatures pose bones.
+    Creates empties based on an armatures pose bones.
 
     :param object rig_object: A blender object that contains armature data.
     :param str empty_prefix: A prefix for the empty name.
@@ -580,6 +577,8 @@ def create_empties(rig_object, empty_prefix, constraints_collection, links_data,
     :param list links_data: A list of dictionaries that contains link attributes.
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     """
+    properties = bpy.context.scene.ue2rigify
+
     if rig_object:
         for link in links_data:
             socket_name = link.get(socket_direction)
@@ -589,12 +588,9 @@ def create_empties(rig_object, empty_prefix, constraints_collection, links_data,
 
             if socket_name == 'object':
                 # get the source rig
-                source_rig_name = bpy.context.window_manager.ue2rigify.source_rig_name
-                source_rig = bpy.data.objects.get(source_rig_name)
-
-                if source_rig:
+                if properties.source_rig:
                     # move the empty to the source rig world matrix
-                    empty.matrix_world = source_rig.matrix_world
+                    empty.matrix_world = properties.source_rig.matrix_world
 
             else:
                 # get edit bone and pose bone
@@ -613,28 +609,27 @@ def create_empties(rig_object, empty_prefix, constraints_collection, links_data,
 
 def create_source_rig_object_constraint(empty_object, socket_direction, properties):
     """
-    This function creates a constraint for the source rig object.
+    Creates a constraint for the source rig object.
 
     :param object empty_object: A object of type empty.
     :param str socket_direction: A socket direction either 'from_socket' or 'to_socket'.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig = bpy.data.objects.get(properties.source_rig_name)
     if empty_object:
         if socket_direction == 'to_socket':
             object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
-            object_constraint.name = properties.constraints_collection_name
-            object_constraint.target = source_rig
+            object_constraint.name = Collections.CONSTRAINTS_COLLECTION_NAME
+            object_constraint.target = properties.source_rig
 
         else:
-            object_constraint = source_rig.constraints.new('COPY_TRANSFORMS')
-            object_constraint.name = properties.constraints_collection_name
+            object_constraint = properties.source_rig.constraints.new('COPY_TRANSFORMS')
+            object_constraint.name = Collections.CONSTRAINTS_COLLECTION_NAME
             object_constraint.target = empty_object
 
 
 def create_object_constraint(rig_object, empty_object, bone_name, properties):
     """
-    This function creates a object constraint to a the provided bone name.
+    Creates a object constraint to a the provided bone name.
 
     :param rig_object: A object of type armature.
     :param str bone_name: The name of the bone to constrain the object to.
@@ -643,14 +638,14 @@ def create_object_constraint(rig_object, empty_object, bone_name, properties):
     """
     if empty_object:
         object_constraint = empty_object.constraints.new('COPY_TRANSFORMS')
-        object_constraint.name = properties.constraints_collection_name
+        object_constraint.name = Collections.CONSTRAINTS_COLLECTION_NAME
         object_constraint.target = rig_object
         object_constraint.subtarget = bone_name
 
 
 def create_bone_constraint(bone, empty_object, properties):
     """
-    This function creates a bone constraint that constrains to the provided bone.
+    Creates a bone constraint that constrains to the provided bone.
 
     :param object bone: A bone object.
     :param object empty_object: A object of type empty.
@@ -658,13 +653,13 @@ def create_bone_constraint(bone, empty_object, properties):
     """
     if bone:
         bone_constraint = bone.constraints.new('COPY_TRANSFORMS')
-        bone_constraint.name = properties.constraints_collection_name
+        bone_constraint.name = Collections.CONSTRAINTS_COLLECTION_NAME
         bone_constraint.target = empty_object
 
 
 def create_constraints(rig_object, links_data, empty_prefix, socket_direction, properties):
     """
-    This function creates the constraints used to bind the bone to the empty objects.
+    Creates the constraints used to bind the bone to the empty objects.
 
     :param object rig_object: A blender object that contains armature data.
     :param list links_data: A list of dictionaries that contains link attributes.
@@ -689,12 +684,12 @@ def create_constraints(rig_object, links_data, empty_prefix, socket_direction, p
 
 def create_starter_metarig_template(properties):
     """
-    This function instantiates the rigify starter meta rig from the selected starter template.
+    Creates the rigify starter meta rig from the selected starter template.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # remove the existing metarig if needed
-    remove_metarig(properties)
+    remove_metarig()
 
     # if meta rig already exists remove it.
     if bpy.context.mode != 'OBJECT':
@@ -705,7 +700,7 @@ def create_starter_metarig_template(properties):
     exec(operator)
 
     # get the meta rig object
-    meta_rig_object = bpy.data.objects.get(properties.meta_rig_name)
+    meta_rig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
 
     # scale the meta rig and apply its scale
     meta_rig_object.scale = meta_rig_object.scale * (1/bpy.context.scene.unit_settings.scale_length)
@@ -721,17 +716,21 @@ def create_starter_metarig_template(properties):
     return meta_rig_object
 
 
-def create_meta_rig(properties):
+def create_meta_rig(properties, file_path=None):
     """
-    This function instantiates the rigify meta rig from the selected template.
+    Instantiates the rigify meta rig from the selected template.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str file_path: The file path to the metarig file.
     """
+    if not file_path:
+        file_path = properties.saved_metarig_data
+
     # create the metarig armature
-    metarig_armature = bpy.data.armatures.new(name=properties.meta_rig_name)
+    metarig_armature = bpy.data.armatures.new(name=Rigify.META_RIG_NAME)
 
     # create the metarig object
-    metarig_object = bpy.data.objects.new(name=properties.meta_rig_name, object_data=metarig_armature)
+    metarig_object = bpy.data.objects.new(name=Rigify.META_RIG_NAME, object_data=metarig_armature)
 
     bpy.context.view_layer.active_layer_collection.collection.objects.link(metarig_object)
 
@@ -740,14 +739,18 @@ def create_meta_rig(properties):
     bpy.context.view_layer.objects.active = metarig_object
 
     # get the path to the saved metarig file
-    rig_template_path = os.path.dirname(properties.saved_metarig_data)
+    rig_template_path = os.path.dirname(file_path)
 
-    # switch the path to the location of the metarig module
-    sys.path[0] = rig_template_path
+    # insert the path to the location of the metarig module
+    if rig_template_path not in sys.path:
+        sys.path.insert(0, rig_template_path)
 
     # load the module
-    metarig = importlib.import_module(properties.meta_rig_name)
+    metarig = importlib.import_module(Rigify.META_RIG_NAME)
     importlib.reload(metarig)
+
+    # remove to prevent root module naming conflicts
+    sys.path.remove(rig_template_path)
 
     # call the create function to add the saved metarig
     metarig.create(metarig_object)
@@ -759,24 +762,18 @@ def create_meta_rig(properties):
         'OBJECT'
     )
 
-    if bpy.app.version[0] <= 2 and bpy.app.version[1] < 92:
-        # creates all the saved constraints on the metarig
-        templates.set_constraints_data(metarig_object, properties)
-
     return metarig_object
 
 
 def create_control_rig(properties):
     """
-    This function trys to create the rigify control rig. If rigify fails, it will retry 5 times.
+    Creates the rigify control rig.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-
     # if the source rig is the mannequin, then fix it
-    if properties.selected_rig_template == properties.default_template:
-        remove_location_key_frames(source_rig_object, ['pelvis'])
+    if properties.selected_rig_template in [Template.DEFAULT_MALE_TEMPLATE, Template.DEFAULT_FEMALE_TEMPLATE]:
+        remove_location_key_frames(properties.source_rig, ['pelvis'])
 
     # create the meta rig
     create_meta_rig(properties)
@@ -786,72 +783,58 @@ def create_control_rig(properties):
         bpy.ops.pose.rigify_generate()
 
     except Exception as error:
-        # if rigify throws an error switch the mode back to source mode
-        properties.selected_mode = properties.source_mode
-
+        properties.selected_mode = Modes.SOURCE.name
         utilities.report_rigify_error(str(error))
 
     finally:
         # remove the metarig
-        remove_metarig(properties)
+        remove_metarig()
 
         # get the control rig
-        control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+        control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
 
         return control_rig_object
 
 
 def move_scene_object_to_collection(scene_object, collection):
     """
-    This function moves a scene object to the provided collection.
+    Moves a scene object to the provided collection.
 
     :param object scene_object: A blender object.
     :param object collection: A blender collection.
     """
-    scene_collection = bpy.context.scene.collection
-
     if scene_object and collection:
-        # remove the object from the scene collection
-        if scene_collection.objects.get(scene_object.name):
-            scene_collection.objects.unlink(scene_object)
-
         # remove the object from all collections
-        for child_collection in bpy.data.collections:
-            if child_collection.objects.get(scene_object.name):
-                child_collection.objects.unlink(scene_object)
+        for scene_collection in bpy.data.collections.values() + [bpy.context.scene.collection]:
+            if scene_object in scene_collection.objects.values():
+                scene_collection.objects.unlink(scene_object)
 
         # link the object to the given collection
-        if not collection.objects.get(scene_object.name):
+        if scene_object not in collection.objects.values():
             collection.objects.link(scene_object)
 
 
 def move_collection_to_collection(collection, to_collection):
     """
-    This function moves a scene object to the provided collection.
+    Moves a scene object to the provided collection.
 
-    :param object collection: A blender collection.
-    :param object to_collection: A blender collection to move the provided collection to.
+    :param object collection: A collection.
+    :param object to_collection: A collection to move the provided collection to.
     """
-    scene_collection = bpy.context.scene.collection
-
     if collection and to_collection:
-        # remove the collection from the scene collection
-        if scene_collection.children.get(collection.name):
-            scene_collection.children.unlink(collection)
-
         # remove the collection from all collections
-        for child_collection in bpy.data.collections:
-            if child_collection.children.get(collection.name):
-                child_collection.children.unlink(collection)
+        for scene_collection in bpy.data.collections.values() + [bpy.context.scene.collection]:
+            if collection in scene_collection.children.values():
+                scene_collection.children.unlink(collection)
 
         # link the collection to the given collection
-        if not to_collection.children.get(collection.name):
+        if collection not in to_collection.children.values():
             to_collection.children.link(collection)
 
 
 def has_iks_on(rig_object):
     """
-    This function check to see if any IK switches are on.
+    Check to see if any IK switches are on.
 
     :param object rig_object: A object of type armature.
     """
@@ -864,7 +847,7 @@ def has_iks_on(rig_object):
 
 def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
     """
-    This function selected all the bones that need to keyed in the action bake.
+    Selects all the bones that need to keyed in the action bake.
 
     :param object to_rig_object: The rig that is being driven by constraints.
     :param dict from_rig_action_data: A dictionary of animation data from the from rig.
@@ -889,38 +872,26 @@ def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
             # select the source rig if there is a socket linked to it and its link has keyframes
             if link['to_socket'] == 'object':
                 if bpy.context.mode == 'OBJECT':
-                    properties = bpy.context.window_manager.ue2rigify
-                    source_rig = bpy.data.objects.get(properties.source_rig_name)
-                    source_rig.select_set(True)
+                    properties = bpy.context.scene.ue2rigify
+                    properties.source_rig.select_set(True)
 
 
-def organize_rig_objects(properties, organize_control_rig=True):
+def organize_rig_objects(organize_control_rig=True):
     """
-    This function moves the collections and objects that are created during the rig generating process to the extras
+    Moves the collections and objects that are created during the rig generating process to the extras
     collection and collapses all the collections in the outliner.
 
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool organize_control_rig: Whether to organize the control rig and its widgets or not.
     """
-    # get the rig collection or create it if it doesn't exist
-    rig_collection = bpy.data.collections.get(properties.rig_collection_name)
-    if not rig_collection:
-        rig_collection = bpy.data.collections.new(properties.rig_collection_name)
-        bpy.context.scene.collection.children.link(rig_collection)
-
     # get the extras collection or create it if it doesn't exist
-    extras_collection = bpy.data.collections.get(properties.extras_collection_name)
+    extras_collection = bpy.data.collections.get(Collections.EXTRAS_COLLECTION_NAME)
     if not extras_collection:
-        extras_collection = bpy.data.collections.new(properties.extras_collection_name)
+        extras_collection = bpy.data.collections.new(Collections.EXTRAS_COLLECTION_NAME)
         bpy.context.scene.collection.children.link(extras_collection)
 
     # get the widgets and constraint collections
-    widgets_collection = bpy.data.collections.get(properties.widgets_collection_name)
-    constraints_collection = bpy.data.collections.get(properties.constraints_collection_name)
-
-    # get the control rig and source rig
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    widgets_collection = bpy.data.collections.get(Rigify.WIDGETS_COLLECTION_NAME)
+    constraints_collection = bpy.data.collections.get(Collections.CONSTRAINTS_COLLECTION_NAME)
 
     # move the constraints collection to the extras collection
     if constraints_collection:
@@ -928,18 +899,16 @@ def organize_rig_objects(properties, organize_control_rig=True):
         constraints_collection.hide_viewport = True
 
     # collapse the collections in the outliner
-    utilities.collapse_collections_in_outliner()
+    utilities.toggle_expand_in_outliner()
 
     if organize_control_rig:
-        # move the source rig to the rig collection
-        move_scene_object_to_collection(source_rig_object, rig_collection)
         # move the control rig to the extras collection
-        move_scene_object_to_collection(control_rig_object, extras_collection)
+        control_rig = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
+        move_scene_object_to_collection(control_rig, extras_collection)
 
         # move the constraints collection to the extras collection
         if widgets_collection:
             move_collection_to_collection(widgets_collection, extras_collection)
-            widgets_collection.hide_viewport = True
 
 
 def parent_empties(parent_prefix, child_prefix, constraints_collection, links_data):
@@ -986,7 +955,7 @@ def constrain_bones(links_data, from_rig_object, to_rig_object, properties):
     child_name = 'child'
 
     if links_data:
-        if properties.selected_mode != properties.control_mode:
+        if properties.selected_mode != Modes.CONTROL.name:
             utilities.save_source_mode_context(properties)
 
         # set the current frame to zero
@@ -1009,37 +978,41 @@ def constrain_bones(links_data, from_rig_object, to_rig_object, properties):
 
         bpy.context.scene.frame_set(frame=frame_current)
 
-        if properties.selected_mode != properties.control_mode:
+        if properties.selected_mode != Modes.CONTROL.name:
             utilities.load_source_mode_context(properties)
 
 
 def constrain_fk_to_source(control_rig_object, source_rig_object, properties):
     """
-    This function constrains the control rig's FK bones to the source bones.
+    Constrains the control rig's FK bones to the source bones.
 
     :param object control_rig_object: The control rig object.
     :param object source_rig_object: The source rig object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # set the template paths to fk to source mode
-    templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
+    templates.set_template_files(properties, mode_override=Modes.FK_TO_SOURCE.name)
 
     # constrain the control rig FKs to the source rig
     fk_to_source_link_data = templates.get_saved_links_data(properties)
     constrain_bones(fk_to_source_link_data, control_rig_object, source_rig_object, properties)
 
-    organize_rig_objects(properties, organize_control_rig=False)
+    organize_rig_objects()
 
 
 def constrain_source_to_deform(source_rig_object, control_rig_object, properties):
     """
-    This function constrains the source bones to the control rig's deform bones.
+    Constrains the source bones to the control rig's deform bones.
 
     :param object source_rig_object: The source rig object.
     :param object control_rig_object: The control rig object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    if properties.selected_mode == properties.source_to_deform_mode:
+    print('constraining')
+    print(source_rig_object.name)
+    print(control_rig_object.name)
+
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
         # remove the control rig constraints
         links_data = templates.get_saved_links_data(properties)
 
@@ -1050,59 +1023,58 @@ def constrain_source_to_deform(source_rig_object, control_rig_object, properties
     source_to_deform_links = templates.get_saved_links_data(properties)
     constrain_bones(source_to_deform_links, source_rig_object, control_rig_object, properties)
 
-    organize_rig_objects(properties)
+    organize_rig_objects()
 
 
 def update_rig_constraints(self=None, value=None):
     """
-    The function get called every time a node link or node gets added the the bone remapping node tree.
+    Called every time a node link or node gets added the the bone remapping node tree.
 
     :param object self: This is a reference to the property this functions in appended to.
     :param object value: The value of the property this update function is assigned to.
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
 
     # get the current links and node data
-    links_data = nodes.get_links_data(properties)
-    node_data = nodes.get_node_data(properties)
+    links_data = nodes.get_links_data()
+    node_data = nodes.get_node_data()
 
     # save the node data and links
     templates.save_json_file(node_data, properties.saved_node_data)
     templates.save_json_file(links_data, properties.saved_links_data)
 
     # get the rig objects
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-    control_rig_object = bpy.data.objects.get(properties.control_rig_name)
+    source_rig = properties.source_rig
+    control_rig = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
 
-    if properties.selected_mode == properties.fk_to_source_mode:
+    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
         # remove the control rig constraints that bind the FKs to the source bones
-        remove_constraints(control_rig_object, properties, 'from_socket', links_data)
+        remove_constraints(control_rig, properties, 'from_socket', links_data)
 
         # constrain the control rig fk bones to the source bones on the control rig
-        constrain_bones(links_data, control_rig_object, source_rig_object, properties)
+        constrain_bones(links_data, control_rig, source_rig, properties)
 
-    if properties.selected_mode == properties.source_to_deform_mode:
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
         # remove the source rig constraints that bind the source bones to the control rig deform bones
-        remove_constraints(source_rig_object, properties, 'from_socket', links_data)
+        remove_constraints(source_rig, properties, 'from_socket', links_data)
 
         # constrain the source rig to the deform bones on the control rig
-        constrain_bones(links_data, source_rig_object, control_rig_object, properties)
+        constrain_bones(links_data, source_rig, control_rig, properties)
 
-    organize_rig_objects(properties, organize_control_rig=False)
+    organize_rig_objects(organize_control_rig=False)
 
     # make sure you stay in pose mode
     if bpy.context.mode != 'POSE':
-        bpy.context.view_layer.objects.active = control_rig_object
+        bpy.context.view_layer.objects.active = control_rig
         bpy.ops.object.mode_set(mode='POSE')
 
 
-def sync_nla_track_data(control_rig_object, source_rig_object, properties):
+def sync_nla_track_data(control_rig_object, source_rig_object):
     """
     This function syncs the nla track data between the control and source rig to ensure they match.
 
     :param object source_rig_object: The source rig object.
     :param object control_rig_object: The control rig object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if control_rig_object and source_rig_object:
         # get the nla tracks on the source rig
@@ -1126,7 +1098,7 @@ def sync_nla_track_data(control_rig_object, source_rig_object, properties):
             for control_strip in control_nla_track.strips:
                 if control_strip.action:
                     # get the source action
-                    source_action_name = f'{properties.source_mode}_{control_strip.action.name}'
+                    source_action_name = f'{Modes.SOURCE.name}_{control_strip.action.name}'
                     source_action = bpy.data.actions.get(source_action_name)
 
                     # if there is not a matching source action, create one
@@ -1147,31 +1119,30 @@ def sync_nla_track_data(control_rig_object, source_rig_object, properties):
                     source_strip.select = False
 
 
-def sync_actions(control_rig_object, source_rig_object, properties):
+def sync_actions(control_rig_object, source_rig_object):
     """
-    This function syncs the actions between the control and source rig to ensure they match.
+    Syncs the actions between the control and source rig to ensure they match.
 
     :param object source_rig_object: The source rig object.
     :param object control_rig_object: The control rig object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    send2ue_module = bpy.context.window_manager.send2ue.module_name
-    auto_stash_active_action = bpy.context.preferences.addons[send2ue_module].preferences.auto_stash_active_action
+    auto_stash_active_action = bpy.context.scene.send2ue.auto_stash_active_action
 
     # automatically stash the active animation if that setting is on in send2ue
     if auto_stash_active_action:
         utilities.stash_animation_data(control_rig_object)
 
     # sync nla track data from the control rig to the source rig
-    sync_nla_track_data(control_rig_object, source_rig_object, properties)
+    sync_nla_track_data(control_rig_object, source_rig_object)
 
 
 def bake_pose_animation(to_rig_object, from_rig_action_data, links_data, only_selected):
     """
-    This function bakes the visual pose bone transform data to the rig driven by constraints.
+    Bakes the visual pose bone transform data to the rig driven by constraints.
 
     :param object to_rig_object: The rig that is being driven by constraints.
     :param dict from_rig_action_data: A dictionary of animation data from the from rig.
+    :param bool only_selected: A whether or not to only bake the selected bones.
     :param list links_data: A list of dictionaries that contains link attributes.
     """
     # select the bones on the to rig which have related keyed bones on the from rig
@@ -1179,8 +1150,8 @@ def bake_pose_animation(to_rig_object, from_rig_action_data, links_data, only_se
 
     # bake the visual transforms of the selected bones to the current action
     bpy.ops.nla.bake(
-        frame_start=from_rig_action_data['action_frame_start'],
-        frame_end=from_rig_action_data['action_frame_end'],
+        frame_start=int(from_rig_action_data['action_frame_start']),
+        frame_end=int(from_rig_action_data['action_frame_end']),
         step=1,
         only_selected=only_selected,
         visual_keying=True,
@@ -1208,8 +1179,8 @@ def bake_object_animation(to_rig_object, from_rig_action_data, links_data):
     select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data)
 
     bpy.ops.nla.bake(
-        frame_start=from_rig_action_data['action_frame_start'],
-        frame_end=from_rig_action_data['action_frame_end'],
+        frame_start=int(from_rig_action_data['action_frame_start']),
+        frame_end=int(from_rig_action_data['action_frame_end']),
         step=1,
         only_selected=True,
         visual_keying=True,
@@ -1235,7 +1206,7 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
     :param bool bake_to_source: This flag states whether or not the action is being baked to the source rig.
     """
     # get the node links data in fk to source mode
-    templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
+    templates.set_template_files(properties, mode_override=Modes.FK_TO_SOURCE.name)
     links_data = templates.get_saved_links_data(properties, reverse=not bake_to_source)
 
     if links_data:
@@ -1280,7 +1251,7 @@ def bake_from_rig_to_rig(from_rig_object, to_rig_object, properties, bake_to_sou
                     bake_object_animation(to_rig_object, from_rig_action_data, links_data)
 
                     bpy.data.actions.remove(from_rig_action)
-                    to_rig_action.name = to_rig_action.name.replace(f'{properties.source_mode}_', '')
+                    to_rig_action.name = to_rig_action.name.replace(f'{Modes.SOURCE.name}_', '')
 
                 set_action_to_nla_strip(to_rig_action, to_rig_object, from_rig_action_data, properties)
 
@@ -1294,7 +1265,7 @@ def save_meta_rig(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+    metarig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
 
     if metarig_object:
         if properties.selected_rig_template != 'create_new':
@@ -1322,14 +1293,14 @@ def save_meta_rig(properties):
                     properties.selected_rig_template = re.sub(r'\W+', '_', properties.new_template_name).lower()
                 # otherwise set the active template to the default
                 else:
-                    properties.selected_rig_template = properties.default_template
+                    properties.selected_rig_template = Template.DEFAULT_MALE_TEMPLATE
             # otherwise just save the active template
             else:
                 templates.save_text_file(metarig_data, properties.saved_metarig_data)
 
         # save the constraints data if there is any
         if bpy.app.version[0] <= 2 and bpy.app.version[1] < 92:
-            metarig_object = bpy.data.objects.get(properties.meta_rig_name)
+            metarig_object = bpy.data.objects.get(Rigify.META_RIG_NAME)
             constraints_data = templates.get_constraints_data(metarig_object)
             if constraints_data:
                 templates.save_constraints(constraints_data, properties)
@@ -1337,7 +1308,7 @@ def save_meta_rig(properties):
 
 def save_rig_nodes(properties):
     """
-    This function saves the rig nodes to the current template.
+    Saves the rig nodes to the current template.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
@@ -1345,18 +1316,18 @@ def save_rig_nodes(properties):
     properties.check_node_tree_for_updates = False
 
     # save the node tree data
-    node_data = nodes.get_node_data(properties)
+    node_data = nodes.get_node_data()
 
-    utilities.remove_pie_menu_hot_keys()
+    nodes.remove_pie_menu_hot_keys()
 
     if node_data:
         templates.save_json_file(node_data, properties.saved_node_data)
 
         # remove the added nodes and their categories
         nodes.remove_added_node_class(nodes.node_classes)
-        nodes.remove_node_categories(properties)
+        nodes.remove_node_categories()
         nodes.node_classes.clear()
-        bpy.context.window_manager.ue2rigify.categorized_nodes.clear()
+        properties.categorized_nodes.clear()
 
         # remove the node editor interface
         node_editor.unregister()
@@ -1364,12 +1335,10 @@ def save_rig_nodes(properties):
 
 def edit_meta_rig_template(properties):
     """
-    This function switches the addons state to edit metarig mode.
+    Switches the addons state to edit metarig mode.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-
     # if not creating a new template, initiate the
     if properties.selected_rig_template != 'create_new':
         meta_rig_object = create_meta_rig(properties)
@@ -1378,7 +1347,7 @@ def edit_meta_rig_template(properties):
 
     # set the viewport settings
     utilities.set_viewport_settings({
-        source_rig_object.name: metarig_mode_settings['source_rig'],
+        properties.source_rig.name: metarig_mode_settings['source_rig'],
         meta_rig_object.name: metarig_mode_settings['metarig']},
         properties
     )
@@ -1386,17 +1355,17 @@ def edit_meta_rig_template(properties):
 
 def edit_fk_to_source_nodes(properties):
     """
-    This function switches the addons state to edit fk to source mode.
+    Switches the addons state to edit fk to source mode.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the source and control rig objects
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
-    control_rig_object = create_control_rig(properties)
+    source_rig = properties.source_rig
+    control_rig = create_control_rig(properties)
 
-    if control_rig_object and source_rig_object:
+    if control_rig and source_rig:
         # constrain the fk bones to the source bones
-        constrain_fk_to_source(control_rig_object, source_rig_object, properties)
+        constrain_fk_to_source(control_rig, source_rig, properties)
 
         # populate the node tree and create the nodes links
         links_data = templates.get_saved_links_data(properties)
@@ -1406,27 +1375,27 @@ def edit_fk_to_source_nodes(properties):
 
         # set the viewport settings
         utilities.set_viewport_settings({
-            control_rig_object.name: fk_to_source_mode_settings['control_rig'],
-            source_rig_object.name: fk_to_source_mode_settings['source_rig']},
+            control_rig.name: fk_to_source_mode_settings['control_rig'],
+            source_rig.name: fk_to_source_mode_settings['source_rig']},
             properties
         )
 
-        utilities.create_pie_menu_hot_key(view_3d.VIEW3D_PIE_MT_CreateNodes, 'ONE', 'Pose')
+        nodes.create_pie_menu_hot_key(view_3d.VIEW3D_PIE_MT_CreateNodes, 'ONE', 'Pose')
 
 
 def edit_source_to_deform_nodes(properties):
     """
-    This function switches the addons state to edit fk to source mode.
+    Switches the addons state to edit fk to source mode.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the source and control rig objects
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    source_rig = properties.source_rig
     control_rig_object = create_control_rig(properties)
 
-    if control_rig_object and source_rig_object:
+    if control_rig_object and source_rig:
         # constrain the source bones to the deform bones
-        constrain_source_to_deform(source_rig_object, control_rig_object, properties)
+        constrain_source_to_deform(source_rig, control_rig_object, properties)
 
         # populate the node tree and create the nodes links
         links_data = templates.get_saved_links_data(properties)
@@ -1435,32 +1404,28 @@ def edit_source_to_deform_nodes(properties):
 
         # set the viewport settings
         utilities.set_viewport_settings({
-            source_rig_object.name: source_to_deform_mode_settings['source_rig'],
+            source_rig.name: source_to_deform_mode_settings['source_rig'],
             control_rig_object.name: source_to_deform_mode_settings['control_rig']},
             properties
         )
 
-        utilities.create_pie_menu_hot_key(view_3d.VIEW3D_PIE_MT_CreateNodes, 'ONE', 'Pose')
+        nodes.create_pie_menu_hot_key(view_3d.VIEW3D_PIE_MT_CreateNodes, 'ONE', 'Pose')
 
 
 def revert_to_source_rig(properties):
     """
-    This function removes any previously generated objects and constraints.
+    Removes any previously generated objects and constraints.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the widgets and constraints collection
-    widget_collection = bpy.data.collections.get(properties.widgets_collection_name)
-    constraints_collection = bpy.data.collections.get(properties.constraints_collection_name)
-
-    # get the control rig and source rig
-    control_rig_object = bpy.data.armatures.get(properties.control_rig_name)
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    widget_collection = bpy.data.collections.get(Rigify.WIDGETS_COLLECTION_NAME)
+    constraints_collection = bpy.data.collections.get(Collections.CONSTRAINTS_COLLECTION_NAME)
 
     # remove the widgets collection and its objects
     if widget_collection:
         for widget_object in widget_collection.objects:
-            bpy.data.meshes.remove(widget_object.data)
+            bpy.data.objects.remove(widget_object)
         bpy.data.collections.remove(widget_collection)
 
     # remove the constraints collection and its objects
@@ -1469,68 +1434,64 @@ def revert_to_source_rig(properties):
             bpy.data.objects.remove(constraint_object)
         bpy.data.collections.remove(constraints_collection)
 
-    # remove the control rig it if it exists
+    # remove the control rig if it exists
+    control_rig_object = bpy.data.objects.get(Rigify.CONTROL_RIG_NAME)
     if control_rig_object:
-        bpy.data.armatures.remove(control_rig_object)
-
-    # set the picker to the source rig
-    if source_rig_object:
-        picker_object = utilities.get_picker_object()
-        picker_object.constraints[0].target = source_rig_object
+        bpy.data.objects.remove(control_rig_object)
 
     # remove the constraints from the bones
-    templates.set_template_files(properties, mode_override=properties.fk_to_source_mode)
+    templates.set_template_files(properties, mode_override=Modes.FK_TO_SOURCE.name)
     links_data = templates.get_saved_links_data(properties)
-    remove_constraints(source_rig_object, properties, 'to_socket', links_data)
+    remove_constraints(properties.source_rig, properties, 'to_socket', links_data)
 
     # remove the metarig
-    remove_metarig(properties)
+    remove_metarig()
 
     # remove the transform change to the action if the previous mode was control mode
-    if properties.previous_mode == properties.control_mode:
+    if properties.previous_mode == Modes.CONTROL.name:
         utilities.load_source_mode_context(properties)
 
 
 def convert_to_control_rig(properties):
     """
-    This function creates the control rig from a template and constrains the source rig to it and bakes over
+    Creates the control rig from a template and constrains the source rig to it and bakes over
     any animations.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
 
-    source_rig_object = bpy.data.objects.get(properties.source_rig_name)
+    source_rig = properties.source_rig
     control_rig_object = create_control_rig(properties)
 
-    source_object_transforms = utilities.get_object_transforms(source_rig_object)
+    source_object_transforms = utilities.get_object_transforms(source_rig)
     utilities.set_object_transforms(control_rig_object, source_object_transforms)
 
-    if control_rig_object and source_rig_object:
+    if control_rig_object and source_rig:
         # change all the control rigs IKs to FKs
         set_fk_ik_switch_values(control_rig_object, 1.0)
         utilities.match_rotation_modes(properties)
 
-        if source_rig_object.animation_data:
+        if source_rig.animation_data:
             # constrain the fk bones to the source bones
-            constrain_fk_to_source(control_rig_object, source_rig_object, properties)
+            constrain_fk_to_source(control_rig_object, source_rig, properties)
 
             # bake the animation data from the source rig to the control rig
-            bake_from_rig_to_rig(source_rig_object, control_rig_object, properties)
+            bake_from_rig_to_rig(source_rig, control_rig_object, properties)
 
             links_data = templates.get_saved_links_data(properties)
             remove_constraints(control_rig_object, properties, 'from_socket', links_data)
 
         # set the template paths to source to deform mode
-        templates.set_template_files(properties, mode_override=properties.source_to_deform_mode)
+        templates.set_template_files(properties, mode_override=Modes.SOURCE_TO_DEFORM.name)
 
         # constrain the source bones to the deform bones
-        constrain_source_to_deform(source_rig_object, control_rig_object, properties)
+        constrain_source_to_deform(source_rig, control_rig_object, properties)
 
-        organize_rig_objects(properties)
+        organize_rig_objects()
 
         # set the viewport settings
         utilities.set_viewport_settings({
-            source_rig_object.name: control_mode_settings['source_rig'],
+            source_rig.name: control_mode_settings['source_rig'],
             control_rig_object.name: control_mode_settings['control_rig']},
             properties
         )
@@ -1538,51 +1499,48 @@ def convert_to_control_rig(properties):
 
 def switch_modes(self=None, context=None):
     """
-    This function gets the called every time mode enumeration dropdown is updated.
+    Called every time the mode enumeration dropdown is updated.
 
     :param object self: This is a reference to the class this functions in appended to.
     :param object context: The context of the object this function is appended to.
     """
-    properties = bpy.context.window_manager.ue2rigify
+    properties = bpy.context.scene.ue2rigify
 
     # save the current context
     utilities.save_context(properties)
 
-    # if the rig is not frozen run the following operations
-    if not properties.freeze_rig:
+    # save the metarig
+    save_meta_rig(properties)
 
-        # save the metarig
-        save_meta_rig(properties)
+    # save and remove the nodes
+    save_rig_nodes(properties)
 
-        # save and remove the nodes
-        save_rig_nodes(properties)
+    # revert to the source rig
+    revert_to_source_rig(properties)
 
-        # revert to the source rig
-        revert_to_source_rig(properties)
+    # restore the source mode viewport settings
+    utilities.restore_viewport_settings()
 
-        # restore the source mode viewport settings
-        utilities.restore_viewport_settings()
+    # set the previous mode to the current mode
+    properties.previous_mode = properties.selected_mode
 
-        # set the previous mode to the current mode
-        properties.previous_mode = properties.selected_mode
+    # set the template files to the previous mode
+    templates.set_template_files(properties)
 
-        # set the template files to the previous mode
-        templates.set_template_files(properties)
+    if properties.selected_mode == Modes.METARIG.name:
+        edit_meta_rig_template(properties)
 
-        if properties.selected_mode == properties.metarig_mode:
-            edit_meta_rig_template(properties)
+    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
+        edit_fk_to_source_nodes(properties)
 
-        if properties.selected_mode == properties.fk_to_source_mode:
-            edit_fk_to_source_nodes(properties)
+    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
+        edit_source_to_deform_nodes(properties)
 
-        if properties.selected_mode == properties.source_to_deform_mode:
-            edit_source_to_deform_nodes(properties)
+    if properties.selected_mode == Modes.CONTROL.name:
+        convert_to_control_rig(properties)
 
-        if properties.selected_mode == properties.control_mode:
-            convert_to_control_rig(properties)
+    # clear the undo history
+    utilities.clear_undo_history()
 
-        # clear the undo history
-        utilities.clear_undo_history()
-
-        # restore the context
-        utilities.load_context(properties)
+    # restore the context
+    utilities.load_context(properties)
