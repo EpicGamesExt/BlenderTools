@@ -65,7 +65,7 @@ A `index.html` should now be available to view in the `tests` folder.
 ## Environment Variables
 The `run_tests.py` script can be customized with environment variables. You probably won't ever need to modify these
 from their defaults, however, since there are so many unit tests, targeting specific files with the `EXCLUSIVE_TEST_FILES` or
-specific cases with `EXCLUSIVE_TEST_CASES` can be beneficial.
+specific cases with `EXCLUSIVE_TESTS` can be beneficial.
 
 
 | Variables | Description | Default |

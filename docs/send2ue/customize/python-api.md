@@ -1,8 +1,7 @@
 # Python API
-Send to Unreal was designed to handle the generation of Unreal asset types and
-sequence tracks. However, it does not handle every possible scenario that your production
-might need. That is why the tool has a programmable python interface that allows the user to set properties
-and to automate processes before and after the Send to Unreal operation.
+Send to Unreal was designed to handle the generation of Unreal asset types. However, it does not handle every possible
+scenario that your production might need. That is why the tool has a programmable python interface that allows the
+user to set properties and to automate processes before and after the Send to Unreal operation.
 
 ## Properties
 All of the properties can be accessed directly on the following scene data object in the blender API.
@@ -23,7 +22,7 @@ the desired property.
 ![1](./images/python/1.png)
 
 ## Operators
-Operators are just callable objects that have been registered in a submodule of the maya API. The listed
+Operators are just callable methods that have been registered in a submodule of the Blender API. The listed
 operators should allow you to do anything that is possible to do from the Send to Unreal menu as well as the
 Settings Dialog.
 
