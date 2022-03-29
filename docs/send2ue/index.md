@@ -15,7 +15,7 @@ features:
 footer: Copyright © Epic Games Inc.
 ---
 ## Overview
-![overview](/send2ue/images/overview.svg)
+![overview]($withBase('/images/overview.svg'))
 
 
 The reason our tool can provide a "one-click" solution for these assets is because it can automatically infer the correct unreal asset type based on just the contents of a single `Export`

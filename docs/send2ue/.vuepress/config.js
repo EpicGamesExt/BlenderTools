@@ -36,7 +36,7 @@ module.exports = {
         nav: [
             {
                 text: 'Home',
-                link: '/',
+                link: process.env.PROD === '1' ? 'https://epicgames.github.io/BlenderTools/' : '/',
             }
         ],
         sidebar: {
