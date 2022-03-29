@@ -1,2 +1,4 @@
-PyGithub
-docker
+dcc-rpc==0.0.2
+container-test-manager==0.0.2
+fake-bpy-module-latest==20220324
+PyGithub==1.55

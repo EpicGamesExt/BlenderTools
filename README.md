@@ -1,22 +1,48 @@
-# Blender Tools
+<p align="center">
+  <img width="300" src="https://github.com/EpicGames/BlenderTools/blob/master/docs/main/images/1.png?raw=true" alt="icon"/>
+</p>
+<h1 align="center">Blender Tools</h1>
+<br></br>
 
-Hi, below you can find information on how to access our tools, and how to use them. These tools are still very new and changing rapidly, so be sure to always download the latest version for new features and bug fixes.
+A repository of blender addons that improve the game development workflow between Blender and Unreal Engine.
 
-### Downloads
-Download the .zip file on the release with the latest addon version number.
-* [Download](https://github.com/EpicGames/BlenderTools/releases)
+## Send to Unreal
 
-### Documentation
-Here you can find the all the documentation for the addons in this repository.
-* [Documentation](https://epicgames.github.io/BlenderTools/)
+![1](./docs/main/images/send2ue/2.png)
 
-### Get Notified on a New Release
-Never miss a new addon release! To do this, select 'Watch' then 'Custom'.
+A one-click solution for sending assets from Blender to Unreal Engine.
 
-![1](https://user-images.githubusercontent.com/67345633/130252170-5e919e6c-b987-407e-9944-5ef281c765a4.png)
+* [Read Docs](https://epicgames.github.io/BlenderTools/send2ue/)
+* [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=Send+to+Unreal&expanded=true)
 
-Then check 'Releases' and click 'Apply'.
 
-![2](https://user-images.githubusercontent.com/67345633/130251961-aacf0416-aa41-4dd5-a481-d6b478b2d690.png)
+## UE to Rigify
+
+![2](./docs/main/images/ue2rigify/2.png)
+
+A node based retargeting system for Blender's
+[Rigify](https://docs.blender.org/manual/en/latest/addons/rigging/rigify/index.html) addon. Quickly retarget and author
+new animation on unreal marketplace assets and more!
+
+* [Read Docs](https://epicgames.github.io/BlenderTools/ue2rigify/)
+* [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
+
+
+## Help Contribute
+Contributions are encouraged! Find out how you can contribute to this repo in one of the following ways:
+
+* [Help Develop](https://epicgames.github.io/BlenderTools/contributing/development.html)
+* [Help Document](https://epicgames.github.io/BlenderTools/contributing/documentation.html)
+* [Help Test](https://epicgames.github.io/BlenderTools/contributing/testing.html)
+
+
+## Get Notified on a New Release
+Never miss a new addon release! Do this:
+1. At the top right of this page select `Watch`
+1. Select `Custom` from the dropdown.
+1. Check `Releases`
+1. Click `Apply`.
 
 You will now get an email notification everytime there is a new version of an addon released.
+
+
