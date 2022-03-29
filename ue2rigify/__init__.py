@@ -2,8 +2,6 @@
 
 import bpy
 import os
-import sys
-import logging
 import importlib
 from . import properties, operators, constants
 from .settings import tool_tips, viewport_settings
@@ -15,7 +13,7 @@ bl_info = {
     "name": "UE to Rigify",
     "author": "Epic Games Inc.",
     "description": "Allows you to drive a given rig and its animations with a Rigify rig.",
-    "blender": (3, 0, 0),
+    "blender": (2, 93, 0),
     "version": (1, 6, 0),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://epicgames.github.io/BlenderTools/ue2rigify/quickstart.html",
