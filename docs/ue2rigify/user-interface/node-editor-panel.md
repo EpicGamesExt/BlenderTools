@@ -5,7 +5,7 @@ layout: default
 ### Node Editor Panel
 This section defines all the properties and operators depicted below in the ‘Node Editor’ panel that is available in ‘FK to Source’ and ‘Source to Deform’ mode under the ‘Bone Remapping Nodes’ view.
 
-![1]( {{ '/assets/images/ue2rigify/user-interface/node-editor-panel/1.jpg' | relative_url }} )
+![1](./images/node-editor-panel/1.jpg)
 
 ### X-axis Mirror
 
