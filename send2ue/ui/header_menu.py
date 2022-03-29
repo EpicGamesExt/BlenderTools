@@ -1,5 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 import bpy
+from ..core import utilities
+from ..constants import ToolInfo, Extensions
 
 
 class TOPBAR_MT_Import(bpy.types.Menu):
@@ -22,7 +24,7 @@ class TOPBAR_MT_Export(bpy.types.Menu):
 
     def draw(self, context):
         self.layout.operator('wm.send2ue')
-        self.layout.operator('wm.advanced_send2ue')
+        self.layout.operator('wm.settings_dialog')
 
 
 class TOPBAR_MT_Utilities(bpy.types.Menu):
@@ -33,9 +35,14 @@ class TOPBAR_MT_Utilities(bpy.types.Menu):
     bl_label = "Utilities"
 
     def draw(self, context):
-        self.layout.operator('wm.add_asset_affixes')
-        self.layout.operator('wm.remove_asset_affixes')
-        self.layout.operator('wm.create_predefined_collections')
+        self.layout.operator('send2ue.create_predefined_collections')
+        self.layout.operator('send2ue.start_rpc_servers')
+
+        operator_namespace = getattr(bpy.ops, ToolInfo.NAME.value, None)
+        if operator_namespace:
+            for namespace in dir(operator_namespace):
+                if namespace.startswith(f'{Extensions.NAME}_') and f'_{Extensions.UTILITY_OPERATOR}' in namespace:
+                    self.layout.operator(f'{ToolInfo.NAME.value}.{namespace}')
 
 
 class TOPBAR_MT_Pipeline(bpy.types.Menu):
@@ -52,7 +59,7 @@ class TOPBAR_MT_Pipeline(bpy.types.Menu):
 
 def pipeline_menu(self, context):
     """
-    This function creates the pipeline menu item. This will be referenced in other functions
+    Creates the pipeline menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -66,7 +73,7 @@ def pipeline_menu(self, context):
 
 def import_menu(self, context):
     """
-    This function creates the import menu item. This will be referenced in other functions
+    Creates the import menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -80,7 +87,7 @@ def import_menu(self, context):
 
 def export_menu(self, context):
     """
-    This function creates the export menu item. This will be referenced in other functions
+    Creates the export menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -94,7 +101,7 @@ def export_menu(self, context):
 
 def utilities_menu(self, context):
     """
-    This function creates the utilities menu item. This will be referenced in other functions
+    Creates the utilities menu item. This will be referenced in other functions
     as a means of appending and removing it's contents from the top bar editor class
     definition.
 
@@ -108,7 +115,7 @@ def utilities_menu(self, context):
 
 def add_pipeline_menu():
     """
-    This function adds the Parent "Pipeline" menu item by appending the pipeline_menu()
+    Adds the Parent "Pipeline" menu item by appending the pipeline_menu()
     function to the top bar editor class definition.
     """
     if not hasattr(bpy.types, TOPBAR_MT_Pipeline.bl_idname):
@@ -129,9 +136,35 @@ def add_pipeline_menu():
 
 def remove_parent_menu():
     """
-    This function removes the Parent "Pipeline" menu item by removing the pipeline_menu()
+    Removes the Parent "Pipeline" menu item by removing the pipeline_menu()
     function from the top bar editor class definition.
     """
     if hasattr(bpy.types, TOPBAR_MT_Pipeline.bl_idname):
         bpy.utils.unregister_class(TOPBAR_MT_Pipeline)
         bpy.types.TOPBAR_MT_editor_menus.remove(pipeline_menu)
+
+
+menu_classes = [
+    TOPBAR_MT_Export,
+    TOPBAR_MT_Import,
+    TOPBAR_MT_Utilities
+]
+
+
+def register():
+    """
+    Registers the menu classes when the addon is enabled.
+    """
+    for menu_class in menu_classes:
+        if not hasattr(bpy.types, menu_class.bl_idname):
+            bpy.utils.register_class(menu_class)
+
+
+def unregister():
+    """
+    Unregisters the menu classes when the addon is disabled.
+    """
+    for menu_class in menu_classes:
+        if hasattr(bpy.types, menu_class.bl_idname):
+            bpy.utils.unregister_class(menu_class)
+

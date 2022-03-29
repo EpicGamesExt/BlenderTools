@@ -8,48 +8,39 @@ import socket as _socket
 import logging as _logging
 import threading as _threading
 
-
-def hello():
-    _logging.debug("Hello from remote")
-
-
 # Protocol constants (see PythonScriptRemoteExecution.cpp for the full protocol definition)
-_PROTOCOL_VERSION = 1  # Protocol version number
-_PROTOCOL_MAGIC = 'ue_py'  # Protocol magic identifier
-_TYPE_PING = 'ping'  # Service discovery request (UDP)
-_TYPE_PONG = 'pong'  # Service discovery response (UDP)
-_TYPE_OPEN_CONNECTION = 'open_connection'  # Open a TCP command connection with the requested server (UDP)
-_TYPE_CLOSE_CONNECTION = 'close_connection'  # Close any active TCP command connection (UDP)
-_TYPE_COMMAND = 'command'  # Execute a remote Python command (TCP)
-_TYPE_COMMAND_RESULT = 'command_result'  # Result of executing a remote Python command (TCP)
+_PROTOCOL_VERSION = 1                                   # Protocol version number
+_PROTOCOL_MAGIC = 'ue_py'                               # Protocol magic identifier
+_TYPE_PING = 'ping'                                     # Service discovery request (UDP)
+_TYPE_PONG = 'pong'                                     # Service discovery response (UDP)
+_TYPE_OPEN_CONNECTION = 'open_connection'               # Open a TCP command connection with the requested server (UDP)
+_TYPE_CLOSE_CONNECTION = 'close_connection'             # Close any active TCP command connection (UDP)
+_TYPE_COMMAND = 'command'                               # Execute a remote Python command (TCP)
+_TYPE_COMMAND_RESULT = 'command_result'                 # Result of executing a remote Python command (TCP)
 
-_NODE_PING_SECONDS = 1  # Number of seconds to wait before sending another "ping" message to discover remote notes
-_NODE_TIMEOUT_SECONDS = 5  # Number of seconds to wait before timing out a remote node that was discovered via UDP and has stopped sending "pong" responses
+_NODE_PING_SECONDS = 1                                  # Number of seconds to wait before sending another "ping" message to discover remote notes
+_NODE_TIMEOUT_SECONDS = 5                               # Number of seconds to wait before timing out a remote node that was discovered via UDP and has stopped sending "pong" responses
 
-DEFAULT_MULTICAST_TTL = 0  # Multicast TTL (0 is limited to the local host, 1 is limited to the local subnet)
-DEFAULT_MULTICAST_GROUP_ENDPOINT = ('239.0.0.1',
-                                    6766)  # The multicast group endpoint tuple that the UDP multicast socket should join (must match the "Multicast Group Endpoint" setting in the Python plugin)
-DEFAULT_MULTICAST_BIND_ADDRESS = '0.0.0.0'  # The adapter address that the UDP multicast socket should bind to, or 0.0.0.0 to bind to all adapters (must match the "Multicast Bind Address" setting in the Python plugin)
-DEFAULT_COMMAND_ENDPOINT = ('127.0.0.1',
-                            6776)  # The endpoint tuple for the TCP command connection hosted by this client (that the remote client will connect to)
+DEFAULT_MULTICAST_TTL = 0                               # Multicast TTL (0 is limited to the local host, 1 is limited to the local subnet)
+DEFAULT_MULTICAST_GROUP_ENDPOINT = ('239.0.0.1', 6766)  # The multicast group endpoint tuple that the UDP multicast socket should join (must match the "Multicast Group Endpoint" setting in the Python plugin)
+DEFAULT_MULTICAST_BIND_ADDRESS = '0.0.0.0'              # The adapter address that the UDP multicast socket should bind to, or 0.0.0.0 to bind to all adapters (must match the "Multicast Bind Address" setting in the Python plugin)
+DEFAULT_COMMAND_ENDPOINT = ('127.0.0.1', 6776)          # The endpoint tuple for the TCP command connection hosted by this client (that the remote client will connect to)
+DEFAULT_RECEIVE_BUFFER_SIZE = 8192                      # The default receive buffer size
 
 # Execution modes (these must match the names given to LexToString for EPythonCommandExecutionMode in IPythonScriptPlugin.h)
-MODE_EXEC_FILE = 'ExecuteFile'  # Execute the Python command as a file. This allows you to execute either a literal Python script containing multiple statements, or a file with optional arguments
-MODE_EXEC_STATEMENT = 'ExecuteStatement'  # Execute the Python command as a single statement. This will execute a single statement and print the result. This mode cannot run files
-MODE_EVAL_STATEMENT = 'EvaluateStatement'  # Evaluate the Python command as a single statement. This will evaluate a single statement and return the result. This mode cannot run files
-
+MODE_EXEC_FILE = 'ExecuteFile'                          # Execute the Python command as a file. This allows you to execute either a literal Python script containing multiple statements, or a file with optional arguments
+MODE_EXEC_STATEMENT = 'ExecuteStatement'                # Execute the Python command as a single statement. This will execute a single statement and print the result. This mode cannot run files
+MODE_EVAL_STATEMENT = 'EvaluateStatement'               # Evaluate the Python command as a single statement. This will evaluate a single statement and return the result. This mode cannot run files
 
 class RemoteExecutionConfig(object):
     '''
     Configuration data for establishing a remote connection with a UE4 instance running Python.
     '''
-
     def __init__(self):
         self.multicast_ttl = DEFAULT_MULTICAST_TTL
         self.multicast_group_endpoint = DEFAULT_MULTICAST_GROUP_ENDPOINT
         self.multicast_bind_address = DEFAULT_MULTICAST_BIND_ADDRESS
         self.command_endpoint = DEFAULT_COMMAND_ENDPOINT
-
 
 class RemoteExecution(object):
     '''
@@ -58,7 +49,6 @@ class RemoteExecution(object):
     Args:
         config (RemoteExecutionConfig): Configuration controlling the connection settings for this session.
     '''
-
     def __init__(self, config=RemoteExecutionConfig()):
         self._config = config
         self._broadcast_connection = None
@@ -136,7 +126,6 @@ class RemoteExecution(object):
             raise RuntimeError('Remote Python Command failed! {0}'.format(data['result']))
         return data
 
-
 class _RemoteExecutionNode(object):
     '''
     A discovered remote "node" (aka, a UE4 instance running Python).
@@ -145,7 +134,6 @@ class _RemoteExecutionNode(object):
         data (dict): The data representing this node (from its "pong" reponse).
         now (float): The timestamp at which this node was last seen.
     '''
-
     def __init__(self, data, now=None):
         self.data = data
         self._last_pong = _time_now(now)
@@ -162,12 +150,10 @@ class _RemoteExecutionNode(object):
         '''
         return (self._last_pong + _NODE_TIMEOUT_SECONDS) < _time_now(now)
 
-
 class _RemoteExecutionBroadcastNodes(object):
     '''
     A thread-safe set of remote execution "nodes" (UE4 instances running Python).
     '''
-
     def __init__(self):
         self._remote_nodes = {}
         self._remote_nodes_lock = _threading.RLock()
@@ -217,7 +203,6 @@ class _RemoteExecutionBroadcastNodes(object):
                     _logger.debug('Lost Node {0}: {1}'.format(node_id, node.data))
                     del self._remote_nodes[node_id]
 
-
 class _RemoteExecutionBroadcastConnection(object):
     '''
     A remote execution broadcast connection (for UDP based messaging and node discovery).
@@ -226,7 +211,6 @@ class _RemoteExecutionBroadcastConnection(object):
         config (RemoteExecutionConfig): Configuration controlling the connection settings.
         node_id (string): The ID of the local "node" (this session).
     '''
-
     def __init__(self, config, node_id):
         self._config = config
         self._node_id = node_id
@@ -271,8 +255,7 @@ class _RemoteExecutionBroadcastConnection(object):
         '''
         Initialize the UDP based broadcast socket based on the current configuration.
         '''
-        self._broadcast_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM,
-                                                _socket.IPPROTO_UDP)  # UDP/IP socket
+        self._broadcast_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_DGRAM, _socket.IPPROTO_UDP)  # UDP/IP socket
         if hasattr(_socket, 'SO_REUSEPORT'):
             self._broadcast_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
         else:
@@ -280,8 +263,8 @@ class _RemoteExecutionBroadcastConnection(object):
         self._broadcast_socket.bind((self._config.multicast_bind_address, self._config.multicast_group_endpoint[1]))
         self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_MULTICAST_LOOP, 1)
         self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_MULTICAST_TTL, self._config.multicast_ttl)
-        self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_ADD_MEMBERSHIP, _socket.inet_aton(
-            self._config.multicast_group_endpoint[0]) + _socket.inet_aton('0.0.0.0'))
+        self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_MULTICAST_IF, _socket.inet_aton(self._config.multicast_bind_address))
+        self._broadcast_socket.setsockopt(_socket.IPPROTO_IP, _socket.IP_ADD_MEMBERSHIP, _socket.inet_aton(self._config.multicast_group_endpoint[0]) + _socket.inet_aton(self._config.multicast_bind_address))
         self._broadcast_socket.settimeout(0.1)
 
     def _init_broadcast_listen_thread(self):
@@ -300,7 +283,7 @@ class _RemoteExecutionBroadcastConnection(object):
             # Receive and process all pending data
             while True:
                 try:
-                    data = self._broadcast_socket.recv(4096)
+                    data = self._broadcast_socket.recv(DEFAULT_RECEIVE_BUFFER_SIZE)
                 except _socket.timeout:
                     data = None
                 if data:
@@ -344,7 +327,7 @@ class _RemoteExecutionBroadcastConnection(object):
         self._broadcast_message(_RemoteExecutionMessage(_TYPE_OPEN_CONNECTION, self._node_id, remote_node_id, {
             'command_ip': self._config.command_endpoint[0],
             'command_port': self._config.command_endpoint[1],
-        }))
+            }))
 
     def broadcast_close_connection(self, remote_node_id):
         '''
@@ -389,7 +372,6 @@ class _RemoteExecutionBroadcastConnection(object):
         '''
         self._nodes.update_remote_node(message.source, message.data)
 
-
 class _RemoteExecutionCommandConnection(object):
     '''
     A remote execution command connection (for TCP based command processing).
@@ -399,13 +381,12 @@ class _RemoteExecutionCommandConnection(object):
         node_id (string): The ID of the local "node" (this session).
         remote_node_id (string): The ID of the remote "node" (the UE4 instance running Python).
     '''
-
     def __init__(self, config, node_id, remote_node_id):
         self._config = config
         self._node_id = node_id
         self._remote_node_id = remote_node_id
         self._command_listen_socket = None
-        self._command_channel_socket = _socket.socket()  # This type is only here to appease PyLint
+        self._command_channel_socket = _socket.socket() # This type is only here to appease PyLint
 
     def open(self, broadcast_connection):
         '''
@@ -449,7 +430,7 @@ class _RemoteExecutionCommandConnection(object):
             'command': command,
             'unattended': unattended,
             'exec_mode': exec_mode,
-        }))
+            }))
         result = self._receive_message(_TYPE_COMMAND_RESULT)
         return result.data
 
@@ -472,11 +453,10 @@ class _RemoteExecutionCommandConnection(object):
         Returns:
             The message that was received.
         '''
-        data = self._command_channel_socket.recv(4096)
+        data = self._command_channel_socket.recv(DEFAULT_RECEIVE_BUFFER_SIZE)
         if data:
             message = _RemoteExecutionMessage(None, None)
-            if message.from_json_bytes(data) and message.passes_receive_filter(
-                    self._node_id) and message.type_ == expected_type:
+            if message.from_json_bytes(data) and message.passes_receive_filter(self._node_id) and message.type_ == expected_type:
                 return message
         raise RuntimeError('Remote party failed to send a valid response!')
 
@@ -484,8 +464,7 @@ class _RemoteExecutionCommandConnection(object):
         '''
         Initialize the TCP based command socket based on the current configuration, and set it to listen for an incoming connection.
         '''
-        self._command_listen_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM,
-                                                     _socket.IPPROTO_TCP)  # TCP/IP socket
+        self._command_listen_socket = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM, _socket.IPPROTO_TCP)  # TCP/IP socket
         if hasattr(_socket, 'SO_REUSEPORT'):
             self._command_listen_socket.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEPORT, 1)
         else:
@@ -511,7 +490,6 @@ class _RemoteExecutionCommandConnection(object):
                 continue
         raise RuntimeError('Remote party failed to attempt the command socket connection!')
 
-
 class _RemoteExecutionMessage(object):
     '''
     A message sent or received by remote execution (on either the UDP or TCP connection), as UTF-8 encoded JSON.
@@ -522,7 +500,6 @@ class _RemoteExecutionMessage(object):
         dest (string): The ID of the destination node of this message, or None to send to all nodes (for UDP broadcast).
         data (dict): The message specific payload data.
     '''
-
     def __init__(self, type_, source, dest=None, data=None):
         self.type_ = type_
         self.source = source
@@ -557,13 +534,13 @@ class _RemoteExecutionMessage(object):
             'magic': _PROTOCOL_MAGIC,
             'type': self.type_,
             'source': self.source,
-        }
+            }
         if self.dest:
             json_obj['dest'] = self.dest
         if self.data:
             json_obj['data'] = self.data
         return _json.dumps(json_obj, ensure_ascii=False)
-
+    
     def to_json_bytes(self):
         '''
         Convert this message to its JSON representation as UTF-8 bytes.
@@ -588,11 +565,9 @@ class _RemoteExecutionMessage(object):
             json_obj = _json.loads(json_str)
             # Read and validate required protocol version information
             if json_obj['version'] != _PROTOCOL_VERSION:
-                raise ValueError(
-                    '"version" is incorrect (got {0}, expected {1})!'.format(json_obj['version'], _PROTOCOL_VERSION))
+                raise ValueError('"version" is incorrect (got {0}, expected {1})!'.format(json_obj['version'], _PROTOCOL_VERSION))
             if json_obj['magic'] != _PROTOCOL_MAGIC:
-                raise ValueError(
-                    '"magic" is incorrect (got "{0}", expected "{1}")!'.format(json_obj['magic'], _PROTOCOL_MAGIC))
+                raise ValueError('"magic" is incorrect (got "{0}", expected "{1}")!'.format(json_obj['magic'], _PROTOCOL_MAGIC))
             # Read required fields
             local_type = json_obj['type']
             local_source = json_obj['source']
@@ -619,7 +594,6 @@ class _RemoteExecutionMessage(object):
         json_str = json_bytes.decode('utf-8')
         return self.from_json(json_str)
 
-
 def _time_now(now=None):
     '''
     Utility function to resolve a potentially cached time value.
@@ -632,13 +606,34 @@ def _time_now(now=None):
     '''
     return _time.time() if now is None else now
 
-
 # Log handling
 _logger = _logging.getLogger(__name__)
 _log_handler = _logging.StreamHandler()
 _logger.addHandler(_log_handler)
-
-
 def set_log_level(log_level):
     _logger.setLevel(log_level)
     _log_handler.setLevel(log_level)
+
+# Usage example
+if __name__ == '__main__':
+    set_log_level(_logging.DEBUG)
+    remote_exec = RemoteExecution()
+    remote_exec.start()
+    # Ask for a remote node ID
+    _sys.stdout.write('Enter remote node ID to connect to: ')
+    remote_node_id = _sys.stdin.readline().rstrip()
+    # Connect to it
+    remote_exec.open_command_connection(remote_node_id)
+    # Process commands remotely
+    _sys.stdout.write('Connected. Enter commands, or an empty line to quit.\n')
+    exec_mode = MODE_EXEC_FILE
+    while True:
+        input = _sys.stdin.readline().rstrip()
+        if input:
+            if input.startswith('set mode '):
+                exec_mode = input[9:]
+            else:
+                print(remote_exec.run_command(input, exec_mode=exec_mode))
+        else:
+            break
+    remote_exec.stop()
