@@ -37,8 +37,8 @@ module.exports = {
         lastUpdated: false,
         nav: [
             {
-                text: 'Contributing',
-                link: '/contributing/development',
+                text: 'Home',
+                link: process.env.PROD === '1' ? `/${name}/` : '/',
             }
         ],
         sidebar: {

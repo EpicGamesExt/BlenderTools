@@ -37,6 +37,8 @@ module.exports = {
             {
                 text: 'Home',
                 link: process.env.PROD === '1' ? 'https://epicgames.github.io/BlenderTools/' : '/',
+                target:'_self',
+                rel:false
             }
         ],
         sidebar: {
