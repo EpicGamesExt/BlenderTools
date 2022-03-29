@@ -1,4 +1,4 @@
-const {description, repository} = require('../../package')
+const {description, repository, name} = require('../../package')
 
 module.exports = {
     /**
