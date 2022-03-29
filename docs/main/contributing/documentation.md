@@ -22,12 +22,13 @@ After your pull request is merged in a new deployment of the site will be made.
 
 ## Testing Locally
 The documentation sites are static html sites that are generated using vuepress. To get up and running with vuepress.
-packages are managed by `npm`. So first install [npm](https://nodejs.org/en/)
-Once you have npm installed switch to the `/docs` folder and start the server for the site you want to preview by
+packages are managed by `npm`. So first install the latest version of [node](https://nodejs.org/en/)
+Once you have node and npm installed switch to the `/docs` folder and start the server for the site you want to preview by
 running these commands:
 
 ``` shell
 cd /docs
+npm install
 npm run dev-main
 ```
 
@@ -44,12 +45,12 @@ For further information on how to customize this site check out
 the [vuepress documentation](https://vuepress.vuejs.org/)
 
 # Building
-All the sites get built into a single static html site when running the docker compose file:
+All the sites get built on a linux machine into a single static html site when running:
 ```shell
-docker compose up
+npm run build
 ```
 
-If successful, a `dist` folder should now exist in `docs`. These files are what is deployed to the server.
+If successful, a `dist` folder should get generated in the `docs` folder. These files are what is deployed to the server.
 You can serve them locally with:
 ```shell
 python -m http.server --directory ./dist
