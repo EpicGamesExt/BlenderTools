@@ -10,5 +10,6 @@ services:
       - USER=$USER
       - ORG=$ORG
       - REPO=$REPO
+      - NODE_ENV=prod
       - NODE_OPTIONS=--openssl-legacy-provider
     entrypoint: ['/home/docs/deploy.sh']
