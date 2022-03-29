@@ -5,7 +5,7 @@ module.exports = {
      * Ref：https://v1.vuepress.vuejs.org/config/#title
      */
     title: 'UE to Rigify',
-    base: process.env.NODE_ENV !== 'development' ? `/${name}/ue2rigify/` : '/',
+    base: process.env.PROD === '1' ? `/${name}/ue2rigify/` : '/',
     /**
      * Ref：https://v1.vuepress.vuejs.org/config/#description
      */

@@ -5,7 +5,7 @@ module.exports = {
      * Ref：https://v1.vuepress.vuejs.org/config/#title
      */
     title: 'Send to Unreal',
-    base: process.env.NODE_ENV !== 'development' ? `/${name}/send2ue/` : '/',
+    base: process.env.PROD === '1' ? `/${name}/send2ue/` : '/',
     /**
      * Ref：https://v1.vuepress.vuejs.org/config/#description
      */

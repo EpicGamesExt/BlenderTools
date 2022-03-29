@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   deploy_docs:
-    image: node:latest
+    image: node:17.8
     volumes:
       - ./:/home/docs
     environment:
@@ -10,6 +10,8 @@ services:
       - USER=$USER
       - ORG=$ORG
       - REPO=$REPO
-      - NODE_ENV=prod
+      - PROD=1
       - NODE_OPTIONS=--openssl-legacy-provider
-    entrypoint: ['/home/docs/deploy.sh']
+    working_dir: '/home/docs'
+    entrypoint: ['sh']
+    command: [-c, "npm install && npm run build"]

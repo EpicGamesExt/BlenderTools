@@ -44,9 +44,10 @@ For further information on how to customize this site check out
 the [vuepress documentation](https://vuepress.vuejs.org/)
 
 # Building
-All the sites get built into a single static html site when running these commands:
-* `npm run build-windows`
-* `npm run build-linux`
+All the sites get built into a single static html site when running the docker compose file:
+```shell
+docker compose up
+```
 
 If successful, a `dist` folder should now exist in `docs`. These files are what is deployed to the server.
 You can serve them locally with:

@@ -11,7 +11,7 @@ module.exports = {
      */
     description: description,
 
-    base: process.env.NODE_ENV !== 'development' ? `/${name}/` : '/',
+    base: process.env.PROD === '1' ? `/${name}/` : '/',
 
     /**
      * Extra tags to be injected to the page HTML `<head>`
