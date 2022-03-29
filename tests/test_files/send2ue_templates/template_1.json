@@ -1,0 +1,272 @@
+{
+  "advanced_ui_import": false,
+  "auto_stash_active_action": true,
+  "automatically_scale_bones": true,
+  "blender": {
+    "export_method": {
+      "fbx": {
+        "animation": {
+          "bake_anim": true,
+          "bake_anim_force_startend_keying": true,
+          "bake_anim_simplify_factor": 0.0,
+          "bake_anim_step": 1.0,
+          "bake_anim_use_all_bones": true
+        },
+        "armature": {
+          "add_leaf_bones": false,
+          "armature_nodetype": "NULL",
+          "primary_bone_axis": "Y",
+          "secondary_bone_axis": "X",
+          "use_armature_deform_only": false
+        },
+        "extras": {
+          "use_metadata": true
+        },
+        "geometry": {
+          "mesh_smooth_type": "FACE",
+          "use_mesh_edges": false,
+          "use_mesh_modifiers": true,
+          "use_subsurf": false,
+          "use_tspace": false
+        },
+        "include": {
+          "use_custom_props": false
+        },
+        "transform": {
+          "apply_scale_options": "FBX_SCALE_NONE",
+          "apply_unit_scale": true,
+          "axis_forward": "Y",
+          "axis_up": "Z",
+          "bake_space_transform": false,
+          "global_scale": 1.0
+        }
+      }
+    }
+  },
+  "combine_child_meshes": false,
+  "disk_animation_folder_path": "C:\\Users\\JamesBaber",
+  "disk_collision_folder_path": "C:\\Users\\JamesBaber",
+  "disk_mesh_folder_path": "C:\\Users\\JamesBaber",
+  "export_all_actions": true,
+  "export_custom_property_fcurves": true,
+  "export_object_name_as_root": true,
+  "extensions": {
+    "affixes": {
+      "animation_sequence_name_affix": "Animation_",
+      "auto_add_asset_name_affixes": false,
+      "auto_remove_asset_name_affixes": false,
+      "material_name_affix": "Material_",
+      "show_name_affix_settings": false,
+      "skeletal_mesh_name_affix": "SkeletalMesh_",
+      "static_mesh_name_affix": "StaticMesh_",
+      "texture_name_affix": "Texture_"
+    },
+    "example": {
+      "some_property": "Hello world"
+    },
+    "ue2rigify": {}
+  },
+  "import_animations": true,
+  "import_lods": true,
+  "import_materials_and_textures": true,
+  "lod_regex": "(?i)(_LOD\\d).*",
+  "path_mode": "send_to_project",
+  "tab": "validations",
+  "template_version": 1.0,
+  "unreal": {
+    "editor_skeletal_mesh_library": {
+      "lod_build_settings": {
+        "compute_weighted_normals": true,
+        "morph_threshold_position": 0.014999999664723873,
+        "recompute_normals": false,
+        "recompute_tangents": true,
+        "remove_degenerates": true,
+        "threshold_position": 1.9999999494757503e-05,
+        "threshold_tangent_normal": 1.9999999494757503e-05,
+        "threshold_uv": 0.0009769999887794256,
+        "use_full_precision_u_vs": false,
+        "use_high_precision_tangent_basis": false,
+        "use_mikk_t_space": false
+      }
+    },
+    "editor_static_mesh_library": {
+      "lod_build_settings": {
+        "build_reversed_index_buffer": true,
+        "build_scale3d": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "compute_weighted_normals": true,
+        "distance_field_replacement_mesh": "",
+        "distance_field_resolution_scale": 1.0,
+        "dst_lightmap_index": 1,
+        "generate_distance_field_as_if_two_sided": false,
+        "generate_lightmap_u_vs": false,
+        "min_lightmap_resolution": 64,
+        "recompute_normals": false,
+        "recompute_tangents": false,
+        "remove_degenerates": true,
+        "src_lightmap_index": 0,
+        "use_full_precision_u_vs": false,
+        "use_high_precision_tangent_basis": false,
+        "use_mikk_t_space": false
+      }
+    },
+    "import_method": {
+      "fbx": {
+        "anim_sequence_import_data": {
+          "animation_length": "unreal.FBXAnimationLengthImportType.FBXALIT_EXPORTED_TIME",
+          "convert_scene": false,
+          "convert_scene_unit": false,
+          "custom_sample_rate": 0,
+          "delete_existing_custom_attribute_curves": true,
+          "delete_existing_morph_target_curves": false,
+          "do_not_import_curve_with_zero": true,
+          "force_front_x_axis": false,
+          "frame_import_range": [
+            0,
+            0
+          ],
+          "import_bone_tracks": true,
+          "import_custom_attribute": true,
+          "import_meshes_in_bone_hierarchy": true,
+          "import_rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_translation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_uniform_scale": 1.0,
+          "material_curve_suffixes": "",
+          "preserve_local_transform": true,
+          "remove_redundant_keys": true,
+          "set_material_drive_parameter_on_custom_attribute": false,
+          "use_default_sample_rate": false
+        },
+        "reset_to_fbx_on_material_conflict": false,
+        "skeletal_mesh_import_data": {
+          "bake_pivot_in_vertex": false,
+          "compute_weighted_normals": true,
+          "convert_scene": false,
+          "convert_scene_unit": false,
+          "force_front_x_axis": false,
+          "import_content_type": "unreal.FBXImportContentType.FBXICT_ALL",
+          "import_meshes_in_bone_hierarchy": true,
+          "import_morph_targets": true,
+          "import_rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_translation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_uniform_scale": 1.0,
+          "morph_threshold_position": 0.014999999664723873,
+          "normal_generation_method": "unreal.FBXNormalGenerationMethod.BUILT_IN",
+          "normal_import_method": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
+          "preserve_smoothing_groups": true,
+          "reorder_material_to_fbx_order": true,
+          "threshold_position": 1.9999999494757503e-05,
+          "threshold_tangent_normal": 1.9999999494757503e-05,
+          "threshold_uv": 0.0009769999887794256,
+          "transform_vertex_to_absolute": true,
+          "update_skeleton_reference_pose": false,
+          "use_t0_as_ref_pose": false,
+          "vertex_color_import_option": "unreal.VertexColorImportOption.REPLACE",
+          "vertex_override_color": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "static_mesh_import_data": {
+          "auto_generate_collision": true,
+          "bake_pivot_in_vertex": false,
+          "build_reversed_index_buffer": true,
+          "combine_meshes": false,
+          "compute_weighted_normals": true,
+          "convert_scene": false,
+          "convert_scene_unit": false,
+          "force_front_x_axis": false,
+          "generate_lightmap_u_vs": false,
+          "import_rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_translation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_uniform_scale": 1.0,
+          "normal_generation_method": "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE",
+          "normal_import_method": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
+          "one_convex_hull_per_ucx": true,
+          "remove_degenerates": true,
+          "reorder_material_to_fbx_order": true,
+          "static_mesh_lod_group": "none",
+          "transform_vertex_to_absolute": true,
+          "vertex_color_import_option": "unreal.VertexColorImportOption.REPLACE",
+          "vertex_override_color": [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        "texture_import_data": {
+          "base_color_name": "",
+          "base_diffuse_texture_name": "",
+          "base_emissive_color_name": "",
+          "base_emmisive_texture_name": "",
+          "base_material_name": "",
+          "base_normal_texture_name": "",
+          "base_opacity_texture_name": "",
+          "base_specular_texture_name": "",
+          "convert_scene": false,
+          "convert_scene_unit": false,
+          "force_front_x_axis": false,
+          "import_rotation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_translation": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "import_uniform_scale": 1.0,
+          "invert_normal_maps": false,
+          "material_search_location": "unreal.MaterialSearchLocation.LOCAL"
+        }
+      }
+    }
+  },
+  "unreal_animation_folder_path": "/Game/untitled_category/untitled_asset/animations/",
+  "unreal_collision_folder_path": "/Game/untitled_category/untitled_asset/collisions/",
+  "unreal_level_sequence_asset_path": "",
+  "unreal_mesh_folder_path": "/Game/untitled_category/untitled_asset/",
+  "unreal_physics_asset_path": "",
+  "unreal_skeletal_mesh_lod_settings_path": "",
+  "unreal_skeleton_asset_path": "",
+  "use_collections_as_folders": false,
+  "use_immediate_parent_collection_name": false,
+  "use_object_origin": false,
+  "validate_armature_transforms": true,
+  "validate_materials": true,
+  "validate_paths": true,
+  "validate_scene_scale": "1.0",
+  "validate_textures": true,
+  "validate_time_units": "off"
+}
