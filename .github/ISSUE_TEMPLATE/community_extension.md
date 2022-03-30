@@ -1,6 +1,6 @@
 ---
-name: Community Extension Listing Request
-about: Create a request to have your extension listed on our [Community Extensions](https://github.com/EpicGames/BlenderTools/) page.
+name: Community Extension
+about: Create a request to have your extension listed on the docs as a community extension.
 title: ''
 labels: community-extension
 assignees: ''
