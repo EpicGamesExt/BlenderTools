@@ -8,7 +8,7 @@ A repository of blender addons that improve the game development workflow betwee
 
 ## Send to Unreal
 
-![1](./docs/main/images/send2ue/3.gif)
+![3](docs/main/images/send2ue/3.gif)
 
 A one-click solution for sending assets from Blender to Unreal Engine.
 
