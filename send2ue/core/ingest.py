@@ -15,7 +15,10 @@ def import_asset(file_path, asset_data, property_data):
     :param dict asset_data: A dictionary of import parameters.
     :param dict property_data: A dictionary representation of the properties.
     """
-    UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
+    try:
+        UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
+    except TimeoutError:
+        print("Got a timeout on probable large asset, continuing ...")
 
 
 @track_progress(message='Importing fcurves on "{param}"...', param='asset_path')
