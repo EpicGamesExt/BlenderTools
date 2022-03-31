@@ -13,7 +13,7 @@ from . import settings
 from . import extension
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import AssetTypes, ToolInfo, PostFixToken, Extensions
+from ..constants import AssetTypes, ToolInfo, PreFixToken, Extensions
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -134,9 +134,6 @@ def get_import_path(scene_object, properties, asset_type):
     """
     if asset_type == AssetTypes.ANIMATION:
         game_path = properties.unreal_animation_folder_path
-
-    elif asset_type == AssetTypes.COLLISION:
-        game_path = properties.unreal_collision_folder_path
 
     else:
         game_path = properties.unreal_mesh_folder_path
@@ -339,7 +336,7 @@ def get_from_collection(object_type, properties):
                 # if the object is visible
                 if collection_object.visible_get():
                     # ensure the object doesn't end with one of the post fix tokens
-                    if not any(collection_object.name.endswith(token.value) for token in PostFixToken):
+                    if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
                         # add it to the group of objects
                         collection_objects.append(collection_object)
     return collection_objects
@@ -702,6 +699,24 @@ def is_lod_of(asset_name, mesh_object_name, properties):
     return asset_name == get_asset_name(mesh_object_name, properties)
 
 
+def is_collision_of(asset_name, mesh_object_name, properties):
+    """
+    Checks if the given asset name matches the collision naming convention.
+
+    :param str asset_name: The name of the asset to export.
+    :param str mesh_object_name: The name of the collision mesh.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
+    """
+    return bool(
+        re.fullmatch(
+            r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?",
+            mesh_object_name
+        ) or re.fullmatch(
+            r"U(BX|CP|SP|CX)_" + asset_name + rf"{properties.lod_regex}(_\d+)?", mesh_object_name
+        )
+    )
+
+
 def has_extension_draw(location):
     """
     Checks whether the given location has any draw functions.
@@ -860,9 +875,23 @@ def refresh_all_areas():
                 area.tag_redraw()
 
 
+def select_asset_collisions(asset_name, properties):
+    """
+    Selects the collision assets for the given asset.
+
+    :param str asset_name: The name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
+    if export_collection:
+        for mesh_object in export_collection.objects:
+            if is_collision_of(asset_name, mesh_object.name, properties):
+                mesh_object.select_set(True)
+
+
 def join_collisions(collisions):
     """
-    This function joins the given collisions into a single mesh.
+    Joins the given collisions into a single mesh.
 
     :param object collisions: Mesh objects.
     :return str: The name of the joined mesh.
@@ -1069,7 +1098,7 @@ def report_path_error_message(layout, send2ue_property, report_text):
 
 def select_all_children(scene_object, object_type, properties, exclude_postfix_tokens=False):
     """
-    This function selects all of an objects children.
+    Selects all of an objects children.
 
     :param object scene_object: A object.
     :param str object_type: The type of object to select.
@@ -1080,7 +1109,7 @@ def select_all_children(scene_object, object_type, properties, exclude_postfix_t
     for child_object in children:
         if child_object.type == object_type:
             if exclude_postfix_tokens:
-                if any(child_object.name.endswith(token.value) for token in PostFixToken):
+                if any(child_object.name.startswith(f'{token.value}_') for token in PreFixToken):
                     continue
 
             child_object.select_set(True)

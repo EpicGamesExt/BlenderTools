@@ -6,7 +6,7 @@ import os
 import re
 import bpy
 from . import utilities, validations, settings, formatting, ingest, extension
-from ..constants import PathModes, AssetTypes, PostFixToken, ToolInfo, ExtensionOperators
+from ..constants import PathModes, AssetTypes, PreFixToken, ToolInfo, ExtensionOperators
 
 
 def get_file_path(asset_name, properties, asset_type, lod=False, file_extension='fbx'):
@@ -38,9 +38,6 @@ def get_file_path(asset_name, properties, asset_type, lod=False, file_extension=
 
         if asset_type == AssetTypes.ANIMATION:
             export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
-
-        if asset_type == AssetTypes.COLLISION:
-            export_folder = formatting.resolve_path(properties.disk_collision_folder_path)
 
     return os.path.join(
         export_folder,
@@ -436,30 +433,6 @@ def is_lod_of(asset_name, mesh_object_name):
     return bool(re.fullmatch(rf"{asset_name}_LOD\d+(_\d+)?", mesh_object_name))
 
 
-def get_asset_collision(asset_name, properties):
-    """
-    Gets the collision asset for the given asset.
-
-    :param str asset_name: The name of the asset to export.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    collision_data = {}
-    mesh_object = bpy.data.objects.get(asset_name)
-    if mesh_object:
-        for child in mesh_object.children:
-            if child.type == 'MESH' and child.name.endswith(PostFixToken.COLLISION.value):
-                asset_name = utilities.get_asset_name(child.name.strip(PostFixToken.COLLISION.value), properties)
-                file_path = get_file_path(asset_name, properties, asset_type=AssetTypes.COLLISION)
-                export_mesh(child, file_path, properties)
-                return {
-                    'file_path': file_path,
-                    'asset_folder': properties.unreal_collision_folder_path,
-                    'asset_path': f'{properties.unreal_collision_folder_path}{asset_name}',
-                    'import_mesh': True
-                }
-    return collision_data
-
-
 def get_asset_sockets(asset_name, properties):
     """
     This function selects the socket under the given asset.
@@ -471,8 +444,8 @@ def get_asset_sockets(asset_name, properties):
     mesh_object = bpy.data.objects.get(asset_name)
     if mesh_object:
         for child in mesh_object.children:
-            if child.type == 'EMPTY' and child.name.endswith(PostFixToken.SOCKET.value):
-                name = utilities.get_asset_name(child.name.strip(PostFixToken.SOCKET.value), properties)
+            if child.type == 'EMPTY' and child.name.startswith(f'{PreFixToken.SOCKET.value}_'):
+                name = utilities.get_asset_name(child.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
                 socket_data[name] = {
                     'relative_location': utilities.convert_blender_to_unreal_location(child.matrix_local.translation),
                     'relative_rotation': [math.degrees(i) for i in child.matrix_local.to_euler()],
@@ -509,6 +482,9 @@ def export_mesh(mesh_object, file_path, properties):
     # select any rigs this object is parented too
     set_parent_rig_selection(mesh_object, properties)
 
+    # select collision meshes
+    utilities.select_asset_collisions(mesh_object_name, properties)
+
     # export selection to an fbx file
     export_file(file_path, properties)
 
@@ -519,12 +495,6 @@ def export_mesh(mesh_object, file_path, properties):
 
     # run the post mesh export extensions
     extension.run_operators(ExtensionOperators.POST_MESH_EXPORT.value)
-
-
-@utilities.track_progress(message='Exporting curves for sequence track "{param}"...', param='file_path')
-def export_curves_for_track(track_name, curves, file_path, properties, start, end):
-    utilities.set_selected_objects(curves)
-    export_file(file_path, properties)
 
 
 @utilities.track_progress(message='Exporting custom property fcurves for animation "{param}"...', param='file_path')
@@ -675,7 +645,6 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 'skeleton_asset_path': properties.unreal_skeleton_asset_path,
                 'lods': export_lods(asset_name, properties),
                 'sockets': get_asset_sockets(mesh_object.name, properties),
-                'collision': get_asset_collision(mesh_object.name, properties),
                 'import_mesh': True
             })
             previous_asset_names.append(asset_name)

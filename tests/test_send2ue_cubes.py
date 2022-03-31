@@ -31,18 +31,18 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         """
         Sends a cube mesh with default settings.
         """
-        self.move_to_collection(['Cube1_LOD0'], 'Export')
+        self.move_to_collection(['Cube1'], 'Export')
         self.send2ue_operation()
-        self.assert_mesh_import('Cube1_LOD0')
+        self.assert_mesh_import('Cube1')
 
     def test_bulk_send_to_unreal(self):
         """
         Sends multiple cubes to unreal at once.
         """
-        self.move_to_collection(['Cube1_LOD0', 'Cube2_lod0_mesh'], 'Export')
+        self.move_to_collection(['Cube1', 'Cube2'], 'Export')
         self.send2ue_operation()
-        self.assert_mesh_import('Cube1_LOD0')
-        self.assert_mesh_import('Cube2_lod0_mesh')
+        self.assert_mesh_import('Cube1')
+        self.assert_mesh_import('Cube2')
 
     def test_lods(self):
         """
@@ -66,18 +66,42 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         https://github.com/EpicGames/BlenderTools/issues/69
         """
         self.run_socket_tests({
-            'Cube1_LOD0': ['socket01_SOCKET', 'socket02_SOCKET']
+            'Cube2': ['SOCKET_Cube2_01', 'SOCKET_Cube2_02']
         })
 
     def test_collisions(self):
         """
         Sends a Cube with complex collisions to unreal.
         https://github.com/EpicGames/BlenderTools/issues/22
+        https://github.com/EpicGames/BlenderTools/issues/359
         """
-        self.run_collision_tests({
-            'Cube1_LOD0': 'collision01_COLLISION',
-            'Cube2_lod0_mesh': '',
-        })
+        self.run_collision_tests([
+            {'Cube1': {
+                'convex_count': 0,
+                'simple_count': 1,
+                'objects': ['UBX_Cube1']
+            }},
+            {'Cube1': {
+                'convex_count': 0,
+                'simple_count': 2,
+                'objects': ['UBX_Cube1_01', 'UBX_Cube1_02']
+            }},
+            {'Cube1': {
+                'convex_count': 0,
+                'simple_count': 1,
+                'objects': ['UCP_Cube1']
+            }},
+            {'Cube1': {
+                'convex_count': 0,
+                'simple_count': 1,
+                'objects': ['USP_Cube1']
+            }},
+            {'Cube1': {
+                'convex_count': 1,
+                'simple_count': 0,
+                'objects': ['UCX_Cube1']
+            }},
+        ])
 
     def test_materials(self):
         """
@@ -156,4 +180,3 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
                 'SK_Mannequin_LodGroup'
             ]
         })
-

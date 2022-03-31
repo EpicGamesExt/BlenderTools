@@ -3,16 +3,18 @@ import os
 from enum import Enum
 
 
-class PostFixToken(Enum):
-    SOCKET = '_SOCKET'
-    COLLISION = '_COLLISION'
+class PreFixToken(Enum):
+    SOCKET = 'SOCKET'
+    BOX_COLLISION = 'UBX'
+    CAPSULE_COLLISION = 'UCP'
+    SPHERE_COLLISION = 'USP'
+    CONVEX_COLLISION = 'UCX'
 
 
 class AssetTypes:
     SKELETON = 'ARMATURE'
     MESH = 'MESH'
     ANIMATION = 'ANIMATION'
-    COLLISION = 'COLLISION'
 
 
 class ToolInfo(Enum):

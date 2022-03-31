@@ -44,9 +44,8 @@
     }
   },
   "combine_child_meshes": false,
-  "disk_animation_folder_path": "C:\\Users\\JamesBaber",
-  "disk_collision_folder_path": "C:\\Users\\JamesBaber",
-  "disk_mesh_folder_path": "C:\\Users\\JamesBaber",
+  "disk_animation_folder_path": "C:\\",
+  "disk_mesh_folder_path": "C:\\",
   "export_all_actions": true,
   "export_custom_property_fcurves": true,
   "export_object_name_as_root": true,
@@ -254,7 +253,6 @@
     }
   },
   "unreal_animation_folder_path": "/Game/untitled_category/untitled_asset/animations/",
-  "unreal_collision_folder_path": "/Game/untitled_category/untitled_asset/collisions/",
   "unreal_level_sequence_asset_path": "",
   "unreal_mesh_folder_path": "/Game/untitled_category/untitled_asset/",
   "unreal_physics_asset_path": "",

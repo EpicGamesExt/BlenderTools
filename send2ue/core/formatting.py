@@ -216,16 +216,6 @@ def update_unreal_animation_folder_path(self, context):
     auto_format_unreal_folder_path('unreal_animation_folder_path', self)
 
 
-def update_unreal_collision_folder_path(self, context):
-    """
-    Called every time the unreal collision folder path is updated.
-
-    :param object self: This is a reference to the property data object.
-    :param object context: The context when the property was called.
-    """
-    auto_format_unreal_folder_path('unreal_collision_folder_path', self)
-
-
 def update_unreal_skeleton_asset_path(self, context):
     """
     Called every time the unreal skeleton asset path is updated.
@@ -274,13 +264,3 @@ def update_disk_animation_folder_path(self, context):
     :param object context: The context when the property was called.
     """
     auto_format_disk_folder_path('disk_animation_folder_path', self)
-
-
-def update_disk_collision_folder_path(self, context):
-    """
-    Called every time the disk collision folder path is updated.
-
-    :param object self: This is a reference to the property data object.
-    :param object context: The context when the property was called.
-    """
-    auto_format_disk_folder_path('disk_collision_folder_path', self)
