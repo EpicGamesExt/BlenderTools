@@ -10,7 +10,6 @@ import inspect
 import importlib
 import tempfile
 from . import settings
-from . import extension
 from ..ui import header_menu
 from ..dependencies import unreal
 from ..constants import AssetTypes, ToolInfo, PreFixToken, Extensions
@@ -676,6 +675,15 @@ def set_all_action_mute_values(rig_object, mute):
                 nla_track.mute = mute
 
 
+def set_unreal_rpc_timeout():
+    """
+    Sets the response timeout value of the unreal RPC server.
+    """
+    addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
+    if addon:
+        unreal.set_rpc_timeout(addon.preferences.rpc_response_timeout)
+
+
 def is_unreal_connected():
     """
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
@@ -1036,8 +1044,7 @@ def setup_project(*args):
         bpy.app.timers.register(setup_project, first_interval=0.1)
 
     # ensure the extension draws are created
-    extension_factory = extension.ExtensionFactory()
-    extension_factory.create_draws()
+    bpy.ops.send2ue.reload_extensions()
 
     # create the scene collections
     addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)

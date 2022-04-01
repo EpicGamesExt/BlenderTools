@@ -435,7 +435,7 @@ def is_lod_of(asset_name, mesh_object_name):
 
 def get_asset_sockets(asset_name, properties):
     """
-    This function selects the socket under the given asset.
+    Gets the socket under the given asset.
 
     :param str asset_name: The name of the asset to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -681,13 +681,12 @@ def send2ue(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # update the server timeout value
+    utilities.set_unreal_rpc_timeout()
+
     # if there are no failed validations continue
     validation_manager = validations.ValidationManager(properties)
     if validation_manager.run():
-        # TODO create the sequence data
-        # sequence_track_data = create_sequence_data(properties)
-        # ingest.sequence_track(sequence_track_data)
-
         # create the asset data
         assets_data = create_asset_data(properties)
         ingest.asset(assets_data, properties)

@@ -39,32 +39,37 @@ Also notice that the LOD build settings can be set under the
 
 ## Collisions
 
-Custom complex collision workflows for static meshes are supported.
+Simple collision workflows for static meshes are supported by prefixing your collision names with their respective identifiers.
+| Mesh Prefix and Name | Description |
+| -------------- | ----------------------- |
+| `UBX_[RenderMeshName]_##` | A Box must be created using a regular rectangular 3D object. You cannot move the vertices around or deform it in any way to make it something other than a rectangular prism, or else it will not work. |
+| `UCP_[RenderMeshName]_##` | A Capsule must be a cylindrical object capped with hemispheres. It does not need to have many segments (8 is a good number) at all because it is converted into a true capsule for collision. Like boxes, you should not move the individual vertices around.|
+| `USP_[RenderMeshName]_##` | A Sphere does not need to have many segments (8 is a good number) at all because it is converted into a true sphere for collision. Like boxes, you should not move the individual vertices around. |
+| `UCX_[RenderMeshName]_##` | A Convex object can be any completely closed convex 3D shape. For example, a box can also be a convex object. |
+
+The underlying mechanism for this is the Unreal FBX importer, so for further information, please refer to the [FBX Guide for static meshes](https://docs.unrealengine.com/4.27/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/).
+
 
 ![5](./images/static-mesh/5.png)
 
-Any child mesh that has the post fix `_COLLISION` in its name will be separately imported as a complex collision of its parent.
+Collisions are imported with the asset that matches the `[RenderMeshName]` after the collision prefix.
 
 ![6](./images/static-mesh/6.png)
 
 ::: tip Note
-  Collisions names have the `_COLLISION` postfix stripped out. `collision01_COLLISION` in blender become `collision01` in unreal.
+  Collisions must be in the `Export` collection to be exported.
 :::
-
-![7](./images/static-mesh/7.png)
-
-Collisions are exported and imported as separate files, so you probably will want to customize their export path and import paths in the [paths](/settings/paths.html) tab
 
 ## Sockets
 
 There is a supported workflow for adding sockets to static meshes.
 
-![8](./images/static-mesh/8.png)
+![8](./images/static-mesh/7.png)
 
-Any child mesh that has the post fix `_SOCKET` in its name will be separately imported as a socket of its parent.
+Any child mesh that has the pre fix `SOCKET_` in its name will be separately imported as a socket of its parent.
 
-![9](./images/static-mesh/9.png)
+![9](./images/static-mesh/8.png)
 
 ::: tip Note
-  Socket names have the `_SOCKET` postfix stripped out. `socket01_SOCKET` in blender become `socket01` in unreal.
+  Socket names have the `SOCKET_` prefix stripped out. `SOCKET_socket_01` in blender becomes `socket_01` in unreal.
 :::

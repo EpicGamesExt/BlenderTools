@@ -15,12 +15,21 @@ class Send2UeAddonProperties:
         default=True,
         description=f"This automatically creates the pre-defined collection (Export)"
     )
+    rpc_response_timeout: bpy.props.IntProperty(
+        name="RPC Response Timeout",
+        default=60,
+        description=(
+            "The amount of seconds that blender stops waiting for an unreal response after it has issued a command. "
+            "This might need to be increased if you plan on importing really large assets, where the import could "
+            "be longer then the timeout value"
+        )
+    )
     extensions_repo_path: bpy.props.StringProperty(
             name="Extensions Repo Path",
             default="",
             description=(
                 "Set this path to the folder that contains your Send to Unreal python extensions. All extensions "
-                "in this folder will be automatically loaded."
+                "in this folder will be automatically loaded"
             )
         )
 
@@ -504,9 +513,6 @@ def unregister_scene_properties():
     if scene_property_class:
         bpy.utils.unregister_class(scene_property_class)
 
-    if hasattr(bpy.types.Scene, ToolInfo.NAME.value):
-        del bpy.types.Scene.send2ue
-
 
 def register():
     """
@@ -533,3 +539,6 @@ def unregister():
 
     if hasattr(bpy.types.WindowManager, ToolInfo.NAME.value):
         del bpy.types.WindowManager.send2ue
+
+    if hasattr(bpy.types.Scene, ToolInfo.NAME.value):
+        del bpy.types.Scene.send2ue

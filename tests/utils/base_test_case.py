@@ -647,6 +647,10 @@ class BaseSend2ueTestCase(BaseTestCase):
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():
             self.move_to_collection([object_name]+socket_names, 'Export')
+
+            for socket_name in socket_names:
+                self.blender.parent_to(socket_name, object_name)
+
             self.send2ue_operation()
             for socket_name in socket_names:
                 self.assert_socket(object_name, socket_name.replace('SOCKET_', ''))
@@ -1199,7 +1203,7 @@ class BaseUe2RigifyTestCase(BaseTestCase):
 
             self.blender.set_addon_property('scene', self.addon_name, 'source_rig', rig_name, 'object')
             template_file_name = f'{template_name}_test.zip'
-            file_path = os.path.join(self.test_folder, 'test_files', 'ue2rigify_templates', template_file_name)
+            file_path = os.path.join(self.test_folder, 'test_files', 'data', template_file_name)
             # make the path a linux path if in the test environment
             if self.test_environment:
                 file_path = os.path.normpath(file_path).replace(os.path.sep, '/')

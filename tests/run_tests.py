@@ -1,10 +1,14 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import sys
 import logging
 
+# adds the rpc module to the path
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir, 'send2ue', 'dependencies'))
+
 from utils.addon_packager import AddonPackager
-from container_test_manager import ContainerTestManager
+from utils.container_test_manager import ContainerTestManager
 
 BLENDER_ADDONS = os.environ.get('BLENDER_ADDONS', 'send2ue,ue2rigify')
 

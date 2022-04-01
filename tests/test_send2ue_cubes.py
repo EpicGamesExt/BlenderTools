@@ -66,7 +66,7 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         https://github.com/EpicGames/BlenderTools/issues/69
         """
         self.run_socket_tests({
-            'Cube2': ['SOCKET_Cube2_01', 'SOCKET_Cube2_02']
+            'Cube2': ['SOCKET_socket_01', 'SOCKET_socket_02']
         })
 
     def test_collisions(self):

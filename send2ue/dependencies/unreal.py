@@ -172,6 +172,13 @@ def is_connected():
         return False
 
 
+def set_rpc_timeout(seconds):
+    """
+    Sets the response timeout value of the unreal RPC server.
+    """
+    rpc_client.proxy.set_env('RPC_TIME_OUT', seconds)
+
+
 def bootstrap_unreal_with_rpc_server():
     """
     Bootstraps the running unreal editor with the unreal rpc server if it doesn't already exist.
