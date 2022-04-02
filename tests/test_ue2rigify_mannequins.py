@@ -59,7 +59,7 @@ class TestUe2RigifyMannequins(BaseUe2RigifyTestCase):
 
     def test_baking(self):
         """
-        related issue:
+        Tests that baking functions correctly.
         This tests that baking the bone transforms is correct.
         https://github.com/EpicGames/BlenderTools/issues/238
         """

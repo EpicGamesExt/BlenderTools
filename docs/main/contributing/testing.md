@@ -1,5 +1,8 @@
 # Help Test
-Testing can be done locally with your open Blender and Unreal Editor instances or with [Docker](https://docs.docker.com/get-docker/) containers.
+Testing can be done locally with your open Blender and Unreal Editor instances or with [Docker](https://docs.docker.com/get-docker/) containers. First install the requirements.
+```shell
+pip install -r requirements.txt
+```
 
 ## Testing Against Open App Instances
 1. Open Blender

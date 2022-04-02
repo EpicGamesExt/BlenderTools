@@ -140,8 +140,7 @@ class ValidationManager:
             ]:
                 property_names = [
                     'disk_mesh_folder_path',
-                    'disk_animation_folder_path',
-                    'disk_collision_folder_path'
+                    'disk_animation_folder_path'
                 ]
                 for property_name in property_names:
                     error_message = formatting.auto_format_disk_folder_path(property_name, self.properties)
@@ -161,8 +160,7 @@ class ValidationManager:
             ]:
                 property_names = [
                     'unreal_mesh_folder_path',
-                    'unreal_animation_folder_path',
-                    'unreal_collision_folder_path',
+                    'unreal_animation_folder_path'
                 ]
                 for property_name in property_names:
                     error_message = formatting.auto_format_unreal_folder_path(property_name, self.properties)

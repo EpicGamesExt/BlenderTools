@@ -87,7 +87,7 @@ def auto_format_unreal_folder_path(name, properties):
 
     value = getattr(properties, name)
     formatted_value = format_folder_path(value)
-    if value and properties.rna_type.properties.get(name).type == 'STRING':
+    if value:
         if value != formatted_value:
             setattr(properties, name, formatted_value)
 
@@ -130,27 +130,35 @@ def auto_format_disk_folder_path(name, properties):
     :param str name: The name of the changed property.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    error_message = None
+    error_message = ''
+    set_property_error_message(name, error_message)
     # don't run the validations if path validation is false
     if not bpy.context.window_manager.send2ue.path_validation:
         return
 
     value = getattr(properties, name)
-    set_property_error_message(name, '')
-    if bpy.data.filepath and value.startswith(('//', './', '.\\')):
-        value = resolve_path(value)
+    formatted_value = value.replace('"', '').replace("'", '')
+    if value != formatted_value:
+        setattr(properties, name, formatted_value)
 
-    elif value.startswith(('//', './', '.\\')):
-        error_message = 'Relative paths can only be used if this file is saved.'
+        if bpy.data.filepath and formatted_value.startswith(('//', './', '.\\')):
+            formatted_value = resolve_path(formatted_value)
+
+        elif formatted_value.startswith(('//', './', '.\\')):
+            error_message = 'Relative paths can only be used if this file is saved.'
+
+        # check that the folder exists
+        if os.path.exists(formatted_value):
+            # test the folder permissions
+            if not os.access(formatted_value, os.W_OK):
+                error_message = f'The permissions of "{formatted_value}" will not allow files to write to it.'
+        else:
+            error_message = f'"{formatted_value}" does not exist on disk.'
+
         set_property_error_message(
             name,
             error_message
         )
-
-    # test the folder permissions
-    if os.path.exists(value):
-        if not os.access(value, os.W_OK):
-            error_message = f'The permissions of "{value}" will not allow files to write to it.'
 
     return error_message
 
@@ -171,7 +179,7 @@ def auto_format_unreal_asset_path(name, properties):
     set_property_error_message(name, '')
 
     value = getattr(properties, name)
-    if value and properties.rna_type.properties.get(name).type == 'STRING':
+    if value:
         formatted_value = format_asset_path(value)
         if value != formatted_value:
             setattr(properties, name, formatted_value)
@@ -214,16 +222,6 @@ def update_unreal_animation_folder_path(self, context):
     :param object context: The context when the property was called.
     """
     auto_format_unreal_folder_path('unreal_animation_folder_path', self)
-
-
-def update_unreal_collision_folder_path(self, context):
-    """
-    Called every time the unreal collision folder path is updated.
-
-    :param object self: This is a reference to the property data object.
-    :param object context: The context when the property was called.
-    """
-    auto_format_unreal_folder_path('unreal_collision_folder_path', self)
 
 
 def update_unreal_skeleton_asset_path(self, context):
@@ -274,13 +272,3 @@ def update_disk_animation_folder_path(self, context):
     :param object context: The context when the property was called.
     """
     auto_format_disk_folder_path('disk_animation_folder_path', self)
-
-
-def update_disk_collision_folder_path(self, context):
-    """
-    Called every time the disk collision folder path is updated.
-
-    :param object self: This is a reference to the property data object.
-    :param object context: The context when the property was called.
-    """
-    auto_format_disk_folder_path('disk_collision_folder_path', self)

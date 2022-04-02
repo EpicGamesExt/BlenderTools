@@ -23,7 +23,6 @@ class Send2UnrealDialog(bpy.types.Panel):
         ]:
             self.draw_property(properties, layout, 'unreal_mesh_folder_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_animation_folder_path', header_label=True)
-            self.draw_property(properties, layout, 'unreal_collision_folder_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_skeleton_asset_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_physics_asset_path', header_label=True)
 
@@ -33,7 +32,6 @@ class Send2UnrealDialog(bpy.types.Panel):
         ]:
             self.draw_property(properties, layout, 'disk_mesh_folder_path', header_label=True)
             self.draw_property(properties, layout, 'disk_animation_folder_path', header_label=True)
-            self.draw_property(properties, layout, 'disk_collision_folder_path', header_label=True)
 
     @staticmethod
     def draw_property(properties, layout, property_name, header_label=False, enabled=True):

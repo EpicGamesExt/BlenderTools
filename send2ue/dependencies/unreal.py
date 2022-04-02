@@ -172,6 +172,13 @@ def is_connected():
         return False
 
 
+def set_rpc_timeout(seconds):
+    """
+    Sets the response timeout value of the unreal RPC server.
+    """
+    rpc_client.proxy.set_env('RPC_TIME_OUT', seconds)
+
+
 def bootstrap_unreal_with_rpc_server():
     """
     Bootstraps the running unreal editor with the unreal rpc server if it doesn't already exist.
@@ -577,18 +584,19 @@ class UnrealRemoteCalls:
         return True
 
     @staticmethod
-    def get_complex_collision_name(asset_path):
+    def get_static_mesh_collision_info(asset_path):
         """
-        Checks to see if an asset has a complex collision.
+        Gets the number of convex and simple collisions on a static mesh.
 
         :param str asset_path: The path to the unreal asset.
         :return str: The name of the complex collision.
         """
         mesh = Unreal.get_asset(asset_path)
-        collision_mesh = mesh.get_editor_property('complex_collision_mesh')
-        if collision_mesh:
-            return collision_mesh.get_name()
-        return ''
+        return {
+            'simple': unreal.EditorStaticMeshLibrary.get_simple_collision_count(mesh),
+            'convex': unreal.EditorStaticMeshLibrary.get_convex_collision_count(mesh),
+            'customized': mesh.get_editor_property('customized_collision')
+        }
 
     @staticmethod
     def get_material_index_by_name(asset_path, material_name):
@@ -804,24 +812,6 @@ class UnrealRemoteCalls:
 
             # create a new socket
             static_mesh.add_socket(socket)
-
-    @staticmethod
-    def set_static_mesh_collision(asset_path, collision_asset_path):
-        """
-        Sets the complex collision on a static mesh.
-
-        :param str asset_path: The project path to the static mesh in unreal.
-        :param str collision_asset_path: The project path to the collision mesh in unreal.
-        """
-        static_mesh = Unreal.get_asset(asset_path)
-        collision_mesh = Unreal.get_asset(collision_asset_path)
-        static_mesh.set_editor_property('customized_collision', True)
-        static_mesh.set_editor_property('complex_collision_mesh', collision_mesh)
-
-        # set the collision complexity to complex
-        body_setup = static_mesh.get_editor_property('body_setup')
-        body_setup.set_editor_property('collision_trace_flag', unreal.CollisionTraceFlag.CTF_USE_COMPLEX_AS_SIMPLE)
-        static_mesh.set_editor_property('body_setup', body_setup)
 
     @staticmethod
     def get_lod_build_settings(asset_path, index):

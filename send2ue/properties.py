@@ -15,12 +15,21 @@ class Send2UeAddonProperties:
         default=True,
         description=f"This automatically creates the pre-defined collection (Export)"
     )
+    rpc_response_timeout: bpy.props.IntProperty(
+        name="RPC Response Timeout",
+        default=60,
+        description=(
+            "The amount of seconds that blender stops waiting for an unreal response after it has issued a command. "
+            "This might need to be increased if you plan on importing really large assets, where the import could "
+            "be longer then the timeout value"
+        )
+    )
     extensions_repo_path: bpy.props.StringProperty(
             name="Extensions Repo Path",
             default="",
             description=(
                 "Set this path to the folder that contains your Send to Unreal python extensions. All extensions "
-                "in this folder will be automatically loaded."
+                "in this folder will be automatically loaded"
             )
         )
 
@@ -203,15 +212,6 @@ def get_scene_property_class():
                 "be imported to this location in your open Unreal Project"
             )
         )
-        unreal_collision_folder_path: bpy.props.StringProperty(
-            name="Collision Folder (Unreal)",
-            default=r"/Game/untitled_category/untitled_asset/collisions/",
-            update=formatting.update_unreal_collision_folder_path,
-            description=(
-                "This is the collision import path. All your collisions that are associated with your asset will be "
-                "imported to this location in your open Unreal Project"
-            )
-        )
         unreal_skeleton_asset_path: bpy.props.StringProperty(
             name="Skeleton Asset (Unreal)",
             default=r"",
@@ -248,15 +248,6 @@ def get_scene_property_class():
                 "This is the path to the folder where your actions will be exported to on disk. All your actions that "
                 "are in an Armature object’s NLA strips will be exported to this location. The file names will match the "
                 "action names in Blender"
-            )
-        )
-        disk_collision_folder_path: bpy.props.StringProperty(
-            name="Collision Folder (Disk)",
-            default=os.path.expanduser('~'),
-            update=formatting.update_disk_collision_folder_path,
-            description=(
-                "This is the path to the folder where your collisions will be exported to on disk. The file names will "
-                "match the collision names in Blender"
             )
         )
         automatically_scale_bones: bpy.props.BoolProperty(
@@ -522,9 +513,6 @@ def unregister_scene_properties():
     if scene_property_class:
         bpy.utils.unregister_class(scene_property_class)
 
-    if hasattr(bpy.types.Scene, ToolInfo.NAME.value):
-        del bpy.types.Scene.send2ue
-
 
 def register():
     """
@@ -551,3 +539,6 @@ def unregister():
 
     if hasattr(bpy.types.WindowManager, ToolInfo.NAME.value):
         del bpy.types.WindowManager.send2ue
+
+    if hasattr(bpy.types.Scene, ToolInfo.NAME.value):
+        del bpy.types.Scene.send2ue

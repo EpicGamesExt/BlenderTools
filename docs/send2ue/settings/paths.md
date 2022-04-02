@@ -50,10 +50,6 @@ unreal project.
 This is the animation import path. All your actions that are in an Armature object’s NLA strips will be imported to
 this location in your open Unreal Project.
 
-### Collision Folder (Unreal):
-This is the collision import path. All your collisions that are associated with your asset will be
-imported to this location in your open Unreal Project
-
 ### Skeleton Asset (Unreal):
 This is the direct path to the Skeleton you want to import animation on. You can get this path by
 right-clicking on the skeleton asset in Unreal and selecting "Copy Reference".
@@ -72,7 +68,3 @@ meshes will be exported to this location. The file names will match the name of 
 This is the path to the folder where your animations will be exported to on disk. All your action strips
 that are in the NLA Editor will be exported to this location. The file names will match
 the action name in blender.
-
-### Collision Folder (Disk):
-This is the path to the folder where your collisions will be exported to on disk. The file names will
-match the collision names in Blender
