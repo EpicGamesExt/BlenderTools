@@ -13,7 +13,7 @@ from .core import formatting, validations, settings, utilities, export, ingest, 
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (2, 0, 0),
+    "version": (2, 0, 1),
     "blender": (2, 93, 0),
     "location": "Header > Pipeline > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
@@ -50,22 +50,25 @@ def register():
         for module in modules:
             importlib.reload(module)
 
-    # register the properties
-    properties.register()
+    try:
+        # register the properties
+        properties.register()
 
-    # register the operators
-    operators.register()
+        # register the operators
+        operators.register()
 
-    # add extensions
-    extension_factory = extension.ExtensionFactory()
-    extension_factory.create_operators()
-    extension_factory.create_draws()
+        # add extensions
+        extension_factory = extension.ExtensionFactory()
+        extension_factory.create_operators()
+        extension_factory.create_draws()
 
-    # register the header menu
-    header_menu.register()
+        # register the header menu
+        header_menu.register()
 
-    # register the addon preferences
-    addon_preferences.register()
+        # register the addon preferences
+        addon_preferences.register()
+    except RuntimeError as error:
+        print(error)
 
     # add an event handler that will run on new file loads
     bpy.app.handlers.load_post.append(bpy.app.handlers.persistent(utilities.setup_project))
@@ -82,26 +85,29 @@ def unregister():
     if utilities.setup_project in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.remove(utilities.setup_project)
 
-    # remove the pipeline menu
-    header_menu.remove_parent_menu()
+    try:
+        # remove the pipeline menu
+        header_menu.remove_parent_menu()
 
-    # unregister the header menu
-    header_menu.unregister()
+        # unregister the header menu
+        header_menu.unregister()
 
-    # register the addon preferences
-    addon_preferences.unregister()
+        # register the addon preferences
+        addon_preferences.unregister()
 
-    # remove extensions
-    extension_factory = extension.ExtensionFactory()
-    extension_factory.remove_draws()
-    extension_factory.remove_operators()
-    extension_factory.remove_property_data()
+        # remove extensions
+        extension_factory = extension.ExtensionFactory()
+        extension_factory.remove_draws()
+        extension_factory.remove_operators()
+        extension_factory.remove_property_data()
 
-    # unregister the operators
-    operators.unregister()
+        # unregister the operators
+        operators.unregister()
 
-    # unregister the properties
-    properties.unregister()
+        # unregister the properties
+        properties.unregister()
+    except RuntimeError as error:
+        print(error)
 
     # remove the temp data
     utilities.remove_temp_data()

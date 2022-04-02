@@ -109,17 +109,6 @@ def create_static_mesh_sockets(asset_path, asset_data):
     UnrealRemoteCalls.set_static_mesh_sockets(asset_path, asset_data)
 
 
-@track_progress(message='Setting static mesh collision for "{param}"...', param='asset_path')
-def set_static_mesh_collision(asset_path, collision_asset_path):
-    """
-    Sets the complex collision on a static mesh.
-
-    :param str asset_path: The project path to the static mesh in unreal.
-    :param str collision_asset_path: The project path to the collision mesh in unreal.
-    """
-    UnrealRemoteCalls.set_static_mesh_collision(asset_path, collision_asset_path)
-
-
 def reset_lods(asset_data, property_data):
     """
     Removes all lods on the given mesh.
@@ -199,16 +188,6 @@ def asset(assets_data, properties):
                 # import sockets
                 if asset_data.get('sockets'):
                     create_static_mesh_sockets(asset_data.get('asset_path'), asset_data)
-
-                # import collisions
-                collision = asset_data.get('collision')
-                if collision:
-                    property_data.update({
-                        'import_materials': {'value': False},
-                        'import_textures': {'value': False},
-                    })
-                    import_asset(collision.get('file_path'), collision, property_data)
-                    set_static_mesh_collision(asset_data.get('asset_path'), collision.get('asset_path'))
 
                 # import fcurves
                 fcurve_file_path = asset_data.get('fcurve_file_path')

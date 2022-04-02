@@ -278,8 +278,7 @@ class BaseSend2ueTestCase(BaseTestCase):
         # delete all folders
         for property_name in [
             'unreal_mesh_folder_path',
-            'unreal_animation_folder_path',
-            'unreal_collision_folder_path'
+            'unreal_animation_folder_path'
         ]:
             unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
             self.unreal.delete_directory(unreal_folder_path)
@@ -292,8 +291,7 @@ class BaseSend2ueTestCase(BaseTestCase):
         # delete all folders
         for property_name in [
             'unreal_mesh_folder_path',
-            'unreal_animation_folder_path',
-            'unreal_collision_folder_path'
+            'unreal_animation_folder_path'
         ]:
             unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
             self.unreal.delete_directory(unreal_folder_path)
@@ -347,15 +345,25 @@ class BaseSend2ueTestCase(BaseTestCase):
             f'The socket "{socket_name}" could not be found on "{asset_name}" in unreal.'
         )
 
-    def assert_collision(self, asset_name, collision_name):
-        self.log(f'Checking "{asset_name}" for collision "{collision_name}"...')
+    def assert_collision(self, asset_name, simple_count=0, convex_count=0):
+        self.log(f'Checking "{asset_name}" for collision...')
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
         asset_path = f'{folder_path}{asset_name}'
-        unreal_collision_name = self.unreal.get_complex_collision_name(asset_path)
+        collision_info = self.unreal.get_static_mesh_collision_info(asset_path)
+
+        self.assertTrue(
+            collision_info.get('customized'),
+            f'The mesh "{asset_name}" does not have a customized collision.'
+        )
         self.assertEqual(
-            unreal_collision_name,
-            collision_name,
-            f'The collision name "{collision_name}" does not match the collision "{unreal_collision_name}" in unreal.'
+            convex_count,
+            collision_info.get('convex'),
+            f'The convex collision count is not correct.'
+        )
+        self.assertEqual(
+            simple_count,
+            collision_info.get('simple'),
+            f'The simple collision count is not correct.'
         )
 
     def assert_material(self, asset_name, material_name, material_index, exists):
@@ -638,23 +646,30 @@ class BaseSend2ueTestCase(BaseTestCase):
 
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():
-            self.move_to_collection([object_name], 'Export')
+            self.move_to_collection([object_name]+socket_names, 'Export')
+
             for socket_name in socket_names:
-                self.log(f'Parenting "{socket_name}" to "{object_name}"...')
                 self.blender.parent_to(socket_name, object_name)
-        self.send2ue_operation()
-        for object_name, socket_names in objects_and_sockets.items():
+
+            self.send2ue_operation()
             for socket_name in socket_names:
-                self.assert_socket(object_name, socket_name.strip('_SOCKET'))
+                self.assert_socket(object_name, socket_name.replace('SOCKET_', ''))
 
     def run_collision_tests(self, objects_and_collisions):
-        for object_name, collision_name in objects_and_collisions.items():
-            self.move_to_collection([object_name], 'Export')
-            self.log(f'Parenting "{collision_name}" to "{object_name}"...')
-            self.blender.parent_to(collision_name, object_name)
-        self.send2ue_operation()
-        for object_name, collision_name in objects_and_collisions.items():
-            self.assert_collision(object_name, collision_name.strip('_COLLISION'))
+        for object_and_collisions in objects_and_collisions:
+            for object_name, collision_data in object_and_collisions.items():
+                simple_count = collision_data.get('simple_count')
+                convex_count = collision_data.get('convex_count')
+                collision_objects = collision_data.get('objects')
+
+                self.move_to_collection([object_name] + collision_objects, 'Export')
+                self.send2ue_operation()
+                self.assert_collision(
+                    object_name,
+                    simple_count=simple_count,
+                    convex_count=convex_count
+                )
+                self.setUp()
 
     def run_material_tests(self, objects_and_materials):
         for object_name, data in objects_and_materials.items():
@@ -1188,7 +1203,7 @@ class BaseUe2RigifyTestCase(BaseTestCase):
 
             self.blender.set_addon_property('scene', self.addon_name, 'source_rig', rig_name, 'object')
             template_file_name = f'{template_name}_test.zip'
-            file_path = os.path.join(self.test_folder, 'test_files', 'ue2rigify_templates', template_file_name)
+            file_path = os.path.join(self.test_folder, 'test_files', 'data', template_file_name)
             # make the path a linux path if in the test environment
             if self.test_environment:
                 file_path = os.path.normpath(file_path).replace(os.path.sep, '/')
