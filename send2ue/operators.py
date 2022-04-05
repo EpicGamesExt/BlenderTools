@@ -31,6 +31,8 @@ class Send2Ue(bpy.types.Operator):
         self.execution_queue = bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value]
 
     def modal(self, context, event):
+        properties = bpy.context.scene.send2ue
+
         if not self.done:
             context.area.tag_redraw()
 
@@ -45,13 +47,15 @@ class Send2Ue(bpy.types.Operator):
 
         if event.type == 'TIMER':
             if not self.execution_queue.empty():
-                function, args, kwargs, description = self.execution_queue.get()
-                bpy.context.workspace.status_text_set_internal(description)
-
+                function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
                 step = self.max_step - self.execution_queue.qsize()
                 context.window_manager.send2ue.progress = abs(((step / self.max_step) * 100) - 1)
                 utilities.refresh_all_areas()
                 function(*args, **kwargs)
+                description = message.format(
+                    attribute=utilities.get_asset_name_from_file_name(properties.asset_data[asset_id].get(attribute))
+                )
+                bpy.context.workspace.status_text_set_internal(description)
 
             if self.escape:
                 bpy.types.STATUSBAR_HT_header.remove(self.draw_progress)
@@ -104,7 +108,7 @@ class Send2Ue(bpy.types.Operator):
 
             # process the queued functions
             while not self.execution_queue.empty():
-                function, args, kwargs, description = self.execution_queue.get()
+                function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
                 function(*args, **kwargs)
 
             self.post_operation()

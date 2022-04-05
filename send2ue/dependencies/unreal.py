@@ -404,10 +404,14 @@ class UnrealImportAsset(Unreal):
         """
         Sets the FBX import options.
         """
-        self._import_task.filename = self._file_path
-        self._import_task.destination_path = self._asset_data.get('asset_folder')
-        self._import_task.automated = not self._property_data.get('advanced_ui_import', {}).get('value', False)
-        self._import_task.replace_existing = True
+        self._import_task.set_editor_property('filename', self._file_path)
+        self._import_task.set_editor_property('destination_path', self._asset_data.get('asset_folder'))
+        self._import_task.set_editor_property('replace_existing', True)
+        self._import_task.set_editor_property('replace_existing_settings', True)
+        self._import_task.set_editor_property(
+            'automated',
+            not self._property_data.get('advanced_ui_import', {}).get('value', False)
+        )
 
         import_materials_and_textures = self._property_data.get('import_materials_and_textures', {}).get('value', True)
 
@@ -439,6 +443,7 @@ class UnrealImportAsset(Unreal):
         # assign the options object to the import task and import the asset
         self._import_task.options = self._options
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([self._import_task])
+        return list(self._import_task.get_editor_property('imported_object_paths'))
 
 
 class UnrealImportSequence(Unreal):
@@ -671,7 +676,7 @@ class UnrealRemoteCalls:
             unreal_import_asset.set_fbx_import_task_options()
 
         # run the import task
-        unreal_import_asset.run_import()
+        return unreal_import_asset.run_import()
 
     @staticmethod
     def import_sequence_track(asset_path, file_path, track_name, start=None, end=None):

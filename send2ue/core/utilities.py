@@ -6,14 +6,42 @@ import sys
 import bpy
 import math
 import shutil
-import inspect
 import importlib
 import tempfile
+import base64
 from . import settings
 from ..ui import header_menu
 from ..dependencies import unreal
 from ..constants import AssetTypes, ToolInfo, PreFixToken, Extensions
 from mathutils import Vector, Quaternion, Matrix
+
+
+def track_progress(message='', attribute=''):
+    """
+    A decorator that makes its wrapped function a queued job.
+
+    :param str message: A the progress message.
+    :param str attribute: The asset attribute to use in as the message.
+    """
+    def decorator(function):
+        def wrapper(*args, **kwargs):
+            asset_id = args[0]
+            bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value].put(
+                (function, args, kwargs, message, asset_id, attribute)
+            )
+        return wrapper
+    return decorator
+
+
+def get_asset_id(file_path):
+    """
+    Gets the asset id, which is the hash from the file path.
+
+    :return str: The asset id.
+    """
+    file_path_bytes = file_path.encode('utf-8')
+    base64_bytes = base64.b64encode(file_path_bytes)
+    return base64_bytes.decode('utf-8')
 
 
 def get_asset_name_from_file_name(file_path):
@@ -24,29 +52,6 @@ def get_asset_name_from_file_name(file_path):
     :return str: A asset name.
     """
     return os.path.splitext(os.path.basename(file_path))[0]
-
-
-def track_progress(message=None, param=None):
-    """
-    A decorator that makes its wrapped function a queued job.
-
-    :param str message: A the progress message.
-    :param str param: A the name of the parameter value to inject in the message.
-    """
-    def decorator(function):
-        def wrapper(*args, **kwargs):
-            description = function.__name__
-            if message:
-                arg_names = inspect.getfullargspec(function).args
-                if param is not None:
-                    value = kwargs.get(param)
-                    if value is None:
-                        index = arg_names.index(param)
-                        value = args[index]
-                    description = message.format(param=get_asset_name_from_file_name(value))
-            bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value].put((function, args, kwargs, description))
-        return wrapper
-    return decorator
 
 
 def get_operator_class_by_bl_idname(bl_idname):
@@ -892,7 +897,7 @@ def select_asset_collisions(asset_name, properties):
     """
     export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
     if export_collection:
-        for mesh_object in export_collection.objects:
+        for mesh_object in export_collection.all_objects:
             if is_collision_of(asset_name, mesh_object.name, properties):
                 mesh_object.select_set(True)
 
@@ -1464,8 +1469,12 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
             for action in actions:
                 # iterate through the location curves
                 for fcurve in [fcurve for fcurve in action.fcurves if fcurve.data_path.endswith('location')]:
-                    # don't scale the objects location keys
+                    # the location fcurve of the object
                     if fcurve.data_path == 'location':
+                        for keyframe_point in fcurve.keyframe_points:
+                            # just the location to preserve root motion
+                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index]
+                        # don't scale the objects location handles
                         continue
 
                     # and iterate through the keyframe values
@@ -1622,15 +1631,3 @@ def apply_transform(scene_object, use_location=False, use_rotation=False, use_sc
         child.matrix_local = matrix @ child.matrix_local
 
     scene_object.matrix_basis = basis[0] @ basis[1] @ basis[2]
-
-
-def safe_call(function):
-    """
-    Safely calls a function and handles the exception.
-
-    :param callable function: A callable.
-    """
-    try:
-        function()
-    except Exception as error:
-        sys.stderr.write(f'{error}\n')

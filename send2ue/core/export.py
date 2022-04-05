@@ -45,10 +45,11 @@ def get_file_path(asset_name, properties, asset_type, lod=False, file_extension=
     )
 
 
-def export_lods(asset_name, properties):
+def export_lods(asset_id, asset_name, properties):
     """
     Exports the lod meshes and returns there file paths.
 
+    :param str asset_id: The unique id of the asset.
     :param str asset_name: The name of the asset that will be exported to a file.
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     :return list: A list of lod file paths.
@@ -61,8 +62,7 @@ def export_lods(asset_name, properties):
                 if mesh_object.name != utilities.get_lod0_name(mesh_object.name, properties):
                     lod_index = utilities.get_lod_index(mesh_object.name, properties)
                     file_path = get_file_path(mesh_object.name, properties, asset_type=AssetTypes.MESH, lod=True)
-                    export_mesh(mesh_object, file_path, properties)
-
+                    export_mesh(asset_id, mesh_object, properties, lod=lod_index)
                     if file_path:
                         lods[str(lod_index)] = file_path
         return lods
@@ -369,30 +369,39 @@ def export_fbx_file(file_path, properties):
     )
 
 
-def export_custom_property_fcurves(action_name, file_path, properties):
+def export_custom_property_fcurves(action_name, properties):
     """
     Exports custom property fcurves to a file.
 
     :param str action_name: The name of the action to export.
-    :param str file_path: A file path where the file will be exported.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    file_path = properties.asset_data[properties.asset_id]['file_path']
+
     fcurve_file_path = None
     fcurve_data = utilities.get_custom_property_fcurve_data(action_name)
     if fcurve_data and properties.export_custom_property_fcurves:
         file_path, file_extension = os.path.splitext(file_path)
         fcurve_file_path = ToolInfo.FCURVE_FILE.value.format(file_path=file_path)
-        export_fcurves_file(fcurve_data, fcurve_file_path)
-    return fcurve_file_path
+        if fcurve_data:
+            with open(fcurve_file_path, 'w') as fcurves_file:
+                json.dump(fcurve_data, fcurves_file)
+
+    properties.asset_data[properties.asset_id]['fcurve_file_path'] = fcurve_file_path
 
 
-def export_file(file_path, properties):
+def export_file(properties, lod=0):
     """
     Calls the blender export operator with specific settings.
 
-    :param str file_path: A file path where the file will be exported.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool lod: Whether the exported mesh is a lod.
     """
+    asset_data = properties.asset_data[properties.asset_id]
+    file_path = asset_data['file_path']
+    if lod != 0:
+        file_path = asset_data['lods'][str(lod)]
+
     # gets the original position and sets the objects position according to the selected properties.
     original_positions = set_selected_objects_to_center(properties)
 
@@ -423,16 +432,6 @@ def export_file(file_path, properties):
     restore_rig_objects(context, properties)
 
 
-def is_lod_of(asset_name, mesh_object_name):
-    """
-    This function checks if the given asset name matches the lod naming convention.
-
-    :param str asset_name: The name of the asset to export.
-    :param str mesh_object_name: The name of the lod mesh.
-    """
-    return bool(re.fullmatch(rf"{asset_name}_LOD\d+(_\d+)?", mesh_object_name))
-
-
 def get_asset_sockets(asset_name, properties):
     """
     Gets the socket under the given asset.
@@ -454,22 +453,23 @@ def get_asset_sockets(asset_name, properties):
     return socket_data
 
 
-@utilities.track_progress(message='Exporting mesh "{param}"...', param='file_path')
-def export_mesh(mesh_object, file_path, properties):
+@utilities.track_progress(message='Exporting mesh "{attribute}"...', attribute='file_path')
+def export_mesh(asset_id, mesh_object, properties, lod=0):
     """
     Exports a mesh to a file.
 
+    :param str asset_id: The unique id of the asset.
     :param object mesh_object: A object of type mesh.
-    :param str file_path: The full file path of the export file.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool lod: Whether the exported mesh is a lod.
     :return str: The fbx file path of the exported mesh
     """
-    # set the property values so they can be accessed
-    properties.asset_name = mesh_object.name
-    properties.file_path = file_path
+    # set the current asset id
+    properties.asset_id = asset_id
 
     # run the pre mesh export extensions
-    extension.run_operators(ExtensionOperators.PRE_MESH_EXPORT.value)
+    if lod == 0:
+        extension.run_operators(ExtensionOperators.PRE_MESH_EXPORT.value)
 
     # deselect everything
     utilities.deselect_all_objects()
@@ -486,7 +486,7 @@ def export_mesh(mesh_object, file_path, properties):
     utilities.select_asset_collisions(mesh_object_name, properties)
 
     # export selection to an fbx file
-    export_file(file_path, properties)
+    export_file(properties, lod)
 
     # deselect the exported object
     mesh_object = bpy.data.objects.get(mesh_object_name)
@@ -494,36 +494,23 @@ def export_mesh(mesh_object, file_path, properties):
         mesh_object.select_set(False)
 
     # run the post mesh export extensions
-    extension.run_operators(ExtensionOperators.POST_MESH_EXPORT.value)
+    if lod == 0:
+        extension.run_operators(ExtensionOperators.POST_MESH_EXPORT.value)
 
 
-@utilities.track_progress(message='Exporting custom property fcurves for animation "{param}"...', param='file_path')
-def export_fcurves_file(fcurve_data, file_path):
-    """
-    Exports the serialized fcurves to a json file.
-
-    :param dict fcurve_data: A dictionary of fcurve names and their keyframe points and values.
-    :param str file_path: The file where the json file will be exported.
-    """
-    if fcurve_data:
-        with open(file_path, 'w') as fcurves_file:
-            json.dump(fcurve_data, fcurves_file)
-
-
-@utilities.track_progress(message='Exporting animation "{param}"...', param='file_path')
-def export_animation(rig_object, action_name, file_path, properties):
+@utilities.track_progress(message='Exporting animation "{attribute}"...', attribute='file_path')
+def export_animation(asset_id, rig_object, action_name, properties):
     """
     Exports a single action from a rig object to a file.
 
+    :param str asset_id: The unique id of the asset.
     :param object rig_object: A object of type armature with animation data.
     :param str action_name: The name of the action to export.
-    :param str file_path: The full file path of the export file.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return str: The fbx file path of the exported action
     """
-    # set the property values so they can be accessed
-    properties.asset_name = action_name
-    properties.file_path = file_path
+    # set the current asset id
+    properties.asset_id = asset_id
 
     # run the pre animation export extensions
     extension.run_operators(ExtensionOperators.PRE_ANIMATION_EXPORT.value)
@@ -541,7 +528,10 @@ def export_animation(rig_object, action_name, file_path, properties):
     utilities.set_action_mute_value(rig_object, action_name, False)
 
     # export the action
-    export_file(properties.file_path, properties)
+    export_file(properties)
+
+    # export custom property fcurves
+    export_custom_property_fcurves(action_name, properties)
 
     # ensure the rigs are in rest position before setting the mute values
     utilities.clear_pose(rig_object)
@@ -561,7 +551,7 @@ def create_animation_data(rig_objects, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of dictionaries containing the action import data.
     """
-    animation_data = []
+    animation_data = {}
 
     if properties.import_animations:
         # get the asset data for the skeletal animations
@@ -584,34 +574,33 @@ def create_animation_data(rig_objects, properties):
                 asset_name = utilities.get_asset_name(action_name, properties)
 
                 # export the animation
-                export_animation(rig_object, action_name, file_path, properties)
-
-                # export custom property fcurves
-                fcurve_file_path = export_custom_property_fcurves(action_name, file_path, properties)
+                asset_id = utilities.get_asset_id(file_path)
+                export_animation(asset_id, rig_object, action_name, properties)
 
                 # save the import data
-                animation_data.append({
+                asset_id = utilities.get_asset_id(file_path)
+                animation_data[asset_id] = {
+                    'asset_type': AssetTypes.ANIMATION,
                     'file_path': file_path,
                     'asset_path': f'{properties.unreal_animation_folder_path}{asset_name}',
                     'asset_folder': properties.unreal_animation_folder_path,
                     'skeleton_asset_path': utilities.get_skeleton_asset_path(rig_object, properties),
-                    'animation': True,
-                    'fcurve_file_path': fcurve_file_path
-                })
+                    'animation': True
+                }
 
     return animation_data
 
 
 def create_mesh_data(mesh_objects, rig_objects, properties):
     """
-    This function collects and creates all the asset data needed for the import process.
+    Collects and creates all the asset data needed for the import process.
 
     :param list mesh_objects: A list of mesh objects.
     :param list rig_objects: A list of rig objects.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of dictionaries containing the mesh import data.
     """
-    mesh_data = []
+    mesh_data = {}
     previous_asset_names = []
 
     # get the asset data for the scene objects
@@ -625,7 +614,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
         # check each previous asset name for its lod mesh
         for previous_asset in previous_asset_names:
-            if is_lod_of(previous_asset, mesh_object.name):
+            if utilities.is_lod_of(previous_asset, mesh_object.name, properties):
                 already_exported = True
                 break
 
@@ -633,20 +622,22 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
             # get file path
             file_path = get_file_path(mesh_object.name, properties, AssetTypes.MESH, lod=False)
             # export the object
-            export_mesh(mesh_object, file_path, properties)
+            asset_id = utilities.get_asset_id(file_path)
+            export_mesh(asset_id, mesh_object, properties)
             import_path = utilities.get_full_import_path(mesh_object, properties, AssetTypes.MESH)
 
             # save the asset data
-            mesh_data.append({
+            mesh_data[asset_id] = {
+                'asset_type': AssetTypes.MESH,
                 'file_path': file_path,
                 'asset_folder': import_path,
                 'asset_path': f'{import_path}{asset_name}',
                 'skeletal_mesh': bool(rig_objects),
                 'skeleton_asset_path': properties.unreal_skeleton_asset_path,
-                'lods': export_lods(asset_name, properties),
+                'lods': export_lods(asset_id, asset_name, properties),
                 'sockets': get_asset_sockets(mesh_object.name, properties),
                 'import_mesh': True
-            })
+            }
             previous_asset_names.append(asset_name)
 
     return mesh_data
@@ -657,7 +648,6 @@ def create_asset_data(properties):
     Collects and creates all the asset data needed for the import process.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return list: A list of dictionaries containing the both the mesh and action import data.
     """
     # get the mesh and rig objects from their collections
     mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
@@ -672,7 +662,8 @@ def create_asset_data(properties):
     # get the asset data for all the actions on the rig objects
     animation_data = create_animation_data(rig_objects, properties)
 
-    return mesh_data + animation_data
+    # update the properties with the asset data
+    properties.asset_data.update({**mesh_data, **animation_data})
 
 
 def send2ue(properties):
@@ -681,6 +672,10 @@ def send2ue(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # clear the asset_data and current id
+    properties.asset_id = ''
+    properties.asset_data.clear()
+
     # update the server timeout value
     utilities.set_unreal_rpc_timeout()
 
@@ -688,5 +683,8 @@ def send2ue(properties):
     validation_manager = validations.ValidationManager(properties)
     if validation_manager.run():
         # create the asset data
-        assets_data = create_asset_data(properties)
-        ingest.asset(assets_data, properties)
+        create_asset_data(properties)
+        ingest.asset(properties)
+
+    # clear the current id
+    properties.asset_id = ''

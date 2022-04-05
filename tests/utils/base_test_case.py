@@ -192,6 +192,21 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
                     f'The "{extension_name}" extension draw method "{name}" should not exist.'
                 )
 
+    def assert_extension(self, extension_name, extensions_data, exists=True):
+        extension_properties = extensions_data.get('properties', {})
+        extension_operators = extensions_data.get('operators', [])
+        extension_utility_operators = extensions_data.get('utility_operators', [])
+        extension_draws = extensions_data.get('draws', [])
+
+        # check properties
+        self.assert_extension_properties(extension_name, extension_properties, exists)
+
+        # check properties
+        self.assert_extension_operators(extension_name, extension_operators + extension_utility_operators, exists)
+
+        # check draws
+        self.assert_extension_draws(extension_name, extension_draws, exists)
+
     def run_extension_tests(self, extensions):
         external_extensions = extensions.get('external', {})
         default_extensions = extensions.get('default', {})
@@ -199,36 +214,18 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         # check that all the extensions exist
         self.set_extension_repo(os.path.join(self.test_folder, 'test_files', 'send2ue_extensions'))
         for extension_name, extensions_data in {**external_extensions, **default_extensions}.items():
-            extension_properties = extensions_data.get('properties', {})
-            extension_operators = extensions_data.get('operators', [])
-            extension_utility_operators = extensions_data.get('utility_operators', [])
-            extension_draws = extensions_data.get('draws', [])
+            self.assert_extension(extension_name, extensions_data)
 
-            # check properties
-            self.assert_extension_properties(extension_name, extension_properties)
-
-            # check properties
-            self.assert_extension_operators(extension_name, extension_operators + extension_utility_operators)
-
-            # check draws
-            self.assert_extension_draws(extension_name, extension_draws)
+        # reload blank scene and check again
+        # https://github.com/EpicGames/BlenderTools/issues/395
+        self.setUp()
+        for extension_name, extensions_data in {**external_extensions, **default_extensions}.items():
+            self.assert_extension(extension_name, extensions_data)
 
         # check that external extensions are removed are being removed correctly
         self.set_extension_repo('')
         for extension_name, extensions_data in external_extensions.items():
-            extension_properties = extensions_data.get('properties', {})
-            extension_operators = extensions_data.get('operators', [])
-            extension_utility_operators = extensions_data.get('utility_operators', [])
-            extension_draws = extensions_data.get('draws', [])
-
-            # check properties
-            self.assert_extension_properties(extension_name, extension_properties, False)
-
-            # check properties
-            self.assert_extension_operators(extension_name, extension_operators + extension_utility_operators, False)
-
-            # check draws
-            self.assert_extension_draws(extension_name, extension_draws, False)
+            self.assert_extension(extension_name, extensions_data, False)
 
     def run_template_tests(self, templates):
         for template_name, properties in templates.items():

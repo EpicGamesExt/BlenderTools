@@ -1,174 +1,127 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
-from . import settings
-from ..constants import PathModes
+from . import settings, extension
+from ..constants import PathModes, ExtensionOperators
 from ..dependencies.unreal import UnrealRemoteCalls
-from .utilities import track_progress
+from .utilities import track_progress, get_asset_id
 
 
-@track_progress(message='Importing asset "{param}"...', param='file_path')
-def import_asset(file_path, asset_data, property_data):
+@track_progress(message='Importing asset "{attribute}"...', attribute='file_path')
+def import_asset(asset_id, properties, property_data):
     """
     Imports an asset to unreal based on the asset data in the provided dictionary.
 
-    :param str file_path: The full path to the file to import.
-    :param dict asset_data: A dictionary of import parameters.
+    :param str asset_id: The unique id of the asset.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
     :param dict property_data: A dictionary representation of the properties.
     """
-    UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
+    # set the current asset id
+    properties.asset_id = asset_id
+
+    # run the pre import extensions
+    extension.run_operators(ExtensionOperators.PRE_IMPORT.value)
+
+    # get the asset data
+    asset_data = properties.asset_data[properties.asset_id]
+
+    # import the asset
+    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)
+
+    # import fcurves
+    if asset_data.get('fcurve_file_path'):
+        UnrealRemoteCalls.import_animation_fcurves(
+            asset_data.get('asset_path'),
+            asset_data.get('fcurve_file_path')
+        )
+
+    # run the post import extensions
+    extension.run_operators(ExtensionOperators.POST_IMPORT.value)
 
 
-@track_progress(message='Importing fcurves on "{param}"...', param='asset_path')
-def import_animation_fcurves(asset_path, fcurve_file_path):
-    """
-    Imports fcurves from a file onto an animation sequence.
-
-    :param str asset_path: The project path to the skeletal mesh in unreal.
-    :param str fcurve_file_path: The file path to the fcurve file.
-    """
-    UnrealRemoteCalls.import_animation_fcurves(asset_path, fcurve_file_path)
-
-
-@track_progress(message='Importing skeletal mesh "{param}"...', param='file_path')
-def import_skeletal_mesh_lod(asset_path, file_path, index):
-    """
-    Imports a lod onto a skeletal mesh.
-
-    :param str asset_path: The project path to the skeletal mesh in unreal.
-    :param str file_path: The path to the fbx file that contains the lods on disk.
-    :param int index: Which lod index to import the lod on.
-    """
-    UnrealRemoteCalls.import_skeletal_mesh_lod(asset_path, file_path, index)
-
-
-@track_progress(message='Importing static mesh "{param}"...', param='file_path')
-def import_static_mesh_lod(asset_path, file_path, index):
-    """
-    Imports a lod onto a static mesh.
-
-    :param str asset_path: The project path to the skeletal mesh in unreal.
-    :param str file_path: The path to the fbx file that contains the lods on disk.
-    :param int index: Which lod index to import the lod on.
-    """
-    UnrealRemoteCalls.import_static_mesh_lod(asset_path, file_path, index)
-
-
-@track_progress(message='Setting skeletal mesh lod build settings for "{param}"...', param='asset_path')
-def set_skeletal_mesh_lod_build_settings(asset_path, index, properties):
-    """
-    Sets the lod build settings for skeletal mesh.
-
-    :param str asset_path: The project path to the skeletal mesh in unreal.
-    :param int index: Which lod index to import the lod on.
-    :param PropertyData properties: A property data instance that contains all property values of the tool.
-    """
-    UnrealRemoteCalls.set_skeletal_mesh_lod_build_settings(asset_path, index, properties)
-
-
-@track_progress(message='Setting static mesh lod build settings for "{param}"...', param='asset_path')
-def set_static_mesh_lod_build_settings(asset_path, index, properties):
-    """
-    Sets the lod build settings for static mesh.
-
-    :param str asset_path: The project path to the static mesh in unreal.
-    :param int index: Which lod index to import the lod on.
-    :param PropertyData properties: A property data instance that contains all property values of the tool.
-    """
-    UnrealRemoteCalls.set_static_mesh_lod_build_settings(asset_path, index, properties)
-
-
-@track_progress(message='Resetting static mesh lods for "{param}"...', param='asset_path')
-def reset_static_mesh_lods(asset_path):
-    """
-    Removes all lods on the given static mesh.
-
-    :param str asset_path: The project path to the static mesh in unreal.
-    """
-    UnrealRemoteCalls.reset_static_mesh_lods(asset_path)
-
-
-@track_progress(message='Resetting skeletal mesh lods for "{param}"...', param='asset_path')
-def reset_skeletal_mesh_lods(asset_path, property_data):
-    """
-    Removes all lods on the given skeletal mesh.
-
-    :param str asset_path: The project path to the skeletal mesh in unreal.
-    :param dict property_data: A dictionary representation of the properties.
-    """
-    UnrealRemoteCalls.reset_skeletal_mesh_lods(asset_path, property_data)
-
-
-@track_progress(message='Creating static mesh sockets for "{param}"...', param='asset_path')
-def create_static_mesh_sockets(asset_path, asset_data):
+@track_progress(message='Creating static mesh sockets for "{attribute}"...', attribute='asset_path')
+def create_static_mesh_sockets(asset_id, properties):
     """
     Creates sockets on a static mesh.
 
-    :param str asset_path: The project path to the static mesh in unreal.
-    :param dict asset_data: A dictionary of import parameters.
+    :param str asset_id: The unique id of the asset.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
-    UnrealRemoteCalls.set_static_mesh_sockets(asset_path, asset_data)
+    asset_data = properties.asset_data[asset_id]
+    UnrealRemoteCalls.set_static_mesh_sockets(
+        asset_data.get('asset_path'),
+        asset_data
+    )
 
 
-def reset_lods(asset_data, property_data):
+@track_progress(message='Resetting lods for "{attribute}"...', attribute='asset_path')
+def reset_lods(asset_id, properties, property_data):
     """
     Removes all lods on the given mesh.
 
-    :param dict asset_data: A dictionary of import parameters.
+    :param str asset_id: The unique id of the asset.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
     :param dict property_data: A dictionary representation of the properties.
     """
+    asset_data = properties.asset_data[asset_id]
+    asset_path = asset_data.get('asset_path')
+
     if asset_data.get('skeletal_mesh'):
-        reset_skeletal_mesh_lods(asset_data.get('asset_path'), property_data)
+        UnrealRemoteCalls.reset_skeletal_mesh_lods(asset_path, property_data)
     else:
-        reset_static_mesh_lods(asset_data.get('asset_path'))
+        UnrealRemoteCalls.reset_static_mesh_lods(asset_path)
 
 
-def import_lod_files(asset_data):
+@track_progress(message='Importing lods for "{attribute}"...', attribute='asset_path')
+def import_lod_files(asset_id, properties):
     """
     Imports lods onto a mesh.
 
-    :param dict asset_data: A dictionary of import parameters.
+    :param str asset_id: The unique id of the asset.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
+    asset_data = properties.asset_data[asset_id]
     lods = asset_data.get('lods', {})
     for index in range(1, len(lods.keys()) + 1):
         lod_file_path = lods.get(str(index))
         if asset_data.get('skeletal_mesh'):
-            import_skeletal_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
+            UnrealRemoteCalls.import_skeletal_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
         else:
-            import_static_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
+            UnrealRemoteCalls.import_static_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
 
 
-def set_lod_build_settings(asset_data, property_data):
+@track_progress(message='Setting lod build settings for "{attribute}"...', attribute='asset_path')
+def set_lod_build_settings(asset_id, properties, property_data):
     """
     Sets the lod build settings.
 
-    :param dict asset_data: A dictionary of import parameters.
+    :param str asset_id: The unique id of the asset.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
     :param dict property_data: A dictionary representation of the properties.
     """
+    asset_data = properties.asset_data[asset_id]
     lods = asset_data.get('lods', {})
     for index in range(0, len(lods.keys()) + 1):
         if asset_data.get('skeletal_mesh'):
-            set_skeletal_mesh_lod_build_settings(
+            UnrealRemoteCalls.set_skeletal_mesh_lod_build_settings(
                 asset_data.get('asset_path'),
                 index,
                 property_data
             )
         else:
-            set_static_mesh_lod_build_settings(
+            UnrealRemoteCalls.set_static_mesh_lod_build_settings(
                 asset_data.get('asset_path'),
                 index,
                 property_data
             )
 
 
-def asset(assets_data, properties):
+def asset(properties):
     """
     Ingests an asset.
 
-    :param list[dict] assets_data: A list of dictionaries of import parameters.
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
-    # if exporting a static mesh, skeletal mesh or animation
-    if assets_data:
+    if properties.asset_data:
         property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
 
         # check path mode to see if exported assets should be imported to unreal
@@ -176,20 +129,19 @@ def asset(assets_data, properties):
             PathModes.SEND_TO_PROJECT.value,
             PathModes.SEND_TO_DISK_THEN_PROJECT.value
         ]:
-            for asset_data in assets_data:
-                import_asset(asset_data.get('file_path'), asset_data, property_data)
+            for asset_data in properties.asset_data.values():
+                # get the asset id
+                asset_id = get_asset_id(asset_data.get('file_path'))
+
+                # imports static mesh, skeletal mesh or animation
+                import_asset(asset_id, properties, property_data)
 
                 # import lods
                 if asset_data.get('lods'):
-                    reset_lods(asset_data, property_data)
-                    import_lod_files(asset_data)
-                    set_lod_build_settings(asset_data, property_data)
+                    reset_lods(asset_id, properties, property_data)
+                    import_lod_files(asset_id, properties)
+                    set_lod_build_settings(asset_id, properties, property_data)
 
                 # import sockets
                 if asset_data.get('sockets'):
-                    create_static_mesh_sockets(asset_data.get('asset_path'), asset_data)
-
-                # import fcurves
-                fcurve_file_path = asset_data.get('fcurve_file_path')
-                if fcurve_file_path:
-                    import_animation_fcurves(asset_data.get('asset_path'), fcurve_file_path)
+                    create_static_mesh_sockets(asset_id, properties)

@@ -253,41 +253,22 @@ class ValidationManager:
                                     self.properties.validations_passed = False
                                     return
 
-    def validate_object_root_orientation(self):
+    def validate_object_root_scale(self):
         """
         Checks the transforms on the provided object to see if they are applied.
         """
-        for scene_object in self.rig_objects:
-            non_zero_transforms = []
+        if self.properties.validate_armature_transforms:
+            for scene_object in self.rig_objects:
+                non_zero_transforms = []
 
-            # check the scale values
-            if scene_object.scale[:] != (1.0, 1.0, 1.0):
-                non_zero_transforms.append(f'scale {scene_object.scale[:]}')
+                # check the scale values
+                if scene_object.scale[:] != (1.0, 1.0, 1.0):
+                    non_zero_transforms.append(f'scale {scene_object.scale[:]}')
 
-            # check the scale values
-            if scene_object.location[:] != (0.0, 0.0, 0.0):
-                non_zero_transforms.append(f'location {scene_object.location[:]}')
-
-            # check the rotation values of the active rotation mode
-            if scene_object.rotation_mode in ['XYZ', 'XZY', 'YXZ', 'YZX', 'ZXY', 'ZYX']:
-                if scene_object.rotation_euler[:] != (0.0, 0.0, 0.0):
-                    rotation_euler = utilities.get_transform_in_degrees(scene_object.rotation_euler[:])
-                    non_zero_transforms.append(f'rotation_euler {rotation_euler}')
-
-            if scene_object.rotation_mode == 'QUATERNION':
-                if scene_object.rotation_quaternion[:] != (1.0, 0.0, 0.0, 0.0):
-                    rotation_quaternion = utilities.get_transform_in_degrees(scene_object.rotation_quaternion[:])
-                    non_zero_transforms.append(f'rotation_quaternion {rotation_quaternion}')
-
-            if scene_object.rotation_mode == 'AXIS_ANGLE':
-                if scene_object.rotation_axis_angle[:] != (0.0, 0.0, 1.0, 0.0):
-                    rotation_axis_angle = utilities.get_transform_in_degrees(scene_object.rotation_axis_angle[:])
-                    non_zero_transforms.append(f'rotation_axis_angle {rotation_axis_angle}')
-
-            if non_zero_transforms:
-                utilities.report_error(
-                    f'"{scene_object.name}" has un-applied transforms "{", ".join(non_zero_transforms)}". These must '
-                    f'be zero to avoid unexpected results. Otherwise, turn off this validation to ignore.'
-                )
-                self.properties.validations_passed = False
-                return
+                if non_zero_transforms:
+                    utilities.report_error(
+                        f'"{scene_object.name}" has un-applied transforms "{", ".join(non_zero_transforms)}". These must '
+                        f'be zero to avoid unexpected results. Otherwise, turn off this validation to ignore.'
+                    )
+                    self.properties.validations_passed = False
+                    return
