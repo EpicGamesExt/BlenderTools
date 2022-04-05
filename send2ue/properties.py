@@ -92,25 +92,19 @@ def get_scene_property_class():
         This class holds the properties for the scene.
         """
         # ------------- current asset info ------------------
-        file_path: bpy.props.StringProperty(
+        asset_data = {}
+        asset_id: bpy.props.StringProperty(
             default='',
             description=(
-                'Holds the current file path being exported. This is useful for extensions that need '
-                'to read or modify this'
-            )
-        )
-        asset_name: bpy.props.StringProperty(
-            default='',
-            description=(
-                'Holds the current asset name being exported. This is useful for extensions that need '
-                'to read or modify this'
+                'Holds the current asset id. This can be used in an extension method to access and modify specific '
+                'asset data'
             )
         )
         validations_passed: bpy.props.BoolProperty(
             default=True,
             description=(
                 'Holds the current passing state of the validations, if set the false all processes will terminate. '
-                'This is useful for extensions that need to read or modify this.'
+                'This is useful for extensions that need to read or modify this'
             )
         )
         # --------------------------------------------------

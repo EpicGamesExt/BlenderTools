@@ -1,5 +1,9 @@
 # Extensions
 
+::: warning
+This feature set is still very new and could be subject to change.
+:::
+
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
 with a minimal amount of code. Within an extension class several things can be defined:
 * [Operators](/customize/extensions.html#operators)
@@ -22,6 +26,7 @@ Here is a simple example
 ### The Code
 ```python
 import bpy
+from pprint import pprint
 from send2ue.core.extension import ExtensionBase
 
 class ExampleExtension(ExtensionBase):
@@ -40,16 +45,18 @@ class ExampleExtension(ExtensionBase):
             self.validations_passed = False
 
     def pre_mesh_export(self):
-        print(self.file_path)
-        print(self.asset_name)
+        pprint(self.asset_data[self.asset_id])
 ```
 
-This adds a property, a pre operation that changes the `unreal_mesh_folder_path` value, and a validation
-that checks to ensure that `hello_property` is equal to "Hello world", otherwise it sets `self.validations_passed`
-to false which terminates the send to unreal operation execution.
+This adds a property, a pre operation that changes the `unreal_mesh_folder_path` value, a pre mesh export operation
+that prints out the asset data of the mesh, and a validation that checks to ensure that `hello_property` is
+equal to "Hello world", otherwise it sets `self.validations_passed` to false which terminates the send to unreal
+operation execution.
 
 ::: tip Note
-  At minimum an extension must at least have the class attribute `name` defined, everything else is optional.
+  At minimum an extension must at least have the class attribute `name` defined, everything else is optional. A more
+advanced extension example is available
+[here](https://github.com/EpicGames/BlenderTools/blob/master/tests/test_files/send2ue_extensions/example_extension.py).
 :::
 
 ### Installation
@@ -72,7 +79,7 @@ bpy.ops.script.reload()
 :::
 
 ### Test
-Now when we use Send to Unreal to with the default cube, we can see the `file_path` and `asset_name` printing in the
+Now when we use Send to Unreal to with the default cube, we can see the `asset_data` dictionary printing in the
 console and that the cube got sent to the `/Game/example_extension/test/` folder in the unreal project.
 
 ![3](./images/extensions/3.png)
@@ -196,6 +203,33 @@ bpy.context.scene.send2ue.extensions.example.hello_property
   Extension properties get saved when the blend file is saved, and can have their values saved to templates
 just like the default properties that exist in the Send to Unreal tool.
 :::
+
+### Asset Data Dictionary
+During the life cycle of the Send to Unreal operation a dictionary `asset_data` is created and modified. Also, an
+`asset_id` is assigned to each asset. If you wish to read or modify this within your extension, it can be done
+using `self.asset_data` and `self.asset_id`.
+
+::: tip Note
+  These are None during `pre_operation` and `post_operation`, since there is no such thing as
+a current asset in those contexts.
+:::
+
+Using `self.asset_id` we can fetch the correct asset data from the `asset_data` dictionary which contains all data for
+all asset that will be processed in the Send to Unreal operation.
+```python
+def pre_mesh_export(self):
+    path, ext = os.path.splitext(asset_data.get('file_path'))
+    asset_path = asset_data.get('asset_path')
+
+    self.asset_data[self.asset_id]['file_path'] = f'{path}_added_this{ext}'
+    self.asset_data[self.asset_id]['asset_path'] = f'{asset_path}_added_this'
+```
+Here you can see that we forced a rename of the asset by changing the fbx name and the asset path.
+
+::: tip Note
+  In order of the `asset_data` to be updated you must make assignments directly to the dictionary like shown above.
+:::
+
 
 ## Draws
 Defining draws for your extension is a way to make your extension properties available to be edited by the user.

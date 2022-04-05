@@ -1,6 +1,8 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
+import os
+from pprint import pprint
 from send2ue.core.extension import ExtensionBase
 
 
@@ -28,6 +30,7 @@ class ExampleExtension(ExtensionBase):
         """
         print('Before the Send to Unreal operation')
         self.unreal_mesh_folder_path = '/Game/example_extension/test/'
+        self.unreal_animation_folder_path = '/Game/example_extension/test/animations'
 
     def pre_validations(self):
         """
@@ -46,9 +49,16 @@ class ExampleExtension(ExtensionBase):
 
         :param PropertyGroup self: The scene property group that contains all the addon properties.
         """
-        print('Before Mesh Export')
-        print(self.file_path)
-        print(self.asset_name)
+        # the asset data using the current asset id
+        asset_data = self.asset_data[self.asset_id]
+
+        path, ext = os.path.splitext(asset_data.get('file_path'))
+        asset_path = asset_data.get('asset_path')
+
+        self.asset_data[self.asset_id]['file_path'] = f'{path}_added_this{ext}'
+        self.asset_data[self.asset_id]['asset_path'] = f'{asset_path}_added_this'
+
+        pprint(self.asset_data[self.asset_id])
 
     def pre_animation_export(self):
         """
@@ -57,8 +67,12 @@ class ExampleExtension(ExtensionBase):
         :param PropertyGroup self: The scene property group that contains all the addon properties.
         """
         print('Before Animation Export')
-        print(self.file_path)
-        print(self.asset_name)
+        asset_data = self.asset_data[self.asset_id]
+        skeleton_asset_path = asset_data.get('skeleton_asset_path').replace('_Skeleton', '')
+
+        self.asset_data[self.asset_id]['skeleton_asset_path'] = f'{skeleton_asset_path}_added_this_Skeleton'
+
+        pprint(self.asset_data[self.asset_id])
 
     def post_operation(self):
         """

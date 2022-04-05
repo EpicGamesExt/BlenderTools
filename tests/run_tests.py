@@ -85,7 +85,7 @@ if __name__ == '__main__':
                     '--python-exit-code',
                     '1',
                     '--python',
-                    '/tmp/site-packages/rpc/server.py',
+                    '/tmp/blender_tools/send2ue/dependencies/rpc/server.py',
                 ]
             },
             'unreal': {
@@ -107,7 +107,7 @@ if __name__ == '__main__':
                     '-nosplash',
                     '-noloadstartuppackages'
                     '-log',
-                    '-ExecutePythonScript=/tmp/site-packages/rpc/server.py',
+                    '-ExecutePythonScript=/tmp/blender_tools/send2ue/dependencies/rpc/server.py',
                 ],
                 'auth_config': {
                     'username': os.environ.get('GITHUB_USERNAME'),

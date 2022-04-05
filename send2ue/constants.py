@@ -31,7 +31,7 @@ class ToolInfo(Enum):
 
 class Template:
     NAME = 'templates'
-    IGNORED_PROPERTIES = ['asset_name', 'file_path', 'validations_passed', 'active_settings_template']
+    IGNORED_PROPERTIES = ['asset_id', 'asset_data', 'validations_passed', 'active_settings_template']
     DEFAULT = 'default.json'
     VERSION = 1
 

@@ -2,11 +2,6 @@
 
 import os
 
-try:
-    import unreal
-except ImportError:
-    pass
-
 from . import base_server
 from .base_server import BaseRPCServerThread, BaseRPCServerManager
 
@@ -35,5 +30,6 @@ class RPCServer(BaseRPCServerManager):
         """
         # TODO use a timer exposed from FTSTicker instead of slate tick, less aggressive and safer
         # https://docs.unrealengine.com/4.27/en-US/PythonAPI/class/AutomationScheduler.html?highlight=automationscheduler#unreal.AutomationScheduler
+        import unreal
         unreal.register_slate_post_tick_callback(base_server.execute_queued_calls)
         super(RPCServer, self).start_server_thread()

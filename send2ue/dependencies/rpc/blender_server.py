@@ -1,12 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
-import sys
-
-try:
-    import bpy
-except ImportError:
-    pass
 
 from . import base_server
 from .base_server import BaseRPCServerThread, BaseRPCServerManager
@@ -46,6 +40,7 @@ class RPCServer(BaseRPCServerManager):
         """
         Starts the server thread.
         """
+        import bpy
         bpy.app.timers.register(
             bpy.app.handlers.persistent(execute_queued_calls),
             persistent=True
