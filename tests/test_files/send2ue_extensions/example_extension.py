@@ -1,9 +1,16 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
-import os
 from pprint import pprint
 from send2ue.core.extension import ExtensionBase
+from send2ue.dependencies.unreal import remote_unreal_decorator
+
+
+@remote_unreal_decorator
+def rename_unreal_asset(source_asset_path, destination_asset_path):
+    if unreal.EditorAssetLibrary.does_asset_exist(destination_asset_path):
+        unreal.EditorAssetLibrary.delete_asset(destination_asset_path)
+    return unreal.EditorAssetLibrary.rename_asset(source_asset_path, destination_asset_path)
 
 
 class ExampleExtension(ExtensionBase):
@@ -50,12 +57,10 @@ class ExampleExtension(ExtensionBase):
         :param PropertyGroup self: The scene property group that contains all the addon properties.
         """
         # the asset data using the current asset id
-        asset_data = self.asset_data[self.asset_id]
+        path, ext = self.asset_data[self.asset_id]['file_path'].split('.')
+        asset_path = self.asset_data[self.asset_id]['asset_path']
 
-        path, ext = os.path.splitext(asset_data.get('file_path'))
-        asset_path = asset_data.get('asset_path')
-
-        self.asset_data[self.asset_id]['file_path'] = f'{path}_added_this{ext}'
+        self.asset_data[self.asset_id]['file_path'] = f'{path}_added_this.{ext}'
         self.asset_data[self.asset_id]['asset_path'] = f'{asset_path}_added_this'
 
         pprint(self.asset_data[self.asset_id])
@@ -73,6 +78,16 @@ class ExampleExtension(ExtensionBase):
         self.asset_data[self.asset_id]['skeleton_asset_path'] = f'{skeleton_asset_path}_added_this_Skeleton'
 
         pprint(self.asset_data[self.asset_id])
+
+    def post_import(self):
+        """
+        Defines the post import logic that will be an injected operation.
+
+        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        """
+        print('After the import operation')
+        asset_path = self.asset_data[self.asset_id]['asset_path']
+        rename_unreal_asset(asset_path, f'{asset_path}_renamed_again')
 
     def post_operation(self):
         """

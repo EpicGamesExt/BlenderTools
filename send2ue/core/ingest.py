@@ -29,25 +29,13 @@ def import_asset(asset_id, properties, property_data):
 
     # import fcurves
     if asset_data.get('fcurve_file_path'):
-        import_animation_fcurves(asset_id, properties)
+        UnrealRemoteCalls.import_animation_fcurves(
+            asset_data.get('asset_path'),
+            asset_data.get('fcurve_file_path')
+        )
 
     # run the post import extensions
     extension.run_operators(ExtensionOperators.POST_IMPORT.value)
-
-
-@track_progress(message='Importing fcurves on "{attribute}"...', attribute='asset_path')
-def import_animation_fcurves(asset_id, properties):
-    """
-    Imports fcurves from a file onto an animation sequence.
-
-    :param str asset_id: The unique id of the asset.
-    :param PropertyData properties: A property data instance that contains all property values of the tool.
-    """
-    asset_data = properties.asset_data[asset_id]
-    UnrealRemoteCalls.import_animation_fcurves(
-        asset_data.get('asset_path'),
-        asset_data.get('fcurve_file_path')
-    )
 
 
 @track_progress(message='Creating static mesh sockets for "{attribute}"...', attribute='asset_path')

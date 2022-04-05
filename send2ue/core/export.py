@@ -580,6 +580,7 @@ def create_animation_data(rig_objects, properties):
                 # save the import data
                 asset_id = utilities.get_asset_id(file_path)
                 animation_data[asset_id] = {
+                    'asset_type': AssetTypes.ANIMATION,
                     'file_path': file_path,
                     'asset_path': f'{properties.unreal_animation_folder_path}{asset_name}',
                     'asset_folder': properties.unreal_animation_folder_path,
@@ -627,6 +628,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
             # save the asset data
             mesh_data[asset_id] = {
+                'asset_type': AssetTypes.MESH,
                 'file_path': file_path,
                 'asset_folder': import_path,
                 'asset_path': f'{import_path}{asset_name}',
@@ -683,3 +685,6 @@ def send2ue(properties):
         # create the asset data
         create_asset_data(properties)
         ingest.asset(properties)
+
+    # clear the current id
+    properties.asset_id = ''

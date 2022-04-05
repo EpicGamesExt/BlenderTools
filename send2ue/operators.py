@@ -108,7 +108,7 @@ class Send2Ue(bpy.types.Operator):
 
             # process the queued functions
             while not self.execution_queue.empty():
-                function, args, kwargs, description = self.execution_queue.get()
+                function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
                 function(*args, **kwargs)
 
             self.post_operation()

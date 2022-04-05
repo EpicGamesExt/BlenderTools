@@ -10,7 +10,6 @@ computer to see if they are blocked by another application.
 Before you start the Unreal Editor, run these commands from a PowerShell prompt:
 
      netstat -an|sls 6766
-     netstat -an|sls 9998
 
 Then start your project (that has Remote Execution enabled with the multicast group endpoint presumably set to
 239.0.0.1:6766) and run these commands again.
@@ -18,7 +17,6 @@ Then start your project (that has Remote Execution enabled with the multicast gr
 The first time, you run `netstat`, nothing should show up. The second time you run it, you should see this:
 
     UDP    0.0.0.0:6766           *:*
-    UDP    0.0.0.0:9998           *:*
 
 
 

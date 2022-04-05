@@ -1469,8 +1469,12 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
             for action in actions:
                 # iterate through the location curves
                 for fcurve in [fcurve for fcurve in action.fcurves if fcurve.data_path.endswith('location')]:
-                    # don't scale the objects location keys
+                    # the location fcurve of the object
                     if fcurve.data_path == 'location':
+                        for keyframe_point in fcurve.keyframe_points:
+                            # just the location to preserve root motion
+                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index]
+                        # don't scale the objects location handles
                         continue
 
                     # and iterate through the keyframe values
@@ -1627,15 +1631,3 @@ def apply_transform(scene_object, use_location=False, use_rotation=False, use_sc
         child.matrix_local = matrix @ child.matrix_local
 
     scene_object.matrix_basis = basis[0] @ basis[1] @ basis[2]
-
-
-def safe_call(function):
-    """
-    Safely calls a function and handles the exception.
-
-    :param callable function: A callable.
-    """
-    try:
-        function()
-    except Exception as error:
-        sys.stderr.write(f'{error}\n')
