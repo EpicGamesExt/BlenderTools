@@ -215,7 +215,7 @@ a current asset in those contexts. Also in the `pre_operation` phase `self.asset
 :::
 
 Using `self.asset_id` we can fetch the correct asset data from the `asset_data` dictionary which contains all data for
-all asset that will be processed in the Send to Unreal operation.
+all assets that will be processed in the Send to Unreal operation.
 ```python
 from send2ue.core.extension import ExtensionBase
 class ExampleExtension(ExtensionBase):
@@ -232,12 +232,13 @@ class ExampleExtension(ExtensionBase):
 Here you can see that we forced a rename of the asset by changing the fbx name and the asset path.
 
 ::: tip Note
-  In order of the `asset_data` to be updated you must make assignments directly to the dictionary like shown above.
+  In order for the `asset_data` to be updated you must make assignments directly to the dictionary like shown above.
 :::
 
-This is what a Mesh's `asset_data` looks like from the example above after being modified:
+This is what the Mesh's `asset_data` looks like from the example above after being modified:
 ```python
-{'asset_folder': '/Game/example_extension/test/',
+{
+ 'asset_folder': '/Game/example_extension/test/',
  'asset_path': '/Game/example_extension/test/Cube1_added_this',
  'asset_type': 'MESH',
  'file_path': 'C:\\Users\\User~1\\AppData\\Local\\Temp\\blender\\send2ue\\data\\mesh\\Cube1_added_this.fbx',

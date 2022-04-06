@@ -19,7 +19,9 @@ module.exports = {
     head: [
         ['meta', {name: 'theme-color', content: '#3eaf7c'}],
         ['meta', {name: 'apple-mobile-web-app-capable', content: 'yes'}],
-        ['meta', {name: 'apple-mobile-web-app-status-bar-style', content: 'black'}]
+        ['meta', {name: 'apple-mobile-web-app-status-bar-style', content: 'black'}],
+        ['script', {async: true, src: 'https://www.googletagmanager.com/gtag/js?id=G-NVX6X5L76V'}],
+        ['script', {}, ["window.dataLayer = window.dataLayer || [];\nfunction gtag(){dataLayer.push(arguments);}\ngtag('js', new Date());\ngtag('config', 'G-NVX6X5L76V');"]],
     ],
 
     /**
@@ -91,6 +93,5 @@ module.exports = {
     plugins: [
         '@vuepress/plugin-back-to-top',
         '@vuepress/plugin-medium-zoom',
-        ['@vuepress/plugin-google-analytics', { ga: 'G-NVX6X5L76V' }]
     ]
 }
