@@ -1,5 +1,5 @@
 # Templates
-A powerful feature of Send to Unreal is that you can configure `Setting Templates` which are just a json files that can
+A powerful feature of Send to Unreal is that you can configure `Setting Templates` which are just json files that can
 be shared among your team members. These templates contain the values of every Send to Unreal property in the tool. This
 could be useful to help "standardize" your pipeline by ensuring everyone is using the correct export
 and import settings, or just help speed up a workflow by minimizing clicks.

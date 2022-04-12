@@ -3,7 +3,7 @@
 ### Could not find an open Unreal Editor instance!
 Toggle `remote execution` off and back on in your project settings.
 
-Go through the [quickstart](/introduction/quickstart) again. If that doesn't work the issue is most likely due to a
+Go through the [quickstart](../introduction/quickstart) again. If that doesn't work the issue is most likely due to a
 networking issue. Check your systems firewall for blender and python. Also check the ports `6766` and `9998` on your
 computer to see if they are blocked by another application.
 
@@ -27,9 +27,9 @@ though.
 
 
 ### Are my settings saved?
-Yes, the state of the tool's properties tracked for each maya file and saved along with the rest of the
+Yes, the state of the tool's properties get tracked in each blend file and saved along with the rest of the
 blend file scene data.
 
 ### Why are my settings back to their defaults?
 If you open a new blend file that does not already contain Send to Unreal properties, then the settings are just
-the defaults.
+the defaults. If you load a saved file, the settings will be the values they were saved at.
