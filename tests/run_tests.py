@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 'rpc_port': UNREAL_PORT,
                 'environment': environment,
                 'volumes': volumes,
-                'tag': 'unreal-engine:dev-slim-5.0.0-preview-2',
+                'tag': 'unreal-engine:dev-slim-5.0.0',
                 'repository': 'ghcr.io/epicgames',
                 'user': 'ue4',
                 'command': [
