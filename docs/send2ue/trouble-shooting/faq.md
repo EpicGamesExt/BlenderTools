@@ -3,7 +3,7 @@
 ### Could not find an open Unreal Editor instance!
 Toggle `remote execution` off and back on in your project settings.
 
-Go through the [quickstart](../introduction/quickstart) again. If that doesn't work the issue is most likely due to a
+Go through the quickstart again. If that doesn't work the issue is most likely due to a
 networking issue. Check your systems firewall for blender and python. Also check the ports `6766` and `9998` on your
 computer to see if they are blocked by another application.
 

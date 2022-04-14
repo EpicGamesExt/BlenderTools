@@ -2,7 +2,7 @@
 These extensions ship with the Send to Unreal addon and are supported by this repository.
 
 ## Affixes
-The Affixes extension provides a convenient why to enforce prefix or postfix naming conventions on
+The Affixes extension provides a convenient way to enforce prefix or postfix naming conventions on
 assets of a particular type.  Currently, supported asset types are:
 * `Static Mesh`
 * `Skeletal Mesh`
