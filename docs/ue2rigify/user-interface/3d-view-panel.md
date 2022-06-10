@@ -17,7 +17,9 @@ This object picker specifies which object is the ‘Source’ rig.
 
 ### Template
 
-This dropdown allows you to select a template or create a new one.
+This dropdown allows you to select a template or create a new one. New templates are stored within:
+- windows: `%TEMP%\ue2rigify\resources\rig_templates`
+- unix: `/tmp/ue2rigify/resources/rig_templates`
 
 
 ### Mode

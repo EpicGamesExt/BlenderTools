@@ -11,3 +11,7 @@ it. You should stay away from the names "metarig" and "rig" because those are Ri
 Rigify generates a new rigify rig, those could get stomped on. Thus, renaming the metarig you added as your source
 rig is necessary for this to work.
 
+## Where are Rig templates stored?
+Rig templates are stored within:
+- windows: `%TEMP%\ue2rigify\resources\rig_templates`
+- unix: `/tmp/ue2rigify/resources/rig_templates`
