@@ -33,3 +33,6 @@ blend file scene data.
 ### Why are my settings back to their defaults?
 If you open a new blend file that does not already contain Send to Unreal properties, then the settings are just
 the defaults. If you load a saved file, the settings will be the values they were saved at.
+
+### Why isn't it finding my X (skeleton, physics asset, ...)?
+For setting the skeleton and physics asset in the Path setting, make sure the game isn't running in PIE. For doing anything with the addon make sure not to have PIE running. 
