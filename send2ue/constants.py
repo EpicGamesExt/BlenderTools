@@ -31,20 +31,19 @@ class ToolInfo(Enum):
 
 class Template:
     NAME = 'templates'
-    IGNORED_PROPERTIES = ['asset_id', 'asset_data', 'validations_passed', 'active_settings_template']
+    IGNORED_PROPERTIES = ['active_settings_template']
     DEFAULT = 'default.json'
     VERSION = 1
 
 
 class Extensions:
     NAME = 'extensions'
-    UTILITY_OPERATOR = 'util_op'
     DRAW_NAMESPACE = f'{ToolInfo.NAME.value}_{NAME}_'
     DRAW_TABS = ['draw_export', 'draw_import', 'draw_validations']
     FOLDER = os.path.join(ToolInfo.RESOURCE_FOLDER.value, NAME)
 
 
-class ExtensionOperators(Enum):
+class ExtensionTasks(Enum):
     PRE_OPERATION = 'pre_operation'
     PRE_VALIDATIONS = 'pre_validations'
     POST_VALIDATIONS = 'post_validations'

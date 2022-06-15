@@ -736,8 +736,8 @@ def has_extension_draw(location):
 
     :param str location: The name of the draw location i.e. export, import, validations.
     """
-    for key in bpy.app.driver_namespace.keys():
-        if key.startswith(Extensions.DRAW_NAMESPACE) and key.endswith(f'_draw_{location}'):
+    for extension_property_group in dir(bpy.context.scene.send2ue.extensions):
+        if hasattr(extension_property_group, f'draw_{location}'):
             return True
     return False
 
@@ -751,29 +751,6 @@ def create_collections():
         if collection_name not in bpy.data.collections:
             new_collection = bpy.data.collections.new(collection_name)
             bpy.context.scene.collection.children.link(new_collection)
-
-
-def create_operator(bl_idname, function):
-    """
-    Creates a operator class
-
-    :param str bl_idname: The operators bl_idname.
-    :param callable function: The function called within the operator.
-    :return Operator: A operator class.
-    """
-    def execute(self, context):
-        function(bpy.context.scene.send2ue)
-        return {'FINISHED'}
-
-    return type(
-        convert_to_class_name(bl_idname),
-        (bpy.types.Operator,),
-        {
-            'bl_idname': bl_idname,
-            'bl_label': bl_idname.replace('.', ' ').replace('_', ' '),
-            'execute': execute,
-            # 'window_manager_properties': bpy.context.window_manager.send2ue
-        })
 
 
 def remove_data(data):

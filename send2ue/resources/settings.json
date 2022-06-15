@@ -714,7 +714,7 @@
         },
         "texture_import_data": {
           "material_search_location": {
-            "name": "Search Location",
+            "name": "Material Import Method",
             "description": "Specify where we should search for matching materials when importing",
             "enum_items": [
               [

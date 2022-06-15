@@ -349,15 +349,16 @@ def create_property(data):
         )
 
 
-def create_property_group(class_name, data):
+def create_property_group(class_name, properties, methods):
     """
     Creates a property group instance given a name and the annotation data.
 
     :param str class_name: A snake case name.
-    :param dict data: A dictionary of property references.
+    :param dict properties: A dictionary of property references.
+    :param dict methods : A dictionary of methods on the property group.
     :return PointerProperty: A reference to the created property group.
     """
-    property_group_class = create_property_group_class(class_name, data)
+    property_group_class = create_property_group_class(class_name, properties, methods)
     bpy.utils.register_class(property_group_class)
     return bpy.props.PointerProperty(type=property_group_class)
 
@@ -376,42 +377,32 @@ def create_default_template():
     )
 
 
-def create_property_group_class(class_name, data):
+def create_property_group_class(class_name, properties, methods=None):
     """
     Creates a property group class given a name and the annotation data.
 
     :param str class_name: A snake case name.
-    :param dict data: A dictionary of property references.
+    :param dict properties: A dictionary of property references.
+    :param dict methods : A dictionary of methods on the property group.
     :return PropertyGroup: A reference to the created property group class.
     """
-    attributes = {'__annotations__': data}
+    if not methods:
+        methods = {}
+
+    attributes = {
+        '__annotations__': properties,
+        **methods
+    }
 
     # make class name pascal case
     class_name = ''.join([
         word.capitalize() for word in f'{ToolInfo.NAME.value}_settings_group_{class_name}'.split('_')
     ])
 
-    # versions 2.92 and older dont have an __annotations__ attribute
-    if bpy.app.version and bpy.app.version[0] <= 2 and bpy.app.version[1] < 93:
-        attributes = data
-
     return type(
         class_name,
         (bpy.types.PropertyGroup,),
         attributes
-    )
-
-
-def create_settings_property_group_class():
-    """
-    Creates a settings property group from the settings file data.
-
-    :return PropertyGroup: A reference to the created property group class.
-    """
-    data = get_settings()
-    return create_property_group_class(
-        class_name=f'{ToolInfo.NAME.value}SettingsGroup',
-        data=convert_to_properties(data)
     )
 
 
@@ -506,7 +497,7 @@ def remove_template(properties):
     properties.active_settings_template = Template.DEFAULT
 
 
-def convert_to_properties(data):
+def convert_to_property_group(data):
     """
     Converts a dictionary of json serializable types to bpy property types and groups.
 
@@ -518,13 +509,13 @@ def convert_to_properties(data):
             data[key] = create_property(value)
             continue
 
+        if type(value).__name__ == 'function':
+            continue
+
         if not value.get('name'):
             data[key] = create_property_group(
                 class_name=key.upper(),
-                data=convert_to_properties(
-                    data.get(key, {})
-                )
+                properties=convert_to_property_group(data.get(key, {})),
+                methods={key: value for key, value in value.items() if type(value).__name__ == 'function'}
             )
-        else:
-            data[key] = create_property(value)
     return data

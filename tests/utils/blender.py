@@ -64,22 +64,11 @@ class BlenderRemoteCalls:
 
     @staticmethod
     def get_addon_property(context_name, addon_name, property_name):
-        # handle addon preferences
-        if context_name == 'preferences':
-            properties = bpy.context.preferences.addons[addon_name].preferences
-        # otherwise the normal contexts
-        else:
-            context = getattr(bpy.context, context_name)
-            properties = getattr(context, addon_name)
+        return Blender.get_addon_property(context_name, addon_name, property_name)
 
-        module_path = property_name.split('.')
-        try:
-            for index, sub_property_name in enumerate(module_path, 1):
-                if index == len(module_path):
-                    return getattr(properties, sub_property_name)
-                properties = getattr(properties, sub_property_name)
-        except AttributeError:
-            return None
+    @staticmethod
+    def has_addon_property(context_name, addon_name, property_name):
+        return Blender.has_addon_property(context_name, addon_name, property_name)
 
     @staticmethod
     def has_data_block(data_type, name):
@@ -389,6 +378,20 @@ class BlenderRemoteCalls:
         operator(*args, **kwargs)
 
     @staticmethod
+    def run_property_group_method(context_name, addon_name, method_name, args=None, kwargs=None):
+        """
+        Runs the given operator.
+        """
+        if args is None:
+            args = []
+        if kwargs is None:
+            kwargs = {}
+
+        method = Blender.get_addon_property(context_name, addon_name, method_name)
+        if method:
+            return method(*args, **kwargs)
+
+    @staticmethod
     def has_driver_namespace(name):
         """
         Checks if the given driver namespace exists.
@@ -591,3 +594,41 @@ class Blender:
                 )
 
             Blender.set_all_action_attributes(rig_object, attributes)
+
+    @staticmethod
+    def get_addon_property(context_name, addon_name, property_name):
+        # handle addon preferences
+        if context_name == 'preferences':
+            properties = bpy.context.preferences.addons[addon_name].preferences
+        # otherwise the normal contexts
+        else:
+            context = getattr(bpy.context, context_name)
+            properties = getattr(context, addon_name)
+
+        module_path = property_name.split('.')
+        try:
+            for index, sub_property_name in enumerate(module_path, 1):
+                if index == len(module_path):
+                    return getattr(properties, sub_property_name)
+                properties = getattr(properties, sub_property_name)
+        except AttributeError:
+            return None
+
+    @staticmethod
+    def has_addon_property(context_name, addon_name, property_name):
+        # handle addon preferences
+        if context_name == 'preferences':
+            properties = bpy.context.preferences.addons[addon_name].preferences
+        # otherwise the normal contexts
+        else:
+            context = getattr(bpy.context, context_name)
+            properties = getattr(context, addon_name)
+
+        module_path = property_name.split('.')
+        try:
+            for index, sub_property_name in enumerate(module_path, 1):
+                if index == len(module_path):
+                    return hasattr(properties, sub_property_name)
+                properties = getattr(properties, sub_property_name)
+        except AttributeError:
+            return None

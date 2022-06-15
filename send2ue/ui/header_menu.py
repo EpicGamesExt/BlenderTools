@@ -41,7 +41,7 @@ class TOPBAR_MT_Utilities(bpy.types.Menu):
         operator_namespace = getattr(bpy.ops, ToolInfo.NAME.value, None)
         if operator_namespace:
             for namespace in dir(operator_namespace):
-                if namespace.startswith(f'{Extensions.NAME}_') and f'_{Extensions.UTILITY_OPERATOR}' in namespace:
+                if namespace.startswith(f'{Extensions.NAME}_'):
                     self.layout.operator(f'{ToolInfo.NAME.value}.{namespace}')
 
 
@@ -126,7 +126,6 @@ def add_pipeline_menu():
         bpy.types.TOPBAR_MT_Pipeline.remove(import_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(export_menu)
         bpy.types.TOPBAR_MT_Pipeline.remove(utilities_menu)
-
 
     finally:
         bpy.types.TOPBAR_MT_Pipeline.append(import_menu)

@@ -2,7 +2,7 @@
 
 import bpy
 from ..constants import PathModes, Extensions, Template
-from ..core import validations, utilities, settings
+from ..core import utilities, settings
 
 
 class Send2UnrealDialog(bpy.types.Panel):
@@ -249,9 +249,10 @@ class Send2UnrealDialog(bpy.types.Panel):
         Draws the draws of each extension.
         """
         properties = bpy.context.scene.send2ue
-        for name, function in bpy.app.driver_namespace.items():
-            if name.startswith(Extensions.DRAW_NAMESPACE) and name.endswith(f'_draw_{properties.tab}'):
-                function(properties, self, layout)
+        for extension_property_group in dir(bpy.context.scene.send2ue.extensions):
+            draw = getattr(extension_property_group, f'draw_{properties.tab}', None)
+            if draw:
+                draw(self, layout)
 
     def draw_animation_settings(self, layout):
         """

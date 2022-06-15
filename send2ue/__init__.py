@@ -57,11 +57,6 @@ def register():
         # register the operators
         operators.register()
 
-        # add extensions
-        extension_factory = extension.ExtensionFactory()
-        extension_factory.create_operators()
-        extension_factory.create_draws()
-
         # register the header menu
         header_menu.register()
 
@@ -94,12 +89,6 @@ def unregister():
 
         # register the addon preferences
         addon_preferences.unregister()
-
-        # remove extensions
-        extension_factory = extension.ExtensionFactory()
-        extension_factory.remove_draws()
-        extension_factory.remove_operators()
-        extension_factory.remove_property_data()
 
         # unregister the operators
         operators.unregister()

@@ -25,20 +25,20 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
             'external': {
                 'example': {
                     'properties': {'hello_property': 'Hello world'},
-                    'operators': [
-                        'extensions_example_post_operation',
-                        'extensions_example_pre_operation',
-                        'extensions_example_pre_validations'
+                    'tasks': [
+                        ['extensions.example.post_operation', []],
+                        ['extensions.example.pre_operation', []],
+                        ['extensions.example.pre_validations', []]
                     ],
                     'draws': [
-                        'send2ue_extensions_example_draw_validations'
+                        'extensions.example.draw_validations'
                     ]
                 },
             },
             'default': {
                 'ue2rigify': {
-                    'operators': [
-                        'extensions_ue2rigify_pre_validations'
+                    'tasks': [
+                        ['extensions.ue2rigify.pre_validations', []]
                     ]
                 }
             }

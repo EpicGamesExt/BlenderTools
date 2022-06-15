@@ -3,9 +3,9 @@
 import re
 import os
 import bpy
-from . import utilities, formatting
+from . import utilities, formatting, extension
 from ..dependencies.unreal import UnrealRemoteCalls
-from ..constants import AssetTypes, PathModes, ToolInfo, Extensions, ExtensionOperators
+from ..constants import AssetTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
 
 
 class ValidationManager:
@@ -24,35 +24,33 @@ class ValidationManager:
         """
         Registers all method in this class that start with `validate`.
         """
+
         for attribute in dir(self):
             if attribute.startswith('validate_'):
                 validator = getattr(self, attribute)
                 self._validators.append(validator)
 
         # add in any validations defined in the extensions
-        operator_namespace = getattr(bpy.ops, ToolInfo.NAME.value, None)
-        if operator_namespace:
-            for attribute in dir(operator_namespace):
-                if attribute.startswith(f'{Extensions.NAME}_'):
-                    validation_operator = getattr(operator_namespace, attribute)
-                    if attribute.endswith(f'_{ExtensionOperators.PRE_VALIDATIONS.value}'):
-                        self._validators.insert(0, validation_operator)
-                    if attribute.endswith(f'_{ExtensionOperators.POST_VALIDATIONS.value}'):
-                        self._validators.append(validation_operator)
+        for extension_property_group in dir(bpy.context.scene.send2ue.extensions):
+            pre_validations = getattr(extension_property_group, ExtensionTasks.PRE_VALIDATIONS.value, None)
+            if pre_validations is not None:
+                self._validators.insert(0, pre_validations)
+
+            post_validations = getattr(extension_property_group, ExtensionTasks.POST_VALIDATIONS.value, None)
+            if post_validations is not None:
+                self._validators.append(post_validations)
 
     def run(self):
         """
         Run the registered validations.
         """
-        self.properties.validations_passed = True
         for validator in self._validators:
-            if self.properties.validations_passed:
-                validator()
-            else:
+            if not validator():
                 return False
         return True
 
-    def validate_collections_exist(self):
+    @staticmethod
+    def validate_collections_exist():
         """
         Checks the scene to make sure the appropriate collections exist.
         """
@@ -62,7 +60,8 @@ class ValidationManager:
                 utilities.report_error(
                     f'You do not have a collection "{collection_name}" in your outliner. Please create it.'
                 )
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_asset_data_exists(self):
         """
@@ -77,7 +76,8 @@ class ValidationManager:
                 utilities.report_error(
                     f'You do not have any objects under the "{ToolInfo.EXPORT_COLLECTION.value}" collection!'
                 )
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_object_names(self):
         """
@@ -89,7 +89,8 @@ class ValidationManager:
                 utilities.report_error(
                     f'Object "{scene_object.name}" has an invalid name. Please rename it.'
                 )
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_geometry_exists(self):
         """
@@ -99,7 +100,8 @@ class ValidationManager:
             # check if vertices exist
             if len(mesh_object.data.vertices) <= 0:
                 utilities.report_error(f'Mesh "{mesh_object.name}" has no geometry.')
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_scene_scale(self):
         """
@@ -112,7 +114,8 @@ class ValidationManager:
                     f'The scene scale "{length_unit}" is not recommended. Please change to '
                     f'"{self.properties.validate_scene_scale}", or disable this validation.'
                 )
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_scene_frame_rate(self):
         """
@@ -126,7 +129,8 @@ class ValidationManager:
                     f'"{self.properties.validate_time_units}" in your render settings before continuing, '
                     f'or disable this validation.'
                 )
-                self.properties.validations_passed = False
+                return False
+        return True
 
     def validate_disk_folders(self):
         """
@@ -146,8 +150,8 @@ class ValidationManager:
                     error_message = formatting.auto_format_disk_folder_path(property_name, self.properties)
                     if error_message:
                         utilities.report_error(error_message)
-                        self.properties.validations_passed = False
-                        return
+                        return False
+        return True
 
     def validate_unreal_folders(self):
         """
@@ -166,8 +170,8 @@ class ValidationManager:
                     error_message = formatting.auto_format_unreal_folder_path(property_name, self.properties)
                     if error_message:
                         utilities.report_error(error_message)
-                        self.properties.validations_passed = False
-                        return
+                        return False
+        return True
 
     def validate_unreal_asset_paths(self):
         """
@@ -188,8 +192,8 @@ class ValidationManager:
                     error_message = formatting.auto_format_unreal_asset_path(property_name, self.properties)
                     if error_message:
                         utilities.report_error(error_message)
-                        self.properties.validations_passed = False
-                        return
+                        return False
+        return True
 
     def validate_materials(self):
         """
@@ -212,8 +216,8 @@ class ValidationManager:
                     if material_slots:
                         for material_slot in material_slots:
                             utilities.report_error(f'Mesh "{mesh_object.name}" has a unused material "{material_slot}"')
-                            self.properties.validations_passed = False
-                            return
+                            return False
+        return True
 
     def validate_lod_names(self):
         """
@@ -227,8 +231,8 @@ class ValidationManager:
                         f'Object "{mesh_object.name}" does not follow the correct lod naming convention defined in the'
                         f'import setting by the lod regex.'
                     )
-                    self.properties.validations_passed = False
-                    return
+                    return False
+        return True
 
     def validate_texture_references(self):
         """
@@ -250,8 +254,8 @@ class ValidationManager:
                                         f'Mesh "{mesh_object.name}" has a material "{material_slot.material.name}" that '
                                         f'contains a missing image "{node.image.name}".'
                                     )
-                                    self.properties.validations_passed = False
-                                    return
+                                    return False
+        return True
 
     def validate_object_root_scale(self):
         """
@@ -270,5 +274,5 @@ class ValidationManager:
                         f'"{scene_object.name}" has un-applied transforms "{", ".join(non_zero_transforms)}". These must '
                         f'be zero to avoid unexpected results. Otherwise, turn off this validation to ignore.'
                     )
-                    self.properties.validations_passed = False
-                    return
+                    return False
+        return True

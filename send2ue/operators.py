@@ -4,7 +4,7 @@ import os
 import bpy
 import queue
 import threading
-from .constants import ToolInfo, ExtensionOperators
+from .constants import ToolInfo, ExtensionTasks
 from .core import export, utilities, settings, validations, extension
 from .ui import file_browser, dialog
 from .dependencies import unreal
@@ -31,8 +31,6 @@ class Send2Ue(bpy.types.Operator):
         self.execution_queue = bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value]
 
     def modal(self, context, event):
-        properties = bpy.context.scene.send2ue
-
         if not self.done:
             context.area.tag_redraw()
 
@@ -52,8 +50,9 @@ class Send2Ue(bpy.types.Operator):
                 context.window_manager.send2ue.progress = abs(((step / self.max_step) * 100) - 1)
                 utilities.refresh_all_areas()
                 function(*args, **kwargs)
+                file_name = context.window_manager.send2ue.asset_data[asset_id].get(attribute)
                 description = message.format(
-                    attribute=utilities.get_asset_name_from_file_name(properties.asset_data[asset_id].get(attribute))
+                    attribute=utilities.get_asset_name_from_file_name(file_name)
                 )
                 bpy.context.workspace.status_text_set_internal(description)
 
@@ -115,6 +114,8 @@ class Send2Ue(bpy.types.Operator):
         return {'FINISHED'}
 
     def pre_operation(self):
+        properties = bpy.context.scene.send2ue
+
         # get the current state of the scene and its objects
         self.state['context'] = utilities.get_current_context()
 
@@ -122,11 +123,13 @@ class Send2Ue(bpy.types.Operator):
         self.state['unpacked_files'] = utilities.unpack_textures()
 
         # run the pre export extensions
-        extension.run_operators(ExtensionOperators.PRE_OPERATION.value)
+        extension.run_extension_tasks(ExtensionTasks.PRE_OPERATION.value, args=[properties])
 
     def post_operation(self):
+        properties = bpy.context.scene.send2ue
+
         # run the post export extensions
-        extension.run_operators(ExtensionOperators.POST_OPERATION.value)
+        extension.run_extension_tasks(ExtensionTasks.POST_OPERATION.value, args=[properties])
 
         # repack the unpacked files
         utilities.remove_unpacked_files(self.state.get('unpacked_files', {}))
@@ -230,17 +233,15 @@ class ReloadExtensions(bpy.types.Operator):
 
         extension_factory = extension.ExtensionFactory()
 
-        # remove the extension operators and draws
-        extension_factory.remove_draws()
-        extension_factory.remove_operators()
+        # remove the extension operators
+        extension_factory.remove_utility_operators()
 
         # remove the properties
         extension_factory.remove_property_data()
         unregister_scene_properties()
 
-        # re-create the operators and draws
-        extension_factory.create_draws()
-        extension_factory.create_operators()
+        # re-create the utility operators
+        extension_factory.create_utility_operators()
 
         # re-create the properties again
         register_scene_properties()
@@ -296,12 +297,21 @@ def register():
         if not utilities.get_operator_class_by_bl_idname(operator_class.bl_idname):
             bpy.utils.register_class(operator_class)
 
+    # register the extension utility operators
+    extension_factory = extension.ExtensionFactory()
+    extension_factory.create_utility_operators()
+
 
 def unregister():
     """
     Unregisters the operators.
     """
+    # remove the extension operators
+    extension_factory = extension.ExtensionFactory()
+    extension_factory.remove_utility_operators()
+
     # unregister the classes
     for operator_class in operator_classes:
         if utilities.get_operator_class_by_bl_idname(operator_class.bl_idname):
             bpy.utils.unregister_class(operator_class)
+

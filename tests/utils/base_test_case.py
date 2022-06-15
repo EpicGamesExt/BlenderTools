@@ -143,8 +143,18 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         )
         self.blender.run_addon_operator(self.addon_name, 'reload_extensions')
 
+    def assert_extension_tasks(self, extension_name, extension_tasks, exists=True):
+        self.log(f'Running all {self.addon_name} {extension_name} extension tasks...')
+        for extension_task, args in extension_tasks:
+            result = self.blender.run_property_group_method('scene', self.addon_name, extension_task)
+            self.assertEqual(
+                result is not None,
+                exists,
+                f'The "{extension_name}" extension task "{extension_task}" does not exist.'
+            )
+
     def assert_extension_operators(self, extension_name, extension_operators, exists=True):
-        self.log(f'Running all {self.addon_name} {extension_name} extension operators...')
+        self.log(f'Running all {self.addon_name} {extension_name} extension utility operators...')
         for extension_operator in extension_operators:
             try:
                 self.blender.run_addon_operator(self.addon_name, extension_operator)
@@ -180,7 +190,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
     def assert_extension_draws(self, extension_name, extension_draws, exists=True):
         self.log(f'Checking {self.addon_name} {extension_name} extension draws...')
         for name in extension_draws:
-            value = self.blender.has_driver_namespace(name)
+            value = self.blender.has_addon_property('scene', self.addon_name, name)
             if exists:
                 self.assertTrue(
                     value,
@@ -194,15 +204,18 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
 
     def assert_extension(self, extension_name, extensions_data, exists=True):
         extension_properties = extensions_data.get('properties', {})
-        extension_operators = extensions_data.get('operators', [])
+        extension_tasks = extensions_data.get('tasks', [])
         extension_utility_operators = extensions_data.get('utility_operators', [])
         extension_draws = extensions_data.get('draws', [])
 
         # check properties
         self.assert_extension_properties(extension_name, extension_properties, exists)
 
-        # check properties
-        self.assert_extension_operators(extension_name, extension_operators + extension_utility_operators, exists)
+        # check tasks
+        self.assert_extension_tasks(extension_name, extension_tasks, exists)
+
+        # check utility operators
+        self.assert_extension_operators(extension_name, extension_utility_operators)
 
         # check draws
         self.assert_extension_draws(extension_name, extension_draws, exists)
