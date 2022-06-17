@@ -64,8 +64,8 @@ class ExampleExtension(ExtensionBase):
 
         asset_data['file_path'] = f'{path}_added_this.{ext}'
         asset_data['asset_path'] = f'{asset_path}_added_this'
-
         pprint(asset_data)
+        self.update_asset_data(asset_data)
 
     def pre_animation_export(self, asset_data, properties):
         """
@@ -78,8 +78,8 @@ class ExampleExtension(ExtensionBase):
         skeleton_asset_path = asset_data.get('skeleton_asset_path').replace('_Skeleton', '')
 
         asset_data['skeleton_asset_path'] = f'{skeleton_asset_path}_added_this_Skeleton'
-
         pprint(asset_data)
+        self.update_asset_data(asset_data)
 
     def post_import(self, asset_data, properties):
         """

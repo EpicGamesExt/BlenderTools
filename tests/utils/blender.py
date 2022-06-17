@@ -631,4 +631,4 @@ class Blender:
                     return hasattr(properties, sub_property_name)
                 properties = getattr(properties, sub_property_name)
         except AttributeError:
-            return None
+            return False

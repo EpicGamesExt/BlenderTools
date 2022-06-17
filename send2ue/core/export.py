@@ -693,6 +693,3 @@ def send2ue(properties):
         # create the asset data
         create_asset_data(properties)
         ingest.assets(properties)
-
-    # clear the current id
-    bpy.context.window_manager.send2ue.asset_id = ''

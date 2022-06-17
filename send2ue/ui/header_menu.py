@@ -1,6 +1,5 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 import bpy
-from ..core import utilities
 from ..constants import ToolInfo, Extensions
 
 

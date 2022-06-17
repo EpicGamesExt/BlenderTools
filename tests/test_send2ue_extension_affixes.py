@@ -69,9 +69,9 @@ class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
                         'animation_sequence_name_affix': 'Anim_',
                     },
                     'tasks': [
-                        ['extensions.affixes.post_operation', []],
-                        ['extensions.affixes.pre_operation', []],
-                        ['extensions.affixes.pre_validations', []]
+                        'extensions.affixes.post_operation',
+                        'extensions.affixes.pre_operation',
+                        'extensions.affixes.pre_validations'
                     ],
                     'utility_operators': [
                         'extensions_affixes_addassetaffixes',

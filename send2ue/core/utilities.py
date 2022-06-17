@@ -736,8 +736,9 @@ def has_extension_draw(location):
 
     :param str location: The name of the draw location i.e. export, import, validations.
     """
-    for extension_property_group in dir(bpy.context.scene.send2ue.extensions):
-        if hasattr(extension_property_group, f'draw_{location}'):
+    for extension_name in dir(bpy.context.scene.send2ue.extensions):
+        extension = getattr(bpy.context.scene.send2ue.extensions, extension_name)
+        if hasattr(extension, f'draw_{location}'):
             return True
     return False
 

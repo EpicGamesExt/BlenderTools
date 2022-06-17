@@ -8,7 +8,7 @@ from send2ue.core import utilities
 class Ue2RigifyExtension(ExtensionBase):
     name = 'ue2rigify'
 
-    def pre_validations(self):
+    def pre_validations(self, properties):
         """
         Defines the pre validation logic that will be an injected operation.
         """

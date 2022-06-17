@@ -26,9 +26,9 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
                 'example': {
                     'properties': {'hello_property': 'Hello world'},
                     'tasks': [
-                        ['extensions.example.post_operation', []],
-                        ['extensions.example.pre_operation', []],
-                        ['extensions.example.pre_validations', []]
+                        'extensions.example.post_operation',
+                        'extensions.example.pre_operation',
+                        'extensions.example.pre_validations'
                     ],
                     'draws': [
                         'extensions.example.draw_validations'
@@ -38,19 +38,11 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
             'default': {
                 'ue2rigify': {
                     'tasks': [
-                        ['extensions.ue2rigify.pre_validations', []]
+                        'extensions.ue2rigify.pre_validations'
                     ]
                 }
             }
         })
-
-        # A one off test against the ./test_files/send2ue_extensions/example.py extension
-        value = self.blender.get_addon_property('scene', self.addon_name, 'unreal_mesh_folder_path')
-        self.assertEqual(
-            value,
-            '/Game/example_extension/test/',
-            f'The unreal mesh folder "{value}" does not match the value it is set to in the example extension file'
-        )
 
     def test_templates(self):
         """

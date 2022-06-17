@@ -8,8 +8,32 @@ import importlib.util
 import tempfile
 from . import settings
 from abc import abstractmethod
-from ..constants import ToolInfo, Extensions, ExtensionTasks
+from ..constants import ToolInfo, Extensions
 from . import utilities
+
+
+def update_asset_data(self, asset_data):
+    """
+    Updates the asset data dictionary on the current asset.
+
+    :param ExtensionBase self: The extension property group.
+    :param dict asset_data: The asset data dictionary.
+    """
+    asset_id = bpy.context.window_manager.send2ue.asset_id
+    bpy.context.window_manager.send2ue.asset_data[asset_id] = asset_data
+
+
+def run_extension_tasks(name_space, args=None):
+    """
+    Runs the task in the given name space.
+
+    :param str name_space: The name space of the task to run.
+    :param list args: A list of arguments passed to the task.
+    """
+    for attribute in dir(bpy.context.scene.send2ue.extensions):
+        task = getattr(getattr(bpy.context.scene.send2ue.extensions, attribute, object), name_space, None)
+        if task:
+            task(*args)
 
 
 class ExtensionBase:
@@ -272,10 +296,13 @@ class ExtensionFactory:
                 for attribute, value in extension_class.__annotations__.items():
                     data[Extensions.NAME][extension_class.name][attribute] = value
 
-            # get the extension methods
+            # get the extension methods and its parent class methods
             for attribute, value in extension_class.__dict__.items():
                 if type(value).__name__ == 'function':
                     data[Extensions.NAME][extension_class.name][attribute] = value
+
+            # add the update asset method to the class
+            data[Extensions.NAME][extension_class.name]['update_asset_data'] = update_asset_data
 
         return settings.create_property_group_class(
             class_name=f"{ToolInfo.NAME.value}SettingsGroup",
@@ -300,16 +327,3 @@ class ExtensionFactory:
             if class_name.startswith(f'{ToolInfo.NAME.value.upper()}_OT_{Extensions.NAME}_'):
                 operator_class = getattr(bpy.types, class_name)
                 bpy.utils.unregister_class(operator_class)
-
-
-def run_extension_tasks(name_space, args=None):
-    """
-    Runs the task in the given name space.
-
-    :param str name_space: The name space of the task to run.
-    :param list args: A list of arguments passed to the task.
-    """
-    for attribute in dir(bpy.context.scene.send2ue.extensions):
-        if not attribute.startswith('__') and attribute != 'name':
-            task = getattr(name_space, attribute)
-            return task(*args)

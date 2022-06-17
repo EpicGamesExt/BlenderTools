@@ -143,16 +143,6 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         )
         self.blender.run_addon_operator(self.addon_name, 'reload_extensions')
 
-    def assert_extension_tasks(self, extension_name, extension_tasks, exists=True):
-        self.log(f'Running all {self.addon_name} {extension_name} extension tasks...')
-        for extension_task, args in extension_tasks:
-            result = self.blender.run_property_group_method('scene', self.addon_name, extension_task)
-            self.assertEqual(
-                result is not None,
-                exists,
-                f'The "{extension_name}" extension task "{extension_task}" does not exist.'
-            )
-
     def assert_extension_operators(self, extension_name, extension_operators, exists=True):
         self.log(f'Running all {self.addon_name} {extension_name} extension utility operators...')
         for extension_operator in extension_operators:
@@ -187,19 +177,19 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
                     f'value "{default_value}".'
                 )
 
-    def assert_extension_draws(self, extension_name, extension_draws, exists=True):
+    def assert_extension_method(self, extension_name, extension_methods, exists=True):
         self.log(f'Checking {self.addon_name} {extension_name} extension draws...')
-        for name in extension_draws:
-            value = self.blender.has_addon_property('scene', self.addon_name, name)
+        for extension_method in extension_methods:
+            value = self.blender.has_addon_property('scene', self.addon_name, extension_method)
             if exists:
                 self.assertTrue(
                     value,
-                    f'The "{extension_name}" extension draw method "{name}" was not found.'
+                    f'The "{extension_name}" extension method "{extension_method}" was not found.'
                 )
             else:
                 self.assertFalse(
                     value,
-                    f'The "{extension_name}" extension draw method "{name}" should not exist.'
+                    f'The "{extension_name}" extension method "{extension_method}" should not exist.'
                 )
 
     def assert_extension(self, extension_name, extensions_data, exists=True):
@@ -212,13 +202,13 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         self.assert_extension_properties(extension_name, extension_properties, exists)
 
         # check tasks
-        self.assert_extension_tasks(extension_name, extension_tasks, exists)
+        self.assert_extension_method(extension_name, extension_tasks, exists)
 
         # check utility operators
         self.assert_extension_operators(extension_name, extension_utility_operators)
 
         # check draws
-        self.assert_extension_draws(extension_name, extension_draws, exists)
+        self.assert_extension_method(extension_name, extension_draws, exists)
 
     def run_extension_tests(self, extensions):
         external_extensions = extensions.get('external', {})

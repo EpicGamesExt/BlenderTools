@@ -294,40 +294,39 @@ class AffixesExtension(ExtensionBase):
                     "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
 
-    def draw_export(self, dialog, layout):
+    def draw_export(self, dialog, layout, properties):
         """
         Draws all the Affix settings in the export extensions panel.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
         :param Send2UnrealDialog dialog: The dialog class.
         :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        properties = self.extensions.affixes
         box = layout.box()
         box.label(text='Affixes:')
-        dialog.draw_property(properties, box, 'auto_add_asset_name_affixes')
-        dialog.draw_property(properties, box, 'auto_remove_asset_name_affixes')
-        dialog.draw_property(properties, box, 'static_mesh_name_affix')
-        dialog.draw_property(properties, box, 'skeletal_mesh_name_affix')
-        dialog.draw_property(properties, box, 'animation_sequence_name_affix')
-        dialog.draw_property(properties, box, 'material_name_affix')
-        dialog.draw_property(properties, box, 'texture_name_affix')
+        dialog.draw_property(self, box, 'auto_add_asset_name_affixes')
+        dialog.draw_property(self, box, 'auto_remove_asset_name_affixes')
+        dialog.draw_property(self, box, 'static_mesh_name_affix')
+        dialog.draw_property(self, box, 'skeletal_mesh_name_affix')
+        dialog.draw_property(self, box, 'animation_sequence_name_affix')
+        dialog.draw_property(self, box, 'material_name_affix')
+        dialog.draw_property(self, box, 'texture_name_affix')
 
-    def pre_operation(self):
+    def pre_operation(self, properties):
         """
         Defines the pre operation logic that will be run before the operation.
         """
         if self.auto_add_asset_name_affixes:
             add_affixes()
 
-    def post_operation(self):
+    def post_operation(self, properties):
         """
         Defines the post operation logic that will be run after the operation.
         """
         if self.auto_remove_asset_name_affixes:
             remove_affixes()
 
-    def pre_validations(self):
+    def pre_validations(self, properties):
         """
         Defines the pre validation logic that will be an injected operation.
         """

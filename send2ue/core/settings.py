@@ -204,6 +204,10 @@ def get_property_group_as_dictionary(property_group, extra_attributes=False):
         property_instance = property_group.__annotations__.get(key)
         value = getattr(property_group, key)
 
+        # skip if this is a function
+        if type(property_instance).__name__ == 'function':
+            continue
+
         if property_instance:
             property_type_name = property_instance.function.__name__
 
@@ -246,6 +250,11 @@ def set_property_group_with_dictionary(property_group, data):
     for attribute in dir(property_group):
         property_type_name = None
         deferred_data = property_group.__annotations__.get(attribute)
+
+        # skip if the attribute is a function
+        if type(deferred_data).__name__ == 'function':
+            continue
+
         if deferred_data:
             property_type_name = deferred_data.function.__name__
 
@@ -406,6 +415,19 @@ def create_property_group_class(class_name, properties, methods=None):
     )
 
 
+def create_settings_property_group_class():
+    """
+    Creates a settings property group from the settings file data.
+
+    :return PropertyGroup: A reference to the created property group class.
+    """
+    data = get_settings()
+    return create_property_group_class(
+        class_name=f'{ToolInfo.NAME.value}SettingsGroup',
+        properties=convert_to_property_group(data)
+    )
+
+
 def save_template(template_file_path):
     """
     Saves the given template.
@@ -518,4 +540,7 @@ def convert_to_property_group(data):
                 properties=convert_to_property_group(data.get(key, {})),
                 methods={key: value for key, value in value.items() if type(value).__name__ == 'function'}
             )
+        else:
+            data[key] = create_property(value)
+
     return data

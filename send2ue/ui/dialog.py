@@ -249,10 +249,11 @@ class Send2UnrealDialog(bpy.types.Panel):
         Draws the draws of each extension.
         """
         properties = bpy.context.scene.send2ue
-        for extension_property_group in dir(bpy.context.scene.send2ue.extensions):
-            draw = getattr(extension_property_group, f'draw_{properties.tab}', None)
+        for extension_name in dir(properties.extensions):
+            extension = getattr(properties.extensions, extension_name)
+            draw = getattr(extension, f'draw_{properties.tab}', None)
             if draw:
-                draw(self, layout)
+                draw(self, layout, properties)
 
     def draw_animation_settings(self, layout):
         """

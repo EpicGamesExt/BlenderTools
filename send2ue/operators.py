@@ -30,6 +30,10 @@ class Send2Ue(bpy.types.Operator):
             bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value] = queue.Queue()
         self.execution_queue = bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value]
 
+    @staticmethod
+    def draw_progress(self, context):
+        self.layout.prop(context.window_manager.send2ue, 'progress')
+
     def modal(self, context, event):
         if not self.done:
             context.area.tag_redraw()
@@ -45,16 +49,26 @@ class Send2Ue(bpy.types.Operator):
 
         if event.type == 'TIMER':
             if not self.execution_queue.empty():
-                function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
-                step = self.max_step - self.execution_queue.qsize()
-                context.window_manager.send2ue.progress = abs(((step / self.max_step) * 100) - 1)
-                utilities.refresh_all_areas()
-                function(*args, **kwargs)
-                file_name = context.window_manager.send2ue.asset_data[asset_id].get(attribute)
-                description = message.format(
-                    attribute=utilities.get_asset_name_from_file_name(file_name)
-                )
-                bpy.context.workspace.status_text_set_internal(description)
+                try:
+                    function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
+                    step = self.max_step - self.execution_queue.qsize()
+                    context.window_manager.send2ue.progress = abs(((step / self.max_step) * 100) - 1)
+                    utilities.refresh_all_areas()
+
+                    # set the current asset id
+                    context.window_manager.send2ue.asset_id = asset_id
+                    # run the function
+                    function(*args, **kwargs)
+
+                    # get the description
+                    file_name = context.window_manager.send2ue.asset_data[asset_id].get(attribute)
+                    description = message.format(
+                        attribute=utilities.get_asset_name_from_file_name(file_name)
+                    )
+                    bpy.context.workspace.status_text_set_internal(description)
+                except Exception as error:
+                    self.escape_operation(context)
+                    raise error
 
             if self.escape:
                 bpy.types.STATUSBAR_HT_header.remove(self.draw_progress)
@@ -73,8 +87,8 @@ class Send2Ue(bpy.types.Operator):
 
     def invoke(self, context, event):
         if utilities.is_unreal_connected():
-            self.pre_operation()
             properties = bpy.context.scene.send2ue
+            self.pre_operation()
 
             # initialize the progress bar
             self.execution_queue.queue.clear()
@@ -89,28 +103,39 @@ class Send2Ue(bpy.types.Operator):
             context.window_manager.modal_handler_add(self)
             self.timer = context.window_manager.event_timer_add(0.01, window=context.window)
             bpy.types.STATUSBAR_HT_header.prepend(self.draw_progress)
+
+            # if validations fail
+            if self.max_step == 0:
+                self.escape_operation(context)
+
             return {'RUNNING_MODAL'}
         else:
             return {'FINISHED'}
 
-    @staticmethod
-    def draw_progress(self, context):
-        self.layout.prop(context.window_manager.send2ue, 'progress')
-
     def execute(self, context):
         if utilities.is_unreal_connected():
+            properties = bpy.context.scene.send2ue
             self.pre_operation()
 
-            properties = bpy.context.scene.send2ue
             self.execution_queue.queue.clear()
             export.send2ue(properties)
 
             # process the queued functions
             while not self.execution_queue.empty():
                 function, args, kwargs, message, asset_id, attribute = self.execution_queue.get()
+                # set the current asset id
+                context.window_manager.send2ue.asset_id = asset_id
+                # run the function
                 function(*args, **kwargs)
 
             self.post_operation()
+        return {'FINISHED'}
+
+    def escape_operation(self, context):
+        bpy.types.STATUSBAR_HT_header.remove(self.draw_progress)
+        context.window_manager.event_timer_remove(self.timer)
+        bpy.context.workspace.status_text_set_internal(None)
+        self.post_operation()
         return {'FINISHED'}
 
     def pre_operation(self):
@@ -163,8 +188,7 @@ class ImportAsset(bpy.types.Operator, file_browser.ImportAsset):
         properties = bpy.context.scene.send2ue
         validation_manager = validations.ValidationManager(properties)
         validation_manager.validate_scene_scale()
-        if properties.validations_passed:
-            utilities.import_asset(self.filepath, bpy.context.window_manager.send2ue)
+        utilities.import_asset(self.filepath, bpy.context.window_manager.send2ue)
         return {'FINISHED'}
 
 
