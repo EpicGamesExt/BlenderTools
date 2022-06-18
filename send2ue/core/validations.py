@@ -30,32 +30,37 @@ class ValidationManager:
                 validator = getattr(self, attribute)
                 self._validators.append(validator)
 
+    def run(self):
+        """
+        Run the registered validations.
+        """
+        # run any pre validations defined in the extensions
         for attribute in dir(bpy.context.scene.send2ue.extensions):
-            # add in any pre validations defined in the extensions
             pre_validations = getattr(getattr(
                 bpy.context.scene.send2ue.extensions, attribute, object),
                 ExtensionTasks.PRE_VALIDATIONS.value,
                 None
             )
-            if pre_validations is not None:
-                self._validators.insert(0, lambda: pre_validations(self.properties))
+            if pre_validations:
+                if not pre_validations(self.properties):
+                    return False
 
-            # add in any post validations defined in the extensions
+        # run the core validations
+        for validator in self._validators:
+            if not validator():
+                return False
+
+        # run any post validations defined in the extensions
+        for attribute in dir(bpy.context.scene.send2ue.extensions):
             post_validations = getattr(getattr(
                 bpy.context.scene.send2ue.extensions, attribute, object),
                 ExtensionTasks.POST_VALIDATIONS.value,
                 None
             )
-            if post_validations is not None:
-                self._validators.append(lambda: post_validations(self.properties))
+            if post_validations:
+                if not post_validations(self.properties):
+                    return False
 
-    def run(self):
-        """
-        Run the registered validations.
-        """
-        for validator in self._validators:
-            if not validator():
-                return False
         return True
 
     @staticmethod

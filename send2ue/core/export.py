@@ -287,6 +287,12 @@ def scale_rig_objects(properties):
         # change scene scale to 0.01
         bpy.context.scene.unit_settings.scale_length = scene_scale
 
+        # run pre bone scale task
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+        extension.run_extension_tasks(ExtensionTasks.PRE_BONE_SCALE.value, args=[asset_data, properties])
+
+        # duplicate objects
         context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
 
         for duplicate_object in context['duplicate_objects']:
@@ -299,6 +305,10 @@ def scale_rig_objects(properties):
 
                 # fix the armature scale and its animation and save that information to the context
                 context = fix_armature_scale(duplicate_object, scale_factor, context)
+
+        # run post bone scale task
+        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+        extension.run_extension_tasks(ExtensionTasks.MID_BONE_SCALE.value, args=[asset_data, properties])
 
         # restore the duplicate object selection for the export
         for duplicate_object in context['duplicate_objects']:
@@ -318,8 +328,10 @@ def restore_rig_objects(context, properties):
     if properties.automatically_scale_bones and context:
         scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
 
-        # scale the control rig if needed
-        # scale_control_rig(scale_factor, properties)
+        # run post bone scale task
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+        extension.run_extension_tasks(ExtensionTasks.POST_BONE_SCALE.value, args=[asset_data, properties])
 
         # restore action scale the duplicated actions
         utilities.scale_object_actions(context['duplicate_objects'], context['source_object']['actions'], scale_factor)

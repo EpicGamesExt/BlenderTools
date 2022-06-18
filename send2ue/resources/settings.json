@@ -1251,7 +1251,7 @@
               ]
             ],
             "type": "ENUM",
-            "default": "OFF"
+            "default": "FACE"
           },
           "use_subsurf": {
             "name": "Export Subdivision Surface",

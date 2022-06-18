@@ -20,7 +20,7 @@ def update_asset_data(self, asset_data):
     :param dict asset_data: The asset data dictionary.
     """
     asset_id = bpy.context.window_manager.send2ue.asset_id
-    bpy.context.window_manager.send2ue.asset_data[asset_id] = asset_data
+    bpy.context.window_manager.send2ue.asset_data[asset_id].update(asset_data)
 
 
 def run_extension_tasks(name_space, args=None):
