@@ -139,8 +139,6 @@ class Send2Ue(bpy.types.Operator):
         return {'FINISHED'}
 
     def pre_operation(self):
-        properties = bpy.context.scene.send2ue
-
         # get the current state of the scene and its objects
         self.state['context'] = utilities.get_current_context()
 
@@ -148,13 +146,11 @@ class Send2Ue(bpy.types.Operator):
         self.state['unpacked_files'] = utilities.unpack_textures()
 
         # run the pre export extensions
-        extension.run_extension_tasks(ExtensionTasks.PRE_OPERATION.value, args=[properties])
+        extension.run_extension_tasks(ExtensionTasks.PRE_OPERATION.value)
 
     def post_operation(self):
-        properties = bpy.context.scene.send2ue
-
         # run the post export extensions
-        extension.run_extension_tasks(ExtensionTasks.POST_OPERATION.value, args=[properties])
+        extension.run_extension_tasks(ExtensionTasks.POST_OPERATION.value)
 
         # repack the unpacked files
         utilities.remove_unpacked_files(self.state.get('unpacked_files', {}))

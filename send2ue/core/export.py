@@ -288,9 +288,7 @@ def scale_rig_objects(properties):
         bpy.context.scene.unit_settings.scale_length = scene_scale
 
         # run pre bone scale task
-        asset_id = bpy.context.window_manager.send2ue.asset_id
-        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-        extension.run_extension_tasks(ExtensionTasks.PRE_BONE_SCALE.value, args=[asset_data, properties])
+        extension.run_extension_tasks(ExtensionTasks.PRE_BONE_SCALE.value)
 
         # duplicate objects
         context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
@@ -307,8 +305,7 @@ def scale_rig_objects(properties):
                 context = fix_armature_scale(duplicate_object, scale_factor, context)
 
         # run post bone scale task
-        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-        extension.run_extension_tasks(ExtensionTasks.MID_BONE_SCALE.value, args=[asset_data, properties])
+        extension.run_extension_tasks(ExtensionTasks.MID_BONE_SCALE.value)
 
         # restore the duplicate object selection for the export
         for duplicate_object in context['duplicate_objects']:
@@ -329,9 +326,7 @@ def restore_rig_objects(context, properties):
         scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
 
         # run post bone scale task
-        asset_id = bpy.context.window_manager.send2ue.asset_id
-        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-        extension.run_extension_tasks(ExtensionTasks.POST_BONE_SCALE.value, args=[asset_data, properties])
+        extension.run_extension_tasks(ExtensionTasks.POST_BONE_SCALE.value)
 
         # restore action scale the duplicated actions
         utilities.scale_object_actions(context['duplicate_objects'], context['source_object']['actions'], scale_factor)
@@ -478,12 +473,9 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param bool lod: Whether the exported mesh is a lod.
     :return str: The fbx file path of the exported mesh
     """
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the pre mesh export extensions
     if lod == 0:
-        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value, args=[asset_data, properties])
+        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
 
     # deselect everything
     utilities.deselect_all_objects()
@@ -507,12 +499,9 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     if mesh_object:
         mesh_object.select_set(False)
 
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the post mesh export extensions
     if lod == 0:
-        extension.run_extension_tasks(ExtensionTasks.POST_MESH_EXPORT.value, args=[asset_data, properties])
+        extension.run_extension_tasks(ExtensionTasks.POST_MESH_EXPORT.value)
 
 
 @utilities.track_progress(message='Exporting animation "{attribute}"...', attribute='file_path')
@@ -526,11 +515,8 @@ def export_animation(asset_id, rig_object, action_name, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return str: The fbx file path of the exported action
     """
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the pre animation export extensions
-    extension.run_extension_tasks(ExtensionTasks.PRE_ANIMATION_EXPORT.value, args=[asset_data, properties])
+    extension.run_extension_tasks(ExtensionTasks.PRE_ANIMATION_EXPORT.value)
 
     if rig_object.animation_data:
         rig_object.animation_data.action = None
@@ -556,11 +542,8 @@ def export_animation(asset_id, rig_object, action_name, properties):
     # mute the action
     utilities.set_action_mute_value(rig_object, action_name, True)
 
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the post animation export extensions
-    extension.run_extension_tasks(ExtensionTasks.POST_ANIMATION_EXPORT.value, args=[asset_data, properties])
+    extension.run_extension_tasks(ExtensionTasks.POST_ANIMATION_EXPORT.value)
 
 
 def create_animation_data(rig_objects, properties):
@@ -600,7 +583,9 @@ def create_animation_data(rig_objects, properties):
                 # save the import data
                 asset_id = utilities.get_asset_id(file_path)
                 animation_data[asset_id] = {
-                    'asset_type': AssetTypes.ANIMATION,
+                    '_asset_type': AssetTypes.ANIMATION,
+                    '_action_name': action_name,
+                    '_armature_object_name': rig_object.name,
                     'file_path': file_path,
                     'asset_path': f'{properties.unreal_animation_folder_path}{asset_name}',
                     'asset_folder': properties.unreal_animation_folder_path,
@@ -648,7 +633,8 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
             # save the asset data
             mesh_data[asset_id] = {
-                'asset_type': AssetTypes.MESH,
+                '_asset_type': AssetTypes.MESH,
+                '_mesh_object_name': mesh_object.name,
                 'file_path': file_path,
                 'asset_folder': import_path,
                 'asset_path': f'{import_path}{asset_name}',

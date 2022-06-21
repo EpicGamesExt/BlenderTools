@@ -3,22 +3,10 @@ from utils.base_test_case import BaseSend2ueTestCaseCore
 from test_send2ue_cubes import TestSend2UeCubes
 
 
-def setUp(self):
-    """
-    The setup for affix test cases.
-    """
-    self.blender.set_addon_property('scene', 'send2ue', 'extensions.affixes.auto_add_asset_name_affixes', True)
-    self.blender.set_addon_property('scene', 'send2ue', 'extensions.affixes.auto_remove_asset_name_affixes', False)
-
-
 class TestSend2UeExtensionExampleCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore):
     """
     Runs several test cases with the affix extension on the cube meshes.
     """
-    def setUp(self):
-        super().setUp()
-        setUp(self)
-
     @unittest.skip
     def test_bulk_send_to_unreal(self):
         pass

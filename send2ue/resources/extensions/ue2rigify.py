@@ -20,7 +20,14 @@ class Ue2RigifyExtension(ExtensionBase):
     current_scale_factor: bpy.props.FloatProperty(default=1)
 
     # ------------ ui -----------------------
-    auto_sync_control_nla_to_source: bpy.props.BoolProperty(default=True)
+    auto_sync_control_nla_to_source: bpy.props.BoolProperty(
+        default=True,
+        name='Sync control rig tracks to source rig',
+        description=(
+            'If enabled and using the UE to Rigify addon in control mode, the NLA tracks of the control rig will be '
+            'synced to the source rig before they are exported'
+        )
+    )
 
     def get_source_rig_hide_value(self):
         """
@@ -86,6 +93,7 @@ class Ue2RigifyExtension(ExtensionBase):
 
         # sync the track values
         if self.use_ue2rigify and self.auto_sync_control_nla_to_source:
+            bpy.context.scene.frame_set(0)
             bpy.ops.ue2rigify.sync_rig_actions()
 
     def post_operation(self, properties):
@@ -102,14 +110,20 @@ class Ue2RigifyExtension(ExtensionBase):
         asset_path = asset_data.get('asset_path')
         file_path = asset_data.get('file_path')
         control_rig_object = bpy.data.objects.get(self.control_rig_name)
-        action_name = os.path.basename(asset_path).strip(self.action_prefix)
+        action_name = asset_data.get('_action_name').strip(self.action_prefix)
 
         if self.use_ue2rigify and control_rig_object:
             if control_rig_object.animation_data:
                 control_rig_object.animation_data.action = None
 
+            # mute all actions
+            utilities.set_all_action_mute_values(control_rig_object, mute=True)
+
             # un-mute the action
+            print('unmuting ', control_rig_object.name, action_name)
             utilities.set_action_mute_value(control_rig_object, action_name, False)
+            # # un-mute the action
+            # utilities.set_action_mute_value(rig_object, action_name, False)
 
             # update the asset and file names
             self.update_asset_data({
@@ -137,6 +151,7 @@ class Ue2RigifyExtension(ExtensionBase):
         if self.use_ue2rigify and control_rig_object:
             # mute the action
             utilities.set_action_mute_value(control_rig_object, action_name, True)
+            utilities.clear_pose(control_rig_object)
 
         self.post_export(properties)
 
@@ -155,16 +170,10 @@ class Ue2RigifyExtension(ExtensionBase):
             scale_factor = bpy.context.scene.unit_settings.scale_length / self.current_scale_factor
             self.scale_control_rig(scale_factor)
 
-    # def pre_validations(self, properties):
-    #     """
-    #     Defines the pre validation logic that will be an injected operation.
-    #     """
-    #     if hasattr(bpy.context.scene, 'ue2rigify'):
-    #         ue2rigify_properties = bpy.context.scene.ue2rigify
-    #         if ue2rigify_properties.selected_mode != 'SOURCE':
-    #             utilities.report_error(
-    #                 'Send to Unreal can not be used while UE to Rigify is in not in source mode. All '
-    #                 'animations must be baked to the source rig then try again.'
-    #             )
-    #             return False
-    #     return True
+    def draw_export(self, dialog, layout, properties):
+        """
+        Defines the draw method for the extension under the `Export` tab.
+        """
+        box = layout.box()
+        box.label(text='UE to Rigify:')
+        dialog.draw_property(self, box, 'auto_sync_control_nla_to_source')

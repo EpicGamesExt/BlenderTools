@@ -15,13 +15,8 @@ def import_asset(asset_id, property_data):
     :param str asset_id: The unique id of the asset.
     :param dict property_data: A dictionary representation of the properties.
     """
-    properties = bpy.context.scene.send2ue
-
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the pre import extensions
-    extension.run_extension_tasks(ExtensionTasks.PRE_IMPORT.value, args=[asset_data, properties])
+    extension.run_extension_tasks(ExtensionTasks.PRE_IMPORT.value)
 
     # get the asset data
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
@@ -36,11 +31,8 @@ def import_asset(asset_id, property_data):
             asset_data.get('fcurve_file_path')
         )
 
-    # get the current asset data
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-
     # run the post import extensions
-    extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value, args=[asset_data, properties])
+    extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
 
 
 @track_progress(message='Creating static mesh sockets for "{attribute}"...', attribute='asset_path')

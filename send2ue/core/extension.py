@@ -8,31 +8,31 @@ import importlib.util
 import tempfile
 from . import settings
 from abc import abstractmethod
-from ..constants import ToolInfo, Extensions
+from ..constants import ToolInfo, Extensions, ExtensionTasks
 from . import utilities
 
 
-def update_asset_data(self, asset_data):
-    """
-    Updates the asset data dictionary on the current asset.
-
-    :param ExtensionBase self: The extension property group.
-    :param dict asset_data: The asset data dictionary.
-    """
-    asset_id = bpy.context.window_manager.send2ue.asset_id
-    bpy.context.window_manager.send2ue.asset_data[asset_id].update(asset_data)
-
-
-def run_extension_tasks(name_space, args=None):
+def run_extension_tasks(name_space):
     """
     Runs the task in the given name space.
 
     :param str name_space: The name space of the task to run.
-    :param list args: A list of arguments passed to the task.
     """
     for attribute in dir(bpy.context.scene.send2ue.extensions):
         task = getattr(getattr(bpy.context.scene.send2ue.extensions, attribute, object), name_space, None)
         if task:
+            args = []
+            asset_id = bpy.context.window_manager.send2ue.asset_id
+            asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
+
+            # if there is current asset data add it to the args
+            if name_space not in [ExtensionTasks.PRE_OPERATION.value, ExtensionTasks.POST_OPERATION.value]:
+                args.append(asset_data)
+
+            # add the addon properties to the args
+            args.append(bpy.context.scene.send2ue)
+
+            # call the task
             task(*args)
 
 
@@ -162,6 +162,15 @@ class ExtensionBase:
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
+
+    def update_asset_data(self, asset_data):
+        """
+        Updates the asset data dictionary on the current asset.
+
+        :param dict asset_data: The asset data dictionary.
+        """
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        bpy.context.window_manager.send2ue.asset_data[asset_id].update(asset_data)
 
 
 class ExtensionCollector(ast.NodeVisitor):
@@ -302,7 +311,7 @@ class ExtensionFactory:
                     data[Extensions.NAME][extension_class.name][attribute] = value
 
             # add the update asset method to the class
-            data[Extensions.NAME][extension_class.name]['update_asset_data'] = update_asset_data
+            data[Extensions.NAME][extension_class.name]['update_asset_data'] = ExtensionBase.update_asset_data
 
         return settings.create_property_group_class(
             class_name=f"{ToolInfo.NAME.value}SettingsGroup",

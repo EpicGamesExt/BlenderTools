@@ -271,7 +271,7 @@ def get_current_context():
     for scene_object in bpy.data.objects:
         active_action_name = ''
         if scene_object.animation_data and scene_object.animation_data.action:
-                active_action_name = scene_object.animation_data.action.name
+            active_action_name = scene_object.animation_data.action.name
 
         object_contexts[scene_object.name] = {
             'hide': scene_object.hide_get(),
@@ -287,7 +287,8 @@ def get_current_context():
     return {
         'mode': getattr(bpy.context, 'mode', 'OBJECT'),
         'objects': object_contexts,
-        'active_object': active_object
+        'active_object': active_object,
+        'current_frame': bpy.context.scene.frame_current
     }
 
 
@@ -626,6 +627,9 @@ def set_context(context):
             mode = 'EDIT'
         bpy.ops.object.mode_set(mode=mode)
 
+    # set the current frame
+    bpy.context.scene.frame_set(context.get('current_frame', 0))
+
 
 def set_all_action_attributes(rig_object, attributes):
     """
@@ -788,7 +792,6 @@ def remove_object_scale_keyframes(actions):
     """
     This function removes all scale keyframes the exist a object in the provided actions.
 
-    :param float scale: The scale to set the all the object scaled keyframes to.
     :param list actions: A list of action objects.
     """
     for action in actions:
