@@ -45,6 +45,8 @@ class BaseTestCase(unittest.TestCase):
             for addon_name in self.blender_addons:
                 self.blender.register_addon(addon_name)
 
+        self.blender.set_addon_property('scene', 'send2ue', 'active_settings_template', 'default.json')
+
     @staticmethod
     def log(message):
         print(message)
@@ -127,6 +129,10 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
     def __init__(self, *args, **kwargs):
         super(BaseSend2ueTestCaseCore, self).__init__(*args, **kwargs)
         self.addon_name = 'send2ue'
+
+    def setUp(self):
+        super().setUp()
+        self.set_extension_repo('')
 
     def set_extension_repo(self, path):
         self.log(f'Setting the addon extension repo to "{path}"')
@@ -216,6 +222,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
 
         # check that all the extensions exist
         self.set_extension_repo(os.path.join(self.test_folder, 'test_files', 'send2ue_extensions'))
+        self.setUp()
         for extension_name, extensions_data in {**external_extensions, **default_extensions}.items():
             self.assert_extension(extension_name, extensions_data)
 

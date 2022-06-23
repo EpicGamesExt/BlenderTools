@@ -12,7 +12,7 @@ import base64
 from . import settings
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import AssetTypes, ToolInfo, PreFixToken, Extensions
+from ..constants import AssetTypes, ToolInfo, PreFixToken, PathModes
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -697,8 +697,16 @@ def is_unreal_connected():
     """
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
     """
+    # skips checking for and unreal connection if in send to disk mode
+    # https://github.com/EpicGames/BlenderTools/issues/420
+    if bpy.context.scene.send2ue.path_mode == PathModes.SEND_TO_DISK.value:
+        return True
+
     try:
+        # bootstrap the unreal rpc server if it is not already running
         unreal.bootstrap_unreal_with_rpc_server()
+        # update the server timeout value
+        set_unreal_rpc_timeout()
         return True
     except ConnectionError:
         report_error('Could not find an open Unreal Editor instance!')

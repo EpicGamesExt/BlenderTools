@@ -22,19 +22,6 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
         Checks that extensions load and function properly.
         """
         self.run_extension_tests({
-            'external': {
-                'example': {
-                    'properties': {'hello_property': 'Hello world'},
-                    'tasks': [
-                        'extensions.example.post_operation',
-                        'extensions.example.pre_operation',
-                        'extensions.example.pre_validations'
-                    ],
-                    'draws': [
-                        'extensions.example.draw_validations'
-                    ]
-                },
-            },
             'default': {
                 'ue2rigify': {
                     'tasks': [

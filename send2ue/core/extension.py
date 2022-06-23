@@ -90,6 +90,7 @@ class ExtensionBase:
         Defines the pre validation logic that will be an injected operation.
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        :return bool: Whether or not the validation has passed.
         """
         pass
 
@@ -98,6 +99,7 @@ class ExtensionBase:
         Defines the post validation logic that will be an injected operation.
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        :return bool: Whether or not the validation has passed.
         """
         pass
 
@@ -105,7 +107,7 @@ class ExtensionBase:
         """
         Defines the pre animation export logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -114,7 +116,7 @@ class ExtensionBase:
         """
         Defines the post animation export logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -123,7 +125,7 @@ class ExtensionBase:
         """
         Defines the pre mesh export logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -132,7 +134,7 @@ class ExtensionBase:
         """
         Defines the post mesh export logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -141,7 +143,7 @@ class ExtensionBase:
         """
         Defines the pre import logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -150,7 +152,7 @@ class ExtensionBase:
         """
         Defines the post import logic that will be an injected operation.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
@@ -207,7 +209,7 @@ class ExtensionCollector(ast.NodeVisitor):
         """
         Gets the Extension classes.
 
-        :return ExtensionBase: A test suite.
+        :return list: A list of extensions.
         """
         return self._extension_classes
 

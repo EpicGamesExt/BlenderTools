@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 'rpc_port': UNREAL_PORT,
                 'environment': environment,
                 'volumes': volumes,
-                'tag': 'unreal-engine:dev-slim-5.0.0',
+                'tag': 'unreal-engine:dev-slim-5.0.2',
                 'repository': 'ghcr.io/epicgames',
                 'user': 'ue4',
                 'command': [
@@ -126,5 +126,5 @@ if __name__ == '__main__':
 
     container_test_manager.run_test_cases()
 
-    if TEST_ENVIRONMENT and os.environ.get('REMOVE_CONTAINERS', True):
+    if TEST_ENVIRONMENT and os.environ.get('REMOVE_CONTAINERS', '').lower() != 'false':
         container_test_manager.stop()

@@ -682,9 +682,6 @@ def send2ue(properties):
     bpy.context.window_manager.send2ue.asset_id = ''
     bpy.context.window_manager.send2ue.asset_data.clear()
 
-    # update the server timeout value
-    utilities.set_unreal_rpc_timeout()
-
     # if there are no failed validations continue
     validation_manager = validations.ValidationManager(properties)
     if validation_manager.run():

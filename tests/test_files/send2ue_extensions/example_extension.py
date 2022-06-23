@@ -17,6 +17,7 @@ class ExampleExtension(ExtensionBase):
     name = 'example'
 
     hello_property: bpy.props.StringProperty(default='Hello world')
+    use_example_extension: bpy.props.BoolProperty(default=False)
 
     def draw_validations(self, dialog, layout, properties):
         """
@@ -27,6 +28,7 @@ class ExampleExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         row = layout.row()
+        row.prop(self, 'use_example_extension')
         row.prop(self, 'hello_property')
 
     def pre_operation(self, properties):
@@ -35,9 +37,10 @@ class ExampleExtension(ExtensionBase):
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        print('Before the Send to Unreal task')
-        properties.unreal_mesh_folder_path = '/Game/example_extension/test/'
-        properties.unreal_animation_folder_path = '/Game/example_extension/test/animations'
+        if self.use_example_extension:
+            print('Before the Send to Unreal task')
+            properties.unreal_mesh_folder_path = '/Game/example_extension/test/'
+            properties.unreal_animation_folder_path = '/Game/example_extension/test/animations'
 
     def pre_validations(self, properties):
         """
@@ -45,10 +48,11 @@ class ExampleExtension(ExtensionBase):
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        print('Before Validations')
-        # Setting this to False will terminate execution in the validation phase
-        if self.hello_property != 'Hello world':
-            return False
+        if self.use_example_extension:
+            print('Before Validations')
+            # Setting this to False will terminate execution in the validation phase
+            if self.hello_property != 'Hello world':
+                return False
         return True
 
     def pre_mesh_export(self, asset_data, properties):
@@ -58,14 +62,15 @@ class ExampleExtension(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        # the asset data using the current asset id
-        path, ext = asset_data['file_path'].split('.')
-        asset_path = asset_data['asset_path']
+        if self.use_example_extension:
+            # the asset data using the current asset id
+            path, ext = asset_data['file_path'].split('.')
+            asset_path = asset_data['asset_path']
 
-        asset_data['file_path'] = f'{path}_added_this.{ext}'
-        asset_data['asset_path'] = f'{asset_path}_added_this'
-        pprint(asset_data)
-        self.update_asset_data(asset_data)
+            asset_data['file_path'] = f'{path}_added_this.{ext}'
+            asset_data['asset_path'] = f'{asset_path}_added_this'
+            pprint(asset_data)
+            self.update_asset_data(asset_data)
 
     def pre_animation_export(self, asset_data, properties):
         """
@@ -74,12 +79,13 @@ class ExampleExtension(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        print('Before Animation Export')
-        skeleton_asset_path = asset_data.get('skeleton_asset_path').replace('_Skeleton', '')
+        if self.use_example_extension:
+            print('Before Animation Export')
+            skeleton_asset_path = asset_data.get('skeleton_asset_path').replace('_Skeleton', '')
 
-        asset_data['skeleton_asset_path'] = f'{skeleton_asset_path}_added_this_Skeleton'
-        pprint(asset_data)
-        self.update_asset_data(asset_data)
+            asset_data['skeleton_asset_path'] = f'{skeleton_asset_path}_added_this_Skeleton'
+            pprint(asset_data)
+            self.update_asset_data(asset_data)
 
     def post_import(self, asset_data, properties):
         """
@@ -88,9 +94,10 @@ class ExampleExtension(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset being processed.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        print('After the import task')
-        asset_path = asset_data['asset_path']
-        rename_unreal_asset(asset_path, f'{asset_path}_renamed_again')
+        if self.use_example_extension:
+            print('After the import task')
+            asset_path = asset_data['asset_path']
+            rename_unreal_asset(asset_path, f'{asset_path}_renamed_again')
 
     def post_operation(self, properties):
         """
@@ -98,4 +105,5 @@ class ExampleExtension(ExtensionBase):
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        print('After the Send to Unreal operation')
+        if self.use_example_extension:
+            print('After the Send to Unreal operation')

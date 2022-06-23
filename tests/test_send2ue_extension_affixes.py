@@ -57,11 +57,11 @@ class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
         Checks that the affix extension loaded properly.
         """
         self.run_extension_tests({
-            'external': {
+            'default': {
                 'affixes': {
                     'properties': {
                         'auto_add_asset_name_affixes': True,
-                        'auto_remove_asset_name_affixes': True,
+                        'auto_remove_asset_name_affixes': False,
                         'static_mesh_name_affix': 'SM_',
                         'material_name_affix': 'M_',
                         'texture_name_affix': 'T_',

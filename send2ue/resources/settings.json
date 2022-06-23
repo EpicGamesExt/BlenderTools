@@ -9,6 +9,12 @@
           "default": false
         },
         "static_mesh_import_data": {
+          "build_nanite": {
+            "name": "Build Nanite",
+            "description": "If enabled, allows to render objects with Nanite",
+            "type": "BOOLEAN",
+            "default": false
+          },
           "auto_generate_collision": {
             "name": "Generate Missing Collision",
             "description": "If checked, collision will automatically be generated (ignored if custom collision is imported or used)",
