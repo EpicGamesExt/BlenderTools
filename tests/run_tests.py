@@ -40,7 +40,7 @@ if __name__ == '__main__':
         'CONTAINER_REPO_FOLDER': CONTAINER_REPO_FOLDER,
         'HOST_TEST_FOLDER': HOST_TEST_FOLDER,
         'CONTAINER_TEST_FOLDER': CONTAINER_TEST_FOLDER,
-        'RPC_TIME_OUT': '20'
+        'RPC_TIME_OUT': '60'
     }
     # add the test environment variable if specified
     if TEST_ENVIRONMENT:
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     host_temp_folder = os.path.join(HOST_TEST_FOLDER, 'data')
     volumes = [
         f'{HOST_REPO_FOLDER}:{CONTAINER_REPO_FOLDER}',
-        f'{host_temp_folder}:/tmp/blender/send2ue'
+        f'{host_temp_folder}:/tmp/blender/send2ue/data'
     ]
 
     logging.debug(f'Launching ContainerTestManager...')
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 'rpc_port': UNREAL_PORT,
                 'environment': environment,
                 'volumes': volumes,
-                'tag': 'unreal-engine:dev-slim-5.0.2',
+                'tag': 'unreal-engine:dev-slim-5.0.1',
                 'repository': 'ghcr.io/epicgames',
                 'user': 'ue4',
                 'command': [

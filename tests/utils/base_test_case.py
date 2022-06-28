@@ -41,6 +41,7 @@ class BaseTestCase(unittest.TestCase):
 
         if os.environ.get('TEST_ENVIRONMENT'):
             self.blender.install_addons(self.repo_folder, self.blender_addons)
+            self.blender.send2ue_setup_project()
         else:
             for addon_name in self.blender_addons:
                 self.blender.register_addon(addon_name)

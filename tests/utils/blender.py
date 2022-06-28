@@ -32,6 +32,11 @@ remote_blender_decorator = rpc.factory.remote_call(
 @rpc.factory.remote_class(remote_blender_decorator)
 class BlenderRemoteCalls:
     @staticmethod
+    def get_data_block_names(data_block_type):
+        data_blocks = getattr(bpy.data, data_block_type)
+        return list(data_blocks.keys())
+
+    @staticmethod
     def install_addons(repo_folder, addons):
         """
         Installs the given addons from the release folder.
@@ -61,6 +66,12 @@ class BlenderRemoteCalls:
         addon = importlib.import_module(addon_name)
         importlib.reload(addon)
         addon.unregister()
+
+    @staticmethod
+    def send2ue_setup_project():
+        addon = importlib.import_module('send2ue')
+        importlib.reload(addon)
+        addon.utilities.setup_project()
 
     @staticmethod
     def get_addon_property(context_name, addon_name, property_name):
