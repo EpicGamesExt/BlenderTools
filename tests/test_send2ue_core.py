@@ -22,35 +22,14 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
         Checks that extensions load and function properly.
         """
         self.run_extension_tests({
-            'external': {
-                'example': {
-                    'properties': {'hello_property': 'Hello world'},
-                    'operators': [
-                        'extensions_example_post_operation',
-                        'extensions_example_pre_operation',
-                        'extensions_example_pre_validations'
-                    ],
-                    'draws': [
-                        'send2ue_extensions_example_draw_validations'
-                    ]
-                },
-            },
             'default': {
                 'ue2rigify': {
-                    'operators': [
-                        'extensions_ue2rigify_pre_validations'
+                    'tasks': [
+                        'extensions.ue2rigify.pre_validations'
                     ]
                 }
             }
         })
-
-        # A one off test against the ./test_files/send2ue_extensions/example.py extension
-        value = self.blender.get_addon_property('scene', self.addon_name, 'unreal_mesh_folder_path')
-        self.assertEqual(
-            value,
-            '/Game/example_extension/test/',
-            f'The unreal mesh folder "{value}" does not match the value it is set to in the example extension file'
-        )
 
     def test_templates(self):
         """

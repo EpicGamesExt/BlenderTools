@@ -6,7 +6,7 @@ This feature set is still very new and could be subject to change.
 
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
 with a minimal amount of code. Within an extension class several things can be defined:
-* [Operators](/customize/extensions.html#operators)
+* [Tasks](/customize/extensions.html#tasks)
 * [Properties](/customize/extensions.html#properties)
 * [Draws](/customize/extensions.html#draws)
 
@@ -33,24 +33,25 @@ class ExampleExtension(ExtensionBase):
     name = 'example'
     hello_property: bpy.props.StringProperty(default='Hello world')
 
-    def draw_validations(self, dialog, layout):
+    def draw_validations(self, dialog, layout, properties):
         row = layout.row()
-        row.prop(self.extensions.example, 'hello_property')
+        row.prop(self, 'hello_property')
 
-    def pre_operation(self):
-        self.unreal_mesh_folder_path = '/Game/example_extension/test/'
+    def pre_operation(self, properties):
+        properties.unreal_mesh_folder_path = '/Game/example_extension/test/'
 
-    def pre_validations(self):
-        if self.extensions.example.hello_property != 'Hello world':
-            self.validations_passed = False
+    def pre_validations(self, properties):
+        if self.hello_property != 'Hello world':
+            return False
+        return True
 
-    def pre_mesh_export(self):
-        pprint(self.asset_data[self.asset_id])
+    def pre_mesh_export(self, asset_data, properties):
+        pprint(asset_data)
 ```
 
-This adds a property, a pre operation that changes the `unreal_mesh_folder_path` value, a pre mesh export operation
+This adds a property, a pre operation task that changes the `unreal_mesh_folder_path` value, a pre mesh export task
 that prints out the asset data of the mesh, and a validation that checks to ensure that `hello_property` is
-equal to "Hello world", otherwise it sets `self.validations_passed` to false which terminates the send to unreal
+equal to "Hello world", otherwise it returns False which terminates the send to unreal
 operation execution.
 
 ::: tip Note
@@ -87,80 +88,88 @@ This same approach can be applied to many other use cases where you need to exte
 For practical examples check out the
 [send2ue/resources](https://github.com/EpicGames/BlenderTools/tree/master/send2ue/resources/extensions) folder.
 
-## Operators
-Operators contain logic for key points within the runtime of the send to unreal
-operation. This is done by name spacing operators within the `send2ue` operator namespace. At runtime, the operators within
-each name space get executed. The methods below can be implemented in an extension class and the Send to Unreal
-extension factory will inject the operations.
+## Tasks
+Tasks contain logic for key points within the runtime of the send to unreal
+operation. This is done by registering methods on the extension's property group class. When the Send to Unreal
+operation gets run, the extension tasks get executed. The methods below can be implemented in an extension class and the Send to Unreal
+extension factory will inject the tasks.
 
 ### pre_operation
 Defines the pre operation logic that will be run before the send to unreal operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-pre_operation(self: Send2UeSceneProperties)
+pre_operation(self, properties)
 ```
 
 ### post_operation
 Defines the post operation logic that will be run before the send to unreal operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-post_operation(self: Send2UeSceneProperties)
+post_operation(self, properties)
 ```
 
 ### pre_validations
 Defines the pre validation logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
+- return `bool` Whether or not the validation has passed.
 ```python
-pre_validations(self: Send2UeSceneProperties)
+pre_validations(self, properties)
 ```
 
 ### post_validations
 Defines the post validation logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
+- return `bool` Whether or not the validation has passed.
 ```python
-post_validations(self: Send2UeSceneProperties)
+post_validations(self, properties)
 ```
 
 ### pre_animation_export
 Defines the pre animation export logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-pre_animation_export(self: Send2UeSceneProperties)
+pre_animation_export(self, asset_data, properties)
 ```
 
 ### post_animation_export
 Defines the post animation export logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-post_animation_export(self: Send2UeSceneProperties)
+post_animation_export(self, asset_data, properties)
 ```
 
 ### pre_mesh_export
 Defines the pre mesh export logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-pre_mesh_export(self: Send2UeSceneProperties)
+pre_mesh_export(self, asset_data, properties)
 ```
 
 ### post_mesh_export
 Defines the post mesh export logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-post_mesh_export(self: Send2UeSceneProperties)
+post_mesh_export(self, asset_data, properties)
 ```
 
 ### pre_import
 Defines the pre import logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-pre_import(self: Send2UeSceneProperties)
+pre_import(self, asset_data, properties)
 ```
 
 ### post_import
 Defines the post import logic that will be an injected operation.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
+- param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-post_import(self: Send2UeSceneProperties)
+post_import(self, asset_data, properties)
 ```
 
 ### Utility Operators
@@ -189,10 +198,10 @@ class ExampleExtension(ExtensionBase):
 :::
 
 All properties defined in the extension class get registered as a sub property group within the
-`send2ue` scene data hierarchy. In the above example, the `hello_property` could be accessed within a
-extension operator like:
+`send2ue` scene data hierarchy. In the above example, the `hello_property` could be accessed within an
+extension task method like:
 ```python
-self.extensions.example.hello_property
+self.hello_property
 ```
 Or globally like:
 ```python
@@ -206,48 +215,51 @@ just like the default properties that exist in the Send to Unreal tool.
 
 ### Asset Data Dictionary
 During the life cycle of the Send to Unreal operation a dictionary `asset_data` is created that contains all assets
-that will be sent in the operation. Also, an `asset_id` is assigned to each asset. If you wish to read or modify this
-within your extension, it can be done using `self.asset_data` and `self.asset_id`.
+that will be sent in the operation. Per asset, data gets fetched and passed into the task method via the `asset_data`
+param in certain extension task methods. i.e `pre_mesh_export(self, asset_data, properties)`.
+
 
 ::: tip Note
-  `self.asset_id` is None during the `pre_operation` and `post_operation`, since there is no such thing as
-a current asset in those contexts. Also in the `pre_operation` phase `self.asset_data` will just be an empty dictionary.
+  Any `asset_data` dictionary value that is prefixed with `_` i.e. `_asset_type` etc. has no effect on how Send to Unreal uses
+that data. However, changing values not prefixed with an underscore will change the Send to Unreal behavior.
 :::
 
-Using `self.asset_id` we can fetch the correct asset data from the `asset_data` dictionary which contains all data for
-all assets that will be processed in the Send to Unreal operation.
+Here is an example of a potential renaming use case.
 ```python
 from send2ue.core.extension import ExtensionBase
 class ExampleExtension(ExtensionBase):
     name = 'example'
-    def pre_mesh_export(self):
-        path, ext = self.asset_data[self.asset_id]['file_path'].split('.')
-        asset_path = self.asset_data[self.asset_id]['asset_path']
+    def pre_mesh_export(self, asset_data, properties):
+        # the asset data using the current asset id
+        path, ext = asset_data['file_path'].split('.')
+        asset_path = asset_data['asset_path']
 
-        self.asset_data[self.asset_id]['file_path'] = f'{path}_added_this.{ext}'
-        self.asset_data[self.asset_id]['asset_path'] = f'{asset_path}_added_this'
-
-        pprint(self.asset_data[self.asset_id])
+        asset_data['file_path'] = f'{path}_added_this.{ext}'
+        asset_data['asset_path'] = f'{asset_path}_added_this'
+        pprint(asset_data)
+        self.update_asset_data(asset_data)
 ```
-Here you can see that we forced a rename of the asset by changing the fbx name and the asset path.
+Here you can see that we forced a rename of the asset by changing the fbx name, then we updated the asset path so that
+Send to Unreal would still have a reference to the imported asset.
 
 ::: tip Note
-  In order for the `asset_data` to be updated you must make assignments directly to the dictionary like shown above.
+  In order for the `asset_data` to be updated you must call `self.update_asset_data(asset_data)` like shown above.
 :::
 
 This is what the Mesh's `asset_data` looks like from the example above after being modified:
 ```python
 {
+ '_asset_type': 'MESH',
+ '_mesh_object_name': 'Cube1',
  'asset_folder': '/Game/example_extension/test/',
  'asset_path': '/Game/example_extension/test/Cube1_added_this',
- 'asset_type': 'MESH',
  'file_path': 'C:\\Users\\User~1\\AppData\\Local\\Temp\\blender\\send2ue\\data\\mesh\\Cube1_added_this.fbx',
  'import_mesh': True,
  'lods': None,
  'skeletal_mesh': False,
  'skeleton_asset_path': '',
  'sockets': {}
- }
+}
 ```
 ::: warning
 Modifying this dictionary incorrectly will produce errors. You must implement your own validations to ensure this
@@ -263,29 +275,29 @@ Unreal Settings Dialog.
 
 ### draw_validations
 Can be overridden to draw an interface for the extension under the validations tab.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-draw_validations(self: Send2UeSceneProperties, dialog: Send2UnrealDialog, bpy.types.UILayout: layout)
+draw_validations(self, dialog, layout, properties)
 ```
 
 ### draw_export
 Can be overridden to draw an interface for the extension under the export tab.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-draw_export(self: Send2UeSceneProperties, dialog: Send2UnrealDialog, bpy.types.UILayout: layout)
+draw_export(self, dialog, layout, properties)
 ```
 
 ### draw_import
 Can be overridden to draw an interface for the extension under the import tab.
-- param `Send2UeSceneProperties` `self` The send2ue scene properties.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
-draw_import(self: Send2UeSceneProperties, dialog: Send2UnrealDialog, bpy.types.UILayout: layout)
+draw_import(self, dialog, layout, properties)
 ```
 
 ## RPC Library
@@ -314,7 +326,7 @@ your code and imports over to the open unreal editor.
 
 ::: tip Note
   RPC calls must be defined as function or a staticmethod of a class, and only basic python data types
-can be marshalled through the function parameters.
+can be marshalled through the function parameters. No object params or kwargs are excepted.
 :::
 
 

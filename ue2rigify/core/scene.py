@@ -1108,7 +1108,7 @@ def sync_nla_track_data(control_rig_object, source_rig_object):
                     # create a new nla strip on the source rig
                     source_strip = source_nla_track.strips.new(
                         name=control_strip.name,
-                        start=control_strip.frame_start,
+                        start=int(control_strip.frame_start),
                         action=source_action
                     )
 

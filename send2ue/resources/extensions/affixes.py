@@ -205,39 +205,6 @@ def rename_texture(image, new_name):
             image.filepath = new_path
 
 
-def validate_asset_affixes(properties):
-    """
-    Checks the affix names.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    for property_name in [
-        'static_mesh_name_affix',
-        'skeletal_mesh_name_affix',
-        'animation_sequence_name_affix',
-        'material_name_affix',
-        'texture_name_affix'
-    ]:
-        error_message = None
-        affix_value = getattr(properties, property_name)
-
-        if not affix_value:
-            error_message = f'The affix "{property_name}" must not be empty.'
-        if not affix_value.startswith("_") and not affix_value.endswith("_"):
-            error_message = (
-                f'The affix "{property_name}" value "{affix_value}" does not start or end with an underscore.'
-            )
-        if affix_value.startswith("_") and affix_value.endswith("_"):
-            error_message = (
-                f'The affix "{property_name}" value "{affix_value}" can not both start and end with an underscore.'
-            )
-
-        formatting.set_property_error_message(property_name, error_message)
-        if error_message:
-            return error_message
-    return error_message
-
-
 def check_asset_affixes(self, context=None):
     """
     Checks the affix names on a property update.
@@ -245,7 +212,7 @@ def check_asset_affixes(self, context=None):
     :param object self: This is a reference to the property group class this functions in appended to.
     :param object context: The context.
     """
-    validate_asset_affixes(self)
+    AffixesExtension.validate_asset_affixes(bpy.context.scene.send2ue.extensions.affixes)
 
 
 class AddAssetAffixes(bpy.types.Operator):
@@ -327,47 +294,74 @@ class AffixesExtension(ExtensionBase):
                     "underscore (e.g. Prefix_) and suffixes start with an underscore (e.g. _Suffix)"
     )
 
-    def draw_export(self, dialog, layout):
+    def draw_export(self, dialog, layout, properties):
         """
         Draws all the Affix settings in the export extensions panel.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
         :param Send2UnrealDialog dialog: The dialog class.
         :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        properties = self.extensions.affixes
         box = layout.box()
         box.label(text='Affixes:')
-        dialog.draw_property(properties, box, 'auto_add_asset_name_affixes')
-        dialog.draw_property(properties, box, 'auto_remove_asset_name_affixes')
-        dialog.draw_property(properties, box, 'static_mesh_name_affix')
-        dialog.draw_property(properties, box, 'skeletal_mesh_name_affix')
-        dialog.draw_property(properties, box, 'animation_sequence_name_affix')
-        dialog.draw_property(properties, box, 'material_name_affix')
-        dialog.draw_property(properties, box, 'texture_name_affix')
+        dialog.draw_property(self, box, 'auto_add_asset_name_affixes')
+        dialog.draw_property(self, box, 'auto_remove_asset_name_affixes')
+        dialog.draw_property(self, box, 'static_mesh_name_affix')
+        dialog.draw_property(self, box, 'skeletal_mesh_name_affix')
+        dialog.draw_property(self, box, 'animation_sequence_name_affix')
+        dialog.draw_property(self, box, 'material_name_affix')
+        dialog.draw_property(self, box, 'texture_name_affix')
 
-    def pre_operation(self):
+    def pre_operation(self, properties):
         """
         Defines the pre operation logic that will be run before the operation.
         """
-        properties = self.extensions.affixes
-        if properties.auto_add_asset_name_affixes:
+        if self.auto_add_asset_name_affixes:
             add_affixes()
 
-    def post_operation(self):
+    def post_operation(self, properties):
         """
         Defines the post operation logic that will be run after the operation.
         """
-        properties = self.extensions.affixes
-        if properties.auto_remove_asset_name_affixes:
+        if self.auto_remove_asset_name_affixes:
             remove_affixes()
 
-    def pre_validations(self):
+    def pre_validations(self, properties):
         """
         Defines the pre validation logic that will be an injected operation.
         """
-        properties = self.extensions.affixes
-        error_message = validate_asset_affixes(properties)
+        error_message = self.validate_asset_affixes()
         if error_message:
             utilities.report_error(error_message)
-            self.validations_passed = False
+            return False
+        return True
+
+    def validate_asset_affixes(self):
+        """
+        Checks the affix names.
+        """
+        for property_name in [
+            'static_mesh_name_affix',
+            'skeletal_mesh_name_affix',
+            'animation_sequence_name_affix',
+            'material_name_affix',
+            'texture_name_affix'
+        ]:
+            error_message = None
+            affix_value = getattr(self, property_name)
+
+            if not affix_value:
+                error_message = f'The affix "{property_name}" must not be empty.'
+            if not affix_value.startswith("_") and not affix_value.endswith("_"):
+                error_message = (
+                    f'The affix "{property_name}" value "{affix_value}" does not start or end with an underscore.'
+                )
+            if affix_value.startswith("_") and affix_value.endswith("_"):
+                error_message = (
+                    f'The affix "{property_name}" value "{affix_value}" can not both start and end with an underscore.'
+                )
+
+            formatting.set_property_error_message(property_name, error_message)
+            if error_message:
+                return error_message
+        return error_message

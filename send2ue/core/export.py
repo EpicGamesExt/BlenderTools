@@ -6,7 +6,7 @@ import os
 import re
 import bpy
 from . import utilities, validations, settings, formatting, ingest, extension
-from ..constants import PathModes, AssetTypes, PreFixToken, ToolInfo, ExtensionOperators
+from ..constants import PathModes, AssetTypes, PreFixToken, ToolInfo, ExtensionTasks
 
 
 def get_file_path(asset_name, properties, asset_type, lod=False, file_extension='fbx'):
@@ -287,6 +287,10 @@ def scale_rig_objects(properties):
         # change scene scale to 0.01
         bpy.context.scene.unit_settings.scale_length = scene_scale
 
+        # run pre bone scale task
+        extension.run_extension_tasks(ExtensionTasks.PRE_BONE_SCALE.value)
+
+        # duplicate objects
         context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
 
         for duplicate_object in context['duplicate_objects']:
@@ -299,6 +303,9 @@ def scale_rig_objects(properties):
 
                 # fix the armature scale and its animation and save that information to the context
                 context = fix_armature_scale(duplicate_object, scale_factor, context)
+
+        # run post bone scale task
+        extension.run_extension_tasks(ExtensionTasks.MID_BONE_SCALE.value)
 
         # restore the duplicate object selection for the export
         for duplicate_object in context['duplicate_objects']:
@@ -318,8 +325,8 @@ def restore_rig_objects(context, properties):
     if properties.automatically_scale_bones and context:
         scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
 
-        # scale the control rig if needed
-        # scale_control_rig(scale_factor, properties)
+        # run post bone scale task
+        extension.run_extension_tasks(ExtensionTasks.POST_BONE_SCALE.value)
 
         # restore action scale the duplicated actions
         utilities.scale_object_actions(context['duplicate_objects'], context['source_object']['actions'], scale_factor)
@@ -376,7 +383,8 @@ def export_custom_property_fcurves(action_name, properties):
     :param str action_name: The name of the action to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    file_path = properties.asset_data[properties.asset_id]['file_path']
+    asset_id = bpy.context.window_manager.send2ue.asset_id
+    file_path = bpy.context.window_manager.send2ue.asset_data[asset_id]['file_path']
 
     fcurve_file_path = None
     fcurve_data = utilities.get_custom_property_fcurve_data(action_name)
@@ -387,7 +395,7 @@ def export_custom_property_fcurves(action_name, properties):
             with open(fcurve_file_path, 'w') as fcurves_file:
                 json.dump(fcurve_data, fcurves_file)
 
-    properties.asset_data[properties.asset_id]['fcurve_file_path'] = fcurve_file_path
+    bpy.context.window_manager.send2ue.asset_data[asset_id]['fcurve_file_path'] = fcurve_file_path
 
 
 def export_file(properties, lod=0):
@@ -397,7 +405,8 @@ def export_file(properties, lod=0):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool lod: Whether the exported mesh is a lod.
     """
-    asset_data = properties.asset_data[properties.asset_id]
+    asset_id = bpy.context.window_manager.send2ue.asset_id
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     file_path = asset_data['file_path']
     if lod != 0:
         file_path = asset_data['lods'][str(lod)]
@@ -464,12 +473,9 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param bool lod: Whether the exported mesh is a lod.
     :return str: The fbx file path of the exported mesh
     """
-    # set the current asset id
-    properties.asset_id = asset_id
-
     # run the pre mesh export extensions
     if lod == 0:
-        extension.run_operators(ExtensionOperators.PRE_MESH_EXPORT.value)
+        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
 
     # deselect everything
     utilities.deselect_all_objects()
@@ -495,7 +501,7 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
 
     # run the post mesh export extensions
     if lod == 0:
-        extension.run_operators(ExtensionOperators.POST_MESH_EXPORT.value)
+        extension.run_extension_tasks(ExtensionTasks.POST_MESH_EXPORT.value)
 
 
 @utilities.track_progress(message='Exporting animation "{attribute}"...', attribute='file_path')
@@ -509,11 +515,8 @@ def export_animation(asset_id, rig_object, action_name, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return str: The fbx file path of the exported action
     """
-    # set the current asset id
-    properties.asset_id = asset_id
-
     # run the pre animation export extensions
-    extension.run_operators(ExtensionOperators.PRE_ANIMATION_EXPORT.value)
+    extension.run_extension_tasks(ExtensionTasks.PRE_ANIMATION_EXPORT.value)
 
     if rig_object.animation_data:
         rig_object.animation_data.action = None
@@ -540,7 +543,7 @@ def export_animation(asset_id, rig_object, action_name, properties):
     utilities.set_action_mute_value(rig_object, action_name, True)
 
     # run the post animation export extensions
-    extension.run_operators(ExtensionOperators.POST_ANIMATION_EXPORT.value)
+    extension.run_extension_tasks(ExtensionTasks.POST_ANIMATION_EXPORT.value)
 
 
 def create_animation_data(rig_objects, properties):
@@ -580,7 +583,9 @@ def create_animation_data(rig_objects, properties):
                 # save the import data
                 asset_id = utilities.get_asset_id(file_path)
                 animation_data[asset_id] = {
-                    'asset_type': AssetTypes.ANIMATION,
+                    '_asset_type': AssetTypes.ANIMATION,
+                    '_action_name': action_name,
+                    '_armature_object_name': rig_object.name,
                     'file_path': file_path,
                     'asset_path': f'{properties.unreal_animation_folder_path}{asset_name}',
                     'asset_folder': properties.unreal_animation_folder_path,
@@ -628,7 +633,8 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
 
             # save the asset data
             mesh_data[asset_id] = {
-                'asset_type': AssetTypes.MESH,
+                '_asset_type': AssetTypes.MESH,
+                '_mesh_object_name': mesh_object.name,
                 'file_path': file_path,
                 'asset_folder': import_path,
                 'asset_path': f'{import_path}{asset_name}',
@@ -663,7 +669,7 @@ def create_asset_data(properties):
     animation_data = create_animation_data(rig_objects, properties)
 
     # update the properties with the asset data
-    properties.asset_data.update({**mesh_data, **animation_data})
+    bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data})
 
 
 def send2ue(properties):
@@ -673,18 +679,12 @@ def send2ue(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # clear the asset_data and current id
-    properties.asset_id = ''
-    properties.asset_data.clear()
-
-    # update the server timeout value
-    utilities.set_unreal_rpc_timeout()
+    bpy.context.window_manager.send2ue.asset_id = ''
+    bpy.context.window_manager.send2ue.asset_data.clear()
 
     # if there are no failed validations continue
     validation_manager = validations.ValidationManager(properties)
     if validation_manager.run():
         # create the asset data
         create_asset_data(properties)
-        ingest.asset(properties)
-
-    # clear the current id
-    properties.asset_id = ''
+        ingest.assets(properties)

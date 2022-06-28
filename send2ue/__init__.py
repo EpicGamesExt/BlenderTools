@@ -13,7 +13,7 @@ from .core import formatting, validations, settings, utilities, export, ingest, 
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (2, 0, 2),
+    "version": (2, 1, 0),
     "blender": (2, 93, 0),
     "location": "Header > Pipeline > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
@@ -57,11 +57,6 @@ def register():
         # register the operators
         operators.register()
 
-        # add extensions
-        extension_factory = extension.ExtensionFactory()
-        extension_factory.create_operators()
-        extension_factory.create_draws()
-
         # register the header menu
         header_menu.register()
 
@@ -94,12 +89,6 @@ def unregister():
 
         # register the addon preferences
         addon_preferences.unregister()
-
-        # remove extensions
-        extension_factory = extension.ExtensionFactory()
-        extension_factory.remove_draws()
-        extension_factory.remove_operators()
-        extension_factory.remove_property_data()
 
         # unregister the operators
         operators.unregister()

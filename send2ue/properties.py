@@ -38,6 +38,15 @@ class Send2UeWindowMangerProperties(bpy.types.PropertyGroup):
     """
     This class holds the properties for a window.
     """
+    # ------------- current asset info ------------------
+    asset_data = {}
+    asset_id: bpy.props.StringProperty(
+        default='',
+        description=(
+            'Holds the current asset id. This can be used in an extension method to access and modify specific '
+            'asset data'
+        )
+    )
     # ----------- read/write dictionaries -----------
     property_errors = {}
     section_collapse_states = {}
@@ -85,30 +94,12 @@ def get_scene_property_class():
     """
     # the extension factory will add in the extension properties
     extension_factory = extension.ExtensionFactory()
-    property_class = extension_factory.get_properties()
+    property_class = extension_factory.get_property_group_class()
 
     class Send2UeSceneProperties(property_class):
         """
         This class holds the properties for the scene.
         """
-        # ------------- current asset info ------------------
-        asset_data = {}
-        asset_id: bpy.props.StringProperty(
-            default='',
-            description=(
-                'Holds the current asset id. This can be used in an extension method to access and modify specific '
-                'asset data'
-            )
-        )
-        validations_passed: bpy.props.BoolProperty(
-            default=True,
-            description=(
-                'Holds the current passing state of the validations, if set the false all processes will terminate. '
-                'This is useful for extensions that need to read or modify this'
-            )
-        )
-        # --------------------------------------------------
-
         # track the template version
         template_version: bpy.props.FloatProperty(
             name='Template Version',
@@ -525,6 +516,10 @@ def unregister():
     Unregisters the property group class and deletes it from the window manager context when the
     addon is disabled.
     """
+
+    # remove the extension property data
+    extension_factory = extension.ExtensionFactory()
+    extension_factory.remove_property_data()
     unregister_scene_properties()
 
     window_manager_property_class = bpy.types.PropertyGroup.bl_rna_get_subclass_py('Send2UeWindowMangerProperties')

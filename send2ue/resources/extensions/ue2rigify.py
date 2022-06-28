@@ -8,7 +8,7 @@ from send2ue.core import utilities
 class Ue2RigifyExtension(ExtensionBase):
     name = 'ue2rigify'
 
-    def pre_validations(self):
+    def pre_validations(self, properties):
         """
         Defines the pre validation logic that will be an injected operation.
         """
@@ -19,4 +19,5 @@ class Ue2RigifyExtension(ExtensionBase):
                     'Send to Unreal can not be used while UE to Rigify is in not in source mode. All '
                     'animations must be baked to the source rig then try again.'
                 )
-                self.validations_passed = False
+                return False
+        return True
