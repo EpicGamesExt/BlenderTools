@@ -611,10 +611,7 @@ class UnrealRemoteCalls:
         """
         mesh = Unreal.get_asset(asset_path)
         if mesh.__class__.__name__ == 'SkeletalMesh':
-            print('Skeletal Mesh')
             for index, material in enumerate(mesh.materials):
-                print(index, material)
-                print(material.material_slot_name, material_name)
                 if material.material_slot_name == material_name:
                     return index
         if mesh.__class__.__name__ == 'StaticMesh':
