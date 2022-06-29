@@ -10,7 +10,7 @@ bpy.context.scene.send2ue
 ```
 
 ::: tip Note
-  This scene property data is actually persistent. This data lives in your blend file. If your blend file is saved,
+  This scene property data is persistent and stored within your blend file. If your blend file is saved,
 then the state of your scene properties gets saved into the file as well.
 :::
 
@@ -27,7 +27,7 @@ operators should allow you to do anything that is possible to do from the Send t
 Settings Dialog.
 
 ### Send to Unreal
-Quickly send your assets to an open unreal editor instance without a dialog,
+Quickly send your assets to an open Unreal editor instance without a dialog,
 ```python
 bpy.ops.wm.send2ue()
 ```
@@ -39,13 +39,13 @@ bpy.ops.wm.settings_dialog()
 ```
 
 ### Import Asset
-Import a file came from unreal,
+Import a file that came from Unreal,
 ```python
 bpy.ops.wm.import_asset()
 ```
 
 ### Create Pre-defined Collections
-Create the predefined collections that are needed for data collection(Export).
+Create the predefined collections that are needed for data collection (Export).
 ```python
 bpy.ops.send2ue.create_predefined_collections()
 ```
@@ -65,7 +65,7 @@ bpy.ops.send2ue.load_template(filepath: str)
 ```
 
 ### Remove Template
-Remove the selected settings template. Note to remove a specific template you must first make it the active template.
+Remove the settings template that is currently selected as active.
 ```python
 bpy.ops.send2ue.remove_template()
 ```
@@ -77,7 +77,7 @@ bpy.ops.send2ue.reload_extensions()
 ```
 
 ### Start RPC Servers
-Bootstraps unreal and blender with rpc server threads, so that they are ready for remote calls.
+Bootstraps Unreal and Blender with RPC server threads so that they are ready for remote calls.
 ```python
 bpy.ops.send2ue.start_rpc_servers()
 ```
@@ -85,7 +85,7 @@ bpy.ops.send2ue.start_rpc_servers()
 ## Examples
 
 ::: tip Change Template Example
-  Here is how you could automate loading in a settings template, and making it the active template.
+  Here is how you could automate loading a settings template from a file and making it the active template.
 ```python
 import bpy
 
@@ -98,7 +98,7 @@ bpy.context.scene.send2ue.active_settings_template = 'my_template.json'
 :::
 
 ::: tip Change Properties Example
-  Here is how you could use python to dynamically change the mesh import folder of your asset.
+  Here is how you could use Python to dynamically change the mesh import folder of your asset.
 ```python
 import bpy
 
