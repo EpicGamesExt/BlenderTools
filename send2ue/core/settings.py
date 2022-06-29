@@ -204,6 +204,10 @@ def get_property_group_as_dictionary(property_group, extra_attributes=False):
         property_instance = property_group.__annotations__.get(key)
         value = getattr(property_group, key)
 
+        # skip if this is a function
+        if type(property_instance).__name__ == 'function':
+            continue
+
         if property_instance:
             property_type_name = property_instance.function.__name__
 
@@ -246,6 +250,11 @@ def set_property_group_with_dictionary(property_group, data):
     for attribute in dir(property_group):
         property_type_name = None
         deferred_data = property_group.__annotations__.get(attribute)
+
+        # skip if the attribute is a function
+        if type(deferred_data).__name__ == 'function':
+            continue
+
         if deferred_data:
             property_type_name = deferred_data.function.__name__
 
@@ -349,15 +358,16 @@ def create_property(data):
         )
 
 
-def create_property_group(class_name, data):
+def create_property_group(class_name, properties, methods):
     """
     Creates a property group instance given a name and the annotation data.
 
     :param str class_name: A snake case name.
-    :param dict data: A dictionary of property references.
+    :param dict properties: A dictionary of property references.
+    :param dict methods : A dictionary of methods on the property group.
     :return PointerProperty: A reference to the created property group.
     """
-    property_group_class = create_property_group_class(class_name, data)
+    property_group_class = create_property_group_class(class_name, properties, methods)
     bpy.utils.register_class(property_group_class)
     return bpy.props.PointerProperty(type=property_group_class)
 
@@ -376,24 +386,27 @@ def create_default_template():
     )
 
 
-def create_property_group_class(class_name, data):
+def create_property_group_class(class_name, properties, methods=None):
     """
     Creates a property group class given a name and the annotation data.
 
     :param str class_name: A snake case name.
-    :param dict data: A dictionary of property references.
+    :param dict properties: A dictionary of property references.
+    :param dict methods : A dictionary of methods on the property group.
     :return PropertyGroup: A reference to the created property group class.
     """
-    attributes = {'__annotations__': data}
+    if not methods:
+        methods = {}
+
+    attributes = {
+        '__annotations__': properties,
+        **methods
+    }
 
     # make class name pascal case
     class_name = ''.join([
         word.capitalize() for word in f'{ToolInfo.NAME.value}_settings_group_{class_name}'.split('_')
     ])
-
-    # versions 2.92 and older dont have an __annotations__ attribute
-    if bpy.app.version and bpy.app.version[0] <= 2 and bpy.app.version[1] < 93:
-        attributes = data
 
     return type(
         class_name,
@@ -411,7 +424,7 @@ def create_settings_property_group_class():
     data = get_settings()
     return create_property_group_class(
         class_name=f'{ToolInfo.NAME.value}SettingsGroup',
-        data=convert_to_properties(data)
+        properties=convert_to_property_group(data)
     )
 
 
@@ -506,7 +519,7 @@ def remove_template(properties):
     properties.active_settings_template = Template.DEFAULT
 
 
-def convert_to_properties(data):
+def convert_to_property_group(data):
     """
     Converts a dictionary of json serializable types to bpy property types and groups.
 
@@ -518,13 +531,16 @@ def convert_to_properties(data):
             data[key] = create_property(value)
             continue
 
+        if type(value).__name__ == 'function':
+            continue
+
         if not value.get('name'):
             data[key] = create_property_group(
                 class_name=key.upper(),
-                data=convert_to_properties(
-                    data.get(key, {})
-                )
+                properties=convert_to_property_group(data.get(key, {})),
+                methods={key: value for key, value in value.items() if type(value).__name__ == 'function'}
             )
         else:
             data[key] = create_property(value)
+
     return data

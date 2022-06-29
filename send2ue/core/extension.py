@@ -8,16 +8,38 @@ import importlib.util
 import tempfile
 from . import settings
 from abc import abstractmethod
-from ..constants import ToolInfo, Extensions, ExtensionOperators
+from ..constants import ToolInfo, Extensions, ExtensionTasks
 from . import utilities
 
 
+def run_extension_tasks(name_space):
+    """
+    Runs the task in the given name space.
+
+    :param str name_space: The name space of the task to run.
+    """
+    for attribute in dir(bpy.context.scene.send2ue.extensions):
+        task = getattr(getattr(bpy.context.scene.send2ue.extensions, attribute, object), name_space, None)
+        if task:
+            args = []
+            asset_id = bpy.context.window_manager.send2ue.asset_id
+            asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
+
+            # if there is current asset data add it to the args
+            if name_space not in [ExtensionTasks.PRE_OPERATION.value, ExtensionTasks.POST_OPERATION.value]:
+                args.append(asset_data)
+
+            # add the addon properties to the args
+            args.append(bpy.context.scene.send2ue)
+
+            # call the task
+            task(*args)
+
+
 class ExtensionBase:
-    # Set this to a list of operator classes that will
-    # be registered and added to the utilities submenu
+    # Set this to a list of operator classes that will be registered and added to the utilities submenu.
     utility_operators = []
 
-    @property
     @abstractmethod
     def name(self):
         """
@@ -25,115 +47,132 @@ class ExtensionBase:
         """
         pass
 
-    def draw_validations(self, dialog, layout):
+    def draw_validations(self, dialog, layout, properties):
         """
         Can be overridden to draw an interface for the extension under the validations tab.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
         :param Send2UnrealDialog dialog: The dialog class.
         :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def draw_export(self, dialog, layout):
+    def draw_export(self, dialog, layout, properties):
         """
         Can be overridden to draw an interface for the extension under the export tab.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
         :param Send2UnrealDialog dialog: The dialog class.
         :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def draw_import(self, dialog, layout):
+    def draw_import(self, dialog, layout, properties):
         """
         Can be overridden to draw an interface for the extension under the import tab.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
         :param Send2UnrealDialog dialog: The dialog class.
         :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def pre_operation(self):
+    def pre_operation(self, properties):
         """
         Defines the pre operation logic that will be run before the send to unreal operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def pre_validations(self):
+    def pre_validations(self, properties):
         """
         Defines the pre validation logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        :return bool: Whether or not the validation has passed.
         """
         pass
 
-    def post_validations(self):
+    def post_validations(self,  properties):
         """
         Defines the post validation logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        :return bool: Whether or not the validation has passed.
         """
         pass
 
-    def pre_animation_export(self):
+    def pre_animation_export(self, asset_data, properties):
         """
         Defines the pre animation export logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def post_animation_export(self):
+    def post_animation_export(self, asset_data, properties):
         """
         Defines the post animation export logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def pre_mesh_export(self):
+    def pre_mesh_export(self, asset_data, properties):
         """
         Defines the pre mesh export logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def post_mesh_export(self):
+    def post_mesh_export(self, asset_data, properties):
         """
         Defines the post mesh export logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def pre_import(self):
+    def pre_import(self, asset_data, properties):
         """
         Defines the pre import logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def post_import(self):
+    def post_import(self, asset_data, properties):
         """
         Defines the post import logic that will be an injected operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
 
-    def post_operation(self):
+    def post_operation(self, properties):
         """
         Defines the post operation logic that will be run after the send to unreal operation.
 
-        :param Send2UeSceneProperties self: The scene property group that contains all the addon properties.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
+
+    def update_asset_data(self, asset_data):
+        """
+        Updates the asset data dictionary on the current asset.
+
+        :param dict asset_data: The asset data dictionary.
+        """
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        bpy.context.window_manager.send2ue.asset_data[asset_id].update(asset_data)
 
 
 class ExtensionCollector(ast.NodeVisitor):
@@ -170,7 +209,7 @@ class ExtensionCollector(ast.NodeVisitor):
         """
         Gets the Extension classes.
 
-        :return ExtensionBase: A test suite.
+        :return list: A list of extensions.
         """
         return self._extension_classes
 
@@ -206,8 +245,7 @@ class ExtensionFactory:
         utility_operators = []
         for operator_class in extension_class.utility_operators:
             bl_idname = (
-                f'{ToolInfo.NAME.value}.{Extensions.NAME}_{extension_class.name}_'
-                f'{Extensions.UTILITY_OPERATOR}_{operator_class.__name__.lower()}'
+                f'{ToolInfo.NAME.value}.{Extensions.NAME}_{extension_class.name}_{operator_class.__name__.lower()}'
             )
             operator_class.bl_idname = bl_idname[:61] if len(bl_idname) > 61 else bl_idname
             utility_operators.append(operator_class)
@@ -239,33 +277,24 @@ class ExtensionFactory:
                 extensions.extend(extension_collector.get_extension_classes())
         return extensions
 
-    def create_operators(self):
+    def create_utility_operators(self):
         """
-        Gets the extension operators.
+        Creates all the extensions utility operators.
         """
         operator_classes = []
 
         for extension_class in self._get_extension_classes():
-            for attribute, value in extension_class.__dict__.items():
-                if type(value).__name__ == 'function':
-                    bl_idname = (
-                        f'{ToolInfo.NAME.value}.{Extensions.NAME}_{extension_class.name}_{value.__name__}'
-                    )
-                    if value.__name__ in [item.value for item in ExtensionOperators]:
-                        # dynamically create operator classes to hold the functions in their execute method
-                        operator_classes.append(utilities.create_operator(bl_idname, value))
-
-            # get the utility operators on the class as well
+            # get the utility operators on the class
             operator_classes.extend(self._get_utility_operators(extension_class))
 
-        # register the extension operators
+        # register the extension utility operators
         for operator_class in operator_classes:
             if not utilities.get_operator_class_by_bl_idname(operator_class.bl_idname):
                 bpy.utils.register_class(operator_class)
 
-    def get_properties(self):
+    def get_property_group_class(self):
         """
-        Gets the property data of the extension.
+        Gets the property data class of the extension.
         """
         data = settings.get_settings()
         data[Extensions.NAME] = {}
@@ -273,25 +302,23 @@ class ExtensionFactory:
         for extension_class in self._get_extension_classes():
             data[Extensions.NAME][extension_class.name] = {}
 
+            # get the properties
             if hasattr(extension_class, '__annotations__'):
                 for attribute, value in extension_class.__annotations__.items():
                     data[Extensions.NAME][extension_class.name][attribute] = value
 
+            # get the extension methods and its parent class methods
+            for attribute, value in extension_class.__dict__.items():
+                if type(value).__name__ == 'function':
+                    data[Extensions.NAME][extension_class.name][attribute] = value
+
+            # add the update asset method to the class
+            data[Extensions.NAME][extension_class.name]['update_asset_data'] = ExtensionBase.update_asset_data
+
         return settings.create_property_group_class(
             class_name=f"{ToolInfo.NAME.value}SettingsGroup",
-            data=settings.convert_to_properties(data)
+            properties=settings.convert_to_property_group(data=data)
         )
-
-    def create_draws(self):
-        """
-        Sets the extensions draw methods.
-        """
-        for extension_class in self._get_extension_classes():
-            for draw_tab in Extensions.DRAW_TABS:
-                draw_function = extension_class.__dict__.get(draw_tab)
-                if draw_function:
-                    namespace = f'{ToolInfo.NAME.value}_{Extensions.NAME}_{extension_class.name}_{draw_tab}'
-                    bpy.app.driver_namespace[namespace] = draw_function
 
     @staticmethod
     def remove_property_data():
@@ -303,40 +330,11 @@ class ExtensionFactory:
             del bpy.context.scene[ToolInfo.NAME.value][Extensions.NAME]
 
     @staticmethod
-    def remove_operators():
+    def remove_utility_operators():
         """
-        Removes all extension operators.
+        Removes all extension utility operators.
         """
         for class_name in dir(bpy.types):
             if class_name.startswith(f'{ToolInfo.NAME.value.upper()}_OT_{Extensions.NAME}_'):
                 operator_class = getattr(bpy.types, class_name)
                 bpy.utils.unregister_class(operator_class)
-
-    @staticmethod
-    def remove_draws():
-        """
-        Removes all draw methods.
-        """
-        # get the draw extension keys
-        keys = [
-            key for key in bpy.app.driver_namespace.keys()
-            if key.startswith(f'{ToolInfo.NAME.value}_{Extensions.NAME}_')
-        ]
-
-        # remove the draw extension keys
-        for key in keys:
-            bpy.app.driver_namespace.pop(key)
-
-
-def run_operators(name_space):
-    """
-    Runs the operators in the given name space.
-
-    :param str name_space: The name space of the operators to run.
-    """
-    operator_namespace = getattr(bpy.ops, ToolInfo.NAME.value, None)
-    if operator_namespace:
-        for attribute in dir(operator_namespace):
-            if attribute.startswith(f'{Extensions.NAME}_') and attribute.endswith(f'_{name_space}'):
-                operator = getattr(operator_namespace, attribute)
-                operator()

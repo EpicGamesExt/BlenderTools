@@ -9,6 +9,12 @@
           "default": false
         },
         "static_mesh_import_data": {
+          "build_nanite": {
+            "name": "Build Nanite",
+            "description": "If enabled, allows to render objects with Nanite",
+            "type": "BOOLEAN",
+            "default": false
+          },
           "auto_generate_collision": {
             "name": "Generate Missing Collision",
             "description": "If checked, collision will automatically be generated (ignored if custom collision is imported or used)",
@@ -714,7 +720,7 @@
         },
         "texture_import_data": {
           "material_search_location": {
-            "name": "Search Location",
+            "name": "Material Import Method",
             "description": "Specify where we should search for matching materials when importing",
             "enum_items": [
               [
@@ -1251,7 +1257,7 @@
               ]
             ],
             "type": "ENUM",
-            "default": "OFF"
+            "default": "FACE"
           },
           "use_subsurf": {
             "name": "Export Subdivision Surface",

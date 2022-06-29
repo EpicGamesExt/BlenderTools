@@ -184,16 +184,16 @@ def auto_format_unreal_asset_path(name, properties):
         if value != formatted_value:
             setattr(properties, name, formatted_value)
 
-            # Ensure unreal editor is open
-            if not is_connected():
-                error_message = (
-                    f'No Unreal Editor connection. Asset path "{formatted_value}" can not be validated.'
-                )
-                set_property_error_message(
-                    name,
-                    error_message
-                )
-                return error_message
+        # Ensure unreal editor is open
+        if not is_connected():
+            error_message = (
+                f'No Unreal Editor connection. Asset path "{formatted_value}" can not be validated.'
+            )
+            set_property_error_message(
+                name,
+                error_message
+            )
+            return error_message
 
         if not error_message and not UnrealRemoteCalls.asset_exists(formatted_value):
             error_message = f'Asset "{formatted_value}" does not exist in unreal.'

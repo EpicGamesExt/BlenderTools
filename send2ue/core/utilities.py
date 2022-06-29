@@ -12,7 +12,7 @@ import base64
 from . import settings
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import AssetTypes, ToolInfo, PreFixToken, Extensions
+from ..constants import AssetTypes, ToolInfo, PreFixToken, PathModes
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -271,7 +271,7 @@ def get_current_context():
     for scene_object in bpy.data.objects:
         active_action_name = ''
         if scene_object.animation_data and scene_object.animation_data.action:
-                active_action_name = scene_object.animation_data.action.name
+            active_action_name = scene_object.animation_data.action.name
 
         object_contexts[scene_object.name] = {
             'hide': scene_object.hide_get(),
@@ -287,7 +287,8 @@ def get_current_context():
     return {
         'mode': getattr(bpy.context, 'mode', 'OBJECT'),
         'objects': object_contexts,
-        'active_object': active_object
+        'active_object': active_object,
+        'current_frame': bpy.context.scene.frame_current
     }
 
 
@@ -626,6 +627,9 @@ def set_context(context):
             mode = 'EDIT'
         bpy.ops.object.mode_set(mode=mode)
 
+    # set the current frame
+    bpy.context.scene.frame_set(context.get('current_frame', 0))
+
 
 def set_all_action_attributes(rig_object, attributes):
     """
@@ -693,8 +697,16 @@ def is_unreal_connected():
     """
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
     """
+    # skips checking for and unreal connection if in send to disk mode
+    # https://github.com/EpicGames/BlenderTools/issues/420
+    if bpy.context.scene.send2ue.path_mode == PathModes.SEND_TO_DISK.value:
+        return True
+
     try:
+        # bootstrap the unreal rpc server if it is not already running
         unreal.bootstrap_unreal_with_rpc_server()
+        # update the server timeout value
+        set_unreal_rpc_timeout()
         return True
     except ConnectionError:
         report_error('Could not find an open Unreal Editor instance!')
@@ -736,8 +748,9 @@ def has_extension_draw(location):
 
     :param str location: The name of the draw location i.e. export, import, validations.
     """
-    for key in bpy.app.driver_namespace.keys():
-        if key.startswith(Extensions.DRAW_NAMESPACE) and key.endswith(f'_draw_{location}'):
+    for extension_name in dir(bpy.context.scene.send2ue.extensions):
+        extension = getattr(bpy.context.scene.send2ue.extensions, extension_name)
+        if hasattr(extension, f'draw_{location}'):
             return True
     return False
 
@@ -751,29 +764,6 @@ def create_collections():
         if collection_name not in bpy.data.collections:
             new_collection = bpy.data.collections.new(collection_name)
             bpy.context.scene.collection.children.link(new_collection)
-
-
-def create_operator(bl_idname, function):
-    """
-    Creates a operator class
-
-    :param str bl_idname: The operators bl_idname.
-    :param callable function: The function called within the operator.
-    :return Operator: A operator class.
-    """
-    def execute(self, context):
-        function(bpy.context.scene.send2ue)
-        return {'FINISHED'}
-
-    return type(
-        convert_to_class_name(bl_idname),
-        (bpy.types.Operator,),
-        {
-            'bl_idname': bl_idname,
-            'bl_label': bl_idname.replace('.', ' ').replace('_', ' '),
-            'execute': execute,
-            # 'window_manager_properties': bpy.context.window_manager.send2ue
-        })
 
 
 def remove_data(data):
@@ -810,7 +800,6 @@ def remove_object_scale_keyframes(actions):
     """
     This function removes all scale keyframes the exist a object in the provided actions.
 
-    :param float scale: The scale to set the all the object scaled keyframes to.
     :param list actions: A list of action objects.
     """
     for action in actions:

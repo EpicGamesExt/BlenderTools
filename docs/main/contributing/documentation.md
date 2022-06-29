@@ -27,7 +27,7 @@ Once you have node and npm installed switch to the `/docs` folder and start the 
 running these commands:
 
 ``` shell
-cd /docs
+cd ./docs
 npm install
 npm run dev-main
 ```

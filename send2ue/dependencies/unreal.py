@@ -33,9 +33,6 @@ remote_unreal_decorator = rpc.factory.remote_call(
 rpc_client = rpc.client.RPCClient(port=UNREAL_PORT)
 unreal_response = ''
 
-# TODO replace unreal.EditorStaticMeshLibrary calls with unreal.StaticMeshEditorSubsystem
-# TODO replace unreal.EditorSkeletalMeshLibrary calls with unreal.SkeletalMeshEditorSubsystem
-
 
 def get_response():
     """
@@ -558,10 +555,10 @@ class UnrealRemoteCalls:
         lod_count = 0
         asset = Unreal.get_asset(asset_path)
         if asset.__class__.__name__ == 'SkeletalMesh':
-            lod_count = unreal.EditorSkeletalMeshLibrary.get_lod_count(asset)
+            lod_count = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem).get_lod_count(asset)
 
         if asset.__class__.__name__ == 'StaticMesh':
-            lod_count = unreal.EditorStaticMeshLibrary.get_lod_count(asset)
+            lod_count = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_lod_count(asset)
 
         return lod_count
 
@@ -598,8 +595,8 @@ class UnrealRemoteCalls:
         """
         mesh = Unreal.get_asset(asset_path)
         return {
-            'simple': unreal.EditorStaticMeshLibrary.get_simple_collision_count(mesh),
-            'convex': unreal.EditorStaticMeshLibrary.get_convex_collision_count(mesh),
+            'simple': unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_simple_collision_count(mesh),
+            'convex': unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_convex_collision_count(mesh),
             'customized': mesh.get_editor_property('customized_collision')
         }
 
@@ -709,7 +706,8 @@ class UnrealRemoteCalls:
         :param int index: Which lod index to import the lod on.
         """
         skeletal_mesh = Unreal.get_asset(asset_path)
-        result = unreal.EditorSkeletalMeshLibrary.import_lod(skeletal_mesh, index, file_path)
+        skeletal_mesh_subsystem = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
+        result = skeletal_mesh_subsystem.import_lod(skeletal_mesh, index, file_path)
         if result == -1:
             raise RuntimeError(f"{file_path} import failed!")
 
@@ -723,7 +721,8 @@ class UnrealRemoteCalls:
         :param int index: Which lod index to import the lod on.
         """
         static_mesh = Unreal.get_asset(asset_path)
-        result = unreal.EditorStaticMeshLibrary.import_lod(static_mesh, index, file_path)
+        static_mesh_subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+        result = static_mesh_subsystem.import_lod(static_mesh, index, file_path)
         if result == -1:
             raise RuntimeError(f"{file_path} import failed!")
 
@@ -737,12 +736,13 @@ class UnrealRemoteCalls:
         :param dict property_data: A dictionary representation of the properties.
         """
         skeletal_mesh = Unreal.get_asset(asset_path)
+        skeletal_mesh_subsystem = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
         options = unreal.SkeletalMeshBuildSettings()
         options = Unreal.set_settings(
             property_data['unreal']['editor_skeletal_mesh_library']['lod_build_settings'],
             options
         )
-        unreal.EditorSkeletalMeshLibrary.set_lod_build_settings(skeletal_mesh, index, options)
+        skeletal_mesh_subsystem.set_lod_build_settings(skeletal_mesh, index, options)
 
     @staticmethod
     def set_static_mesh_lod_build_settings(asset_path, index, property_data):
@@ -754,12 +754,13 @@ class UnrealRemoteCalls:
         :param dict property_data: A dictionary representation of the properties.
         """
         static_mesh = Unreal.get_asset(asset_path)
+        static_mesh_subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
         options = unreal.MeshBuildSettings()
         options = Unreal.set_settings(
             property_data['unreal']['editor_static_mesh_library']['lod_build_settings'],
             options
         )
-        unreal.EditorStaticMeshLibrary.set_lod_build_settings(static_mesh, index, options)
+        static_mesh_subsystem.set_lod_build_settings(static_mesh, index, options)
 
     @staticmethod
     def reset_skeletal_mesh_lods(asset_path, property_data):
@@ -770,15 +771,16 @@ class UnrealRemoteCalls:
         :param dict property_data: A dictionary representation of the properties.
         """
         skeletal_mesh = Unreal.get_asset(asset_path)
-        lod_count = unreal.EditorSkeletalMeshLibrary.get_lod_count(skeletal_mesh)
+        skeletal_mesh_subsystem = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
+        lod_count = skeletal_mesh_subsystem.get_lod_count(skeletal_mesh)
         if lod_count > 1:
-            unreal.EditorSkeletalMeshLibrary.remove_lo_ds(skeletal_mesh, list(range(1, lod_count)))
+            skeletal_mesh_subsystem.remove_lo_ds(skeletal_mesh, list(range(1, lod_count)))
 
         lod_settings_path = property_data.get('unreal_skeletal_mesh_lod_settings_path', {}).get('value', '')
         if lod_settings_path:
             data_asset = Unreal.get_asset(asset_path)
             skeletal_mesh.lod_settings = data_asset
-            unreal.EditorSkeletalMeshLibrary.regenerate_lod(skeletal_mesh, new_lod_count=lod_count)
+            skeletal_mesh_subsystem.regenerate_lod(skeletal_mesh, new_lod_count=lod_count)
 
     @staticmethod
     def reset_static_mesh_lods(asset_path):
@@ -788,9 +790,10 @@ class UnrealRemoteCalls:
         :param str asset_path: The project path to the static mesh in unreal.
         """
         static_mesh = Unreal.get_asset(asset_path)
-        lod_count = unreal.EditorStaticMeshLibrary.get_lod_count(static_mesh)
+        static_mesh_subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+        lod_count = static_mesh_subsystem.get_lod_count(static_mesh)
         if lod_count > 1:
-            unreal.EditorStaticMeshLibrary.remove_lods(static_mesh)
+            static_mesh_subsystem.remove_lods(static_mesh)
 
     @staticmethod
     def set_static_mesh_sockets(asset_path, asset_data):
@@ -832,9 +835,11 @@ class UnrealRemoteCalls:
         if not mesh:
             raise RuntimeError(f'"{asset_path}" was not found in the unreal project!')
         if mesh.__class__.__name__ == 'SkeletalMesh':
-            build_settings = unreal.EditorSkeletalMeshLibrary.get_lod_build_settings(mesh, index)
+            skeletal_mesh_subsystem = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
+            build_settings = skeletal_mesh_subsystem.get_lod_build_settings(mesh, index)
         if mesh.__class__.__name__ == 'StaticMesh':
-            build_settings = unreal.EditorStaticMeshLibrary.get_lod_build_settings(mesh, index)
+            static_mesh_subsystem = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem)
+            build_settings = static_mesh_subsystem.get_lod_build_settings(mesh, index)
 
         return Unreal.object_attributes_to_dict(build_settings)
 

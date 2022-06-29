@@ -41,9 +41,12 @@ class BaseTestCase(unittest.TestCase):
 
         if os.environ.get('TEST_ENVIRONMENT'):
             self.blender.install_addons(self.repo_folder, self.blender_addons)
+            self.blender.send2ue_setup_project()
         else:
             for addon_name in self.blender_addons:
                 self.blender.register_addon(addon_name)
+
+        self.blender.set_addon_property('scene', 'send2ue', 'active_settings_template', 'default.json')
 
     @staticmethod
     def log(message):
@@ -128,6 +131,10 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         super(BaseSend2ueTestCaseCore, self).__init__(*args, **kwargs)
         self.addon_name = 'send2ue'
 
+    def setUp(self):
+        super().setUp()
+        self.set_extension_repo('')
+
     def set_extension_repo(self, path):
         self.log(f'Setting the addon extension repo to "{path}"')
 
@@ -144,7 +151,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
         self.blender.run_addon_operator(self.addon_name, 'reload_extensions')
 
     def assert_extension_operators(self, extension_name, extension_operators, exists=True):
-        self.log(f'Running all {self.addon_name} {extension_name} extension operators...')
+        self.log(f'Running all {self.addon_name} {extension_name} extension utility operators...')
         for extension_operator in extension_operators:
             try:
                 self.blender.run_addon_operator(self.addon_name, extension_operator)
@@ -177,35 +184,38 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
                     f'value "{default_value}".'
                 )
 
-    def assert_extension_draws(self, extension_name, extension_draws, exists=True):
+    def assert_extension_method(self, extension_name, extension_methods, exists=True):
         self.log(f'Checking {self.addon_name} {extension_name} extension draws...')
-        for name in extension_draws:
-            value = self.blender.has_driver_namespace(name)
+        for extension_method in extension_methods:
+            value = self.blender.has_addon_property('scene', self.addon_name, extension_method)
             if exists:
                 self.assertTrue(
                     value,
-                    f'The "{extension_name}" extension draw method "{name}" was not found.'
+                    f'The "{extension_name}" extension method "{extension_method}" was not found.'
                 )
             else:
                 self.assertFalse(
                     value,
-                    f'The "{extension_name}" extension draw method "{name}" should not exist.'
+                    f'The "{extension_name}" extension method "{extension_method}" should not exist.'
                 )
 
     def assert_extension(self, extension_name, extensions_data, exists=True):
         extension_properties = extensions_data.get('properties', {})
-        extension_operators = extensions_data.get('operators', [])
+        extension_tasks = extensions_data.get('tasks', [])
         extension_utility_operators = extensions_data.get('utility_operators', [])
         extension_draws = extensions_data.get('draws', [])
 
         # check properties
         self.assert_extension_properties(extension_name, extension_properties, exists)
 
-        # check properties
-        self.assert_extension_operators(extension_name, extension_operators + extension_utility_operators, exists)
+        # check tasks
+        self.assert_extension_method(extension_name, extension_tasks, exists)
+
+        # check utility operators
+        self.assert_extension_operators(extension_name, extension_utility_operators)
 
         # check draws
-        self.assert_extension_draws(extension_name, extension_draws, exists)
+        self.assert_extension_method(extension_name, extension_draws, exists)
 
     def run_extension_tests(self, extensions):
         external_extensions = extensions.get('external', {})
@@ -213,6 +223,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
 
         # check that all the extensions exist
         self.set_extension_repo(os.path.join(self.test_folder, 'test_files', 'send2ue_extensions'))
+        self.setUp()
         for extension_name, extensions_data in {**external_extensions, **default_extensions}.items():
             self.assert_extension(extension_name, extensions_data)
 

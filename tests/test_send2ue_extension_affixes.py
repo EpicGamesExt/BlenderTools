@@ -57,28 +57,30 @@ class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
         Checks that the affix extension loaded properly.
         """
         self.run_extension_tests({
-            'affixes': {
-                'properties': {
-                    'auto_add_asset_name_affixes': True,
-                    'auto_remove_asset_name_affixes': True,
-                    'static_mesh_name_affix': 'SM_',
-                    'material_name_affix': 'M_',
-                    'texture_name_affix': 'T_',
-                    'skeletal_mesh_name_affix': 'SK_',
-                    'animation_sequence_name_affix': 'Anim_',
-                },
-                'operators': [
-                    'extensions_affixes_post_operation',
-                    'extensions_affixes_pre_operation',
-                    'extensions_affixes_pre_validations'
-                ],
-                'utility_operators': [
-                    'extensions_affixes_util_op_addassetaffixes',
-                    'extensions_affixes_util_op_removeassetaffixes'
-                ],
-                'draws': [
-                    'send2ue_extensions_affixes_draw_export'
-                ]
+            'default': {
+                'affixes': {
+                    'properties': {
+                        'auto_add_asset_name_affixes': True,
+                        'auto_remove_asset_name_affixes': False,
+                        'static_mesh_name_affix': 'SM_',
+                        'material_name_affix': 'M_',
+                        'texture_name_affix': 'T_',
+                        'skeletal_mesh_name_affix': 'SK_',
+                        'animation_sequence_name_affix': 'Anim_',
+                    },
+                    'tasks': [
+                        'extensions.affixes.post_operation',
+                        'extensions.affixes.pre_operation',
+                        'extensions.affixes.pre_validations'
+                    ],
+                    'utility_operators': [
+                        'extensions_affixes_addassetaffixes',
+                        'extensions_affixes_removeassetaffixes'
+                    ],
+                    'draws': [
+                        'extensions.affixes.draw_export'
+                    ]
+                }
             }
         })
 

@@ -32,6 +32,11 @@ remote_blender_decorator = rpc.factory.remote_call(
 @rpc.factory.remote_class(remote_blender_decorator)
 class BlenderRemoteCalls:
     @staticmethod
+    def get_data_block_names(data_block_type):
+        data_blocks = getattr(bpy.data, data_block_type)
+        return list(data_blocks.keys())
+
+    @staticmethod
     def install_addons(repo_folder, addons):
         """
         Installs the given addons from the release folder.
@@ -63,23 +68,18 @@ class BlenderRemoteCalls:
         addon.unregister()
 
     @staticmethod
-    def get_addon_property(context_name, addon_name, property_name):
-        # handle addon preferences
-        if context_name == 'preferences':
-            properties = bpy.context.preferences.addons[addon_name].preferences
-        # otherwise the normal contexts
-        else:
-            context = getattr(bpy.context, context_name)
-            properties = getattr(context, addon_name)
+    def send2ue_setup_project():
+        addon = importlib.import_module('send2ue')
+        importlib.reload(addon)
+        addon.utilities.setup_project()
 
-        module_path = property_name.split('.')
-        try:
-            for index, sub_property_name in enumerate(module_path, 1):
-                if index == len(module_path):
-                    return getattr(properties, sub_property_name)
-                properties = getattr(properties, sub_property_name)
-        except AttributeError:
-            return None
+    @staticmethod
+    def get_addon_property(context_name, addon_name, property_name):
+        return Blender.get_addon_property(context_name, addon_name, property_name)
+
+    @staticmethod
+    def has_addon_property(context_name, addon_name, property_name):
+        return Blender.has_addon_property(context_name, addon_name, property_name)
 
     @staticmethod
     def has_data_block(data_type, name):
@@ -389,6 +389,20 @@ class BlenderRemoteCalls:
         operator(*args, **kwargs)
 
     @staticmethod
+    def run_property_group_method(context_name, addon_name, method_name, args=None, kwargs=None):
+        """
+        Runs the given operator.
+        """
+        if args is None:
+            args = []
+        if kwargs is None:
+            kwargs = {}
+
+        method = Blender.get_addon_property(context_name, addon_name, method_name)
+        if method:
+            return method(*args, **kwargs)
+
+    @staticmethod
     def has_driver_namespace(name):
         """
         Checks if the given driver namespace exists.
@@ -591,3 +605,41 @@ class Blender:
                 )
 
             Blender.set_all_action_attributes(rig_object, attributes)
+
+    @staticmethod
+    def get_addon_property(context_name, addon_name, property_name):
+        # handle addon preferences
+        if context_name == 'preferences':
+            properties = bpy.context.preferences.addons[addon_name].preferences
+        # otherwise the normal contexts
+        else:
+            context = getattr(bpy.context, context_name)
+            properties = getattr(context, addon_name)
+
+        module_path = property_name.split('.')
+        try:
+            for index, sub_property_name in enumerate(module_path, 1):
+                if index == len(module_path):
+                    return getattr(properties, sub_property_name)
+                properties = getattr(properties, sub_property_name)
+        except AttributeError:
+            return None
+
+    @staticmethod
+    def has_addon_property(context_name, addon_name, property_name):
+        # handle addon preferences
+        if context_name == 'preferences':
+            properties = bpy.context.preferences.addons[addon_name].preferences
+        # otherwise the normal contexts
+        else:
+            context = getattr(bpy.context, context_name)
+            properties = getattr(context, addon_name)
+
+        module_path = property_name.split('.')
+        try:
+            for index, sub_property_name in enumerate(module_path, 1):
+                if index == len(module_path):
+                    return hasattr(properties, sub_property_name)
+                properties = getattr(properties, sub_property_name)
+        except AttributeError:
+            return False
