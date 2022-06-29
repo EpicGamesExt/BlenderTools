@@ -34,7 +34,7 @@ Also notice that the LOD build settings can be set under the
 ![4](./images/static-mesh/4.png)
 
 ::: tip Note
-  The Editor Settings corresponds to what is available in the [EditorStaticMeshLibrary](https://docs.unrealengine.com/4.27/en-US/PythonAPI/class/EditorStaticMeshLibrary.html) in the Unreal Python API:
+  The Editor Settings corresponds to what is available in the [EditorStaticMeshLibrary](https://docs.unrealengine.com/5.0/en-US/PythonAPI/class/EditorStaticMeshLibrary.html) in the Unreal Python API:
 :::
 
 ## Collisions
@@ -47,7 +47,7 @@ Simple collision workflows for static meshes are supported by prefixing your col
 | `USP_[RenderMeshName]_##` | A Sphere does not need to have many segments (8 is a good number) at all because it is converted into a true sphere for collision. Like boxes, you should not move the individual vertices around. |
 | `UCX_[RenderMeshName]_##` | A Convex object can be any completely closed convex 3D shape. For example, a box can also be a convex object. |
 
-The underlying mechanism for this is the Unreal FBX importer, so for further information, please refer to the [FBX Guide for static meshes](https://docs.unrealengine.com/4.27/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/).
+The underlying mechanism for this is the Unreal FBX importer, so for further information, please refer to the [FBX Guide for static meshes](https://docs.unrealengine.com/5.0/en-US/WorkingWithContent/Importing/FBX/StaticMeshes/).
 
 
 ![5](./images/static-mesh/5.png)
