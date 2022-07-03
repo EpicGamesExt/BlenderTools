@@ -18,18 +18,22 @@ def add_affixes():
 
     for mesh_object in mesh_objects:
         if mesh_object.modifiers:
+            is_armature = False
             for modifier in mesh_object.modifiers:
                 if modifier.type == 'ARMATURE':
                     if bool(modifier.object):
-                        append_affix(
-                            mesh_object,
-                            properties.extensions.affixes.skeletal_mesh_name_affix
-                        )
-                    else:
-                        append_affix(
-                            mesh_object,
-                            properties.extensions.affixes.static_mesh_name_affix
-                        )
+                        is_armature = True
+                        break
+            if is_armature:
+                append_affix(
+                    mesh_object,
+                    properties.extensions.affixes.skeletal_mesh_name_affix
+                )
+            else:
+                append_affix(
+                    mesh_object,
+                    properties.extensions.affixes.static_mesh_name_affix
+                )
         else:
             append_affix(mesh_object, properties.extensions.affixes.static_mesh_name_affix)
 
