@@ -111,10 +111,6 @@ def set_parent_rig_selection(mesh_object, properties):
             # select the parent object
             rig_object.select_set(True)
 
-            # if the combine child meshes option is on, then select all the rigs children that are meshes
-            if properties.combine_child_meshes:
-                utilities.select_all_children(rig_object, AssetTypes.MESH, properties, exclude_postfix_tokens=True)
-
             # call the function again to see if this object has a parent that
             set_parent_rig_selection(rig_object, properties)
     return rig_object
@@ -417,9 +413,6 @@ def export_file(properties, lod=0):
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
 
-    # combine all child meshes if option is on
-    selected_object_names, duplicate_data = utilities.combine_child_meshes(properties)
-
     # if the folder does not exists create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
     if not os.path.exists(folder_path):
@@ -427,12 +420,6 @@ def export_file(properties, lod=0):
 
     # export the fbx file
     export_fbx_file(file_path, properties)
-
-    # remove duplicate objects
-    utilities.remove_data(duplicate_data)
-
-    # restore selection
-    utilities.set_selected_objects(selected_object_names)
 
     # restores original positions
     set_object_positions(original_positions)
@@ -473,14 +460,12 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param bool lod: Whether the exported mesh is a lod.
     :return str: The fbx file path of the exported mesh
     """
-    # run the pre mesh export extensions
-    if lod == 0:
-        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
-
     # deselect everything
     utilities.deselect_all_objects()
 
-    mesh_object_name = mesh_object.name
+    # run the pre mesh export extensions
+    if lod == 0:
+        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
 
     # select the scene object
     mesh_object.select_set(True)
@@ -489,15 +474,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     set_parent_rig_selection(mesh_object, properties)
 
     # select collision meshes
-    utilities.select_asset_collisions(mesh_object_name, properties)
+    utilities.select_asset_collisions(mesh_object.name, properties)
 
-    # export selection to an fbx file
+    # export selection to a file
     export_file(properties, lod)
-
-    # deselect the exported object
-    mesh_object = bpy.data.objects.get(mesh_object_name)
-    if mesh_object:
-        mesh_object.select_set(False)
 
     # run the post mesh export extensions
     if lod == 0:
@@ -659,8 +639,8 @@ def create_asset_data(properties):
     mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
     rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
 
-    # if the combine meshes option is on, get only meshes with unique armature parents
-    mesh_objects = utilities.get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties)
+    # filter the rigs and meshes based on the extension filter methods
+    rig_objects, mesh_objects = extension.run_extension_filters(rig_objects, mesh_objects)
 
     # get the asset data for all the mesh objects
     mesh_data = create_mesh_data(mesh_objects, rig_objects, properties)

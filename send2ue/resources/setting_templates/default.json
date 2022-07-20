@@ -43,7 +43,6 @@
       }
     }
   },
-  "combine_child_meshes": false,
   "disk_animation_folder_path": "C:\\",
   "disk_mesh_folder_path": "C:\\",
   "export_all_actions": true,

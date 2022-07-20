@@ -82,7 +82,6 @@ class Send2Ue(bpy.types.Operator):
                 bpy.context.workspace.status_text_set_internal('Finished!')
                 bpy.context.window_manager.progress_end()
                 self.escape = True
-
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
@@ -96,17 +95,24 @@ class Send2Ue(bpy.types.Operator):
             bpy.context.workspace.status_text_set_internal('Validating...')
 
             # run the full send to unreal operation which queues all the jobs
-            export.send2ue(properties)
+            try:
+                export.send2ue(properties)
+            # if validations fail
+            except Exception as error:
+                self.escape_operation(context)
+                # if in dev mode raise the error instead of reporting it
+                if os.environ.get('SEND2UE_DEV'):
+                    raise error
+
+                self.report({'ERROR'}, str(error))
+                return {'FINISHED'}
+
             self.max_step = self.execution_queue.qsize()
 
             # start a timer in the operators modal that processes the queued jobs
             context.window_manager.modal_handler_add(self)
             self.timer = context.window_manager.event_timer_add(0.01, window=context.window)
             bpy.types.STATUSBAR_HT_header.prepend(self.draw_progress)
-
-            # if validations fail
-            if self.max_step == 0:
-                self.escape_operation(context)
 
             return {'RUNNING_MODAL'}
         else:
@@ -132,8 +138,9 @@ class Send2Ue(bpy.types.Operator):
         return {'FINISHED'}
 
     def escape_operation(self, context):
-        bpy.types.STATUSBAR_HT_header.remove(self.draw_progress)
-        context.window_manager.event_timer_remove(self.timer)
+        if self.timer:
+            bpy.types.STATUSBAR_HT_header.remove(self.draw_progress)
+            context.window_manager.event_timer_remove(self.timer)
         bpy.context.workspace.status_text_set_internal(None)
         self.post_operation()
         return {'FINISHED'}
@@ -248,7 +255,7 @@ class ReloadExtensions(bpy.types.Operator):
                 if not os.path.exists(extensions_repo_path) or not os.path.isdir(
                     extensions_repo_path
                 ):
-                    utilities.report_error(f'"{extensions_repo_path}" is not a folder path on disk.')
+                    self.report(f'"{extensions_repo_path}" is not a folder path on disk.')
                     return {'FINISHED'}
 
         extension_factory = extension.ExtensionFactory()

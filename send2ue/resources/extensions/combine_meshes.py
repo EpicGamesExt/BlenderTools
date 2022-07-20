@@ -1,0 +1,85 @@
+# Copyright Epic Games, Inc. All Rights Reserved.
+
+import os
+import bpy
+from send2ue.core.extension import ExtensionBase
+from send2ue.core import utilities
+from send2ue.constants import AssetTypes
+
+
+class CombineMeshesExtension(ExtensionBase):
+    name = 'combine_meshes'
+
+    combine_child_meshes: bpy.props.BoolProperty(
+        name="Combine child meshes",
+        default=False,
+        description=(
+            "This combines all child meshes of an object into a single mesh when exported"
+        )
+    )
+
+    def pre_operation(self, properties):
+        properties.unreal.import_method.fbx.static_mesh_import_data.combine_meshes = False
+        # turn on the combine meshes option on the static meshes fbx importer
+        if self.combine_child_meshes:
+            properties.unreal.import_method.fbx.static_mesh_import_data.combine_meshes = True
+
+    def filter_objects(self, armature_objects, mesh_objects):
+        if self.combine_child_meshes:
+            mesh_objects = self.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
+        return armature_objects, mesh_objects
+
+    def draw_export(self, dialog, layout, properties):
+        dialog.draw_property(self, layout, 'combine_child_meshes')
+
+    def pre_mesh_export(self, asset_data, properties):
+        if self.combine_child_meshes:
+            mesh_object_name = asset_data.get('_mesh_object_name', '')
+            mesh_object = bpy.data.objects.get(mesh_object_name)
+            if mesh_object and mesh_object.parent:
+                # select the child hierarchy of the mesh parent
+                utilities.select_all_children(
+                    mesh_object.parent,
+                    AssetTypes.MESH,
+                    properties,
+                    exclude_postfix_tokens=True
+                )
+                # rename the asset to match the empty if this is a static mesh export
+                if mesh_object.parent.type == 'EMPTY':
+                    path, ext = asset_data['file_path'].split('.')
+                    asset_folder = asset_data['asset_folder']
+
+                    self.update_asset_data({
+                        'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}.{ext}'),
+                        'asset_path': f'{asset_folder}{mesh_object.parent.name}'
+                    })
+
+    def get_unique_parent_mesh_objects(self, rig_objects, mesh_objects):
+        """
+        Gets only meshes that have a unique same armature parent.
+
+        :param list rig_objects: A list of rig objects.
+        :param list mesh_objects: A list of mesh objects.
+        :returns: A list of mesh objects.
+        :rtype: list
+        """
+        unique_parent_armatures = []
+        unique_parent_empties = []
+        meshes_with_unique_parents = []
+        if self.combine_child_meshes:
+            for mesh_object in mesh_objects:
+                if mesh_object.parent:
+                    # for static meshes it combines by empty
+                    if mesh_object.parent.type == 'EMPTY' and mesh_object.parent not in unique_parent_empties:
+                        meshes_with_unique_parents.append(mesh_object)
+                        unique_parent_empties.append(mesh_object.parent)
+
+                    # for skeletal meshes it combines by armature
+                    if mesh_object.parent.type == 'ARMATURE' and (
+                        mesh_object.parent in rig_objects and mesh_object.parent not in unique_parent_armatures
+                    ):
+                        meshes_with_unique_parents.append(mesh_object)
+                        unique_parent_armatures.append(mesh_object.parent)
+            return meshes_with_unique_parents
+        else:
+            return mesh_objects

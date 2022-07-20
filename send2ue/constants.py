@@ -57,6 +57,7 @@ class ExtensionTasks(Enum):
     PRE_IMPORT = 'pre_import'
     POST_IMPORT = 'post_import'
     POST_OPERATION = 'post_operation'
+    FILTER_OBJECTS = 'filter_objects'
 
 
 class PathModes(Enum):

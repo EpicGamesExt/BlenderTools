@@ -15,7 +15,7 @@ def execute_queued_calls():
         base_server.execute_queued_calls()
     except Exception as error:
         sys.stderr.write(str(error))
-    return 0.02
+    return 0.1
 
 
 class BlenderRPCServerThread(BaseRPCServerThread):

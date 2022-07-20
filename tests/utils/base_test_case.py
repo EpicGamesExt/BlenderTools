@@ -750,7 +750,12 @@ class BaseSend2ueTestCase(BaseTestCase):
                     self.move_to_collection([child_name], 'Export')
 
             # turn combine_child_meshes off
-            self.blender.set_addon_property('scene', 'send2ue', 'combine_child_meshes', False)
+            self.blender.set_addon_property(
+                'scene',
+                'send2ue',
+                'extensions.combine_meshes.combine_child_meshes',
+                False
+            )
 
             # send to unreal
             self.send2ue_operation()
