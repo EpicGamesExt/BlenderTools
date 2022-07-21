@@ -120,49 +120,6 @@ def set_parent_rig_selection(mesh_object, properties):
     return rig_object
 
 
-def set_selected_objects_to_center(properties):
-    """
-    This function gets the original world position and centers the objects at world zero for export.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return dict: A dictionary of tuple that are the original position values of the selected objects.
-    """
-    original_positions = {}
-
-    if properties.use_object_origin:
-
-        for selected_object in bpy.context.selected_objects:
-            # get the original locations
-            original_x = selected_object.location.x
-            original_y = selected_object.location.y
-            original_z = selected_object.location.z
-
-            # set the location to zero
-            selected_object.location.x = 0.0
-            selected_object.location.y = 0.0
-            selected_object.location.z = 0.0
-
-            original_positions[selected_object.name] = original_x, original_y, original_z
-
-    # return the original positions
-    return original_positions
-
-
-def set_object_positions(original_positions):
-    """
-    This function sets the given object's location in world space.
-
-    :param object original_positions: A dictionary of tuple that are the original position values of the
-    selected objects.
-    """
-    for object_name, positions in original_positions.items():
-        scene_object = bpy.data.objects.get(object_name)
-        if scene_object:
-            scene_object.location.x = positions[0]
-            scene_object.location.y = positions[1]
-            scene_object.location.z = positions[2]
-
-
 def set_armatures_as_parents(properties):
     """
     Sets the armature in a mesh modifier as a rig's parent.
@@ -411,9 +368,6 @@ def export_file(properties, lod=0):
     if lod != 0:
         file_path = asset_data['lods'][str(lod)]
 
-    # gets the original position and sets the objects position according to the selected properties.
-    original_positions = set_selected_objects_to_center(properties)
-
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
 
@@ -433,9 +387,6 @@ def export_file(properties, lod=0):
 
     # restore selection
     utilities.set_selected_objects(selected_object_names)
-
-    # restores original positions
-    set_object_positions(original_positions)
 
     # restores the original rig objects
     restore_rig_objects(context, properties)
