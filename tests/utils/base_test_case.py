@@ -723,7 +723,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def run_use_object_origin_option_tests(self, object_names):
         for object_name, object_name_to_move in object_names:
             # turn object origin off
-            self.blender.set_addon_property('scene', 'send2ue', 'use_object_origin', False)
+            self.blender.set_addon_property('scene', 'send2ue', 'extensions.object_origin.use_object_origin', False)
 
             # Notice blender units are meters and unreal units are centimeters
             location = [1.0, 1.0, 1.0]
@@ -733,7 +733,7 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.assert_use_object_origin_option(object_name, location)
 
             # turn object origin on
-            self.blender.set_addon_property('scene', 'send2ue', 'use_object_origin', True)
+            self.blender.set_addon_property('scene', 'send2ue', 'extensions.object_origin.use_object_origin', True)
             self.send2ue_operation()
             self.assert_use_object_origin_option(object_name, [0.0, 0.0, 0.0])
 
