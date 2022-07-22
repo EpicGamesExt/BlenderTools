@@ -1,5 +1,5 @@
 import unittest
-from utils.base_test_case import BaseSend2ueTestCaseCore
+from utils.base_test_case import BaseSend2ueTestCaseCore, SkipSend2UeTests
 from test_send2ue_cubes import TestSend2UeCubes
 from test_send2ue_mannequins import TestSend2UeMannequins
 
@@ -12,45 +12,13 @@ def setUp(self):
     self.blender.set_addon_property('scene', 'send2ue', 'extensions.affixes.auto_remove_asset_name_affixes', False)
 
 
-class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore):
+class TestSend2UeExtensionAffixesCubes(SkipSend2UeTests, TestSend2UeCubes, BaseSend2ueTestCaseCore):
     """
     Runs several test cases with the affix extension on the cube meshes.
     """
     def setUp(self):
         super().setUp()
         setUp(self)
-
-    @unittest.skip
-    def test_bulk_send_to_unreal(self):
-        pass
-
-    @unittest.skip
-    def test_lods(self):
-        pass
-
-    @unittest.skip
-    def test_sockets(self):
-        pass
-
-    @unittest.skip
-    def test_collisions(self):
-        pass
-
-    @unittest.skip
-    def test_use_object_origin_option(self):
-        pass
-
-    @unittest.skip
-    def test_combine_child_meshes_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_immediate_parent_collection_name_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_collections_as_folders_option(self):
-        pass
 
     def test_extension(self):
         """
@@ -69,16 +37,16 @@ class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
                         'animation_sequence_name_affix': 'Anim_',
                     },
                     'tasks': [
-                        'extensions.affixes.post_operation',
-                        'extensions.affixes.pre_operation',
-                        'extensions.affixes.pre_validations'
+                        'post_operation',
+                        'pre_operation',
+                        'pre_validations'
                     ],
                     'utility_operators': [
                         'extensions_affixes_addassetaffixes',
                         'extensions_affixes_removeassetaffixes'
                     ],
                     'draws': [
-                        'extensions.affixes.draw_export'
+                        'draw_export'
                     ]
                 }
             }
@@ -125,45 +93,13 @@ class TestSend2UeExtensionAffixesCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
         })
 
 
-class TestSend2UeExtensionAffixesMannequins(TestSend2UeMannequins):
+class TestSend2UeExtensionAffixesMannequins(SkipSend2UeTests, TestSend2UeMannequins):
     """
     Runs several test cases with the affix extension on the mannequin meshes.
     """
     def setUp(self):
         super().setUp()
         setUp(self)
-
-    @unittest.skip
-    def test_bulk_send_to_unreal(self):
-        pass
-
-    @unittest.skip
-    def test_lods(self):
-        pass
-
-    @unittest.skip
-    def test_auto_stash_active_action_option(self):
-        pass
-
-    @unittest.skip
-    def test_export_object_name_as_root_option(self):
-        pass
-
-    @unittest.skip
-    def test_export_custom_property_fcurves_option(self):
-        pass
-
-    @unittest.skip
-    def test_combine_child_meshes_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_immediate_parent_collection_name_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_collections_as_folders_option(self):
-        pass
 
     def test_default_send_to_unreal(self):
         """

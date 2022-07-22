@@ -72,7 +72,7 @@ class ExtensionBase:
         """
         The name of the extension that all properties and operators will be namespaced under.
         """
-        pass
+        raise NotImplementedError('A name must be defined for the extension class.')
 
     def draw_validations(self, dialog, layout, properties):
         """

@@ -186,6 +186,10 @@ class BlenderRemoteCalls:
             bones[bone_name].select = True
 
     @staticmethod
+    def create_empty(name):
+        Blender.create_empty(name)
+
+    @staticmethod
     def create_scene_collections(collection_names):
         """
         Creates a collection and links it to the current view layer.
@@ -643,3 +647,12 @@ class Blender:
                 properties = getattr(properties, sub_property_name)
         except AttributeError:
             return False
+
+    @staticmethod
+    def create_empty(name):
+        empty_object = bpy.data.objects.get(name)
+        if not empty_object:
+            empty_object = bpy.data.objects.new(name, object_data=None)
+
+        if empty_object not in bpy.context.scene.collection.objects.values():
+            bpy.context.scene.collection.objects.link(empty_object)

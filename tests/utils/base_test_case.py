@@ -1,6 +1,5 @@
 import math
 import os
-import abc
 import collections
 import sys
 import unittest
@@ -187,7 +186,11 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
     def assert_extension_method(self, extension_name, extension_methods, exists=True):
         self.log(f'Checking {self.addon_name} {extension_name} extension draws...')
         for extension_method in extension_methods:
-            value = self.blender.has_addon_property('scene', self.addon_name, extension_method)
+            value = self.blender.has_addon_property(
+                'scene',
+                self.addon_name,
+                f'extensions.{extension_name}.{extension_method}'
+            )
             if exists:
                 self.assertTrue(
                     value,
@@ -276,6 +279,43 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
                         template_name
                     ]),
                     f'The template "{template_name}" still exists when it should have been removed.'
+                )
+
+    def run_import_asset_operator_tests(self, asset_files):
+        for asset_file, object_names in asset_files.items():
+
+            self.log(f'Running import asset operation on FBX file "{asset_file}"...')
+            file_path = os.path.join(self.test_folder, 'test_files', 'fbx_files', asset_file)
+
+            # make the path a linux path if in the test environment
+            if self.test_environment:
+                file_path = os.path.normpath(file_path).replace(os.path.sep, '/')
+
+            self.blender.run_addon_operator('wm', 'import_asset', [], {'filepath': file_path})
+            for object_name in object_names:
+                self.assertTrue(
+                    self.blender.has_data_block('objects', object_name),
+                    f'The object {object_name} does not exits when it should have been imported.'
+                )
+                transforms = self.blender.get_object_transforms(object_name, None)
+                location = transforms.get('location')
+                rotation = transforms.get('rotation')
+                scale = transforms.get('scale')
+
+                self.assertEqual(
+                    location,
+                    [0, 0, 0],
+                    f'{object_name} has a location of {location} when it should be [0, 0, 0]'
+                )
+                self.assertEqual(
+                    rotation,
+                    [0, 0, 0],
+                    f'{object_name} has a location of {location} when it should be [0, 0, 0]'
+                )
+                self.assertEqual(
+                    scale,
+                    [1, 1, 1],
+                    f'{object_name} has a location of {location} when it should be [1, 1, 1]'
                 )
 
 
@@ -737,54 +777,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.send2ue_operation()
             self.assert_use_object_origin_option(object_name, [0.0, 0.0, 0.0])
 
-    def run_combine_child_meshes_option_tests(self, objects, setup_parents=True):
-        for object_name, children in objects.items():
-            self.move_to_collection([object_name], 'Export')
-
-            if setup_parents:
-                # parent the objects
-                for offset, child_name in enumerate(children, 1):
-                    self.set_object_transforms(child_name, location=[0.0, offset * 2, 0.0])
-                    self.log(f'Parenting "{child_name}" to "{object_name}"...')
-                    self.blender.parent_to(child_name, object_name)
-                    self.move_to_collection([child_name], 'Export')
-
-            # turn combine_child_meshes off
-            self.blender.set_addon_property(
-                'scene',
-                'send2ue',
-                'extensions.combine_meshes.combine_child_meshes',
-                False
-            )
-
-            # send to unreal
-            self.send2ue_operation()
-            for scene_object_name in [object_name] + children:
-                self.assert_mesh_import(scene_object_name)
-
-            # reset blender and unreal
-            self.tearDown()
-            self.setUp()
-
-            self.move_to_collection([object_name], 'Export')
-
-            if setup_parents:
-                # parent the objects
-                for offset, child_name in enumerate(children, 1):
-                    self.set_object_transforms(child_name, location=[0.0, offset * 2, 0.0])
-                    self.log(f'Parenting "{child_name}" to "{object_name}"...')
-                    self.blender.parent_to(child_name, object_name)
-                    self.move_to_collection([child_name], 'Export')
-
-            # turn combine_child_meshes on
-            self.blender.set_addon_property('scene', 'send2ue', 'combine_child_meshes', True)
-
-            # send to unreal
-            self.send2ue_operation()
-            self.assert_mesh_import(object_name)
-            for child_name in children:
-                self.assert_mesh_import(child_name, False)
-
     def run_use_immediate_parent_collection_name_option_tests(self, objects_and_collections):
         for object_name, collection_hierarchy in objects_and_collections.items():
             self.blender.create_scene_collections(collection_hierarchy)
@@ -832,43 +824,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.send2ue_operation()
             folder_path = mesh_folder_path + '/'.join(collection_hierarchy[1:-1]) + '/'
             self.assert_asset_exists(collection_hierarchy[-1], folder_path, True)
-
-    def run_import_asset_operator_tests(self, asset_files):
-        for asset_file, object_names in asset_files.items():
-
-            self.log(f'Running import asset operation on FBX file "{asset_file}"...')
-            file_path = os.path.join(self.test_folder, 'test_files', 'fbx_files', asset_file)
-
-            # make the path a linux path if in the test environment
-            if self.test_environment:
-                file_path = os.path.normpath(file_path).replace(os.path.sep, '/')
-
-            self.blender.run_addon_operator('wm', 'import_asset', [], {'filepath': file_path})
-            for object_name in object_names:
-                self.assertTrue(
-                    self.blender.has_data_block('objects', object_name),
-                    f'The object {object_name} does not exits when it should have been imported.'
-                )
-                transforms = self.blender.get_object_transforms(object_name, None)
-                location = transforms.get('location')
-                rotation = transforms.get('rotation')
-                scale = transforms.get('scale')
-
-                self.assertEqual(
-                    location,
-                    [0, 0, 0],
-                    f'{object_name} has a location of {location} when it should be [0, 0, 0]'
-                )
-                self.assertEqual(
-                    rotation,
-                    [0, 0, 0],
-                    f'{object_name} has a location of {location} when it should be [0, 0, 0]'
-                )
-                self.assertEqual(
-                    scale,
-                    [1, 1, 1],
-                    f'{object_name} has a location of {location} when it should be [1, 1, 1]'
-                )
 
     def run_auto_stash_active_action_option_tests(self, objects_and_animations):
         self.blender.set_addon_property('scene', 'send2ue', 'export_all_actions', True)
@@ -920,118 +875,165 @@ class BaseSend2ueTestCase(BaseTestCase):
                 for curve_name, exists in curve_data.items():
                     self.assert_curve(animation_name, curve_name, exists)
 
-    @abc.abstractmethod
     def test_default_send_to_unreal(self):
         """
         Sends a cube mesh with default settings.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_bulk_send_to_unreal(self):
         """
         Sends multiple cubes to unreal at once.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_animations(self):
         """
         Sends the mannequin animations to unreal with various options and ensures they are identical.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_lods(self):
         """
         Sends both cube meshes with lods to unreal.
         https://github.com/EpicGames/BlenderTools/issues/331
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_sockets(self):
         """
         Sends a Cube with sockets to unreal.
         https://github.com/EpicGames/BlenderTools/issues/69
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_collisions(self):
         """
         Sends a Cube with complex collisions to unreal.
         https://github.com/EpicGames/BlenderTools/issues/22
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_materials(self):
         """
         Sends a Cube with materials to unreal.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_textures(self):
         """
         Sends a Cube with a textured material to unreal.
         https://github.com/EpicGames/BlenderTools/issues/83
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_use_object_origin_option(self):
         """
         Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
         https://github.com/EpicGames/BlenderTools/issues/223
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_combine_child_meshes_option(self):
         """
         Tests the combine child mesh option.
         https://github.com/EpicGames/BlenderTools/issues/285
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_use_immediate_parent_collection_name_option(self):
         """
         Tests the use immediate parent collection name option.
         https://github.com/EpicGames/BlenderTools/issues/352
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_use_collections_as_folders_option(self):
         """
         Tests using collections as folders.
         https://github.com/EpicGames/BlenderTools/issues/183
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_auto_stash_active_action_option(self):
         """
         Tests not using auto stash active action option.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_export_object_name_as_root_option(self):
         """
         Tests export object name as root option.
         https://github.com/EpicGames/BlenderTools/issues/121
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_export_custom_property_fcurves_option(self):
         """
         Tests export custom property fcurves option.
         """
+        raise NotImplementedError('This test case must be implemented or skipped')
+
+
+class SkipSend2UeTests(unittest.TestCase):
+    @unittest.skip
+    def test_default_send_to_unreal(self):
+        pass
+
+    @unittest.skip
+    def test_bulk_send_to_unreal(self):
+        pass
+
+    @unittest.skip
+    def test_lods(self):
+        pass
+
+    @unittest.skip
+    def test_sockets(self):
+        pass
+
+    @unittest.skip
+    def test_collisions(self):
+        pass
+
+    @unittest.skip
+    def test_materials(self):
+        pass
+
+    @unittest.skip
+    def test_textures(self):
+        pass
+
+    @unittest.skip
+    def test_use_immediate_parent_collection_name_option(self):
+        pass
+
+    @unittest.skip
+    def test_use_collections_as_folders_option(self):
+        pass
+
+    @unittest.skip
+    def test_import_asset_operator(self):
+        pass
+
+    @unittest.skip
+    def test_animations(self):
+        pass
+
+    @unittest.skip
+    def test_auto_stash_active_action_option(self):
+        pass
+
+    @unittest.skip
+    def test_export_object_name_as_root_option(self):
+        pass
+
+    @unittest.skip
+    def test_export_custom_property_fcurves_option(self):
+        pass
+
+    @unittest.skip
+    def test_extension(self):
         pass
 
 
@@ -1265,26 +1267,23 @@ class BaseUe2RigifyTestCase(BaseTestCase):
                     f'The template file "{os.path.join(*template_file_path)}" exists when it should have been removed.'
                 )
 
-    @abc.abstractmethod
     def test_modes(self):
         """
         Switches through each mode.
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_new_template(self):
         """
         Tests creating a new template.
         https://github.com/EpicGames/BlenderTools/issues/233
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')
 
-    @abc.abstractmethod
     def test_baking(self):
         """
         related issue:
         This tests that baking the bone transforms is correct.
         https://github.com/EpicGames/BlenderTools/issues/238
         """
-        pass
+        raise NotImplementedError('This test case must be implemented or skipped')

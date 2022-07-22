@@ -52,7 +52,8 @@ class TestSuiteCollector(ast.NodeVisitor):
         test_case_class = getattr(self._test_case_module, node.name)
 
         if issubclass(test_case_class, unittest.TestCase):
-            self._test_case_classes.append(test_case_class)
+            if test_case_class not in self._test_case_classes and not test_case_class.__name__.lower().endswith('base'):
+                self._test_case_classes.append(test_case_class)
 
     def get_test_case_classes(self):
         """

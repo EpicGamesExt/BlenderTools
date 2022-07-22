@@ -1460,3 +1460,18 @@ def apply_transform(scene_object, use_location=False, use_rotation=False, use_sc
         child.matrix_local = matrix @ child.matrix_local
 
     scene_object.matrix_basis = basis[0] @ basis[1] @ basis[2]
+
+
+def set_animation_origin(scene_object, world_location):
+    if scene_object.animation_data:
+        action = scene_object.animation_data.action
+        if action:
+            for fcurve in action.fcurves:
+                if fcurve.data_path == 'location':
+                    # the offset from the first location keyframe and the passed in world location
+                    offset = world_location[fcurve.array_index] - fcurve.keyframe_points[0].co[1]
+                    for keyframe_point in fcurve.keyframe_points:
+                        # apply the offset to all keys and handles
+                        keyframe_point.co[1] = keyframe_point.co[1] + offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + offset

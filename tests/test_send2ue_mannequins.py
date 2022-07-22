@@ -92,17 +92,6 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
             'SK_Mannequin_Female': ['unreal-engine-logo'],
         })
 
-    def test_combine_child_meshes_option(self):
-        """
-        Tests the combine child mesh option.
-        """
-        self.blender.separate_mesh_by_selection('SK_Mannequin_Female', 'Head')
-        self.move_to_collection(['female_root', 'SK_Mannequin_Female', 'Head'], 'Export')
-        self.run_combine_child_meshes_option_tests(
-            {'SK_Mannequin_Female': ['Head']},
-            setup_parents=False
-        )
-
     def test_use_immediate_parent_collection_name_option(self):
         """
         Tests the use immediate parent collection name option.
