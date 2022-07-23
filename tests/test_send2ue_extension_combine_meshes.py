@@ -4,14 +4,6 @@ from test_send2ue_mannequins import TestSend2UeMannequins
 
 
 class TestSend2UeExtensionCombineMeshesBase(BaseSend2ueTestCaseCore):
-    """
-    Runs several test cases with the affix extension on the cube meshes.
-    """
-
-    def setUp(self):
-        super().setUp()
-        self.blender.set_addon_property('scene', 'send2ue', 'extensions.combine_meshes.combine_child_meshes', True)
-
     def setup_parents(self, children, parent_name, mesh_type):
         if mesh_type == 'static_mesh':
             self.blender.create_empty(parent_name)
@@ -44,6 +36,13 @@ class TestSend2UeExtensionCombineMeshesBase(BaseSend2ueTestCaseCore):
         self.tearDown()
         self.setUp()
 
+        self.blender.set_addon_property(
+            'scene',
+            'send2ue',
+            'extensions.combine_meshes.combine_child_meshes',
+            True
+        )
+
         self.setup_parents(children, parent, mesh_type)
         self.move_to_collection([parent] + children, 'Export')
 
@@ -59,10 +58,18 @@ class TestSend2UeExtensionCombineMeshesBase(BaseSend2ueTestCaseCore):
             self.assert_mesh_import(child_name, False)
 
 
-class TestSend2UeExtensionCombineMeshesCubes(SkipSend2UeTests, TestSend2UeCubes, TestSend2UeExtensionCombineMeshesBase):
+class TestSend2UeExtensionCombineMeshesCubes(
+    SkipSend2UeTests,
+    TestSend2UeCubes,
+    TestSend2UeExtensionCombineMeshesBase
+):
+    """
+    Runs several test cases with the combine meshes extension on the cube meshes.
+    """
     def test_combine_child_meshes_option(self):
         """
-        Tests the combine meshes
+        Tests the combine child mesh option.
+        https://github.com/EpicGames/BlenderTools/issues/285
         """
         self.run_combine_child_meshes_tests(
             asset_name='CombinedCubes',
@@ -79,7 +86,7 @@ class TestSend2UeExtensionCombineMeshesCubes(SkipSend2UeTests, TestSend2UeCubes,
             'default': {
                 'combine_meshes': {
                     'properties': {
-                        'combine_child_meshes': True,
+                        'combine_child_meshes': False,
                     },
                     'tasks': [
                         'pre_operation',
@@ -94,10 +101,18 @@ class TestSend2UeExtensionCombineMeshesCubes(SkipSend2UeTests, TestSend2UeCubes,
         })
 
 
-class TestSend2UeExtensionCombineMeshesMannequins(SkipSend2UeTests, TestSend2UeMannequins, TestSend2UeExtensionCombineMeshesBase):
+class TestSend2UeExtensionCombineMeshesMannequins(
+    SkipSend2UeTests,
+    TestSend2UeMannequins,
+    TestSend2UeExtensionCombineMeshesBase
+):
+    """
+    Runs several test cases with the combine meshes extension on the mannequin meshes.
+    """
     def test_combine_child_meshes_option(self):
         """
-        Sends a cube mesh with default settings.
+        Tests the combine child mesh option.
+        https://github.com/EpicGames/BlenderTools/issues/459
         """
         self.run_combine_child_meshes_tests(
             asset_name='SK_Mannequin_Female',

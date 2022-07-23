@@ -276,14 +276,6 @@ def get_scene_property_class():
                 "manually edit NLA strips."
             )
         )
-        use_object_origin: bpy.props.BoolProperty(
-            name="Use object origin",
-            default=False,
-            description=(
-                "When active, this option will center each object at world origin before it is exported to an FBX, then it "
-                "will move each object back to its original position"
-            )
-        )
         import_materials_and_textures: bpy.props.BoolProperty(
             name="Materials and Textures",
             default=True,

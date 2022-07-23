@@ -316,7 +316,7 @@ def restore_rig_objects(context, properties):
     the context dictionary.
 
     :param dict context: The original context of the scene scale and its selected objects before changes occurred.
-    :param properties:
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if properties.automatically_scale_bones and context:
         scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
@@ -407,9 +407,6 @@ def export_file(properties, lod=0):
     if lod != 0:
         file_path = asset_data['lods'][str(lod)]
 
-    # gets the original position and sets the objects position according to the selected properties.
-    original_positions = set_selected_objects_to_center(properties)
-
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
 
@@ -420,9 +417,6 @@ def export_file(properties, lod=0):
 
     # export the fbx file
     export_fbx_file(file_path, properties)
-
-    # restores original positions
-    set_object_positions(original_positions)
 
     # restores the original rig objects
     restore_rig_objects(context, properties)

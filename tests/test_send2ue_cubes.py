@@ -135,13 +135,6 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
             'Cube2_lod0_mesh': ['unreal-engine-logo'],
         })
 
-    # def test_use_object_origin_option(self):
-    #     """
-    #     Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
-    #     https://github.com/EpicGames/BlenderTools/issues/223
-    #     """
-    #     self.run_use_object_origin_option_tests([('Cube1_LOD0', 'Cube1_LOD0')])
-
     def test_use_immediate_parent_collection_name_option(self):
         """
         Tests the use immediate parent collection name option.

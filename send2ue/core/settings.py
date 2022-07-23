@@ -205,7 +205,7 @@ def get_property_group_as_dictionary(property_group, extra_attributes=False):
         value = getattr(property_group, key)
 
         # skip if this is a function
-        if type(property_instance).__name__ == 'function':
+        if type(property_instance).__name__ in ['function', 'staticmethod']:
             continue
 
         if property_instance:
@@ -252,7 +252,7 @@ def set_property_group_with_dictionary(property_group, data):
         deferred_data = property_group.__annotations__.get(attribute)
 
         # skip if the attribute is a function
-        if type(deferred_data).__name__ == 'function':
+        if type(deferred_data).__name__ in ['function', 'staticmethod']:
             continue
 
         if deferred_data:
@@ -531,14 +531,14 @@ def convert_to_property_group(data):
             data[key] = create_property(value)
             continue
 
-        if type(value).__name__ == 'function':
+        if type(value).__name__ in ['function', 'staticmethod']:
             continue
 
         if not value.get('name'):
             data[key] = create_property_group(
                 class_name=key.upper(),
                 properties=convert_to_property_group(data.get(key, {})),
-                methods={key: value for key, value in value.items() if type(value).__name__ == 'function'}
+                methods={key: value for key, value in value.items() if type(value).__name__ in ['function', 'staticmethod']}
             )
         else:
             data[key] = create_property(value)

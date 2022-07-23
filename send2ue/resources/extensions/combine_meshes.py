@@ -14,7 +14,7 @@ class CombineMeshesExtension(ExtensionBase):
         name="Combine child meshes",
         default=False,
         description=(
-            "This combines all child meshes of an object into a single mesh when exported"
+            "This combines all child meshes of an armature or empty into a single mesh when exported"
         )
     )
 

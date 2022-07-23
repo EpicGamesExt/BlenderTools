@@ -152,6 +152,9 @@ class Send2Ue(bpy.types.Operator):
         # unpack the textures for export if needed
         self.state['unpacked_files'] = utilities.unpack_textures()
 
+        # sets the current frame to 0
+        bpy.context.scene.frame_current = 0
+
         # run the pre export extensions
         extension.run_extension_tasks(ExtensionTasks.PRE_OPERATION.value)
 

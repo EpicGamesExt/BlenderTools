@@ -760,23 +760,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             for texture_name in texture_names:
                 self.assert_texture(texture_name, False)
 
-    def run_use_object_origin_option_tests(self, object_names):
-        for object_name, object_name_to_move in object_names:
-            # turn object origin off
-            self.blender.set_addon_property('scene', 'send2ue', 'extensions.object_origin.use_object_origin', False)
-
-            # Notice blender units are meters and unreal units are centimeters
-            location = [1.0, 1.0, 1.0]
-            self.set_object_transforms(object_name_to_move, location=location)
-            self.move_to_collection([object_name], 'Export')
-            self.send2ue_operation()
-            self.assert_use_object_origin_option(object_name, location)
-
-            # turn object origin on
-            self.blender.set_addon_property('scene', 'send2ue', 'extensions.object_origin.use_object_origin', True)
-            self.send2ue_operation()
-            self.assert_use_object_origin_option(object_name, [0.0, 0.0, 0.0])
-
     def run_use_immediate_parent_collection_name_option_tests(self, objects_and_collections):
         for object_name, collection_hierarchy in objects_and_collections.items():
             self.blender.create_scene_collections(collection_hierarchy)
@@ -924,20 +907,6 @@ class BaseSend2ueTestCase(BaseTestCase):
         """
         Sends a Cube with a textured material to unreal.
         https://github.com/EpicGames/BlenderTools/issues/83
-        """
-        raise NotImplementedError('This test case must be implemented or skipped')
-
-    def test_use_object_origin_option(self):
-        """
-        Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
-        https://github.com/EpicGames/BlenderTools/issues/223
-        """
-        raise NotImplementedError('This test case must be implemented or skipped')
-
-    def test_combine_child_meshes_option(self):
-        """
-        Tests the combine child mesh option.
-        https://github.com/EpicGames/BlenderTools/issues/285
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 

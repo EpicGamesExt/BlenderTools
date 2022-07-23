@@ -39,7 +39,7 @@ Also notice that the LOD build settings can be set under the
 
 ## Collisions
 
-Simple collision workflows for static meshes are supported by prefixing your collision names with their respective identifiers.
+Simple collision workflows for static meshes are supported by prefixing your collision names with their respective identifiers and making them a child of the mesh.
 | Mesh Prefix and Name | Description |
 | -------------- | ----------------------- |
 | `UBX_[RenderMeshName]_##` | A Box must be created using a regular rectangular 3D object. You cannot move the vertices around or deform it in any way to make it something other than a rectangular prism, or else it will not work. |

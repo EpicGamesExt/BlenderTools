@@ -349,7 +349,7 @@ class ExtensionFactory:
 
             # get the extension methods and its parent class methods
             for attribute, value in extension_class.__dict__.items():
-                if type(value).__name__ == 'function':
+                if type(value).__name__ in ['function', 'staticmethod']:
                     data[Extensions.NAME][extension_class.name][attribute] = value
 
             # add the update asset method to the class

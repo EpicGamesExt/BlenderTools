@@ -2,6 +2,8 @@
 
 import bpy
 from send2ue.core.extension import ExtensionBase
+from send2ue.core import utilities
+from send2ue.constants import AssetTypes
 
 
 class ObjectOriginExtension(ExtensionBase):
@@ -14,38 +16,134 @@ class ObjectOriginExtension(ExtensionBase):
             "will move each object back to its original position"
         )
     )
+    world_center: bpy.props.FloatVectorProperty(default=[0.0, 0.0, 0.0])
 
     def draw_export(self, dialog, layout, properties):
-        row = layout.row()
-        row.prop(self, 'use_object_origin')
+        dialog.draw_property(self, layout, 'use_object_origin')
 
-    # saves original location of asset to asset_data dictionary, set location to 0
     def pre_mesh_export(self, asset_data, properties):
+        # saves original location of asset to asset_data dictionary, set location to 0
         if self.use_object_origin:
-            asset_data['_original_position'] = self.set_object_location(
-                asset_data['_mesh_object_name'],
-                [0, 0, 0]
-            )
+            self.center_object_locations(asset_data['_mesh_object_name'])
 
-    # restores original location of asset
+    def pre_animation_export(self, asset_data, properties):
+        # restores original location of objects and actions
+        if self.use_object_origin:
+            action = bpy.data.actions.get(asset_data['_action_name'])
+            if action:
+                action_location = self.set_action_location(action, [0.0, 0.0, 0.0])
+                self.update_asset_data({
+                    '_original_locations': {
+                        '_actions': {action.name: action_location}
+                    }
+                })
+
     def post_mesh_export(self, asset_data, properties):
+        # restores original location of asset
         if self.use_object_origin:
-            self.set_object_location(
-                asset_data['_mesh_object_name'],
-                asset_data['_original_position']
-            )
+            self.restore_object_locations(asset_data)
+            self.restore_action_locations(asset_data)
 
-    def set_object_location(self, name, location):
+    def post_animation_export(self, asset_data, properties):
+        # restores original location of asset
+        if self.use_object_origin:
+            self.restore_action_locations(asset_data)
+
+    def center_object_locations(self, mesh_name):
+        original_locations = {}
+        mesh_object = bpy.data.objects.get(mesh_name)
+        if mesh_object:
+            original_locations['_objects'] = {}
+            # in the case of a skeletal mesh center the armature object
+            if mesh_object.parent and mesh_object.parent.type == 'ARMATURE':
+                original_locations['_objects'][mesh_object.parent.name] = self.set_object_location(
+                    mesh_object.parent,
+                    self.world_center
+                )
+                # center the actions on this armature too so that keyframes don't move
+                # the armature back when the scene updates
+                original_locations['_actions'] = self.center_action_locations(mesh_object.parent)
+
+            # if a static mesh
+            else:
+                # in the case that the meshes parent is an empty
+                if mesh_object.parent and mesh_object.parent.type == 'EMPTY':
+                    # center the empty instead of the mesh, thus centering all child meshes
+                    original_locations['_objects'][mesh_object.parent.name] = self.set_object_location(
+                        mesh_object.parent,
+                        self.world_center
+                    )
+                # otherwise just center the mesh
+                else:
+                    original_locations['_objects'][mesh_object.name] = self.set_object_location(
+                        mesh_object,
+                        self.world_center
+                    )
+        # update the asset data so that it can be accessed in the post export methods
+        self.update_asset_data({'_original_locations': original_locations})
+
+    def center_action_locations(self, armature_object):
+        action_locations = {}
+        for action in utilities.get_actions(armature_object, all_actions=True):
+            # center the action location keyframes
+            action_locations[action.name] = self.set_action_location(action, self.world_center)
+        return action_locations
+
+    def restore_object_locations(self, asset_data):
+        original_locations = asset_data.get('_original_locations', {})
+        object_locations = original_locations.get('_objects', {})
+
+        for object_name, object_location in object_locations.items():
+            scene_object = bpy.data.actions.get(object_name)
+            if scene_object:
+                print(object_location)
+                self.set_object_location(scene_object, object_location)
+
+    def restore_action_locations(self, asset_data):
+        original_locations = asset_data.get('_original_locations', {})
+        action_locations = original_locations.get('_actions', {})
+        for action_name, action_location in action_locations.items():
+            action = bpy.data.actions.get(action_name)
+            if action:
+                self.set_action_location(action, action_location)
+
+    @staticmethod
+    def set_action_location(action, world_location):
         """
-        This function gets the original world position and centers the object at world zero for export.
+        Sets the world location of an animation based of the first frame of the animation
+        and returns its original world location.
 
-        :param str name: Name of object to relocate.
-        :param list location: x,y,z coordinates.
-        :returns: A tuple that is the original position values of the selected object.
+        :param bpy.types.Action action: A object.
+        :param list world_location: x,y,z coordinates.
+        :returns: The original world location values of the given object.
         :rtype: list
         """
-        scene_object = bpy.data.objects.get(name)
-        if scene_object:
-            original_position = scene_object.location[:]
-            scene_object.location = location
-            return original_position
+        original_location = []
+        if action:
+            for fcurve in action.fcurves:
+                if fcurve.data_path == 'location':
+                    # the offset from the first location keyframe and the passed in world location
+                    offset = world_location[fcurve.array_index] - fcurve.keyframe_points[0].co[1]
+                    for keyframe_point in fcurve.keyframe_points:
+                        # save the original location
+                        original_location.append(keyframe_point.co[1])
+
+                        # apply the offset to all keys and handles
+                        keyframe_point.co[1] = keyframe_point.co[1] + offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + offset
+        return original_location
+
+    @staticmethod
+    def set_object_location(scene_object, world_location):
+        """
+        Sets the world location of the object and returns its original world location.
+
+        :param bpy.types.Object scene_object: A object.
+        :param list world_location: x,y,z coordinates.
+        :returns: The original world location values of the given object.
+        :rtype: list
+        """
+        original_location = scene_object.location[:]
+        scene_object.location = world_location[:]
+        return original_location

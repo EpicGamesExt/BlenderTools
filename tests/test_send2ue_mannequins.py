@@ -19,10 +19,6 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
     def test_collisions(self):
         pass
 
-    @unittest.skip
-    def test_use_object_origin_option(self):
-        pass
-
     def test_default_send_to_unreal(self):
         """
         Sends a mannequin mesh with default settings.
