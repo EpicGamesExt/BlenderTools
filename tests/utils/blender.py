@@ -37,9 +37,9 @@ class BlenderRemoteCalls:
         return list(data_blocks.keys())
 
     @staticmethod
-    def set_animation_location(object_name, world_location):
-        scene_object = bpy.data.objects.get(object_name)
-        Blender.set_animation_location(scene_object, world_location)
+    def set_all_action_locations(world_location):
+        for action in bpy.data.actions:
+            Blender.set_action_location(action, world_location)
 
     @staticmethod
     def install_addons(repo_folder, addons):
@@ -561,28 +561,31 @@ class Blender:
                                 nla_track.is_solo = is_solo
 
     @staticmethod
-    def set_animation_location(scene_object, world_location):
+    def set_action_location(action, world_location):
         """
-        Sets the world location of an animation based of the first frame of the animation
+        Sets the world location of an action based of the first frame of the action
         and returns its original world location.
 
-        :param bpy.types.Object scene_object: A object.
+        :param bpy.types.Action action: A object.
         :param list world_location: x,y,z coordinates.
         :returns: The original world location values of the given object.
         :rtype: list
         """
-        if scene_object.animation_data:
-            action = scene_object.animation_data.action
-            if action:
-                for fcurve in action.fcurves:
-                    if fcurve.data_path == 'location':
-                        # the offset from the first location keyframe and the passed in world location
-                        offset = world_location[fcurve.array_index] - fcurve.keyframe_points[0].co[1]
-                        for keyframe_point in fcurve.keyframe_points:
-                            # apply the offset to all keys and handles
-                            keyframe_point.co[1] = keyframe_point.co[1] + offset
-                            keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + offset
-                            keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + offset
+        original_location = []
+        if action:
+            for fcurve in action.fcurves:
+                if fcurve.data_path == 'location':
+                    # the offset from the first location keyframe and the passed in world location
+                    offset = world_location[fcurve.array_index] - fcurve.keyframe_points[0].co[1]
+                    for keyframe_point in fcurve.keyframe_points:
+                        # save the original location
+                        original_location.append(keyframe_point.co[1])
+
+                        # apply the offset to all keys and handles
+                        keyframe_point.co[1] = keyframe_point.co[1] + offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + offset
+        return original_location
 
     @staticmethod
     def clean_nla_tracks(rig_object, action):

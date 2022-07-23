@@ -2,8 +2,6 @@
 
 import bpy
 from send2ue.core.extension import ExtensionBase
-from send2ue.core import utilities
-from send2ue.constants import AssetTypes
 
 
 class ObjectOriginExtension(ExtensionBase):
@@ -19,19 +17,38 @@ class ObjectOriginExtension(ExtensionBase):
     world_center: bpy.props.FloatVectorProperty(default=[0.0, 0.0, 0.0])
 
     def draw_export(self, dialog, layout, properties):
+        """
+        Draws an interface for the use_object_origin option under the export tab.
+
+        :param Send2UnrealDialog dialog: The dialog class.
+        :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
         dialog.draw_property(self, layout, 'use_object_origin')
 
     def pre_mesh_export(self, asset_data, properties):
-        # saves original location of asset to asset_data dictionary, set location to 0
+        """
+        Defines the pre mesh export logic that centers object locations.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        # saves original location of asset to asset_data dictionary and sets location to 0
         if self.use_object_origin:
             self.center_object_locations(asset_data['_mesh_object_name'])
 
     def pre_animation_export(self, asset_data, properties):
-        # restores original location of objects and actions
+        """
+        Defines the pre animation export logic that centers actions.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
         if self.use_object_origin:
             action = bpy.data.actions.get(asset_data['_action_name'])
             if action:
                 action_location = self.set_action_location(action, [0.0, 0.0, 0.0])
+                # save action location to dictionary
                 self.update_asset_data({
                     '_original_locations': {
                         '_actions': {action.name: action_location}
@@ -39,17 +56,32 @@ class ObjectOriginExtension(ExtensionBase):
                 })
 
     def post_mesh_export(self, asset_data, properties):
-        # restores original location of asset
+        """
+        Defines the post mesh export logic the restores the object to their original positions.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
         if self.use_object_origin:
             self.restore_object_locations(asset_data)
             self.restore_action_locations(asset_data)
 
     def post_animation_export(self, asset_data, properties):
-        # restores original location of asset
+        """
+        Defines the post animation export logic the restores the actions to their original positions.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
         if self.use_object_origin:
             self.restore_action_locations(asset_data)
 
     def center_object_locations(self, mesh_name):
+        """
+        Centers a object and its active action to world center.
+
+        :param str mesh_name: The name of the object.
+        """
         original_locations = {}
         mesh_object = bpy.data.objects.get(mesh_name)
         if mesh_object:
@@ -62,7 +94,7 @@ class ObjectOriginExtension(ExtensionBase):
                 )
                 # center the actions on this armature too so that keyframes don't move
                 # the armature back when the scene updates
-                original_locations['_actions'] = self.center_action_locations(mesh_object.parent)
+                original_locations['_actions'] = self.center_action_location(mesh_object.parent)
 
             # if a static mesh
             else:
@@ -82,24 +114,40 @@ class ObjectOriginExtension(ExtensionBase):
         # update the asset data so that it can be accessed in the post export methods
         self.update_asset_data({'_original_locations': original_locations})
 
-    def center_action_locations(self, armature_object):
+    def center_action_location(self, armature_object):
+        """
+        Centers a armatures active action to world center.
+
+        :param bpy.types.Object armature_object: The name of the object.
+        """
         action_locations = {}
-        for action in utilities.get_actions(armature_object, all_actions=True):
-            # center the action location keyframes
-            action_locations[action.name] = self.set_action_location(action, self.world_center)
+        if armature_object.animation_data:
+            action = armature_object.animation_data.action
+            if action:
+                # center the action location keyframes
+                action_locations[action.name] = self.set_action_location(action, self.world_center)
         return action_locations
 
     def restore_object_locations(self, asset_data):
+        """
+        Restores the original object locations.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        """
         original_locations = asset_data.get('_original_locations', {})
         object_locations = original_locations.get('_objects', {})
 
         for object_name, object_location in object_locations.items():
-            scene_object = bpy.data.actions.get(object_name)
+            scene_object = bpy.data.objects.get(object_name)
             if scene_object:
-                print(object_location)
                 self.set_object_location(scene_object, object_location)
 
     def restore_action_locations(self, asset_data):
+        """
+        Restores the original action locations.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        """
         original_locations = asset_data.get('_original_locations', {})
         action_locations = original_locations.get('_actions', {})
         for action_name, action_location in action_locations.items():
@@ -110,7 +158,7 @@ class ObjectOriginExtension(ExtensionBase):
     @staticmethod
     def set_action_location(action, world_location):
         """
-        Sets the world location of an animation based of the first frame of the animation
+        Sets the world location of an action based of the first frame of the action
         and returns its original world location.
 
         :param bpy.types.Action action: A object.
@@ -145,5 +193,5 @@ class ObjectOriginExtension(ExtensionBase):
         :rtype: list
         """
         original_location = scene_object.location[:]
-        scene_object.location = world_location[:]
+        scene_object.location = world_location
         return original_location

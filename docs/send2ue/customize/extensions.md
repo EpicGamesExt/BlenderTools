@@ -94,6 +94,16 @@ operation. This is done by registering methods on the extension's property group
 operation gets run, the extension tasks get executed. The methods below can be implemented in an extension class and the Send to Unreal
 extension factory will inject the tasks.
 
+### filter_objects
+Defines a filter for the armature and mesh objects after they have been initially collected.
+- param `list[bpy.types.Object]` `armature_objects` A list of armature objects.
+- param `list[bpy.types.Object]` `mesh_objects` A list of mesh objects.
+- returns A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
+- rtype tuple(list, list)
+```python
+filter_objects(self, armature_objects, mesh_objects)
+```
+
 ### pre_operation
 Defines the pre operation logic that will be run before the send to unreal operation.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.

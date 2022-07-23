@@ -1,13 +1,6 @@
 # Export
 When Send to Unreal writes files, the following properties dictate what and how assets are exported.
 
-### Use object origin
-When active, this option will center each object at world origin before it is exported,
-then it will move each object back to its original position.
-
-### Combine child meshes
-This combines all children mesh of an object into as a single mesh when exported.
-
 ## Animation Settings
 
 ### Automatically scale bones

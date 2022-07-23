@@ -1,9 +1,9 @@
-from utils.base_test_case import BaseSend2ueTestCaseCore, SkipSend2UeTests
+from utils.base_test_case import BaseSend2ueTestCaseCore, BaseSend2ueTestCase, SkipSend2UeTests
 from test_send2ue_cubes import TestSend2UeCubes
 from test_send2ue_mannequins import TestSend2UeMannequins
 
 
-class TestSend2UeExtensionCombineMeshesBase(BaseSend2ueTestCaseCore):
+class TestSend2UeExtensionCombineMeshesBase(BaseSend2ueTestCaseCore, BaseSend2ueTestCase):
     def setup_parents(self, children, parent_name, mesh_type):
         if mesh_type == 'static_mesh':
             self.blender.create_empty(parent_name)

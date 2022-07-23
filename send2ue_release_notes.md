@@ -1,14 +1,19 @@
 ## Minor Changes
-* Static mesh with modifier is not affixed
+* Fixed static mesh with modifier not affixed
   * https://github.com/EpicGames/BlenderTools/issues/467
-* Refactored combine meshes logic into an extension
+* Refactored combine meshes logic into an [extension](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes)
   * https://github.com/EpicGames/BlenderTools/issues/459
-* Refactored object origin logic into an extension
+* Refactored object origin logic into an [extension](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#object-origin)
 * Added `filter_objects` method to extension class interface
-    * This allows extension classes to filter out mesh object or armature object during the collection phase
+    * This allows extension classes to filter out mesh objects or armature objects during the collection phase
+* Fixed bug that was freezing the viewport when displaying validation messages.
 
-* Fixed bug that was freezing the viewport when displaying a validation message.
+## Deprecated
+Combine child meshes does not combine children of mesh objects, rather it only
+combines children of an empty or an armature now. Read [here](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes) for more info.
 
 ## Tests Passing On
 * Blender `3.1`, `3.2`
 * Unreal `5.0.1`
+
+## Minor Changes
