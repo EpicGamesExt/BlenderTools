@@ -9,8 +9,7 @@
 * Fixed bug that was freezing the viewport when displaying validation messages.
 
 ## Deprecated
-Combine child meshes does not combine children of mesh objects, rather it only
-combines children of an empty or an armature now. Read [here](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes) for more info.
+Combine child meshes does not combine children of mesh objects, rather it only combines children of an empty or an armature now. Read [here](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes) for more info.
 
 ## Tests Passing On
 * Blender `3.1`, `3.2`
