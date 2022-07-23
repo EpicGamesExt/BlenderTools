@@ -4,7 +4,7 @@
 * Refactored combine meshes logic into an [extension](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes)
   * https://github.com/EpicGames/BlenderTools/issues/459
 * Refactored object origin logic into an [extension](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#object-origin)
-* Added `filter_objects` method to extension class interface
+* Added `filter_objects` [method](https://epicgames.github.io/BlenderTools/send2ue/customize/extensions.html#filter-objects) to extension class interface
     * This allows extension classes to filter out mesh objects or armature objects during the collection phase
 * Fixed bug that was freezing the viewport when displaying validation messages.
 
