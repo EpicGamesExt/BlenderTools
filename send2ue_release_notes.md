@@ -16,4 +16,6 @@ combines children of an empty or an armature now. Read [here](https://epicgames.
 * Blender `3.1`, `3.2`
 * Unreal `5.0.1`
 
-## Minor Changes
+## Special Thanks
+* @Seekon
+* @iigindesign
