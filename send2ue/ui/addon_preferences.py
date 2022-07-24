@@ -35,13 +35,11 @@ def register():
     """
     Registers the addon preferences when the addon is enabled.
     """
-    if not hasattr(bpy.types, SendToUnrealPreferences.bl_idname):
-        bpy.utils.register_class(SendToUnrealPreferences)
+    bpy.utils.register_class(SendToUnrealPreferences)
 
 
 def unregister():
     """
     Unregisters the addon preferences when the addon is disabled.
     """
-    if hasattr(bpy.types, SendToUnrealPreferences.bl_idname):
-        bpy.utils.unregister_class(SendToUnrealPreferences)
+    bpy.utils.unregister_class(SendToUnrealPreferences)

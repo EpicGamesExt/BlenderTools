@@ -43,7 +43,6 @@
       }
     }
   },
-  "combine_child_meshes": false,
   "disk_animation_folder_path": "C:\\",
   "disk_mesh_folder_path": "C:\\",
   "export_all_actions": true,
@@ -261,7 +260,6 @@
   "unreal_skeleton_asset_path": "",
   "use_collections_as_folders": false,
   "use_immediate_parent_collection_name": false,
-  "use_object_origin": false,
   "validate_armature_transforms": true,
   "validate_materials": true,
   "validate_paths": true,

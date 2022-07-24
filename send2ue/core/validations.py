@@ -24,7 +24,6 @@ class ValidationManager:
         """
         Registers all method in this class that start with `validate`.
         """
-
         for attribute in dir(self):
             if attribute.startswith('validate_'):
                 validator = getattr(self, attribute)
@@ -242,7 +241,7 @@ class ValidationManager:
                 result = re.search(rf"({self.properties.lod_regex})", mesh_object.name)
                 if not result:
                     utilities.report_error(
-                        f'Object "{mesh_object.name}" does not follow the correct lod naming convention defined in the'
+                        f'Object "{mesh_object.name}" does not follow the correct lod naming convention defined in the '
                         f'import setting by the lod regex.'
                     )
                     return False

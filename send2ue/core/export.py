@@ -111,13 +111,52 @@ def set_parent_rig_selection(mesh_object, properties):
             # select the parent object
             rig_object.select_set(True)
 
-            # if the combine child meshes option is on, then select all the rigs children that are meshes
-            if properties.combine_child_meshes:
-                utilities.select_all_children(rig_object, AssetTypes.MESH, properties, exclude_postfix_tokens=True)
-
             # call the function again to see if this object has a parent that
             set_parent_rig_selection(rig_object, properties)
     return rig_object
+
+
+def set_selected_objects_to_center(properties):
+    """
+    This function gets the original world position and centers the objects at world zero for export.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return dict: A dictionary of tuple that are the original position values of the selected objects.
+    """
+    original_positions = {}
+
+    if properties.use_object_origin:
+
+        for selected_object in bpy.context.selected_objects:
+            # get the original locations
+            original_x = selected_object.location.x
+            original_y = selected_object.location.y
+            original_z = selected_object.location.z
+
+            # set the location to zero
+            selected_object.location.x = 0.0
+            selected_object.location.y = 0.0
+            selected_object.location.z = 0.0
+
+            original_positions[selected_object.name] = original_x, original_y, original_z
+
+    # return the original positions
+    return original_positions
+
+
+def set_object_positions(original_positions):
+    """
+    This function sets the given object's location in world space.
+
+    :param object original_positions: A dictionary of tuple that are the original position values of the
+    selected objects.
+    """
+    for object_name, positions in original_positions.items():
+        scene_object = bpy.data.objects.get(object_name)
+        if scene_object:
+            scene_object.location.x = positions[0]
+            scene_object.location.y = positions[1]
+            scene_object.location.z = positions[2]
 
 
 def set_armatures_as_parents(properties):
@@ -277,7 +316,7 @@ def restore_rig_objects(context, properties):
     the context dictionary.
 
     :param dict context: The original context of the scene scale and its selected objects before changes occurred.
-    :param properties:
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     if properties.automatically_scale_bones and context:
         scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
@@ -371,9 +410,6 @@ def export_file(properties, lod=0):
     # change the scene scale and scale the rig objects and get their original context
     context = scale_rig_objects(properties)
 
-    # combine all child meshes if option is on
-    selected_object_names, duplicate_data = utilities.combine_child_meshes(properties)
-
     # if the folder does not exists create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
     if not os.path.exists(folder_path):
@@ -381,12 +417,6 @@ def export_file(properties, lod=0):
 
     # export the fbx file
     export_fbx_file(file_path, properties)
-
-    # remove duplicate objects
-    utilities.remove_data(duplicate_data)
-
-    # restore selection
-    utilities.set_selected_objects(selected_object_names)
 
     # restores the original rig objects
     restore_rig_objects(context, properties)
@@ -424,14 +454,12 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param bool lod: Whether the exported mesh is a lod.
     :return str: The fbx file path of the exported mesh
     """
-    # run the pre mesh export extensions
-    if lod == 0:
-        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
-
     # deselect everything
     utilities.deselect_all_objects()
 
-    mesh_object_name = mesh_object.name
+    # run the pre mesh export extensions
+    if lod == 0:
+        extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
 
     # select the scene object
     mesh_object.select_set(True)
@@ -440,15 +468,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     set_parent_rig_selection(mesh_object, properties)
 
     # select collision meshes
-    utilities.select_asset_collisions(mesh_object_name, properties)
+    utilities.select_asset_collisions(mesh_object.name, properties)
 
-    # export selection to an fbx file
+    # export selection to a file
     export_file(properties, lod)
-
-    # deselect the exported object
-    mesh_object = bpy.data.objects.get(mesh_object_name)
-    if mesh_object:
-        mesh_object.select_set(False)
 
     # run the post mesh export extensions
     if lod == 0:
@@ -610,8 +633,8 @@ def create_asset_data(properties):
     mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
     rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
 
-    # if the combine meshes option is on, get only meshes with unique armature parents
-    mesh_objects = utilities.get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties)
+    # filter the rigs and meshes based on the extension filter methods
+    rig_objects, mesh_objects = extension.run_extension_filters(rig_objects, mesh_objects)
 
     # get the asset data for all the mesh objects
     mesh_data = create_mesh_data(mesh_objects, rig_objects, properties)

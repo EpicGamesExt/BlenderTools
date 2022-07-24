@@ -12,6 +12,32 @@ from ..constants import ToolInfo, Extensions, ExtensionTasks
 from . import utilities
 
 
+def run_extension_filters(armature_objects, mesh_objects):
+    """
+    Runs all the filter methods on the registered extensions. The result with be the intersection of
+    all filter methods.
+
+    :param list[bpy.types.Object] armature_objects: The name space of the task to run.
+    :param list[bpy.types.Object] mesh_objects: The name space of the task to run.
+    :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
+    :rtype: tuple(list, list)
+    """
+    for attribute in dir(bpy.context.scene.send2ue.extensions):
+        filter_objects = getattr(
+            getattr(bpy.context.scene.send2ue.extensions, attribute, object),
+            ExtensionTasks.FILTER_OBJECTS.value,
+            None
+        )
+        if filter_objects:
+            filtered_armature_objects, filtered_mesh_objects = filter_objects(armature_objects, mesh_objects)
+
+            # get the intersection of the previous list values and the new filtered
+            armature_objects = set(armature_objects).intersection(filtered_armature_objects)
+            mesh_objects = set(mesh_objects).intersection(filtered_mesh_objects)
+
+    return list(armature_objects), list(mesh_objects)
+
+
 def run_extension_tasks(name_space):
     """
     Runs the task in the given name space.
@@ -40,12 +66,13 @@ class ExtensionBase:
     # Set this to a list of operator classes that will be registered and added to the utilities submenu.
     utility_operators = []
 
+    @property
     @abstractmethod
     def name(self):
         """
         The name of the extension that all properties and operators will be namespaced under.
         """
-        pass
+        raise NotImplementedError('A name must be defined for the extension class.')
 
     def draw_validations(self, dialog, layout, properties):
         """
@@ -90,7 +117,8 @@ class ExtensionBase:
         Defines the pre validation logic that will be an injected operation.
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
-        :return bool: Whether or not the validation has passed.
+        :returns: Whether or not the validation has passed.
+        :rtype: bool
         """
         pass
 
@@ -99,7 +127,8 @@ class ExtensionBase:
         Defines the post validation logic that will be an injected operation.
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
-        :return bool: Whether or not the validation has passed.
+        :returns: Whether or not the validation has passed.
+        :rtype: bool
         """
         pass
 
@@ -164,6 +193,17 @@ class ExtensionBase:
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         pass
+
+    def filter_objects(self, armature_objects, mesh_objects):
+        """
+        Defines a filter for the armature and mesh objects after they have been initially collected.
+
+        :param list[object] armature_objects: A list of armature objects.
+        :param list[object] mesh_objects: A list of mesh objects.
+        :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
+        :rtype: tuple(list, list)
+        """
+        return armature_objects, mesh_objects
 
     def update_asset_data(self, asset_data):
         """
@@ -309,7 +349,7 @@ class ExtensionFactory:
 
             # get the extension methods and its parent class methods
             for attribute, value in extension_class.__dict__.items():
-                if type(value).__name__ == 'function':
+                if type(value).__name__ in ['function', 'staticmethod']:
                     data[Extensions.NAME][extension_class.name][attribute] = value
 
             # add the update asset method to the class

@@ -37,6 +37,11 @@ class BlenderRemoteCalls:
         return list(data_blocks.keys())
 
     @staticmethod
+    def set_all_action_locations(world_location):
+        for action in bpy.data.actions:
+            Blender.set_action_location(action, world_location)
+
+    @staticmethod
     def install_addons(repo_folder, addons):
         """
         Installs the given addons from the release folder.
@@ -184,6 +189,10 @@ class BlenderRemoteCalls:
 
         for bone_name in bone_names:
             bones[bone_name].select = True
+
+    @staticmethod
+    def create_empty(name):
+        Blender.create_empty(name)
 
     @staticmethod
     def create_scene_collections(collection_names):
@@ -552,6 +561,33 @@ class Blender:
                                 nla_track.is_solo = is_solo
 
     @staticmethod
+    def set_action_location(action, world_location):
+        """
+        Sets the world location of an action based of the first frame of the action
+        and returns its original world location.
+
+        :param bpy.types.Action action: A object.
+        :param list world_location: x,y,z coordinates.
+        :returns: The original world location values of the given object.
+        :rtype: list
+        """
+        original_location = []
+        if action:
+            for fcurve in action.fcurves:
+                if fcurve.data_path == 'location':
+                    # the offset from the first location keyframe and the passed in world location
+                    offset = world_location[fcurve.array_index] - fcurve.keyframe_points[0].co[1]
+                    for keyframe_point in fcurve.keyframe_points:
+                        # save the original location
+                        original_location.append(keyframe_point.co[1])
+
+                        # apply the offset to all keys and handles
+                        keyframe_point.co[1] = keyframe_point.co[1] + offset
+                        keyframe_point.handle_left[1] = keyframe_point.handle_left[1] + offset
+                        keyframe_point.handle_right[1] = keyframe_point.handle_right[1] + offset
+        return original_location
+
+    @staticmethod
     def clean_nla_tracks(rig_object, action):
         """
         This function removes any nla tracks that have a action that matches the provided action. Also it removes
@@ -643,3 +679,12 @@ class Blender:
                 properties = getattr(properties, sub_property_name)
         except AttributeError:
             return False
+
+    @staticmethod
+    def create_empty(name):
+        empty_object = bpy.data.objects.get(name)
+        if not empty_object:
+            empty_object = bpy.data.objects.new(name, object_data=None)
+
+        if empty_object not in bpy.context.scene.collection.objects.values():
+            bpy.context.scene.collection.objects.link(empty_object)

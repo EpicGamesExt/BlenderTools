@@ -19,10 +19,6 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
     def test_collisions(self):
         pass
 
-    @unittest.skip
-    def test_use_object_origin_option(self):
-        pass
-
     def test_default_send_to_unreal(self):
         """
         Sends a mannequin mesh with default settings.
@@ -91,17 +87,6 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
         self.run_texture_tests({
             'SK_Mannequin_Female': ['unreal-engine-logo'],
         })
-
-    def test_combine_child_meshes_option(self):
-        """
-        Tests the combine child mesh option.
-        """
-        self.blender.separate_mesh_by_selection('SK_Mannequin_Female', 'Head')
-        self.move_to_collection(['female_root', 'SK_Mannequin_Female', 'Head'], 'Export')
-        self.run_combine_child_meshes_option_tests(
-            {'SK_Mannequin_Female': ['Head']},
-            setup_parents=False
-        )
 
     def test_use_immediate_parent_collection_name_option(self):
         """

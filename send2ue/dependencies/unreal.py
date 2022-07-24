@@ -134,6 +134,10 @@ def run_unreal_python_commands(remote_exec, commands, failed_connection_attempts
                 remote_exec.stop()
                 raise ConnectionError("Could not find an open Unreal Editor instance!")
 
+    # catch all errors
+    except:
+        raise ConnectionError("Could not find an open Unreal Editor instance!")
+
     # shutdown the connection
     finally:
         remote_exec.stop()
@@ -570,7 +574,7 @@ class UnrealRemoteCalls:
         :param str asset_path: The path to the unreal asset.
         :return bool: Whether or not the asset exists.
         """
-        return unreal.EditorAssetLibrary.does_asset_exist(asset_path)
+        return bool(unreal.load_asset(asset_path))
 
     @staticmethod
     def directory_exists(asset_path):

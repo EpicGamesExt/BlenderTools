@@ -25,7 +25,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
             'default': {
                 'ue2rigify': {
                     'tasks': [
-                        'extensions.ue2rigify.pre_validations'
+                        'pre_validations'
                     ]
                 }
             }
@@ -78,3 +78,18 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
             self.blender.has_data_block('collections', collection_name),
             f'The collection "{collection_name}" exists when it should not.'
         )
+
+    def test_import_asset_operator(self):
+        """
+        Tests that the asset import operator is working correctly.
+        """
+        self.run_import_asset_operator_tests({
+            'ThirdPersonRun.FBX': [
+                'root',
+                'SK_Mannequin_LOD0',
+                'SK_Mannequin_LOD1',
+                'SK_Mannequin_LOD2',
+                'SK_Mannequin_LOD3',
+                'SK_Mannequin_LodGroup'
+            ]
+        })

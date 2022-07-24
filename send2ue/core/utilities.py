@@ -23,13 +23,16 @@ def track_progress(message='', attribute=''):
     :param str message: A the progress message.
     :param str attribute: The asset attribute to use in as the message.
     """
+
     def decorator(function):
         def wrapper(*args, **kwargs):
             asset_id = args[0]
             bpy.app.driver_namespace[ToolInfo.EXECUTION_QUEUE.value].put(
                 (function, args, kwargs, message, asset_id, attribute)
             )
+
         return wrapper
+
     return decorator
 
 
@@ -183,7 +186,7 @@ def get_custom_property_fcurve_data(action_name):
         for fcurve in action.fcurves:
             if fcurve.data_path.startswith('["') and fcurve.data_path.endswith('"]'):
                 name = fcurve.data_path.strip('["').strip('"]')
-                data[name] = [[(point.co[0]-1)/frame_rate, point.co[1]] for point in fcurve.keyframe_points]
+                data[name] = [[(point.co[0] - 1) / frame_rate, point.co[1]] for point in fcurve.keyframe_points]
     return data
 
 
@@ -329,15 +332,8 @@ def get_from_collection(object_type, properties):
     if export_collection:
         # get all the objects in the collection
         for collection_object in export_collection.all_objects:
-            # dont select an object if it has a parent and combine child meshes option is on
-            if properties.combine_child_meshes:
-                if collection_object.parent:
-                    if collection_object.parent.type == AssetTypes.MESH:
-                        continue
-
             # if the object is the correct type
             if collection_object.type == object_type:
-
                 # if the object is visible
                 if collection_object.visible_get():
                     # ensure the object doesn't end with one of the post fix tokens
@@ -493,32 +489,6 @@ def get_armature_modifier_rig_object(mesh_object):
     return None
 
 
-def get_unique_parent_mesh_objects(rig_objects, mesh_objects, properties):
-    """
-    This function get only meshes that have a unique same armature parent.
-
-    :param list rig_objects: A list of rig objects.
-    :param list mesh_objects: A list of mesh objects.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return list: A list of mesh objects.
-    """
-    unique_parent_mesh_objects = []
-
-    if properties.combine_child_meshes:
-        for rig_object in rig_objects:
-            parent_count = 0
-            for mesh_object in mesh_objects:
-                if mesh_object.parent == rig_object or rig_object == get_armature_modifier_rig_object(mesh_object):
-                    if parent_count < 1:
-                        unique_parent_mesh_objects.append(mesh_object)
-                    parent_count += 1
-
-    if not unique_parent_mesh_objects:
-        unique_parent_mesh_objects = mesh_objects
-
-    return unique_parent_mesh_objects
-
-
 def set_to_title(text):
     """
     Converts text to titles.
@@ -560,19 +530,6 @@ def set_action_mute_values(rig_object, action_names):
                             nla_track.mute = False
                         else:
                             nla_track.mute = True
-
-
-def set_selected_objects(scene_object_names):
-    """
-    Sets selection only on the given objects.
-
-    :param list scene_object_names: A list of object names.
-    """
-    deselect_all_objects()
-    for scene_object_name in scene_object_names:
-        scene_object = bpy.data.objects.get(scene_object_name)
-        if scene_object:
-            scene_object.select_set(True)
 
 
 def set_pose(rig_object, pose_values):
@@ -709,7 +666,7 @@ def is_unreal_connected():
         set_unreal_rpc_timeout()
         return True
     except ConnectionError:
-        report_error('Could not find an open Unreal Editor instance!')
+        report_error('Could not find an open Unreal Editor instance!', raise_exception=False)
         return False
 
 
@@ -764,23 +721,6 @@ def create_collections():
         if collection_name not in bpy.data.collections:
             new_collection = bpy.data.collections.new(collection_name)
             bpy.context.scene.collection.children.link(new_collection)
-
-
-def remove_data(data):
-    """
-    Removes the provided data.
-
-    :param dict data: A dictionary of data names.
-    """
-    for scene_object_name in data.get('objects', []):
-        scene_object = bpy.data.objects.get(scene_object_name)
-        if scene_object:
-            bpy.data.objects.remove(scene_object)
-
-    for armature_name in data.get('armatures', []):
-        armature = bpy.data.armatures.get(armature_name)
-        if armature:
-            bpy.data.armatures.remove(armature)
 
 
 def remove_extra_data(data_blocks, original_data_blocks):
@@ -891,46 +831,6 @@ def select_asset_collisions(asset_name, properties):
                 mesh_object.select_set(True)
 
 
-def join_collisions(collisions):
-    """
-    Joins the given collisions into a single mesh.
-
-    :param object collisions: Mesh objects.
-    :return str: The name of the joined mesh.
-    """
-    joined_collision = None
-    selected_objects = bpy.context.selected_objects.copy()
-    active_object = bpy.context.active_object
-
-    deselect_all_objects()
-
-    # select just the collisions
-    for collision in collisions:
-        collision.select_set(True)
-
-    # duplicate the collisions
-    bpy.ops.object.duplicate()
-
-    # set the duplicates as active objects
-    for duplicate_object in bpy.context.selected_objects.copy():
-        bpy.context.view_layer.objects.active = duplicate_object
-        duplicate_object.select_set(True)
-
-    # join all the selected collisions
-    if len(bpy.context.selected_objects) > 1:
-        bpy.ops.object.join()
-        joined_collision = bpy.context.selected_objects[0]
-
-    # restore the selected objects
-    for selected_object in selected_objects:
-        selected_object.select_set(True)
-
-    # restore the active object
-    bpy.context.view_layer.objects.active = active_object
-
-    return joined_collision
-
-
 def clear_pose(rig_object):
     """
     This function sets the transforms of the pose bones on the provided rig object to the resting position.
@@ -993,9 +893,9 @@ def convert_blender_to_unreal_location(location):
 
     :return list[float]: The unreal location.
     """
-    x = location[0]*100
-    y = location[1]*100
-    z = location[2]*100
+    x = location[0] * 100
+    y = location[1] * 100
+    z = location[2] * 100
     return [x, -y, z]
 
 
@@ -1005,9 +905,9 @@ def convert_unreal_to_blender_location(location):
 
     :return list[float]: The blender location.
     """
-    x = location[0]/100
-    y = location[1]/100
-    z = location[2]/100
+    x = location[0] / 100
+    y = location[1] / 100
+    z = location[2] / 100
     return [x, -y, z]
 
 
@@ -1064,19 +964,20 @@ def draw_error_message(self, context):
         self.layout.label(text=bpy.context.window_manager.send2ue.error_message_details)
 
 
-def report_error(message, details=''):
+def report_error(message, details='', raise_exception=True):
     """
     This function reports a given error message to the screen.
 
     :param str message: The error message to display to the user.
     :param str details: The error message details to display to the user.
+    :param bool raise_exception: Whether or not to raise an exception or report the error in the popup.
     """
-    if not os.environ.get('SEND2UE_DEV'):
+    if os.environ.get('SEND2UE_DEV', raise_exception):
+        raise RuntimeError(message + details)
+    else:
         bpy.context.window_manager.send2ue.error_message = message
         bpy.context.window_manager.send2ue.error_message_details = details
-        bpy.context.window_manager.popup_menu(draw_error_message, title="Error", icon='ERROR')
-    else:
-        raise RuntimeError(message + details)
+        bpy.context.window_manager.popup_menu(draw_error_message, title='Error', icon='ERROR')
 
 
 def report_path_error_message(layout, send2ue_property, report_text):
@@ -1116,64 +1017,6 @@ def select_all_children(scene_object, object_type, properties, exclude_postfix_t
             child_object.select_set(True)
             if child_object.children:
                 select_all_children(child_object, object_type, properties, exclude_postfix_tokens)
-
-
-def combine_child_meshes(properties):
-    """
-    This function combines all an objects child meshes and all of its children.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    selected_object_names = [selected_object.name for selected_object in bpy.context.selected_objects]
-    duplicate_data = {}
-
-    if properties.combine_child_meshes:
-        selected_objects = bpy.context.selected_objects.copy()
-
-        if bpy.context.mode != 'OBJECT':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        # select all children
-        for selected_object in selected_objects:
-            select_all_children(selected_object, 'MESH', properties, exclude_postfix_tokens=True)
-
-        # duplicate the selection
-        bpy.ops.object.duplicate()
-
-        duplicate_data['objects'] = [selected_object.name for selected_object in bpy.context.selected_objects]
-        duplicate_data['armatures'] = []
-        for selected_object in bpy.context.selected_objects:
-            if selected_object.type == 'ARMATURE':
-                duplicate_data['armatures'].append(selected_object.data.name)
-
-        duplicate_objects = bpy.context.selected_objects.copy()
-
-        # apply all modifiers on the duplicates
-        for duplicate_object in duplicate_objects:
-            apply_all_mesh_modifiers(duplicate_object)
-
-        deselect_all_objects()
-
-        # select all the duplicate objects that are meshes
-        mesh_count = 0
-        mesh_objects = bpy.data.collections[ToolInfo.EXPORT_COLLECTION.value].all_objects.values()
-        for duplicate_object in duplicate_objects:
-            if duplicate_object.type == 'MESH' and duplicate_object in mesh_objects:
-                bpy.context.view_layer.objects.active = duplicate_object
-                duplicate_object.select_set(True)
-                mesh_count += 1
-
-        # join all the selected mesh objects
-        if mesh_count > 1:
-            bpy.ops.object.join()
-
-        # now select all the duplicate objects by their name
-        for duplicate_object_name in duplicate_data['objects']:
-            duplicate_object = bpy.data.objects.get(duplicate_object_name)
-            if duplicate_object:
-                duplicate_object.select_set(True)
-
-    return selected_object_names, duplicate_data
 
 
 def apply_all_mesh_modifiers(scene_object):

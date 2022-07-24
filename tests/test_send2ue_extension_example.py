@@ -1,10 +1,10 @@
 import unittest
 import os
-from utils.base_test_case import BaseSend2ueTestCaseCore
+from utils.base_test_case import BaseSend2ueTestCaseCore, SkipSend2UeTests
 from test_send2ue_cubes import TestSend2UeCubes
 
 
-class TestSend2UeExtensionExampleCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore):
+class TestSend2UeExtensionExampleCubes(SkipSend2UeTests, TestSend2UeCubes, BaseSend2ueTestCaseCore):
     """
     Runs several test cases with the affix extension on the cube meshes.
     """
@@ -12,46 +12,6 @@ class TestSend2UeExtensionExampleCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
         super().setUp()
         self.set_extension_repo(os.path.join(self.test_folder, 'test_files', 'send2ue_extensions'))
         self.blender.set_addon_property('scene', 'send2ue', 'extensions.example.use_example_extension', True)
-
-    @unittest.skip
-    def test_bulk_send_to_unreal(self):
-        pass
-
-    @unittest.skip
-    def test_lods(self):
-        pass
-
-    @unittest.skip
-    def test_sockets(self):
-        pass
-
-    @unittest.skip
-    def test_collisions(self):
-        pass
-
-    @unittest.skip
-    def test_use_object_origin_option(self):
-        pass
-
-    @unittest.skip
-    def test_combine_child_meshes_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_immediate_parent_collection_name_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_collections_as_folders_option(self):
-        pass
-
-    @unittest.skip
-    def test_materials(self):
-        pass
-
-    @unittest.skip
-    def test_textures(self):
-        pass
 
     def test_extension(self):
         """
@@ -62,20 +22,16 @@ class TestSend2UeExtensionExampleCubes(TestSend2UeCubes, BaseSend2ueTestCaseCore
                 'example': {
                     'properties': {'hello_property': 'Hello world'},
                     'tasks': [
-                        'extensions.example.post_operation',
-                        'extensions.example.pre_operation',
-                        'extensions.example.pre_validations'
+                        'post_operation',
+                        'pre_operation',
+                        'pre_validations'
                     ],
                     'draws': [
-                        'extensions.example.draw_validations'
+                        'draw_validations'
                     ]
                 },
             }
         })
-
-    @unittest.skip
-    def test_import_asset_operator(self):
-        pass
 
     def test_default_send_to_unreal(self):
         """

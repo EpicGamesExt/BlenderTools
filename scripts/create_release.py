@@ -27,10 +27,9 @@ class ReleaseAddon:
 
         :return str: The commit message.
         """
-        for commit in self.repo.get_commits():
-            for file in commit.files:
-                if file.filename == f'{self.addon_name}/addon/__init__.py':
-                    return commit.commit.message
+        release_notes_file_path = os.path.join(os.path.dirname(__file__), os.pardir, f'{self.addon_name}_release_notes.md')
+        with open(release_notes_file_path, 'r') as release_notes_file:
+            return release_notes_file.read()
 
     def get_previous_releases(self):
         """

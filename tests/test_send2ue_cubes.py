@@ -135,21 +135,6 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
             'Cube2_lod0_mesh': ['unreal-engine-logo'],
         })
 
-    def test_use_object_origin_option(self):
-        """
-        Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
-        https://github.com/EpicGames/BlenderTools/issues/223
-        """
-        self.run_use_object_origin_option_tests([('Cube1_LOD0', 'Cube1_LOD0')])
-
-    def test_combine_child_meshes_option(self):
-        """
-        Tests the combine child mesh option.
-        """
-        self.run_combine_child_meshes_option_tests({
-            'Cube1_LOD0': ['Cube1_LOD1', 'Cube1_LOD2']
-        })
-
     def test_use_immediate_parent_collection_name_option(self):
         """
         Tests the use immediate parent collection name option.
@@ -164,19 +149,4 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         """
         self.run_use_collections_as_folders_option_tests({
             'Cube1_LOD0': ['Export', 'SomeFolder', 'Another']
-        })
-
-    def test_import_asset_operator(self):
-        """
-        Tests that the asset import operator is working correctly.
-        """
-        self.run_import_asset_operator_tests({
-            'ThirdPersonRun.FBX': [
-                'root',
-                'SK_Mannequin_LOD0',
-                'SK_Mannequin_LOD1',
-                'SK_Mannequin_LOD2',
-                'SK_Mannequin_LOD3',
-                'SK_Mannequin_LodGroup'
-            ]
         })
