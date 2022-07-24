@@ -13,7 +13,7 @@ Combine child meshes does not combine children of mesh objects, rather it only c
 
 ## Tests Passing On
 * Blender `3.1`, `3.2`
-* Unreal `5.0.1`
+* Unreal `5.0.1`, `5.0.3`
 
 ## Special Thanks
 * @Seekon
