@@ -64,7 +64,7 @@ In this example the name of the combine static mesh in unreal would be `Combined
 #### Skeletal Meshes
 All child meshes under an armature will be combined into one skeletal mesh using the name of the first child mesh.
 ::: tip Note
- This might not give you enough control over the skeletal mesh name, so using the collection as parent option can be useful.
+ This might not give you enough control over the skeletal mesh name, so using the immediate parent collection name option can be useful.
 :::
 ![2](./images/extensions/combine-meshes/2.png)
 
