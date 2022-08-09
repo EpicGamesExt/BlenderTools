@@ -76,6 +76,13 @@ module.exports = {
                     ]
                 },
                 {
+                    title: 'Extras',
+                    collapsable: false,
+                    children: [
+                        'extras/community-templates'
+                    ]
+                },
+                {
                     title: 'Trouble Shooting',
                     collapsable: false,
                     children: [
