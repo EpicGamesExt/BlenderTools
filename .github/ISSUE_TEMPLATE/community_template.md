@@ -9,7 +9,7 @@ assignees: ''
 
 ### Checklist:
   1. Is the template in a public GitHub repo?
-  1. Does the template have a link to publicly README describing the template and what rig it is designed for?
+  1. Does the template have a link to public README describing the template and what rig it is designed for?
 
 Give a brief description of your template and why you think it would be valuable for others.
 
