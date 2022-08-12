@@ -1,8 +1,8 @@
 ---
-name: Community Extension
-about: Create a request to have your extension listed on the docs as a community extension.
+name: Send to Unreal Community Extension
+about: Create a request to have your extension listed on the Send to Unreal docs as a community extension.
 title: ''
-labels: community-extension
+labels: send2ue-community-extension
 assignees: ''
 
 ---
