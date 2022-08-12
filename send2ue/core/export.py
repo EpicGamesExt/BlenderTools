@@ -468,7 +468,8 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     set_parent_rig_selection(mesh_object, properties)
 
     # select collision meshes
-    utilities.select_asset_collisions(mesh_object.name, properties)
+    asset_name = utilities.get_asset_name(mesh_object.name, properties)
+    utilities.select_asset_collisions(asset_name, properties)
 
     # export selection to a file
     export_file(properties, lod)
