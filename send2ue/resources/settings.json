@@ -265,10 +265,12 @@
           },
           "import_rotation": {
             "name": "Import Rotation",
-            "description": "Import Rotation In Degrees",
+            "description": "Import Rotation",
             "type": "FLOATVECTOR",
             "unreal_type": "Rotator",
+            "unit": "ROTATION",
             "size": 3,
+            "subtype": "EULER",
             "default": [
               0.0,
               0.0,
@@ -522,10 +524,12 @@
           },
           "import_rotation": {
             "name": "Import Rotation",
-            "description": "Import Rotation In Degrees",
+            "description": "Import Rotation",
             "type": "FLOATVECTOR",
             "unreal_type": "Rotator",
+            "unit": "ROTATION",
             "size": 3,
+            "subtype": "EULER",
             "default": [
               0.0,
               0.0,
@@ -695,10 +699,12 @@
           },
           "import_rotation": {
             "name": "Import Rotation",
-            "description": "Import Rotation In Degrees",
+            "description": "Import Rotation",
             "type": "FLOATVECTOR",
             "unreal_type": "Rotator",
+            "unit": "ROTATION",
             "size": 3,
+            "subtype": "EULER",
             "default": [
               0.0,
               0.0,
@@ -853,10 +859,12 @@
           },
           "import_rotation": {
             "name": "Import Rotation",
-            "description": "Import Rotation In Degrees",
+            "description": "Import Rotation",
             "type": "FLOATVECTOR",
             "unreal_type": "Rotator",
+            "unit": "ROTATION",
             "size": 3,
+            "subtype": "EULER",
             "default": [
               0.0,
               0.0,
