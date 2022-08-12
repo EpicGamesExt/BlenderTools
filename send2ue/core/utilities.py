@@ -369,7 +369,7 @@ def get_unreal_asset_name(asset_name, properties, lod=False):
     :param bool lod: Whether to use the lod post fix of not.
     :return str: The formatted name of the asset to export.
     """
-    asset_name = re.sub(r"\W+", "_", asset_name)
+    asset_name = re.sub(r"[^-+\w]+", "_", asset_name)
 
     if properties.import_lods:
         # remove the lod name from the asset
