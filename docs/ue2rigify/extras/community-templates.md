@@ -5,6 +5,25 @@ what app the skeleton and skin weights were originally created with. As the numb
 we want this page to be filled with links to templates that the community has authored, and can hopefully help others
 with their blender and unreal pipelines.
 
+## Manny
+* **Description**: Manny character from the Unreal Engine 5 third person project example.
+* **Download**: [https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Manny.zip](https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Manny.zip)
+
+## Quinn
+* **Description**: Quinn character from the Unreal Engine 5 third person project example.
+* **Download**: [https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Quinn.zip](https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Quinn.zip)
+
+## Echo
+* **Description**: Echo character from the Valley of the Ancients Unreal Engine demo.
+* **Download**: [https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Echo.zip](https://github.com/gzmuszynski/UE-to-Rigify/blob/main/Echo.zip)
+
+## Metahuman
+* **Description**: Template for character bodies made with Metahuman Creator.
+* **Download**: [https://github.com/gzmuszynski/UE-to-Rigify/blob/main/MetaHuman.zip](https://github.com/gzmuszynski/UE-to-Rigify/blob/main/MetaHuman.zip)
+
+
+
+## How to Contribute?
 ### Guidelines
 
 In order to have your template linked to this page, several requirements must be met.
@@ -24,4 +43,3 @@ the templates you decide to download. When you decide to download any of these t
 you are exposing yourself to security vulnerabilities and potential system failure. Always use caution. Read through
 the code or consult a security professional before proceeding to download code from the internet. Any issues that you have with the template
 must be reported to the template author not to us.
-
