@@ -442,7 +442,7 @@ def get_skeleton_asset_path(rig_object, properties):
                 parent_collection = get_parent_collection(child, export_collection)
                 if parent_collection and parent_collection.name != ToolInfo.EXPORT_COLLECTION.value:
                     import_path = get_full_import_path(child, properties, AssetTypes.MESH)
-                    asset_name = get_unreal_asset_name(parent_collection.name)
+                    asset_name = get_unreal_asset_name(parent_collection.name, properties)
                     return f'{import_path}{asset_name}_Skeleton'
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
