@@ -164,21 +164,6 @@ def get_scene_property_class():
             default=PathModes.SEND_TO_PROJECT.value,
             description="Select which type of paths you want to export to"
         )
-        use_immediate_parent_collection_name: bpy.props.BoolProperty(
-            name="Use immediate parent collection name",
-            default=False,
-            description=(
-                "This makes the immediate parent collection the name of the asset"
-            )
-        )
-        use_collections_as_folders: bpy.props.BoolProperty(
-            name="Use collections as folders",
-            default=False,
-            description=(
-                "This uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your "
-                "unreal project"
-            )
-        )
         unreal_mesh_folder_path: bpy.props.StringProperty(
             name="Mesh Folder (Unreal)",
             default=r"/Game/untitled_category/untitled_asset/",

@@ -1,6 +1,13 @@
 # Supported Extensions
 These extensions ship with the Send to Unreal addon and are supported by this repository.
 
+* [Affixes](/extras/supported-extensions.html#affixes)
+* [UE to Rigify](/extras/supported-extensions.html#ue-to-rigify)
+* [Object Origin](/extras/supported-extensions.html#object-origin)
+* [Combine Meshes](/extras/supported-extensions.html#combine-meshes)
+* [Use Immediate Parent Name](/extras/supported-extensions.html#use-immediate-parent-name)
+* [Use Collections as Folders](/extras/supported-extensions.html#use-collections-as-folders)
+
 ## Affixes
 The Affixes extension provides a convenient way to enforce prefix or postfix naming conventions on
 assets of a particular type.  Currently, supported asset types are:
@@ -63,9 +70,6 @@ In this example the name of the combine static mesh in unreal would be `Combined
 
 #### Skeletal Meshes
 All child meshes under an armature will be combined into one skeletal mesh using the name of the first child mesh.
-::: tip Note
- This might not give you enough control over the skeletal mesh name, so using the immediate parent collection name option can be useful.
-:::
 ![2](./images/extensions/combine-meshes/2.png)
 
 In this example the name of the combine skeletal mesh in unreal would be `SK_Mannequin_Female`
@@ -77,3 +81,26 @@ This combines all child meshes of an empty object or armature object into a sing
 
 ### UI
 The settings can be found under the `Export` tab
+
+## Use Immediate Parent Name
+Gives the user more control over the naming of the assets sent to unreal with the asset taking on the name of its immediate parent that is either a collection or an empty type object.
+
+#### Skeletal Meshes
+A mesh under an armature will take the name of the immediate parent of the said armature.
+
+### Properties
+#### use immediate parent name
+When active, this makes the immediate parent the name of the asset if the immediate parent is a collection or an empty type object. This setting can be used concurrently with import LODs.
+
+### UI
+The settings can be found under the `Paths` tab
+
+## Use Collections as Folders
+Let collections in blender persist through the send2ue operation as folders in unreal.
+
+### Properties
+#### use collections as folders
+When active, this uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your unreal project. This setting can be used concurrently with import LODs.
+
+### UI
+The settings can be found under the `Paths` tab

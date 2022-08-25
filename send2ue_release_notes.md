@@ -1,9 +1,7 @@
 ## Minor Changes
-* Added '-' and '+' as valid characters in asset names when exporting to unreal. '-' and '+' no longer will be replaced by '_' during export.
-  * https://github.com/EpicGames/BlenderTools/issues/426
-  * https://github.com/EpicGames/BlenderTools/issues/471
-* Fixed an import rotation settings (in the settings dialogue) issue where input angle in degrees was changed to radians.
-  * https://github.com/EpicGames/BlenderTools/issues/430
+* Updated use_immediate_parent_collection_name to use_immediate_parent_name for broader usage, where the immediate parent can be both a collection and empty type object
+* Refactored use_immediate_parent_name and use_collections_as_folders into exclusive usage extensions with LODs support
+* Updated extensions and settings>paths documentations
 
 ## Tests Passing On
 * Blender `3.1`, `3.2`
