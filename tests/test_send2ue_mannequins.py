@@ -88,26 +88,6 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
             'SK_Mannequin_Female': ['unreal-engine-logo'],
         })
 
-    def test_use_immediate_parent_collection_name_option(self):
-        """
-        Tests the use immediate parent collection name option.
-        https://github.com/EpicGames/BlenderTools/issues/202
-        """
-        self.move_to_collection(['female_root', 'SK_Mannequin_Female'], 'Export')
-        self.run_use_immediate_parent_collection_name_option_tests({
-            'SK_Mannequin_Female': ['Export', 'ParentCollectionName']
-        })
-
-    def test_use_collections_as_folders_option(self):
-        """
-        Tests using collections as folders option.
-        https://github.com/EpicGames/BlenderTools/issues/183
-        """
-        self.move_to_collection(['female_root', 'SK_Mannequin_Female'], 'Export')
-        self.run_use_collections_as_folders_option_tests({
-            'SK_Mannequin_Female': ['Export', 'SomeFolder', 'Another']
-        })
-
     def test_auto_stash_active_action_option(self):
         """
         Tests not using auto stash active action option.

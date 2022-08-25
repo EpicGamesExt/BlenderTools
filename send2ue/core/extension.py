@@ -104,6 +104,16 @@ class ExtensionBase:
         """
         pass
 
+    def draw_paths(self, dialog, layout, properties):
+        """
+        Can be overridden to draw an interface for the extension under the paths tab.
+
+        :param Send2UnrealDialog dialog: The dialog class.
+        :param bpy.types.UILayout layout: The extension layout area.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        pass
+
     def pre_operation(self, properties):
         """
         Defines the pre operation logic that will be run before the send to unreal operation.

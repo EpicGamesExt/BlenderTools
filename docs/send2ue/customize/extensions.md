@@ -310,6 +310,15 @@ Can be overridden to draw an interface for the extension under the import tab.
 draw_import(self, dialog, layout, properties)
 ```
 
+### draw_paths
+Can be overridden to draw an interface for the extension under the paths tab.
+- param `Send2UnrealDialog` `dialog` The dialog class.
+- param `bpy.types.UILayout` `layout` The extension layout area.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
+```python
+draw_paths(self, dialog, layout, properties)
+```
+
 ## RPC Library
 There is a submodule within `send2ue` that can be used to make your own rpc calls. Here is
 a basic example of how you can force an asset to be renamed in the `post_import` method of an extension.

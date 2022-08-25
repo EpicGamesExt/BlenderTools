@@ -72,7 +72,7 @@ class CombineMeshesExtension(ExtensionBase):
                 )
                 # rename the asset to match the empty if this is a static mesh export
                 if mesh_object.parent.type == 'EMPTY':
-                    path, ext = asset_data['file_path'].rsplit('.', 1)
+                    path, ext = os.path.splitext(asset_data['file_path'])
                     asset_folder = asset_data['asset_folder']
 
                     self.update_asset_data({

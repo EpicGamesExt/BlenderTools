@@ -36,12 +36,6 @@ can be used if the blender file is saved.  The paths are relative to the current
 :::
 
 ## Path Properties
-### Use collections as folders:
-This uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your unreal project
-
-### Use immediate parent collection name:
-This makes the immediate parent collection the name of the asset
-
 ### Mesh Folder (Unreal):
 This is the mesh import path. All your static and skeletal meshes will be imported to this location in your open
 unreal project.

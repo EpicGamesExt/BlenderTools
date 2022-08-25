@@ -9,7 +9,7 @@ import shutil
 import importlib
 import tempfile
 import base64
-from . import settings
+from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
 from ..constants import AssetTypes, ToolInfo, PreFixToken, PathModes
@@ -97,25 +97,6 @@ def get_lod_index(asset_name, properties):
     return 0
 
 
-def get_collections_as_path(scene_object, properties):
-    """
-    Walks the collection hierarchy till it finds the given scene object.
-
-    :param object scene_object: A object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return str: The sub path to the given scene object.
-    """
-    parent_names = []
-    if properties.use_collections_as_folders and len(scene_object.users_collection) > 0:
-        parent_collection = scene_object.users_collection[0]
-        parent_names.append(parent_collection.name)
-        set_parent_collection_names(parent_collection, parent_names)
-        parent_names.reverse()
-        return '/'.join(parent_names).replace(f'{ToolInfo.EXPORT_COLLECTION.value}/', '')
-
-    return ''
-
-
 def get_temp_folder():
     """
     Gets the full path to the temp folder on disk.
@@ -128,6 +109,36 @@ def get_temp_folder():
         'send2ue',
         'data'
     )
+
+
+def get_export_folder_path(properties, asset_type):
+    """
+    Gets the path to the export folder according to path mode set in properties
+
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
+    :param str asset_type: The type of data being exported.
+    :return str: The path to the export folder.
+    """
+    export_folder = None
+    # if saving in a temp location
+    if properties.path_mode in [
+        PathModes.SEND_TO_PROJECT.value,
+        PathModes.SEND_TO_DISK_THEN_PROJECT.value
+    ]:
+        export_folder = os.path.join(get_temp_folder(), asset_type.lower())
+
+    # if saving to a specified location
+    if properties.path_mode in [
+        PathModes.SEND_TO_DISK.value,
+        PathModes.SEND_TO_DISK_THEN_PROJECT.value
+    ]:
+        if asset_type == AssetTypes.MESH:
+            export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
+
+        if asset_type == AssetTypes.ANIMATION:
+            export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
+
+    return export_folder
 
 
 def get_import_path(scene_object, properties, asset_type):
@@ -144,32 +155,7 @@ def get_import_path(scene_object, properties, asset_type):
 
     else:
         game_path = properties.unreal_mesh_folder_path
-
-    sub_path = get_collections_as_path(scene_object, properties)
-    if sub_path:
-        game_path = f'{game_path}{sub_path}/'
-
     return game_path
-
-
-def get_full_import_path(scene_object, properties, asset_type):
-    """
-    Gets the unreal import path when using the immediate collection name as the asset name.
-
-    :param object scene_object: A object.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param str asset_type: The type of asset.
-    :return str: The full import path for the given asset.
-    """
-    export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
-    parent_collection = get_parent_collection(scene_object, export_collection)
-    import_path = get_import_path(scene_object, properties, asset_type)
-
-    if properties.use_immediate_parent_collection_name and parent_collection:
-        if import_path:
-            import_path = import_path.replace(f'{parent_collection.name}/', '')
-
-    return import_path
 
 
 def get_custom_property_fcurve_data(action_name):
@@ -359,7 +345,7 @@ def get_meshes_using_armature_modifier(rig_object, properties):
     return child_meshes
 
 
-def get_unreal_asset_name(asset_name, properties, lod=False):
+def get_asset_name(asset_name, properties, lod=False):
     """
     Takes a given asset name and removes the postfix _LOD and other non-alpha numeric characters
     that unreal won't except.
@@ -378,26 +364,6 @@ def get_unreal_asset_name(asset_name, properties, lod=False):
             asset_name = asset_name.replace(result.groups()[0], '')
 
     return asset_name
-
-
-def get_asset_name(asset_name, properties, lod=False):
-    """
-    Takes a given asset name and removes the postfix _LOD and other non-alpha numeric characters
-    that unreal won't except.
-
-    :param str asset_name: The original name of the asset to export.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param bool lod: Whether to use the lod post fix of not.
-    :return str: The formatted name of the asset to export.
-    """
-    if properties.use_immediate_parent_collection_name:
-        asset_object = bpy.data.objects.get(asset_name)
-        export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
-        if asset_object and export_collection:
-            parent_collection = get_parent_collection(asset_object, export_collection)
-            if parent_collection and parent_collection.name != ToolInfo.EXPORT_COLLECTION.value:
-                return get_unreal_asset_name(parent_collection.name, properties, lod)
-    return get_unreal_asset_name(asset_name, properties, lod)
 
 
 def get_parent_collection(scene_object, collection):
@@ -433,30 +399,13 @@ def get_skeleton_asset_path(rig_object, properties):
 
     if children:
         # get all meshes from the mesh collection
-        export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
         mesh_collection_objects = get_from_collection(AssetTypes.MESH, properties)
-
-        if properties.use_immediate_parent_collection_name and export_collection:
-            # use the collection that is the parent of a child mesh to build the skeleton game path
-            for child in children:
-                parent_collection = get_parent_collection(child, export_collection)
-                if parent_collection and parent_collection.name != ToolInfo.EXPORT_COLLECTION.value:
-                    import_path = get_full_import_path(child, properties, AssetTypes.MESH)
-                    asset_name = get_unreal_asset_name(parent_collection.name)
-                    return f'{import_path}{asset_name}_Skeleton'
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_full_import_path(child, properties, AssetTypes.MESH)
-                return f'{import_path}{asset_name}_Skeleton'
-
-        # otherwise just use the first child mesh
-        for child in children:
-            if child in [mesh_object for mesh_object in bpy.data.objects if mesh_object.type == AssetTypes.MESH]:
-                asset_name = get_asset_name(child.name, properties)
-                import_path = get_full_import_path(child, properties, AssetTypes.MESH)
+                import_path = get_import_path(child, properties, AssetTypes.MESH)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(
@@ -498,21 +447,6 @@ def set_to_title(text):
     :return str: The new title text.
     """
     return ' '.join([word.capitalize() for word in text.lower().split('_')]).strip('.json')
-
-
-def set_parent_collection_names(collection, parent_names):
-    """
-    This function recursively adds the parent collection names to the given list until.
-
-    :param object collection: A collection.
-    :param list parent_names: A list of parent collection names.
-    :return list: A list of parent collection names.
-    """
-    for parent_collection in bpy.data.collections:
-        if collection.name in parent_collection.children.keys():
-            parent_names.append(parent_collection.name)
-            set_parent_collection_names(parent_collection, parent_names)
-            return None
 
 
 def set_action_mute_values(rig_object, action_names):
