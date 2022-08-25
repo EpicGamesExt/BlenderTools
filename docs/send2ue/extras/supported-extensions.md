@@ -64,6 +64,7 @@ Lets the user combine child meshes.
 
 #### Static Meshes
 All child meshes under an empty will be combined into one static mesh using the name of the empty.
+
 ![1](./images/extensions/combine-meshes/1.png)
 
 In this example the name of the combine static mesh in unreal would be `CombinedCubes`
