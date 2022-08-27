@@ -99,21 +99,20 @@ class UseImmediateParentNameExtension(ExtensionBase):
 
         :param object mesh_object: A mesh object.
         :param object properties: The property group that contains variables that maintain the addon's correct state.
+        :return str: The full asset name when use_immediate_parent_name is active,
         """
         parent_object = mesh_object.parent
-        # use empty-type parent object name as asset name
         if parent_object:
-            # if immediate parent object is of armature type, check the grandparent
-            if parent_object.type == 'ARMATURE':
-                parent_object = parent_object.parent
-            # if grandparent is of empty type, use grandparent's name as asset name
-            if parent_object and parent_object.type == 'EMPTY':
-                asset_name = parent_object.name
-            else:
-                asset_name = self.get_parent_collection_name(mesh_object.name, properties)
-        # use immediate parent name as asset name
-        else:
-            asset_name = self.get_parent_collection_name(mesh_object.name, properties)
+            # if immediate parent object is of the type empty, return its name as asset name
+            if parent_object.type == 'EMPTY':
+                return parent_object.name
+            # if immediate parent object is of armature type and if grandparent exists
+            elif parent_object.type == 'ARMATURE' and parent_object.parent:
+                # if grandparent is of the type empty, return its name as asset name
+                if parent_object.parent.type == 'EMPTY':
+                    return parent_object.parent.name
+        # else get asset name from immediate parent collection, return as asset name
+        asset_name = self.get_parent_collection_name(mesh_object.name, properties)
         return asset_name
 
     def get_full_file_path(self, object_name, properties, asset_type, file_extension='fbx'):
@@ -185,7 +184,6 @@ class UseImmediateParentNameExtension(ExtensionBase):
         path = path.replace(f'{parent_collection_name}/', '')
         return path
 
-    # TODO: doc draw_paths in base class and readme extensions documentation
     def draw_paths(self, dialog, layout, properties):
         """
         Draws an interface for the use_immediate_collection_name option under the paths tab.

@@ -76,7 +76,7 @@ class CombineMeshesExtension(ExtensionBase):
                     asset_folder = asset_data['asset_folder']
 
                     self.update_asset_data({
-                        'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}.{ext}'),
+                        'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}{ext}'),
                         'asset_path': f'{asset_folder}{mesh_object.parent.name}'
                     })
 
