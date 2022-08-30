@@ -71,9 +71,11 @@ In this example the name of the combine static mesh in unreal would be `Combined
 
 #### Skeletal Meshes
 All child meshes under an armature will be combined into one skeletal mesh using the name of the first child mesh.
+
 ::: tip Note
- This might not give you enough control over the skeletal mesh name, so using the immediate parent collection name option can be useful.
+ This might not give you enough control over the skeletal mesh name, so using the immediate parent name option can be useful.
 :::
+
 ![2](./images/extensions/combine-meshes/2.png)
 
 In this example the name of the combine skeletal mesh in unreal would be `SK_Mannequin_Female`
@@ -81,7 +83,7 @@ In this example the name of the combine skeletal mesh in unreal would be `SK_Man
 
 ### Properties
 #### Combine child meshes
-This combines all child meshes of an empty object or armature object into a single mesh when exported.
+This combines all child meshes of an empty object or armature object into a single mesh when exported. Meshes that are directly under the export collection will be exported as they normally would, along with meshes parented under an empty type object or a collection which would be combined accordingly.
 
 ### UI
 The settings can be found under the `Export` tab

@@ -15,7 +15,7 @@ class TestSend2UeExtensionExampleCubes(SkipSend2UeTests, TestSend2UeCubes, BaseS
 
     def test_extension(self):
         """
-        Checks that extensions load and function properly.
+        Checks that the example extension load and function properly.
         """
         self.run_extension_tests({
             'external': {

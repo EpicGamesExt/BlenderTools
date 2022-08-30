@@ -106,4 +106,7 @@ class CombineMeshesExtension(ExtensionBase):
                 ):
                     meshes_with_unique_parents.append(mesh_object)
                     unique_parent_armatures.append(mesh_object.parent)
+            else:
+                meshes_with_unique_parents.append(mesh_object)
+
         return meshes_with_unique_parents

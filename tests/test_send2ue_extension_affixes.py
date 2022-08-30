@@ -121,7 +121,7 @@ class TestSend2UeExtensionAffixesMannequins(SkipSend2UeTests, TestSend2UeMannequ
             'SK_Mannequin_Female': {
                 'rig': 'female_root',
                 # 'animations': ['Anim_third_person_walk_01', 'Anim_third_person_run_01'],
-                'animations': ['Anim_third_person_run_01'],
+                'animations': ['third_person_run_01', 'third_person_walk_01'],
                 'bones': ['pelvis', 'calf_r', 'hand_l'],
                 'frames': [1, 5, 14]
             }})

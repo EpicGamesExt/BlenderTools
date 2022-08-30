@@ -124,3 +124,18 @@ class TestSend2UeExtensionUseImmediateParentNameMannequins(
             objects_and_collections={
                 'SK_Mannequin_Female': ['Export', 'ParentCollectionName']
             })
+
+    def test_animations(self):
+        """
+        Sends the mannequin animations to unreal with various options and ensures they are identical.
+        """
+        # disable the auto remove option so the tests get the right animations
+        self.blender.set_addon_property('scene', 'send2ue', 'auto_remove_original_asset_names', False)
+
+        self.run_animation_tests({
+            'SK_Mannequin_Female': {
+                'rig': 'female_root',
+                'animations': ['third_person_run_01', 'third_person_walk_01'],
+                'bones': ['pelvis', 'calf_r', 'hand_l'],
+                'frames': [1, 5, 14]
+            }})
