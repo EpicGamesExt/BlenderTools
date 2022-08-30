@@ -25,11 +25,6 @@ class UseImmediateParentNameExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.use_immediate_parent_name:
-            if properties.extensions.combine_meshes.combine_child_meshes:
-                utilities.report_error(
-                    f'Cannot use both combine meshes and use immediate parent name extensions!'
-                )
-                return False
             if properties.extensions.use_collections_as_folders.use_collections_as_folders:
                 utilities.report_error(
                     f'Cannot use both use_collections_as_folders'
@@ -68,7 +63,8 @@ class UseImmediateParentNameExtension(ExtensionBase):
                 import_path = self.get_full_import_path(
                     mesh_object,
                     properties,
-                    asset_data.get('_asset_type'))
+                    asset_data.get('_asset_type')
+                )
                 asset_name = self.get_full_asset_name(mesh_object, properties)
 
                 self.update_asset_data({

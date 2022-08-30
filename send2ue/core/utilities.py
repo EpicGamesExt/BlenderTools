@@ -383,12 +383,13 @@ def get_parent_collection(scene_object, collection):
         return collection
 
 
-def get_skeleton_asset_path(rig_object, properties):
+def get_skeleton_asset_path(rig_object, properties, get_path_function = get_import_path):
     """
     Gets the asset path to the skeleton.
 
     :param object rig_object: A object of type armature.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param callable get_path_function: A function that gets the import path.
     :return str: The game path to the unreal skeleton asset.
     """
     # if a skeleton path is provided
@@ -405,7 +406,7 @@ def get_skeleton_asset_path(rig_object, properties):
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_import_path(child, properties, AssetTypes.MESH)
+                import_path = get_path_function(child, properties, AssetTypes.MESH)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(

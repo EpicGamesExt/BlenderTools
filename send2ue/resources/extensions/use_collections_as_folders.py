@@ -17,20 +17,6 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         )
     )
 
-    def pre_validations(self, properties):
-        """
-        Defines the pre validations logic that guarantees exclusive usage of some extensions.
-
-        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
-        """
-        if self.use_collections_as_folders:
-            if properties.extensions.combine_meshes.combine_child_meshes:
-                utilities.report_error(
-                    f'Cannot use both combine meshes and use collections as folders extensions!'
-                )
-                return False
-        return True
-
     def pre_import(self, asset_data, properties):
         """
         Defines the pre import logic that uses blender collections as unreal folders
@@ -39,53 +25,77 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.use_collections_as_folders:
-            if asset_data['_asset_type'] == AssetTypes.ANIMATION:
-                game_path = properties.unreal_animation_folder_path
+            asset_type = asset_data['_asset_type']
+            if asset_type == AssetTypes.ANIMATION:
                 object_name = asset_data['_armature_object_name']
+                scene_object = bpy.data.objects.get(object_name)
+                # update skeletal asset path now that it is under new collections path
+                self.update_asset_data({
+                    'skeleton_asset_path': utilities.get_skeleton_asset_path(
+                        scene_object,
+                        properties,
+                        self.get_full_import_path
+                    )
+                })
             else:
-                game_path = properties.unreal_mesh_folder_path
                 object_name = asset_data['_mesh_object_name']
+                scene_object = bpy.data.objects.get(object_name)
+                asset_name = utilities.get_asset_name(object_name, properties)
+                # get import path when using blender collections as folders
+                import_path = self.get_full_import_path(scene_object, properties, asset_type)
 
-            asset_name = utilities.get_asset_name(object_name, properties)
-            # get collections to be part of import path
-            scene_object = bpy.data.objects.get(object_name)
-            sub_path = self.get_collections_as_path(scene_object)
-            path = f'{game_path}{sub_path}/'
+                self.update_asset_data({
+                    'asset_folder': import_path,
+                    'asset_path': f'{import_path}{asset_name}'
+                })
 
-            self.update_asset_data({
-                'asset_folder': path,
-                'asset_path': f'{path}{asset_name}'
-            })
+    def get_full_import_path(self, scene_object, properties, asset_type):
+        """
+        Gets the unreal import path when use_collections_as_folders extension is active.
 
-    def get_collections_as_path(self, scene_object):
+        :param object scene_object: A object.
+        :param object properties: The property group that contains variables that maintain the addon's correct state.
+        :param str asset_type: The type of asset.
+        :return str: The full import path for the given asset.
+        """
+        game_path = utilities.get_import_path(scene_object, properties, asset_type)
+        sub_path = self.get_collections_as_path(scene_object, properties)
+        import_path = f'{game_path}{sub_path}/'
+        return import_path
+
+    def get_collections_as_path(self, scene_object, properties):
         """
         Walks the collection hierarchy till it finds the given scene object.
 
         :param object scene_object: A object.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         :return str: The sub path to the given scene object.
         """
         parent_names = []
         if self.use_collections_as_folders and len(scene_object.users_collection) > 0:
             parent_collection = scene_object.users_collection[0]
-            parent_names.append(parent_collection.name)
-            self.set_parent_collection_names(parent_collection, parent_names)
+            parent_collection_name = utilities.get_asset_name(parent_collection.name, properties)
+            parent_names.append(parent_collection_name)
+            self.set_parent_collection_names(parent_collection, parent_names, properties)
             parent_names.reverse()
             return '/'.join(parent_names).replace(f'{ToolInfo.EXPORT_COLLECTION.value}/', '')
 
         return ''
 
-    def set_parent_collection_names(self, collection, parent_names):
+    def set_parent_collection_names(self, collection, parent_names, properties):
         """
         This function recursively adds the parent collection names to the given list until.
 
         :param object collection: A collection.
         :param list parent_names: A list of parent collection names.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         :return list: A list of parent collection names.
         """
         for parent_collection in bpy.data.collections:
             if collection.name in parent_collection.children.keys():
-                parent_names.append(parent_collection.name)
-                self.set_parent_collection_names(parent_collection, parent_names)
+                parent_collection_name = utilities.get_asset_name(parent_collection.name, properties)
+                parent_names.append(parent_collection_name)
+                self.set_parent_collection_names(parent_collection, parent_names, properties)
                 return None
 
     def draw_paths(self, dialog, layout, properties):
@@ -97,4 +107,3 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         dialog.draw_property(self, layout, 'use_collections_as_folders')
-

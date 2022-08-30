@@ -71,7 +71,6 @@ class TestSend2UeExtensionCollectionsAsFoldersCubes(
                         'use_collections_as_folders': False,
                     },
                     'tasks': [
-                        'pre_validations',
                         'pre_import'
                     ],
                     'draws': [
