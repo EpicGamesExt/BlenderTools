@@ -1,5 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
+import os
 import bpy
 from pprint import pprint
 from send2ue.core.extension import ExtensionBase
@@ -64,10 +65,10 @@ class ExampleExtension(ExtensionBase):
         """
         if self.use_example_extension:
             # the asset data using the current asset id
-            path, ext = asset_data['file_path'].split('.')
+            path, ext = os.path.splitext(asset_data['file_path'])
             asset_path = asset_data['asset_path']
 
-            asset_data['file_path'] = f'{path}_added_this.{ext}'
+            asset_data['file_path'] = f'{path}_added_this{ext}'
             asset_data['asset_path'] = f'{asset_path}_added_this'
             pprint(asset_data)
             self.update_asset_data(asset_data)
