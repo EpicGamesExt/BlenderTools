@@ -101,8 +101,8 @@ When active, this makes the immediate parent the name of the asset if the immedi
 ### UI
 The settings can be found under the `Paths` tab
 
-::: tip Note
-Use Immediate Parent Name is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+::: warning Exclusive Usage Extension
+_Use Immediate Parent Name_ is an **exclusive usage extension**, which means that an error will be raised if it is used in combination with another exclusive usage extension.
 :::
 
 ## Use Collections as Folders
@@ -115,6 +115,6 @@ When active, this uses the collection hierarchy in your scene as sub folders fro
 ### UI
 The settings can be found under the `Paths` tab
 
-::: tip Note
-Use Collections as Folders is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+::: warning Exclusive Usage Extension
+_Use Collections as Folders_ is an **exclusive usage extension**, which means that an error will be raised if it is used in combination with another exclusive usage extension.
 :::
