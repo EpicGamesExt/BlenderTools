@@ -72,11 +72,11 @@ class CombineMeshesExtension(ExtensionBase):
                 )
                 # rename the asset to match the empty if this is a static mesh export
                 if mesh_object.parent.type == 'EMPTY':
-                    path, ext = asset_data['file_path'].split('.')
+                    path, ext = os.path.splitext(asset_data['file_path'])
                     asset_folder = asset_data['asset_folder']
 
                     self.update_asset_data({
-                        'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}.{ext}'),
+                        'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}{ext}'),
                         'asset_path': f'{asset_folder}{mesh_object.parent.name}'
                     })
 
@@ -106,4 +106,7 @@ class CombineMeshesExtension(ExtensionBase):
                 ):
                     meshes_with_unique_parents.append(mesh_object)
                     unique_parent_armatures.append(mesh_object.parent)
+            else:
+                meshes_with_unique_parents.append(mesh_object)
+
         return meshes_with_unique_parents

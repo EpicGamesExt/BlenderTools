@@ -14,8 +14,6 @@ class Send2UnrealDialog(bpy.types.Panel):
         properties = bpy.context.scene.send2ue
         row = layout.row()
         row.prop(properties, 'path_mode', text='')
-        self.draw_property(properties, layout, 'use_collections_as_folders')
-        self.draw_property(properties, layout, 'use_immediate_parent_collection_name')
 
         if bpy.context.scene.send2ue.path_mode in [
             PathModes.SEND_TO_PROJECT.value,

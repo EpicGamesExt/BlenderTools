@@ -20,25 +20,7 @@ def get_file_path(asset_name, properties, asset_type, lod=False, file_extension=
     :param str file_extension: The file extension in the file path.
     :return str: The full path to the file.
     """
-    export_folder = None
-    # if saving in a temp location
-    if properties.path_mode in [
-        PathModes.SEND_TO_PROJECT.value,
-        PathModes.SEND_TO_DISK_THEN_PROJECT.value
-    ]:
-        export_folder = os.path.join(utilities.get_temp_folder(), asset_type.lower())
-
-    # if saving to a specified location
-    if properties.path_mode in [
-        PathModes.SEND_TO_DISK.value,
-        PathModes.SEND_TO_DISK_THEN_PROJECT.value
-    ]:
-        if asset_type == AssetTypes.MESH:
-            export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
-
-        if asset_type == AssetTypes.ANIMATION:
-            export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
-
+    export_folder = utilities.get_export_folder_path(properties, asset_type)
     return os.path.join(
         export_folder,
         f'{utilities.get_asset_name(asset_name, properties, lod)}.{file_extension}'
@@ -604,7 +586,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
             # export the object
             asset_id = utilities.get_asset_id(file_path)
             export_mesh(asset_id, mesh_object, properties)
-            import_path = utilities.get_full_import_path(mesh_object, properties, AssetTypes.MESH)
+            import_path = utilities.get_import_path(mesh_object, properties, AssetTypes.MESH)
 
             # save the asset data
             mesh_data[asset_id] = {

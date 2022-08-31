@@ -1,7 +1,7 @@
 # Extensions
 
 ::: warning
-This feature set is still very new and could be subject to change.
+This feature set is still very new and could be subject to change. See [this page](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html) for a list of [supported extensions](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html).
 :::
 
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
@@ -308,6 +308,15 @@ Can be overridden to draw an interface for the extension under the import tab.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
 draw_import(self, dialog, layout, properties)
+```
+
+### draw_paths
+Can be overridden to draw an interface for the extension under the paths tab.
+- param `Send2UnrealDialog` `dialog` The dialog class.
+- param `bpy.types.UILayout` `layout` The extension layout area.
+- param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
+```python
+draw_paths(self, dialog, layout, properties)
 ```
 
 ## RPC Library

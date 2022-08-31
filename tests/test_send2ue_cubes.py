@@ -134,19 +134,3 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         self.run_texture_tests({
             'Cube2_lod0_mesh': ['unreal-engine-logo'],
         })
-
-    def test_use_immediate_parent_collection_name_option(self):
-        """
-        Tests the use immediate parent collection name option.
-        """
-        self.run_use_immediate_parent_collection_name_option_tests({
-            'Cube1_LOD0': ['Export', 'ParentCollectionName']
-        })
-
-    def test_use_collections_as_folders_option(self):
-        """
-        Tests using collections as folders.
-        """
-        self.run_use_collections_as_folders_option_tests({
-            'Cube1_LOD0': ['Export', 'SomeFolder', 'Another']
-        })

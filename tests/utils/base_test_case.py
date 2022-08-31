@@ -760,54 +760,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             for texture_name in texture_names:
                 self.assert_texture(texture_name, False)
 
-    def run_use_immediate_parent_collection_name_option_tests(self, objects_and_collections):
-        for object_name, collection_hierarchy in objects_and_collections.items():
-            self.blender.create_scene_collections(collection_hierarchy)
-            self.blender.set_scene_collection_hierarchy(collection_hierarchy)
-            self.move_to_collection([object_name], collection_hierarchy[-1])
-
-            # turn use immediate parent collection name off
-            self.blender.set_addon_property('scene', 'send2ue', 'use_immediate_parent_collection_name', False)
-            self.send2ue_operation()
-            # check that the mesh name the object name
-            self.assert_mesh_import(object_name)
-
-            # turn use immediate parent collection name on
-            self.blender.set_addon_property('scene', 'send2ue', 'use_immediate_parent_collection_name', True)
-            self.send2ue_operation()
-
-            # check that the mesh name is the parent collection
-            self.assert_mesh_import(collection_hierarchy[-1])
-
-    def run_use_collections_as_folders_option_tests(self, objects_and_collections):
-        for object_name, collection_hierarchy in objects_and_collections.items():
-            self.blender.create_scene_collections(collection_hierarchy)
-            self.blender.set_scene_collection_hierarchy(collection_hierarchy)
-            self.move_to_collection([object_name], collection_hierarchy[-1])
-
-            # turn use immediate parent collection name off
-            self.blender.set_addon_property('scene', 'send2ue', 'use_collections_as_folders', False)
-            self.send2ue_operation()
-            # check that the mesh name the object name
-            self.assert_mesh_import(object_name)
-
-            # turn use immediate parent collection name on
-            self.blender.set_addon_property('scene', 'send2ue', 'use_collections_as_folders', True)
-            self.send2ue_operation()
-
-            # check that the mesh name is the parent collection
-            mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
-            folder_path = mesh_folder_path + '/'.join(collection_hierarchy[1:]) + '/'
-            self.assert_asset_exists(object_name, folder_path, True)
-
-            self.unreal.delete_directory(mesh_folder_path)
-
-            # turn use immediate parent collection name on since these two setting can be use together
-            self.blender.set_addon_property('scene', 'send2ue', 'use_immediate_parent_collection_name', True)
-            self.send2ue_operation()
-            folder_path = mesh_folder_path + '/'.join(collection_hierarchy[1:-1]) + '/'
-            self.assert_asset_exists(collection_hierarchy[-1], folder_path, True)
-
     def run_auto_stash_active_action_option_tests(self, objects_and_animations):
         self.blender.set_addon_property('scene', 'send2ue', 'export_all_actions', True)
         self.blender.set_addon_property('scene', 'send2ue', 'import_animations', True)
@@ -910,20 +862,6 @@ class BaseSend2ueTestCase(BaseTestCase):
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
-    def test_use_immediate_parent_collection_name_option(self):
-        """
-        Tests the use immediate parent collection name option.
-        https://github.com/EpicGames/BlenderTools/issues/352
-        """
-        raise NotImplementedError('This test case must be implemented or skipped')
-
-    def test_use_collections_as_folders_option(self):
-        """
-        Tests using collections as folders.
-        https://github.com/EpicGames/BlenderTools/issues/183
-        """
-        raise NotImplementedError('This test case must be implemented or skipped')
-
     def test_auto_stash_active_action_option(self):
         """
         Tests not using auto stash active action option.
@@ -971,14 +909,6 @@ class SkipSend2UeTests(unittest.TestCase):
 
     @unittest.skip
     def test_textures(self):
-        pass
-
-    @unittest.skip
-    def test_use_immediate_parent_collection_name_option(self):
-        pass
-
-    @unittest.skip
-    def test_use_collections_as_folders_option(self):
         pass
 
     @unittest.skip

@@ -1,6 +1,13 @@
 # Supported Extensions
 These extensions ship with the Send to Unreal addon and are supported by this repository.
 
+* [Affixes](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#affixes)
+* [UE to Rigify](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#ue-to-rigify)
+* [Object Origin](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#object-origin)
+* [Combine Meshes](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes)
+* [Use Immediate Parent Name](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#use-immediate-parent-name)
+* [Use Collections as Folders](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#use-collections-as-folders)
+
 ## Affixes
 The Affixes extension provides a convenient way to enforce prefix or postfix naming conventions on
 assets of a particular type.  Currently, supported asset types are:
@@ -57,15 +64,18 @@ Lets the user combine child meshes.
 
 #### Static Meshes
 All child meshes under an empty will be combined into one static mesh using the name of the empty.
+
 ![1](./images/extensions/combine-meshes/1.png)
 
 In this example the name of the combine static mesh in unreal would be `CombinedCubes`
 
 #### Skeletal Meshes
 All child meshes under an armature will be combined into one skeletal mesh using the name of the first child mesh.
+
 ::: tip Note
- This might not give you enough control over the skeletal mesh name, so using the immediate parent collection name option can be useful.
+ This might not give you enough control over the skeletal mesh name, so using the immediate parent name option can be useful.
 :::
+
 ![2](./images/extensions/combine-meshes/2.png)
 
 In this example the name of the combine skeletal mesh in unreal would be `SK_Mannequin_Female`
@@ -73,7 +83,35 @@ In this example the name of the combine skeletal mesh in unreal would be `SK_Man
 
 ### Properties
 #### Combine child meshes
-This combines all child meshes of an empty object or armature object into a single mesh when exported.
+This combines all child meshes of an empty object or armature object into a single mesh when exported. Meshes that are directly under the export collection will be exported as they normally would, along with meshes parented under an empty type object or a collection which would be combined accordingly.
 
 ### UI
 The settings can be found under the `Export` tab
+
+## Use Immediate Parent Name
+Gives the user more control over the naming of the assets sent to unreal with the asset taking on the name of its immediate parent that is either a collection or an empty type object.
+
+#### Special Notes on Skeletal Meshes
+A mesh under an armature will take the name of the immediate parent of the said armature if the immediate parent is an empty type object or a collection.
+
+### Properties
+#### use immediate parent name
+When active, this makes the immediate parent the name of the asset if the immediate parent is a collection or an empty type object. This setting can be used concurrently with import LODs or combine meshes.
+
+### UI
+The settings can be found under the `Paths` tab
+
+> Use Immediate Parent Name is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+
+## Use Collections as Folders
+Let collections in blender persist through the send2ue operation as folders in unreal.
+
+### Properties
+#### use collections as folders
+When active, this uses the collection hierarchy in your scene as sub folders from the specified mesh folder in your unreal project. This setting can be used concurrently with import LODs or combine meshes.
+
+### UI
+The settings can be found under the `Paths` tab
+
+> Use Collections as Folders is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+
