@@ -138,7 +138,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
         :param str asset_type: The type of asset.
         :return str: The import path for the given asset without the immediate parent.
         """
-        import_path = utilities.get_import_path(scene_object, properties, asset_type)
+        import_path = utilities.get_import_path(properties, asset_type)
         if import_path:
             parent_object = scene_object.parent
             if not parent_object or parent_object.type != 'EMPTY':

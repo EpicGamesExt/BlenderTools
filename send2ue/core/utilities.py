@@ -132,7 +132,7 @@ def get_export_folder_path(properties, asset_type):
         PathModes.SEND_TO_DISK.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        if asset_type == AssetTypes.MESH:
+        if asset_type == AssetTypes.MESH or asset_type == AssetTypes.GROOM:
             export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
 
         if asset_type == AssetTypes.ANIMATION:
@@ -141,13 +141,13 @@ def get_export_folder_path(properties, asset_type):
     return export_folder
 
 
-def get_import_path(scene_object, properties, asset_type):
+def get_import_path(properties, asset_type, scene_object = None):
     """
     Gets the unreal import path.
 
-    :param object scene_object: A object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param str asset_type: The type of asset.
+    :param object scene_object: A object.
     :return str: The full import path for the given asset.
     """
     if asset_type == AssetTypes.ANIMATION:
@@ -406,7 +406,7 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function = get_impo
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_path_function(child, properties, AssetTypes.MESH)
+                import_path = get_path_function(properties, AssetTypes.MESH, child)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(

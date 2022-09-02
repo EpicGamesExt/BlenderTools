@@ -32,9 +32,9 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
                 # update skeletal asset path now that it is under new collections path
                 self.update_asset_data({
                     'skeleton_asset_path': utilities.get_skeleton_asset_path(
-                        scene_object,
                         properties,
-                        self.get_full_import_path
+                        self.get_full_import_path,
+                        scene_object
                     )
                 })
             else:
@@ -42,23 +42,23 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
                 scene_object = bpy.data.objects.get(object_name)
                 asset_name = utilities.get_asset_name(object_name, properties)
                 # get import path when using blender collections as folders
-                import_path = self.get_full_import_path(scene_object, properties, asset_type)
+                import_path = self.get_full_import_path(properties, asset_type, scene_object)
 
                 self.update_asset_data({
                     'asset_folder': import_path,
                     'asset_path': f'{import_path}{asset_name}'
                 })
 
-    def get_full_import_path(self, scene_object, properties, asset_type):
+    def get_full_import_path(self, properties, asset_type, scene_object):
         """
         Gets the unreal import path when use_collections_as_folders extension is active.
 
-        :param object scene_object: A object.
         :param object properties: The property group that contains variables that maintain the addon's correct state.
         :param str asset_type: The type of asset.
+        :param object scene_object: A object.
         :return str: The full import path for the given asset.
         """
-        game_path = utilities.get_import_path(scene_object, properties, asset_type)
+        game_path = utilities.get_import_path(properties, asset_type)
         sub_path = self.get_collections_as_path(scene_object, properties)
         import_path = f'{game_path}{sub_path}/'
         return import_path

@@ -354,6 +354,25 @@ def export_fbx_file(file_path, properties):
     )
 
 
+def export_alembic_file(file_path, properties):
+    """
+    Exports a fbx file.
+
+    :param str file_path: A file path where the file will be exported.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    export_settings = {}
+    for group_name, group_data in settings.get_settings_by_path('blender-export_method', 'abc').items():
+        prefix = settings.get_generated_prefix('blender-export_method-abc', group_name)
+        for attribute_name in group_data.keys():
+            export_settings[attribute_name] = settings.get_property_by_path(prefix, attribute_name, properties)
+
+    bpy.ops.wm.alembic_export(
+        filepath=file_path,
+        **export_settings
+    )
+
+
 def export_custom_property_fcurves(action_name, properties):
     """
     Exports custom property fcurves to a file.
@@ -503,6 +522,36 @@ def export_animation(asset_id, rig_object, action_name, properties):
     extension.run_extension_tasks(ExtensionTasks.POST_ANIMATION_EXPORT.value)
 
 
+@utilities.track_progress(message='Exporting hair "{attribute}"...', attribute='file_path')
+def export_hair(asset_id, mesh_object, properties, lod=0):
+    """
+    Exports a mesh to a file.
+
+    :param str asset_id: The unique id of the asset.
+    :param object mesh_object: A object of type mesh.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool lod: Whether the exported mesh is a lod.
+    :return str: The fbx file path of the exported mesh
+    """
+    # deselect everything
+    utilities.deselect_all_objects()
+
+    # select the scene object
+    mesh_object.select_set(True)
+
+    # export selection to a file
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+    file_path = asset_data['file_path']
+
+    # if the folder does not exists create it
+    folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    # export the fbx file
+    export_alembic_file(file_path, properties)
+
+
 def create_animation_data(rig_objects, properties):
     """
     Collects and creates all the action data needed for an animation import.
@@ -574,6 +623,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
         if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
             continue
 
+        # TODO: don't think this block is needed
         # check each previous asset name for its lod mesh
         for previous_asset in previous_asset_names:
             if utilities.is_lod_of(previous_asset, mesh_object.name, properties):
@@ -586,7 +636,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
             # export the object
             asset_id = utilities.get_asset_id(file_path)
             export_mesh(asset_id, mesh_object, properties)
-            import_path = utilities.get_import_path(mesh_object, properties, AssetTypes.MESH)
+            import_path = utilities.get_import_path(properties, AssetTypes.MESH)
 
             # save the asset data
             mesh_data[asset_id] = {
@@ -604,6 +654,66 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
             previous_asset_names.append(asset_name)
 
     return mesh_data
+
+
+def create_hair_data(mesh_objects, rig_objects, properties):
+    """
+    Collects and creates all the asset data needed for the import process.
+
+    :param list mesh_objects: A list of mesh objects.
+    :param list rig_objects: A list of rig objects.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return list: A list of dictionaries containing the mesh import data.
+    """
+    particle_hair_data = {}
+    previous_asset_names = []
+
+    # get the asset data for the scene objects
+    for mesh_object in mesh_objects:
+        already_exported = False
+        mesh_asset_name = utilities.get_asset_name(mesh_object.name, properties)
+
+        # only export meshes that are lod 0
+        if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
+            continue
+
+        # TODO: how would the code ever reach this block since all LODs except LOD0 are skipped?
+        # check each previous asset name for its lod mesh
+        for previous_asset in previous_asset_names:
+            if utilities.is_lod_of(previous_asset, mesh_object.name, properties):
+                already_exported = True
+                break
+
+        if not already_exported:
+            hair_particle = None
+            particle_systems = list(bpy.data.objects[mesh_object.name].particle_systems)
+            if len(particle_systems) != 0:
+                for particle in particle_systems:
+                    if particle.settings.type == 'HAIR':
+                        hair_particle = particle
+
+            if not hair_particle:
+                continue
+            # get file path
+            file_path = get_file_path(hair_particle.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
+            # export the object
+            asset_id = utilities.get_asset_id(file_path)
+            export_hair(asset_id, mesh_object, properties)
+            import_path = utilities.get_import_path(properties, AssetTypes.GROOM)
+            groom_asset_name = utilities.get_asset_name(hair_particle.name, properties)
+
+            # save the asset data
+            particle_hair_data[asset_id] = {
+                '_asset_type': AssetTypes.GROOM,
+                '_hair_particle_name': hair_particle.name,
+                '_mesh_object_name': mesh_object.name,
+                'file_path': file_path,
+                'asset_folder': import_path,
+                'asset_path': f'{import_path}{groom_asset_name}',
+            }
+            previous_asset_names.append(mesh_asset_name)
+
+    return particle_hair_data
 
 
 def create_asset_data(properties):
@@ -625,8 +735,11 @@ def create_asset_data(properties):
     # get the asset data for all the actions on the rig objects
     animation_data = create_animation_data(rig_objects, properties)
 
+    # get the asset data for all the hair objects
+    hair_data = create_hair_data(mesh_objects, rig_objects, properties)
+
     # update the properties with the asset data
-    bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data})
+    bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data, **hair_data})
 
 
 def send2ue(properties):

@@ -15,6 +15,7 @@ class AssetTypes:
     SKELETON = 'ARMATURE'
     MESH = 'MESH'
     ANIMATION = 'ANIMATION'
+    GROOM = 'HAIR'
 
 
 class ToolInfo(Enum):

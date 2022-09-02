@@ -1463,6 +1463,52 @@
             "default": true
           }
         }
+      },
+      "abc": {
+        "manual_transform": {
+          "global_scale": {
+            "name": "Scale",
+            "description": "Value by which to enlarge or shrink the objects with respect to the world’s origin",
+            "type": "FLOAT",
+            "default": 100.0,
+            "min": 0.001,
+            "max": 1000.0
+          }
+        },
+        "scene_options": {
+          "end": {
+            "name": "End Frame",
+            "description": "End frame of the export, use the default value to take the end frame of the current scene",
+            "type": "INT",
+            "default": 1
+          },
+          "selected": {
+            "name": "Selected Objects Only",
+            "description": "Export only selected objects",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "visible_objects_only": {
+            "name": "Visible Objects Only",
+            "description": "Export only objects that are visible",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        },
+        "particle_systems": {
+          "export_hair": {
+            "name": "Export Hair",
+            "description": "Exports hair particle systems as animated curves",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "export_particles": {
+            "name": "Export Particles",
+            "description": "Exports non-hair particle systems",
+            "type": "BOOLEAN",
+            "default": false
+          }
+        }
       }
     }
   }
