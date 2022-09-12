@@ -300,6 +300,31 @@ class Unreal:
                     data[attribute] = getattr(object_instance, attribute)
         return data
 
+    @staticmethod
+    def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
+        """
+        Creates a new unreal asset.
+
+        :param str asset_path: The project path to the asset.
+        :param str asset_class: The name of the unreal asset class.
+        :param str asset_factory: The name of the unreal factory.
+        :param bool unique_name: Whether or not the check if the name is unique before creating the asset.
+        """
+        asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
+        if unique_name:
+            asset_path, _ = asset_tools.create_unique_asset_name(
+                base_package_name=asset_path,
+                suffix=''
+            )
+        path = asset_path.rsplit("/", 1)[0]
+        name = asset_path.rsplit("/", 1)[1]
+        return asset_tools.create_asset(
+            asset_name=name,
+            package_path=path,
+            asset_class=asset_class,
+            factory=asset_factory
+        )
+
 
 class UnrealImportAsset(Unreal):
     def __init__(self, file_path, asset_data, property_data):
@@ -347,7 +372,9 @@ class UnrealImportAsset(Unreal):
         """
         Sets the static mesh import options.
         """
-        if not self._asset_data.get('skeletal_mesh') and not self._asset_data.get('animation'):
+        # TODO: the 'skeletal_mesh' attribute isn't used since the importer automatically infers type
+        # TODO: should be able to get rid of this line after careful inspection
+        if not self._asset_data.get('skeletal_mesh') and not self._asset_data.get('animation') and not self._asset_data.get('groom'):
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
             self._options.static_mesh_import_data.import_mesh_lo_ds = False
 
@@ -401,18 +428,49 @@ class UnrealImportAsset(Unreal):
             )
             self._options.texture_import_data = import_data
 
+    def set_groom_import_options(self):
+        """
+        Sets the groom import options.
+        """
+        if self._asset_data.get('groom'):
+            import_data = unreal.GroomConversionSettings()
+            self.set_settings(
+                self._property_data['unreal']['import_method']['abc']['conversion_settings'],
+                import_data
+            )
+            self._options.conversion_settings = import_data
+
+    def create_binding_asset(self):
+        if self._asset_data.get('groom'):
+            groom_asset_path = self._asset_data['asset_path']
+            mesh_asset_path = self._asset_data['mesh_asset_path']
+            groom_asset = unreal.load_asset(groom_asset_path)
+            skeletal_asset = unreal.load_asset(mesh_asset_path)
+
+            asset_folder = groom_asset_path.rsplit("/", 1)[0]
+            binding_asset_name = groom_asset_path.rsplit("/", 1)[1] + '_binding_asset'
+
+            factory = unreal.GroomBindingFactory()
+
+
+            asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
+            groom_binding_asset = asset_tools.create_asset(
+                asset_name=binding_asset_name,
+                package_path=asset_folder,
+                asset_class=unreal.GroomBindingAsset,
+                factory=factory
+            )
+            # asset_path = groom_asset_path + '_binding_asset'
+            # groom_binding_asset = UnrealRemoteCalls.create_asset(asset_path, 'GroomBindingAsset', 'GroomBindingFactory')
+            groom_binding_asset.set_editor_property('groom', groom_asset)
+            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_asset)
+            # TODO: need to plan out behavior where a binding asset already exist, probably just check with loadasset
+
     def set_fbx_import_task_options(self):
         """
         Sets the FBX import options.
         """
-        self._import_task.set_editor_property('filename', self._file_path)
-        self._import_task.set_editor_property('destination_path', self._asset_data.get('asset_folder'))
-        self._import_task.set_editor_property('replace_existing', True)
-        self._import_task.set_editor_property('replace_existing_settings', True)
-        self._import_task.set_editor_property(
-            'automated',
-            not self._property_data.get('advanced_ui_import', {}).get('value', False)
-        )
+        self.set_import_task_options()
 
         import_materials_and_textures = self._property_data.get('import_materials_and_textures', {}).get('value', True)
 
@@ -440,10 +498,36 @@ class UnrealImportAsset(Unreal):
         # add the texture import options
         self.set_texture_import_options()
 
+    def set_abc_import_task_options(self):
+        """
+        Sets the ABC import options.
+        """
+        self.set_import_task_options()
+        # set the options
+        self._options = unreal.GroomImportOptions()
+        # set the static mesh import options
+        self.set_groom_import_options()
+
+    def set_import_task_options(self):
+        """
+        Sets common import options.
+        """
+        self._import_task.set_editor_property('filename', self._file_path)
+        self._import_task.set_editor_property('destination_path', self._asset_data.get('asset_folder'))
+        self._import_task.set_editor_property('replace_existing', True)
+        self._import_task.set_editor_property('replace_existing_settings', True)
+        self._import_task.set_editor_property(
+            'automated',
+            not self._property_data.get('advanced_ui_import', {}).get('value', False)
+        )
+
     def run_import(self):
         # assign the options object to the import task and import the asset
         self._import_task.options = self._options
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([self._import_task])
+
+        # TODO: maybe create a queue of post import operations?
+        self.create_binding_asset()
         return list(self._import_task.get_editor_property('imported_object_paths'))
 
 
@@ -659,25 +743,35 @@ class UnrealRemoteCalls:
         unreal.EditorAssetLibrary.delete_directory(directory_path)
 
     @staticmethod
-    def import_asset(file_path, asset_data, property_data, file_type='fbx'):
+    def import_asset(file_path, asset_data, property_data):
         """
         Imports an asset to unreal based on the asset data in the provided dictionary.
 
         :param str file_path: The full path to the file to import.
         :param dict asset_data: A dictionary of import parameters.
         :param dict property_data: A dictionary representation of the properties.
-        :param str file_type: The import file type.
         """
         unreal_import_asset = UnrealImportAsset(
             file_path=file_path,
             asset_data=asset_data,
             property_data=property_data
         )
-        if file_type.lower() == 'fbx':
+        file_path, file_type = os.path.splitext(file_path)
+        if file_type.lower() == '.fbx':
             unreal_import_asset.set_fbx_import_task_options()
+        elif file_type.lower() == '.abc':
+            unreal_import_asset.set_abc_import_task_options()
 
         # run the import task
         return unreal_import_asset.run_import()
+
+    @staticmethod
+    def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
+        asset_class = getattr(unreal, asset_class)
+        factory = getattr(unreal, asset_factory)
+        factory_instance = factory()
+        unreal_asset = Unreal.create_asset(asset_path, asset_class, factory_instance, unique_name)
+        return unreal_asset
 
     @staticmethod
     def import_sequence_track(asset_path, file_path, track_name, start=None, end=None):
@@ -934,30 +1028,7 @@ class UnrealRemoteCalls:
                         data[channel.get_name()] = key.get_value()
         return data
 
-    @staticmethod
-    def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
-        """
-        Creates a new unreal asset.
 
-        :param str asset_path: The project path to the asset.
-        :param str asset_class: The name of the unreal asset class.
-        :param str asset_factory: The name of the unreal factory.
-        :param bool unique_name: Whether or not the check if the name is unique before creating the asset.
-        """
-        asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
-        if unique_name:
-            asset_path, _ = asset_tools.create_unique_asset_name(
-                base_package_name=asset_path,
-                suffix=''
-            )
-        path = asset_path.rsplit("/", 1)[0]
-        name = asset_path.rsplit("/", 1)[1]
-        asset_tools.create_asset(
-            asset_name=name,
-            package_path=path,
-            asset_class=asset_class,
-            factory=asset_factory
-        )
 
     @staticmethod
     def import_animation_fcurves(asset_path, fcurve_file_path):

@@ -685,6 +685,7 @@ def create_hair_data(mesh_objects, rig_objects, properties):
                 break
 
         if not already_exported:
+            mesh_object.show_instancer_for_render = False
             hair_particle = None
             particle_systems = list(bpy.data.objects[mesh_object.name].particle_systems)
             if len(particle_systems) != 0:
@@ -710,6 +711,8 @@ def create_hair_data(mesh_objects, rig_objects, properties):
                 'file_path': file_path,
                 'asset_folder': import_path,
                 'asset_path': f'{import_path}{groom_asset_name}',
+                'mesh_asset_path': f'{import_path}{mesh_asset_name}',
+                'groom': True
             }
             previous_asset_names.append(mesh_asset_name)
 

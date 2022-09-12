@@ -126,7 +126,7 @@ def assets(properties):
                 # get the asset id
                 asset_id = get_asset_id(asset_data.get('file_path'))
 
-                # imports static mesh, skeletal mesh or animation
+                # imports static mesh, skeletal mesh, animation or groom
                 import_asset(asset_id, property_data)
 
                 # import lods

@@ -870,6 +870,34 @@
             "default": 1.0
           }
         }
+      },
+      "abc": {
+        "conversion_settings": {
+          "rotation": {
+            "name": "Rotation",
+            "description": "Rotation in Euler angles in degrees to fix up or front axes",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "size": 3,
+            "default": [
+              90.0,
+              0.0,
+              0.0
+            ]
+          },
+          "scale": {
+            "name": "Scale",
+            "description": "Scale value to convert file unit into centimeters",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "size": 3,
+            "default": [
+              1.0,
+              -1.0,
+              1.0
+            ]
+          }
+        }
       }
     },
     "editor_static_mesh_library": {
