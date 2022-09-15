@@ -374,7 +374,8 @@ class UnrealImportAsset(Unreal):
         """
         # TODO: the 'skeletal_mesh' attribute isn't used since the importer automatically infers type
         # TODO: should be able to get rid of this line after careful inspection
-        if not self._asset_data.get('skeletal_mesh') and not self._asset_data.get('animation') and not self._asset_data.get('groom'):
+        if not self._asset_data.get('skeletal_mesh') and not self._asset_data.get(
+            'animation') and not self._asset_data.get('groom'):
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
             self._options.static_mesh_import_data.import_mesh_lo_ds = False
 
@@ -444,14 +445,27 @@ class UnrealImportAsset(Unreal):
         if self._asset_data.get('groom'):
             groom_asset_path = self._asset_data['asset_path']
             mesh_asset_path = self._asset_data['mesh_asset_path']
-            groom_asset = unreal.load_asset(groom_asset_path)
-            skeletal_asset = unreal.load_asset(mesh_asset_path)
 
-            asset_folder = groom_asset_path.rsplit("/", 1)[0]
-            binding_asset_name = groom_asset_path.rsplit("/", 1)[1] + '_binding_asset'
+            mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
+            if mesh_asset_data.asset_class != 'SkeletalMesh':
+                return
+
+            groom_asset = unreal.load_asset(groom_asset_path)
+            skeletal_mesh_asset = unreal.load_asset(mesh_asset_path)
+
+            binding_asset_path = groom_asset_path + '_binding_asset'
+            asset_folder = binding_asset_path.rsplit("/", 1)[0]
+            binding_asset_name = binding_asset_path.rsplit("/", 1)[1]
+
+            # handles replacement logic, consolidation will be called later
+            existing_binding_asset = unreal.load_asset(binding_asset_path)
+            if existing_binding_asset:
+                unreal.EditorAssetLibrary.rename_asset(
+                    binding_asset_path,
+                    binding_asset_path + '_'
+                )
 
             factory = unreal.GroomBindingFactory()
-
 
             asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
             groom_binding_asset = asset_tools.create_asset(
@@ -463,8 +477,11 @@ class UnrealImportAsset(Unreal):
             # asset_path = groom_asset_path + '_binding_asset'
             # groom_binding_asset = UnrealRemoteCalls.create_asset(asset_path, 'GroomBindingAsset', 'GroomBindingFactory')
             groom_binding_asset.set_editor_property('groom', groom_asset)
-            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_asset)
-            # TODO: need to plan out behavior where a binding asset already exist, probably just check with loadasset
+            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
+
+            # if a previous version of the binding asset exists, consolidate all references with new asset
+            if existing_binding_asset:
+                unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
 
     def set_fbx_import_task_options(self):
         """
@@ -1028,8 +1045,6 @@ class UnrealRemoteCalls:
                         data[channel.get_name()] = key.get_value()
         return data
 
-
-
     @staticmethod
     def import_animation_fcurves(asset_path, fcurve_file_path):
         """
@@ -1056,4 +1071,5 @@ class UnrealRemoteCalls:
         :param str curve_name: The fcurve name.
         """
         animation_sequence = Unreal.get_asset(asset_path)
-        return unreal.AnimationLibrary.does_curve_exist(animation_sequence, curve_name, unreal.RawCurveTrackTypes.RCT_FLOAT)
+        return unreal.AnimationLibrary.does_curve_exist(animation_sequence, curve_name,
+                                                        unreal.RawCurveTrackTypes.RCT_FLOAT)

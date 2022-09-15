@@ -16,6 +16,7 @@ class AssetTypes:
     MESH = 'MESH'
     ANIMATION = 'ANIMATION'
     GROOM = 'HAIR'
+    CURVES = 'CURVES'
 
 
 class ToolInfo(Enum):
@@ -55,6 +56,8 @@ class ExtensionTasks(Enum):
     POST_BONE_SCALE = 'post_bone_scale'
     PRE_MESH_EXPORT = 'pre_mesh_export'
     POST_MESH_EXPORT = 'post_mesh_export'
+    PRE_GROOM_EXPORT = 'pre_groom_export'
+    POST_GROOM_EXPORT = 'post_groom_export'
     PRE_IMPORT = 'pre_import'
     POST_IMPORT = 'post_import'
     POST_OPERATION = 'post_operation'

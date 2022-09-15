@@ -178,6 +178,24 @@ class ExtensionBase:
         """
         pass
 
+    def pre_groom_export(self, asset_data, properties):
+        """
+        Defines the pre groom export logic that will be an injected operation.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        pass
+
+    def post_groom_export(self, asset_data, properties):
+        """
+        Defines the post groom export logic that will be an injected operation.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        pass
+
     def pre_import(self, asset_data, properties):
         """
         Defines the pre import logic that will be an injected operation.
