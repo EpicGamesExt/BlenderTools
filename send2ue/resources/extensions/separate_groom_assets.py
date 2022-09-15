@@ -18,22 +18,27 @@ class SeparateGroomAssetsExtension(ExtensionBase):
         )
     )
 
+    properties = {}
+
+    def pre_operation(self, properties):
+        if self.separate_groom_assets:
+            SeparateGroomAssetsExtension.properties = properties
+
     def post_groom_export(self, asset_data, properties):
         if self.separate_groom_assets:
             assets_data = asset_data['groom_assets_data']
             if len(assets_data) > 1:
-                self.change_particles_type(assets_data, 'EMITTER')
+                self.disable_particles_visibility(assets_data)
                 for asset_data in assets_data.values():
                     self.export_individual_hair(asset_data, properties)
-                self.change_particles_type(assets_data, 'HAIR')
+                self.disable_particles_visibility(assets_data, disable_particles_render=False)
 
-    def pre_import(self, asset_data, properties):
-        property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
+    def post_import(self, asset_data, properties):
         if self.separate_groom_assets and asset_data.get('groom'):
             assets_data = asset_data['groom_assets_data']
             if len(assets_data) > 1:
                 for asset_data in assets_data.values():
-                    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)
+                    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, SeparateGroomAssetsExtension.property_data)
 
     def draw_export(self, dialog, layout, properties):
         """
@@ -45,12 +50,12 @@ class SeparateGroomAssetsExtension(ExtensionBase):
         """
         dialog.draw_property(self, layout, 'separate_groom_assets')
 
-    def change_particles_type(self, assets_data, particle_type):
+    def disable_particles_visibility(self, assets_data, disable_particles_render=True):
         for asset_data in assets_data.values():
-            self.change_particle_type(asset_data, particle_type)
+            self.disable_particle_visibility(asset_data, disable_particles_render)
 
     def export_individual_hair(self, asset_data, properties):
-        self.change_particle_type(asset_data, 'HAIR')
+        self.disable_particle_visibility(asset_data, disable_particle_render=False)
         # export selection to a file
         file_path = asset_data['file_path']
 
@@ -61,10 +66,13 @@ class SeparateGroomAssetsExtension(ExtensionBase):
 
         # export the fbx file
         export.export_alembic_file(file_path, properties)
-        self.change_particle_type(asset_data, 'EMITTER')
+        self.disable_particle_visibility(asset_data)
 
     @staticmethod
-    def change_particle_type(asset_data, particle_type):
+    def disable_particle_visibility(asset_data, disable_particle_render=True):
+        # dynamically uses what the user has selected to
+        # TODO: it's really late and this actually appears useless lol
+        show = SeparateGroomAssetsExtension.properties.blender.export_method.abc.scene_options.evaluation_mode
         mesh_object = bpy.data.objects[asset_data['_mesh_object_name']]
-        particle = mesh_object.particle_systems[asset_data['_hair_particle_name']]
-        particle.settings.type = particle_type
+        setattr(mesh_object.modifiers[asset_data['_hair_particle_name']], show, not disable_particle_render)
+        # particle = mesh_object.particle_systems[asset_data['_hair_particle_name']]

@@ -1521,6 +1521,28 @@
             "description": "Export only objects that are visible",
             "type": "BOOLEAN",
             "default": true
+          },
+          "evaluation_mode": {
+            "name": "Use Settings for",
+            "description": "Determines visibility of objects, modifier settings, and other areas where there are different settings for viewport and rendering",
+            "enum_items": [
+              [
+                "RENDER",
+                "RENDER",
+                "",
+                "NONE",
+                0
+              ],
+              [
+                "VIEWPORT",
+                "VIEWPORT",
+                "",
+                "NONE",
+                1
+              ]
+            ],
+            "type": "ENUM",
+            "default": "RENDER"
           }
         },
         "particle_systems": {
