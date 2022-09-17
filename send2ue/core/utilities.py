@@ -743,6 +743,30 @@ def remove_unpacked_files(unpacked_files):
             remove_from_disk(folder, directory=True)
 
 
+def remove_particle_system(particle_name, mesh_object):
+    """
+    Removes a particle system on a mesh object.
+
+    :param str particle_name: The name of the particle system to be removed.
+    :param str mesh_object: The name of the mesh object with the particle system.
+    """
+    # deselect everything
+    deselect_all_objects()
+
+    # select the scene object
+    mesh_object.select_set(True)
+    bpy.context.view_layer.objects.active = mesh_object
+
+    # get index of hair particle to be deleted
+    particle_list = mesh_object.particle_systems.keys()
+    particle_index = particle_list.index(particle_name)
+
+    # select hair particle to be deleted
+    mesh_object.particle_systems.active_index = particle_index
+    # remove the active particle system
+    bpy.ops.object.particle_system_remove()
+
+
 def refresh_all_areas():
     """
     Iterates of all windows and screens and tags them for a redraw
@@ -845,6 +869,22 @@ def convert_unreal_to_blender_location(location):
     y = location[1] / 100
     z = location[2] / 100
     return [x, -y, z]
+
+
+def convert_curves_to_particle_system(curves_object):
+    """
+    Converts a curves object to a particle system on the mesh it's surfaced to.
+
+    :param object curves_object: A curves object.
+    """
+    # deselect everything
+    deselect_all_objects()
+    # select the curves object
+    curves_object.select_set(True)
+    bpy.context.view_layer.objects.active = curves_object
+
+    # convert to a particle system
+    bpy.ops.curves.convert_to_particle_system()
 
 
 def addon_enabled(*args):

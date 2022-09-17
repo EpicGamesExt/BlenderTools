@@ -1504,26 +1504,20 @@
           }
         },
         "scene_options": {
-          "end": {
-            "name": "End Frame",
-            "description": "End frame of the export, use the default value to take the end frame of the current scene",
-            "type": "INT",
-            "default": 1
-          },
-          "selected": {
-            "name": "Selected Objects Only",
-            "description": "Export only selected objects",
+          "use_instancing": {
+            "name": "Use Instancing",
+            "description": "Export data of duplicated objects as Alembic instances; speeds up the export and can be disabled for compatibility with other software",
             "type": "BOOLEAN",
             "default": true
           },
-          "visible_objects_only": {
-            "name": "Visible Objects Only",
-            "description": "Export only objects that are visible",
+          "export_custom_properties": {
+            "name": "Export Custom Properties",
+            "description": "Export custom properties to Alembic .userProperties",
             "type": "BOOLEAN",
             "default": true
           },
           "evaluation_mode": {
-            "name": "Use Settings for",
+            "name": "Use Visibility Settings for",
             "description": "Determines visibility of objects, modifier settings, and other areas where there are different settings for viewport and rendering",
             "enum_items": [
               [
@@ -1545,18 +1539,36 @@
             "default": "RENDER"
           }
         },
-        "particle_systems": {
-          "export_hair": {
-            "name": "Export Hair",
-            "description": "Exports hair particle systems as animated curves",
+        "object_options": {
+          "uvs": {
+            "name": "UVs",
+            "description": "Export UVs",
             "type": "BOOLEAN",
             "default": true
           },
-          "export_particles": {
-            "name": "Export Particles",
-            "description": "Exports non-hair particle systems",
+          "packuv": {
+            "name": "Pack UV Islands",
+            "description": "Export UVs with packed island",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "normals": {
+            "name": "Normals",
+            "description": "Export normals",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "vcolors": {
+            "name": "Color Attributes",
+            "description": "Export color attributes",
             "type": "BOOLEAN",
             "default": false
+          },
+          "orcos": {
+            "name": "Generated Coordinates",
+            "description": "Export undeformed mesh vertex coordinates",
+            "type": "BOOLEAN",
+            "default": true
           }
         }
       }

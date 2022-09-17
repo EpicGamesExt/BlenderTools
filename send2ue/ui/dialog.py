@@ -80,6 +80,15 @@ class Send2UnrealDialog(bpy.types.Panel):
             'EXPORT'
         )
 
+        #  abc settings box
+        self.draw_expanding_section(
+            layout,
+            self.draw_abc_export_settings,
+            'show_abc_export_settings',
+            'ABC Export Settings',
+            'EXPORT'
+        )
+
     def draw_expanding_section(self, layout, draw_function, toggle_state_property, label, icon='NONE'):
         """
         Draws all the properties for the given settings group.
@@ -192,6 +201,19 @@ class Send2UnrealDialog(bpy.types.Panel):
             'Miscellaneous'
         )
 
+    def draw_abc_import_settings(self, layout):
+        """
+        Draws all the properties in the ABC import settings.
+
+        :param layout: The layout container for this tab.
+        """
+        self.draw_settings_section(
+            layout,
+            'unreal-import_method-abc',
+            'conversion_settings',
+            'Groom Conversion Settings'
+        )
+
     def draw_import_tab(self, layout):
         """
         Draws all the properties in the Import tab.
@@ -218,6 +240,14 @@ class Send2UnrealDialog(bpy.types.Panel):
             self.draw_fbx_import_settings,
             'show_fbx_import_settings',
             'FBX Import Settings',
+            'IMPORT'
+        )
+        #  abc import settings box
+        self.draw_expanding_section(
+            layout,
+            self.draw_abc_import_settings,
+            'show_abc_import_settings',
+            'ABC Import Settings',
             'IMPORT'
         )
         #  editor library settings box
@@ -312,6 +342,28 @@ class Send2UnrealDialog(bpy.types.Panel):
             'blender-export_method-fbx',
             'extras',
             'Extras'
+        )
+
+    def draw_abc_export_settings(self, layout):
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'manual_transform',
+            'Manual Transform'
+        )
+
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'scene_options',
+            'Scene Options'
+        )
+
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'object_options',
+            'Object Options'
         )
 
     @staticmethod

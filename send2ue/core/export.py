@@ -369,6 +369,11 @@ def export_alembic_file(file_path, properties):
 
     bpy.ops.wm.alembic_export(
         filepath=file_path,
+        end=1,
+        selected=True,
+        visible_objects_only=True,
+        export_hair=True,
+        export_particles=False,
         **export_settings
     )
 
@@ -453,7 +458,6 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param object mesh_object: A object of type mesh.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool lod: Whether the exported mesh is a lod.
-    :return str: The fbx file path of the exported mesh
     """
     # deselect everything
     utilities.deselect_all_objects()
@@ -489,7 +493,6 @@ def export_animation(asset_id, rig_object, action_name, properties):
     :param object rig_object: A object of type armature with animation data.
     :param str action_name: The name of the action to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return str: The fbx file path of the exported action
     """
     # run the pre animation export extensions
     extension.run_extension_tasks(ExtensionTasks.PRE_ANIMATION_EXPORT.value)
@@ -523,17 +526,16 @@ def export_animation(asset_id, rig_object, action_name, properties):
 
 
 @utilities.track_progress(message='Exporting hair "{attribute}"...', attribute='file_path')
-def export_hair(asset_id, mesh_object, hair_particle_names, curves_object_names, properties):
+def export_hair(asset_id, mesh_object, curves_object_names, properties):
     """
     Exports a mesh to a file.
 
     :param str asset_id: The unique id of the asset.
     :param object mesh_object: A object of type mesh.
-    :param list hair_particle_names: A list of hair particle names on the mesh object.
     :param list curves_object_names: A list of all curves object names.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return str: The fbx file path of the exported mesh
     """
+    # run the pre groom export extensions
     extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
     # deselect everything
     utilities.deselect_all_objects()
@@ -542,7 +544,7 @@ def export_hair(asset_id, mesh_object, hair_particle_names, curves_object_names,
     mesh_object.select_set(True)
     bpy.context.view_layer.objects.active = mesh_object
 
-    # export selection to a file
+    # get file path to export
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     file_path = asset_data['file_path']
 
@@ -554,18 +556,13 @@ def export_hair(asset_id, mesh_object, hair_particle_names, curves_object_names,
     # export the fbx file
     export_alembic_file(file_path, properties)
 
+    # run the pre groom export extensions
     extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)
 
-    for hair_particle_name in hair_particle_names:
-        # inelegant solution: checks if hair particle name is in list of names of Curves objects
-        if hair_particle_name in curves_object_names:
-            # TODO: refactor into utilities?
-            particle_list = bpy.data.objects[mesh_object.name].particle_systems.keys()
-            # Get index of hair particle
-            particle_index = particle_list.index(hair_particle_name)
-            # Set
-            bpy.data.objects[mesh_object.name].particle_systems.active_index = particle_index
-            bpy.ops.object.particle_system_remove()
+    # delete particle systems that were converted from curves objects
+    for curves_object_name in curves_object_names:
+        if mesh_object.particle_systems.get(curves_object_name):
+            utilities.remove_particle_system(curves_object_name, mesh_object)
 
 
 def create_animation_data(rig_objects, properties):
@@ -679,75 +676,74 @@ def create_groom_data(mesh_objects, curves_objects, properties):
     :param list mesh_objects: A list of mesh objects.
     :param list curves_objects: A list of curves objects.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return list: A list of dictionaries containing the mesh import data.
+    :return list: A list of dictionaries containing the groom import data.
     """
-    asset_data = {}
+    groom_data = {}
     curves_object_names = []
 
+    # convert curves objects to particle systems
     for curves_object in curves_objects:
-        bpy.ops.object.mode_set(mode='OBJECT')
-        # deselect all objects
-        bpy.ops.object.select_all(action='DESELECT')
-        # select the rig object
-        curves_object.select_set(True)
-        bpy.context.view_layer.objects.active = curves_object
-        bpy.ops.curves.convert_to_particle_system()
+        utilities.convert_curves_to_particle_system(curves_object)
+        # store the converted curves object name for deletion post export
         curves_object_names.append(curves_object.name)
 
     # get the asset data for the scene objects
     for mesh_object in mesh_objects:
-        # only export meshes that are lod 0
+        # only export particle systems on meshes that are lod 0
         if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
             continue
-
+        # turn show_emitter off in particle system render settings
         mesh_object.show_instancer_for_render = False
 
+        # get all particle systems of type 'HAIR' on the current mesh
         particle_systems = list(bpy.data.objects[mesh_object.name].particle_systems)
         hair_particles = list(filter(
             lambda particle_system: particle_system.settings.type == 'HAIR',
-            particle_systems))
-        hair_particle_names = list(map(
-            lambda particle_system: particle_system.name,
             particle_systems
         ))
 
-        if len(hair_particles) != 0:
+        if len(hair_particles) > 0:
             groom_assets_data = {}
-            for hair_particle in hair_particles:
-                file_path = get_file_path(
-                    hair_particle.name,
-                    properties,
-                    AssetTypes.GROOM,
-                    lod=False,
-                    file_extension='abc')
+            for particle in hair_particles:
+                # get file path and asset id
+                file_path = get_file_path(particle.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
                 asset_id = utilities.get_asset_id(file_path)
+                # create groom asset data in groom_assets_data dictionary
                 groom_assets_data[asset_id] = create_groom_asset_data(
                     file_path,
-                    hair_particle.name,
+                    particle.name,
                     mesh_object.name,
-                    properties)
-                # if this is the head particle
-                if hair_particle == hair_particles[0]:
-                    asset_data[asset_id] = create_groom_asset_data(
-                        file_path,
-                        hair_particle.name,
-                        mesh_object.name,
-                        properties)
+                    properties
+                )
+                # if this is the head particle, add created groom asset data to groom_data dictionary to be returned
+                if particle == hair_particles[0]:
+                    groom_data[asset_id] = dict(groom_assets_data[asset_id])
                     head_particle_id = asset_id
-            # append groom_assets_data dictionary as attribute to first particle's asset data
-            asset_data[head_particle_id].update({
+
+            # append groom_assets_data dictionary as an attribute to head particle's asset data
+            groom_data[head_particle_id].update({
                 'groom_assets_data': groom_assets_data
             })
-            export_hair(head_particle_id, mesh_object, hair_particle_names, curves_object_names, properties)
+            # export particle hair systems as alembic file
+            export_hair(head_particle_id, mesh_object, curves_object_names, properties)
 
-    return asset_data
+    return groom_data
 
 
 def create_groom_asset_data(file_path, hair_name, mesh_object_name, properties):
+    """
+    Creates asset data for a groom asset.
+
+    :param str file_path:
+    :param str hair_name:
+    :param str mesh_object_name:
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return dict: A dictionary of groom import data.
+    """
     import_path = utilities.get_import_path(properties, AssetTypes.GROOM)
     groom_asset_name = utilities.get_asset_name(hair_name, properties)
     mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
-    # save the asset data
+
     asset_data = {
         '_asset_type': AssetTypes.GROOM,
         '_hair_particle_name': hair_name,

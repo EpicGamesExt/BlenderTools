@@ -54,7 +54,9 @@ class Send2UeWindowMangerProperties(bpy.types.PropertyGroup):
     # ----------- read/write variables -----------
     show_animation_settings: bpy.props.BoolProperty(default=False)
     show_fbx_export_settings: bpy.props.BoolProperty(default=False)
+    show_abc_export_settings: bpy.props.BoolProperty(default=False)
     show_fbx_import_settings: bpy.props.BoolProperty(default=False)
+    show_abc_import_settings: bpy.props.BoolProperty(default=False)
     show_lod_settings: bpy.props.BoolProperty(default=False)
     show_editor_library_settings: bpy.props.BoolProperty(default=False)
     show_export_extensions: bpy.props.BoolProperty(default=False)

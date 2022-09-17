@@ -306,8 +306,8 @@ class Unreal:
         Creates a new unreal asset.
 
         :param str asset_path: The project path to the asset.
-        :param str asset_class: The name of the unreal asset class.
-        :param str asset_factory: The name of the unreal factory.
+        :param type(Class) asset_class: The unreal asset class.
+        :param Factory asset_factory: The unreal factory.
         :param bool unique_name: Whether or not the check if the name is unique before creating the asset.
         """
         asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -373,9 +373,13 @@ class UnrealImportAsset(Unreal):
         Sets the static mesh import options.
         """
         # TODO: the 'skeletal_mesh' attribute isn't used since the importer automatically infers type
-        # TODO: should be able to get rid of this line after careful inspection
-        if not self._asset_data.get('skeletal_mesh') and not self._asset_data.get(
-            'animation') and not self._asset_data.get('groom'):
+        if not self._asset_data.get(
+            'skeletal_mesh'
+        ) and not self._asset_data.get(
+            'animation'
+        ) and not self._asset_data.get(
+            'groom'
+        ):
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
             self._options.static_mesh_import_data.import_mesh_lo_ds = False
 
@@ -433,6 +437,8 @@ class UnrealImportAsset(Unreal):
         """
         Sets the groom import options.
         """
+        self._options = unreal.GroomImportOptions()
+
         if self._asset_data.get('groom'):
             import_data = unreal.GroomConversionSettings()
             self.set_settings(
@@ -442,46 +448,45 @@ class UnrealImportAsset(Unreal):
             self._options.conversion_settings = import_data
 
     def create_binding_asset(self):
+        """
+        Creates a groom binding asset.
+        """
         if self._asset_data.get('groom'):
             groom_asset_path = self._asset_data['asset_path']
             mesh_asset_path = self._asset_data['mesh_asset_path']
 
             mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
-            if mesh_asset_data.asset_class != 'SkeletalMesh':
-                return
+            # only create binding asset if the particle system's mesh asset is a skeletal mesh
+            if mesh_asset_data.asset_class == 'SkeletalMesh':
+                groom_asset = unreal.load_asset(groom_asset_path)
+                skeletal_mesh_asset = unreal.load_asset(mesh_asset_path)
 
-            groom_asset = unreal.load_asset(groom_asset_path)
-            skeletal_mesh_asset = unreal.load_asset(mesh_asset_path)
+                binding_asset_path = groom_asset_path + '_binding_asset'
+                asset_folder, binding_asset_name = binding_asset_path.rsplit("/", 1)
 
-            binding_asset_path = groom_asset_path + '_binding_asset'
-            asset_folder = binding_asset_path.rsplit("/", 1)[0]
-            binding_asset_name = binding_asset_path.rsplit("/", 1)[1]
+                # renames the existing binding asset (one that had the same name) that will be consolidated
+                existing_binding_asset = unreal.load_asset(binding_asset_path)
+                if existing_binding_asset:
+                    unreal.EditorAssetLibrary.rename_asset(
+                        binding_asset_path,
+                        binding_asset_path + '_'
+                    )
 
-            # handles replacement logic, consolidation will be called later
-            existing_binding_asset = unreal.load_asset(binding_asset_path)
-            if existing_binding_asset:
-                unreal.EditorAssetLibrary.rename_asset(
-                    binding_asset_path,
-                    binding_asset_path + '_'
+                # create new groom binding asset
+                asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
+                groom_binding_asset = asset_tools.create_asset(
+                    asset_name=binding_asset_name,
+                    package_path=asset_folder,
+                    asset_class=unreal.GroomBindingAsset,
+                    factory=unreal.GroomBindingFactory()
                 )
+                # source groom asset and target skeletal mesh for the binding asset
+                groom_binding_asset.set_editor_property('groom', groom_asset)
+                groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
 
-            factory = unreal.GroomBindingFactory()
-
-            asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
-            groom_binding_asset = asset_tools.create_asset(
-                asset_name=binding_asset_name,
-                package_path=asset_folder,
-                asset_class=unreal.GroomBindingAsset,
-                factory=factory
-            )
-            # asset_path = groom_asset_path + '_binding_asset'
-            # groom_binding_asset = UnrealRemoteCalls.create_asset(asset_path, 'GroomBindingAsset', 'GroomBindingFactory')
-            groom_binding_asset.set_editor_property('groom', groom_asset)
-            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
-
-            # if a previous version of the binding asset exists, consolidate all references with new asset
-            if existing_binding_asset:
-                unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
+                # if a previous version of the binding asset exists, consolidate all references with new asset
+                if existing_binding_asset:
+                    unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
 
     def set_fbx_import_task_options(self):
         """
@@ -519,10 +524,9 @@ class UnrealImportAsset(Unreal):
         """
         Sets the ABC import options.
         """
-        self.set_import_task_options()
         # set the options
-        self._options = unreal.GroomImportOptions()
-        # set the static mesh import options
+        self.set_import_task_options()
+        # set the groom import options
         self.set_groom_import_options()
 
     def set_import_task_options(self):
@@ -784,10 +788,18 @@ class UnrealRemoteCalls:
 
     @staticmethod
     def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
+        """
+        Creates a new unreal asset.
+
+        :param str asset_path: The project path to the asset.
+        :param str asset_class: The name of the unreal asset class.
+        :param str asset_factory: The name of the unreal factory.
+        :param bool unique_name: Whether or not the check if the name is unique before creating the asset.
+        """
         asset_class = getattr(unreal, asset_class)
-        factory = getattr(unreal, asset_factory)
-        factory_instance = factory()
-        unreal_asset = Unreal.create_asset(asset_path, asset_class, factory_instance, unique_name)
+        factory = getattr(unreal, asset_factory)()
+
+        unreal_asset = Unreal.create_asset(asset_path, asset_class, factory, unique_name)
         return unreal_asset
 
     @staticmethod
