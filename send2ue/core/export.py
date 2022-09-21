@@ -697,17 +697,22 @@ def create_groom_data(mesh_objects, curves_objects, properties):
         # turn show_emitter off in particle system render settings
         mesh_object.show_instancer_for_render = False
 
-        # get all particle systems of type 'HAIR' on the current mesh
-        particle_systems = list(bpy.data.objects[mesh_object.name].particle_systems)
-        hair_particles = list(filter(
-            lambda particle_system: particle_system.settings.type == 'HAIR',
-            particle_systems
-        ))
+        modifiers = list(bpy.data.objects[mesh_object.name].modifiers)
+        particle_modifiers = list(filter(lambda mod: type(mod) == bpy.types.ParticleSystemModifier, modifiers))
 
-        if len(hair_particles) > 0:
+        # get all particle systems of type 'HAIR' on the current mesh
+        hair_particle_systems = []
+        for modifier in particle_modifiers:
+            particle_system = modifier.particle_system
+            if particle_system.settings.type == 'HAIR':
+                hair_particle_systems.append((modifier, particle_system))
+
+        head_particle = list(bpy.data.objects[mesh_object.name].particle_systems)[0]
+
+        if len(hair_particle_systems) > 0:
             groom_assets_data = {}
             # populate groom_assets_data dictionary, storing assets data of particle systems on the current mesh
-            for particle in hair_particles:
+            for modifier, particle in hair_particle_systems:
                 # get file path and asset id
                 file_path = get_file_path(particle.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
                 asset_id = utilities.get_asset_id(file_path)
@@ -715,11 +720,12 @@ def create_groom_data(mesh_objects, curves_objects, properties):
                 groom_assets_data[asset_id] = create_groom_asset_data(
                     file_path,
                     particle.name,
+                    modifier.name,
                     mesh_object.name,
                     properties
                 )
                 # if this is the head particle, add created groom asset data to groom_data dictionary to be returned
-                if particle == hair_particles[0]:
+                if particle == head_particle:
                     groom_data[asset_id] = dict(groom_assets_data[asset_id])
                     head_particle_id = asset_id
 
@@ -733,13 +739,14 @@ def create_groom_data(mesh_objects, curves_objects, properties):
     return groom_data
 
 
-def create_groom_asset_data(file_path, hair_name, mesh_object_name, properties):
+def create_groom_asset_data(file_path, hair_name, modifier_name, mesh_object_name, properties):
     """
     Creates asset data for a groom asset.
 
-    :param str file_path:
-    :param str hair_name:
-    :param str mesh_object_name:
+    :param str file_path: the export path for the alembic file.
+    :param str hair_name: the name of the particle system.
+    :param str modifier_name: the name of the modifier controlling the particle system.
+    :param str mesh_object_name: the name of the mesh that the particle system is surfaced on.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return dict: A dictionary of groom import data.
     """
@@ -750,6 +757,7 @@ def create_groom_asset_data(file_path, hair_name, mesh_object_name, properties):
     asset_data = {
         '_asset_type': AssetTypes.GROOM,
         '_hair_particle_name': hair_name,
+        '_modifier_name': modifier_name,
         '_mesh_object_name': mesh_object_name,
         'file_path': file_path,
         'asset_folder': import_path,

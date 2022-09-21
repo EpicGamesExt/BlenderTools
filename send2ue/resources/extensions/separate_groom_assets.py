@@ -55,6 +55,8 @@ class SeparateGroomAssetsExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.separate_groom_assets and asset_data.get('groom'):
+            property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
+
             # Gets the asset data of each hair particle system on the current mesh from the head particle system
             assets_data = asset_data['groom_assets_data']
             if len(assets_data) > 1:
@@ -62,8 +64,13 @@ class SeparateGroomAssetsExtension(ExtensionBase):
                     UnrealRemoteCalls.import_asset(
                         asset_data.get('file_path'),
                         asset_data,
-                        SeparateGroomAssetsExtension.property_data
+                        property_data
                     )
+                    # if create_binding_asset extension is on, create binding asset for each additional groom asset
+                    if properties.extensions.create_binding_asset.create_binding_asset:
+                        groom_asset_path = asset_data['asset_path']
+                        mesh_asset_path = asset_data['mesh_asset_path']
+                        UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
 
     def draw_export(self, dialog, layout, properties):
         """
@@ -120,5 +127,5 @@ class SeparateGroomAssetsExtension(ExtensionBase):
         show = SeparateGroomAssetsExtension.properties.blender.export_method.abc.scene_options.evaluation_mode
 
         mesh_object = bpy.data.objects[asset_data['_mesh_object_name']]
-        hair_particle = mesh_object.modifiers[asset_data['_hair_particle_name']]
-        setattr(hair_particle, show, not disable_particle_render)
+        hair_particle = mesh_object.modifiers[asset_data['_modifier_name']]
+        setattr(hair_particle, 'show_' + show.lower(), not disable_particle_render)

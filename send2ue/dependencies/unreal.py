@@ -325,7 +325,7 @@ class Unreal:
         )
 
     @staticmethod
-    def create_binding_asset(asset_data):
+    def create_binding_asset(groom_asset_path, mesh_asset_path):
         """
         Creates a groom binding asset.
 
@@ -334,40 +334,37 @@ class Unreal:
         """
         binding_asset_path = None
 
-        if asset_data.get('groom'):
-            groom_asset_path = asset_data['asset_path']
-            mesh_asset_path = asset_data['mesh_asset_path']
+        mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
+        # only create binding asset if the particle system's mesh asset is a skeletal mesh
+        # TODO: in 5.2+ asset_class (5.0.3) is deprecated. Use asset_class_path.asset_name instead.
+        if mesh_asset_data.asset_class == 'SkeletalMesh':
+            groom_asset = Unreal.get_asset(groom_asset_path)
+            skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
 
-            mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
-            # only create binding asset if the particle system's mesh asset is a skeletal mesh
-            if mesh_asset_data.asset_class == 'SkeletalMesh':
-                groom_asset = Unreal.get_asset(groom_asset_path)
-                skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
+            binding_asset_path = groom_asset_path + '_binding_asset'
 
-                binding_asset_path = groom_asset_path + '_binding_asset'
-
-                # renames the existing binding asset (one that had the same name) that will be consolidated
-                existing_binding_asset = unreal.load_asset(binding_asset_path)
-                if existing_binding_asset:
-                    unreal.EditorAssetLibrary.rename_asset(
-                        binding_asset_path,
-                        binding_asset_path + '_'
-                    )
-
-                groom_binding_asset = Unreal.create_asset(
+            # renames the existing binding asset (one that had the same name) that will be consolidated
+            existing_binding_asset = unreal.load_asset(binding_asset_path)
+            if existing_binding_asset:
+                unreal.EditorAssetLibrary.rename_asset(
                     binding_asset_path,
-                    unreal.GroomBindingAsset,
-                    unreal.GroomBindingFactory(),
-                    False
+                    binding_asset_path + '_'
                 )
 
-                # source groom asset and target skeletal mesh for the binding asset
-                groom_binding_asset.set_editor_property('groom', groom_asset)
-                groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
+            groom_binding_asset = Unreal.create_asset(
+                binding_asset_path,
+                unreal.GroomBindingAsset,
+                unreal.GroomBindingFactory(),
+                False
+            )
 
-                # if a previous version of the binding asset exists, consolidate all references with new asset
-                if existing_binding_asset:
-                    unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
+            # source groom asset and target skeletal mesh for the binding asset
+            groom_binding_asset.set_editor_property('groom', groom_asset)
+            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
+
+            # if a previous version of the binding asset exists, consolidate all references with new asset
+            if existing_binding_asset:
+                unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
 
         return binding_asset_path
 
@@ -789,11 +786,7 @@ class UnrealRemoteCalls:
             unreal_import_asset.set_abc_import_task_options()
 
         # run the import task
-        imported_paths = unreal_import_asset.run_import()
-
-        # create post import assets
-        Unreal.create_binding_asset(asset_data)
-        return imported_paths
+        return unreal_import_asset.run_import()
 
     @staticmethod
     def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
@@ -810,6 +803,16 @@ class UnrealRemoteCalls:
 
         unreal_asset = Unreal.create_asset(asset_path, asset_class, factory, unique_name)
         return unreal_asset
+
+    @staticmethod
+    def create_binding_asset(groom_asset_path, mesh_asset_path):
+        """
+        Creates a groom binding asset.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :return str binding_asset_path: The unreal path to the binding asset created.
+        """
+        return Unreal.create_binding_asset(groom_asset_path, mesh_asset_path)
 
     @staticmethod
     def import_sequence_track(asset_path, file_path, track_name, start=None, end=None):
