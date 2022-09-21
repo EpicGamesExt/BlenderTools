@@ -707,9 +707,10 @@ def create_groom_data(mesh_objects, curves_objects, properties):
             if particle_system.settings.type == 'HAIR':
                 hair_particle_systems.append((modifier, particle_system))
 
-        head_particle = list(bpy.data.objects[mesh_object.name].particle_systems)[0]
-
         if len(hair_particle_systems) > 0:
+            # get head particle
+            head_particle = list(bpy.data.objects[mesh_object.name].particle_systems)[0]
+
             groom_assets_data = {}
             # populate groom_assets_data dictionary, storing assets data of particle systems on the current mesh
             for modifier, particle in hair_particle_systems:

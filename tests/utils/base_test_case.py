@@ -369,6 +369,10 @@ class BaseSend2ueTestCase(BaseTestCase):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_animation_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
 
+    def assert_groom_import(self, asset_name, exists=True):
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        self.assert_asset_exists(asset_name, folder_path, exists)
+
     def assert_mesh_origin(self, asset_name, origin):
         self.log(f'Checking "{asset_name}" for matching origins...')
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')

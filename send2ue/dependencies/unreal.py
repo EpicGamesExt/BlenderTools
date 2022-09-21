@@ -488,7 +488,7 @@ class UnrealImportAsset(Unreal):
                 self._property_data['unreal']['import_method']['abc']['conversion_settings'],
                 import_data
             )
-            self._options.conversion_settings = import_data
+            self._options.set_editor_property('conversion_settings', import_data)
 
     def set_fbx_import_task_options(self):
         """
@@ -549,8 +549,6 @@ class UnrealImportAsset(Unreal):
         self._import_task.options = self._options
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([self._import_task])
 
-        # TODO: maybe create a queue of post import operations?
-        # self.create_binding_asset()
         return list(self._import_task.get_editor_property('imported_object_paths'))
 
 

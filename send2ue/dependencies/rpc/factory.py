@@ -28,6 +28,62 @@ class RPCFactory:
         self.remap_pairs = remap_pairs
         self.default_imports = default_imports or []
 
+    @staticmethod
+    def _get_docstring(code, function_name):
+        """
+        Gets the docstring value from the functions code.
+
+        :param list code: A list of code lines.
+        :param str function_name: The name of the function.
+        :returns: The docstring text.
+        :rtype: str
+        """
+        # run the function code
+        exec('\n'.join(code))
+        # get the function from the locals
+        function_instance = locals().copy().get(function_name)
+        # get the doc strings from the function
+        return function_instance.__doc__
+
+    @staticmethod
+    def _save_execution_history(code, function, args):
+        """
+        Saves out the executed code to a file.
+
+        :param list code: A list of code lines.
+        :param callable function: A function.
+        :param list args: A list of function arguments.
+        """
+        history_file_path = os.environ.get('RPC_EXECUTION_HISTORY_FILE')
+
+        if history_file_path and os.path.exists(os.path.dirname(history_file_path)):
+            file_size = 0
+            if os.path.exists(history_file_path):
+                file_size = os.path.getsize(history_file_path)
+
+            with open(history_file_path, 'a') as history_file:
+                # add the import for SourceFileLoader if the file is empty
+                if file_size == 0:
+                    history_file.write('from importlib.machinery import SourceFileLoader\n')
+
+                # space out the functions
+                history_file.write(f'\n\n')
+
+                for line in code:
+                    history_file.write(f'{line}\n')
+
+                # convert the args to strings
+                formatted_args = []
+                for arg in args:
+                    if isinstance(arg, str):
+                        formatted_args.append(f'r"{arg}"')
+                    else:
+                        formatted_args.append(str(arg))
+
+                # write the call with the arg values
+                params = ", ".join(formatted_args) if formatted_args else ''
+                history_file.write(f'{function.__name__}({params})\n')
+
     def _get_callstack_references(self, code, function):
         """
         Gets all references for the given code.
@@ -70,7 +126,7 @@ class RPCFactory:
                     import_code.append(f'from {module_name} import {key}')
                     break
 
-        return textwrap.indent('\n'.join(import_code), ' ' * 4)
+        return textwrap.indent('\n'.join(list(set(import_code))), ' ' * 4)
 
     def _get_code(self, function):
         """
@@ -80,16 +136,19 @@ class RPCFactory:
         :return str: The code of the callable.
         """
         code = textwrap.dedent(inspect.getsource(function)).split('\n')
-        code = [line for line in code if not line.startswith('@')]
+        code = [line for line in code if not line.startswith(('@', '#'))]
+
+        # get the docstring from the code
+        doc_string = self._get_docstring(code, function.__name__)
 
         # get import code and insert them inside the function
         import_code = self._get_callstack_references(code, function)
         code.insert(1, import_code)
 
-        # log out the generated code
-        if os.environ.get('RPC_LOG_CODE'):
-            for line in code:
-                logger.debug(line)
+        # remove the doc string
+        if doc_string:
+            code = '\n'.join(code).replace(doc_string, '')
+            code = [line for line in code.split('\n') if not all([char == '"' or char == "'" for char in line.strip()])]
 
         return code
 
@@ -98,7 +157,8 @@ class RPCFactory:
         Registers a given callable with the server.
 
         :param  callable function: A callable.
-        :return Any: The return value.
+        :return: The code of the function.
+        :rtype: list
         """
         code = self._get_code(function)
         try:
@@ -121,6 +181,8 @@ class RPCFactory:
             server_name = os.environ.get(f'RPC_SERVER_{self.rpc_client.port}', self.rpc_client.port)
             raise ConnectionRefusedError(f'No connection could be made with "{server_name}"')
 
+        return code
+
     def run_function_remotely(self, function, args):
         """
         Handles running the given function on remotely.
@@ -132,8 +194,9 @@ class RPCFactory:
         validate_arguments(function, args)
 
         # get the remote function instance
-        self._register(function)
+        code = self._register(function)
         remote_function = getattr(self.rpc_client.proxy, function.__name__)
+        self._save_execution_history(code, function, args)
 
         current_frame = inspect.currentframe()
         outer_frame_info = inspect.getouterframes(current_frame)
@@ -143,7 +206,7 @@ class RPCFactory:
         call_traceback = types.TracebackType(None, caller_frame, caller_frame.f_lasti, caller_frame.f_lineno)
         # call the remote function
         if not self.rpc_client.marshall_exceptions:
-            # if exceptions are not marshalled then receive the default Faut
+            # if exceptions are not marshalled then receive the default Fault
             return remote_function(*args)
 
         # otherwise catch them and add a line link to them
