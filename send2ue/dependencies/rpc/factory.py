@@ -55,9 +55,12 @@ class RPCFactory:
         :param list args: A list of function arguments.
         """
         history_file_path = os.environ.get('RPC_EXECUTION_HISTORY_FILE')
-        file_size = os.path.getsize(history_file_path)
 
         if history_file_path and os.path.exists(os.path.dirname(history_file_path)):
+            file_size = 0
+            if os.path.exists(history_file_path):
+                file_size = os.path.getsize(history_file_path)
+
             with open(history_file_path, 'a') as history_file:
                 # add the import for SourceFileLoader if the file is empty
                 if file_size == 0:
