@@ -31,6 +31,7 @@ def import_asset(asset_id, property_data):
             asset_data.get('fcurve_file_path')
         )
 
+    # TODO: post import extension using Unreal class to create bp assets with skeletal mesh component
     # run the post import extensions
     extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
 

@@ -418,6 +418,8 @@ def export_file(properties, lod=0):
 
     # if the folder does not exists create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
+    # TODO: replace
+    # os.makedirs(self.disk_folder, exist_ok=True)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
@@ -553,7 +555,7 @@ def export_hair(asset_id, mesh_object, curves_object_names, properties):
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    # export the fbx file
+    # export the abc file
     export_alembic_file(file_path, properties)
 
     # run the pre groom export extensions
@@ -704,6 +706,7 @@ def create_groom_data(mesh_objects, curves_objects, properties):
 
         if len(hair_particles) > 0:
             groom_assets_data = {}
+            # populate groom_assets_data dictionary, storing assets data of particle systems on the current mesh
             for particle in hair_particles:
                 # get file path and asset id
                 file_path = get_file_path(particle.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')

@@ -316,14 +316,60 @@ class Unreal:
                 base_package_name=asset_path,
                 suffix=''
             )
-        path = asset_path.rsplit("/", 1)[0]
-        name = asset_path.rsplit("/", 1)[1]
+        path, name = asset_path.rsplit("/", 1)
         return asset_tools.create_asset(
             asset_name=name,
             package_path=path,
             asset_class=asset_class,
             factory=asset_factory
         )
+
+    @staticmethod
+    def create_binding_asset(asset_data):
+        """
+        Creates a groom binding asset.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :return str binding_asset_path: The unreal path to the binding asset created.
+        """
+        binding_asset_path = None
+
+        if asset_data.get('groom'):
+            groom_asset_path = asset_data['asset_path']
+            mesh_asset_path = asset_data['mesh_asset_path']
+
+            mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
+            # only create binding asset if the particle system's mesh asset is a skeletal mesh
+            if mesh_asset_data.asset_class == 'SkeletalMesh':
+                groom_asset = Unreal.get_asset(groom_asset_path)
+                skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
+
+                binding_asset_path = groom_asset_path + '_binding_asset'
+
+                # renames the existing binding asset (one that had the same name) that will be consolidated
+                existing_binding_asset = unreal.load_asset(binding_asset_path)
+                if existing_binding_asset:
+                    unreal.EditorAssetLibrary.rename_asset(
+                        binding_asset_path,
+                        binding_asset_path + '_'
+                    )
+
+                groom_binding_asset = Unreal.create_asset(
+                    binding_asset_path,
+                    unreal.GroomBindingAsset,
+                    unreal.GroomBindingFactory(),
+                    False
+                )
+
+                # source groom asset and target skeletal mesh for the binding asset
+                groom_binding_asset.set_editor_property('groom', groom_asset)
+                groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
+
+                # if a previous version of the binding asset exists, consolidate all references with new asset
+                if existing_binding_asset:
+                    unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
+
+        return binding_asset_path
 
 
 class UnrealImportAsset(Unreal):
@@ -447,47 +493,6 @@ class UnrealImportAsset(Unreal):
             )
             self._options.conversion_settings = import_data
 
-    def create_binding_asset(self):
-        """
-        Creates a groom binding asset.
-        """
-        if self._asset_data.get('groom'):
-            groom_asset_path = self._asset_data['asset_path']
-            mesh_asset_path = self._asset_data['mesh_asset_path']
-
-            mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
-            # only create binding asset if the particle system's mesh asset is a skeletal mesh
-            if mesh_asset_data.asset_class == 'SkeletalMesh':
-                groom_asset = unreal.load_asset(groom_asset_path)
-                skeletal_mesh_asset = unreal.load_asset(mesh_asset_path)
-
-                binding_asset_path = groom_asset_path + '_binding_asset'
-                asset_folder, binding_asset_name = binding_asset_path.rsplit("/", 1)
-
-                # renames the existing binding asset (one that had the same name) that will be consolidated
-                existing_binding_asset = unreal.load_asset(binding_asset_path)
-                if existing_binding_asset:
-                    unreal.EditorAssetLibrary.rename_asset(
-                        binding_asset_path,
-                        binding_asset_path + '_'
-                    )
-
-                # create new groom binding asset
-                asset_tools = unreal.AssetToolsHelpers.get_asset_tools()
-                groom_binding_asset = asset_tools.create_asset(
-                    asset_name=binding_asset_name,
-                    package_path=asset_folder,
-                    asset_class=unreal.GroomBindingAsset,
-                    factory=unreal.GroomBindingFactory()
-                )
-                # source groom asset and target skeletal mesh for the binding asset
-                groom_binding_asset.set_editor_property('groom', groom_asset)
-                groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
-
-                # if a previous version of the binding asset exists, consolidate all references with new asset
-                if existing_binding_asset:
-                    unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
-
     def set_fbx_import_task_options(self):
         """
         Sets the FBX import options.
@@ -548,7 +553,7 @@ class UnrealImportAsset(Unreal):
         unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([self._import_task])
 
         # TODO: maybe create a queue of post import operations?
-        self.create_binding_asset()
+        # self.create_binding_asset()
         return list(self._import_task.get_editor_property('imported_object_paths'))
 
 
@@ -784,7 +789,11 @@ class UnrealRemoteCalls:
             unreal_import_asset.set_abc_import_task_options()
 
         # run the import task
-        return unreal_import_asset.run_import()
+        imported_paths = unreal_import_asset.run_import()
+
+        # create post import assets
+        Unreal.create_binding_asset(asset_data)
+        return imported_paths
 
     @staticmethod
     def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):
