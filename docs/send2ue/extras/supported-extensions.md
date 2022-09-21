@@ -1,12 +1,12 @@
 # Supported Extensions
 These extensions ship with the Send to Unreal addon and are supported by this repository.
 
-* [Affixes](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#affixes)
-* [UE to Rigify](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#ue-to-rigify)
-* [Object Origin](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#object-origin)
-* [Combine Meshes](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#combine-meshes)
-* [Use Immediate Parent Name](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#use-immediate-parent-name)
-* [Use Collections as Folders](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html#use-collections-as-folders)
+* [Affixes](/extras/supported-extensions.html#affixes)
+* [UE to Rigify](/extras/supported-extensions.html#ue-to-rigify)
+* [Object Origin](/extras/supported-extensions.html#object-origin)
+* [Combine Meshes](/extras/supported-extensions.html#combine-meshes)
+* [Use Immediate Parent Name](/extras/supported-extensions.html#use-immediate-parent-name)
+* [Use Collections as Folders](/extras/supported-extensions.html#use-collections-as-folders)
 
 ## Affixes
 The Affixes extension provides a convenient way to enforce prefix or postfix naming conventions on
@@ -101,7 +101,9 @@ When active, this makes the immediate parent the name of the asset if the immedi
 ### UI
 The settings can be found under the `Paths` tab
 
-> Use Immediate Parent Name is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+::: warning Exclusive Usage Extension
+_Use Immediate Parent Name_ is an **exclusive usage extension**, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+:::
 
 ## Use Collections as Folders
 Let collections in blender persist through the send2ue operation as folders in unreal.
@@ -113,5 +115,6 @@ When active, this uses the collection hierarchy in your scene as sub folders fro
 ### UI
 The settings can be found under the `Paths` tab
 
-> Use Collections as Folders is an exclusive usage extension, which means that an error will be raised if it is used in combination with another exclusive usage extension.
-
+::: warning Exclusive Usage Extension
+_Use Collections as Folders_ is an **exclusive usage extension**, which means that an error will be raised if it is used in combination with another exclusive usage extension.
+:::
