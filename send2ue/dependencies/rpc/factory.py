@@ -120,7 +120,8 @@ class RPCFactory:
                         base_name = os.path.basename(self.file_path)
 
                     module_name, file_extension = os.path.splitext(base_name)
-                    import_code.append(
+                    import_code.insert(
+                        0,
                         f'{module_name} = SourceFileLoader("{module_name}", r"{server_module_path}").load_module()'
                     )
                     import_code.append(f'from {module_name} import {key}')
