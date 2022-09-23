@@ -329,8 +329,9 @@ class Unreal:
         """
         Creates a groom binding asset.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset.
-        :return str binding_asset_path: The unreal path to the binding asset created.
+        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
+        :return str binding_asset_path: The unreal asset path to the created binding asset.
         """
         binding_asset_path = None
 
@@ -342,15 +343,17 @@ class Unreal:
             skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
 
             binding_asset_path = groom_asset_path + '_binding_asset'
+            temp_asset_path = binding_asset_path + '_temp'
 
             # renames the existing binding asset (one that had the same name) that will be consolidated
             existing_binding_asset = unreal.load_asset(binding_asset_path)
             if existing_binding_asset:
                 unreal.EditorAssetLibrary.rename_asset(
                     binding_asset_path,
-                    binding_asset_path + '_'
+                    temp_asset_path
                 )
 
+            # create the binding asset
             groom_binding_asset = Unreal.create_asset(
                 binding_asset_path,
                 unreal.GroomBindingAsset,
@@ -365,6 +368,7 @@ class Unreal:
             # if a previous version of the binding asset exists, consolidate all references with new asset
             if existing_binding_asset:
                 unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
+                unreal.EditorAssetLibrary.delete_asset(temp_asset_path)
 
         return binding_asset_path
 
@@ -807,8 +811,9 @@ class UnrealRemoteCalls:
         """
         Creates a groom binding asset.
 
-        :param dict asset_data: A mutable dictionary of asset data for the current asset.
-        :return str binding_asset_path: The unreal path to the binding asset created.
+        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
+        :return str binding_asset_path: The unreal asset path to the created binding asset.
         """
         return Unreal.create_binding_asset(groom_asset_path, mesh_asset_path)
 
