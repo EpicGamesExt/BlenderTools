@@ -7,7 +7,7 @@
 * Updated [testing docs](https://epicgames.github.io/BlenderTools/contributing/testing.html#environment-variables) to include the new env `RPC_EXECUTION_HISTORY_FILE`
 
 ## Tests Passing On
-* Blender `3.1`, `3.2`
+* Blender `3.2`, `3.3`
 * Unreal `5.0.1`, `5.0.3`
 
 ## Special Thanks
