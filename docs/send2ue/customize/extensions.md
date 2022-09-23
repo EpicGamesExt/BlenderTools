@@ -1,7 +1,7 @@
 # Extensions
 
 ::: warning
-This feature set is still very new and could be subject to change. See [this page](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html) for a list of [supported extensions](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html).
+This feature set is still very new and could be subject to change. Navigate to the linked page to see [supported extensions](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html).
 :::
 
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
