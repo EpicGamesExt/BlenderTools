@@ -69,6 +69,17 @@ All child meshes under an empty will be combined into one static mesh using the 
 
 In this example the name of the combine static mesh in unreal would be `CombinedCubes`
 
+::: tip Note
+ When using this with custom collisions, each collision name must correspond to each mesh name, not the final
+combined Static Mesh asset name.
+
+In this example the final name of the combined asset is `S_Boards_Platform_1x1` and all the collisions below match
+to each mesh within the combined asset.
+
+![3](./images/extensions/combine-meshes/3.png)
+
+:::
+
 #### Skeletal Meshes
 All child meshes under an armature will be combined into one skeletal mesh using the name of the first child mesh.
 
