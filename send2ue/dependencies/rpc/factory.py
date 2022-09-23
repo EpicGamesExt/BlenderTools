@@ -120,14 +120,20 @@ class RPCFactory:
                         base_name = os.path.basename(self.file_path)
 
                     module_name, file_extension = os.path.splitext(base_name)
-                    import_code.insert(
-                        0,
-                        f'{module_name} = SourceFileLoader("{module_name}", r"{server_module_path}").load_module()'
-                    )
-                    import_code.append(f'from {module_name} import {key}')
+
+                    # add the source file to the import code
+                    source_import_code = f'{module_name} = SourceFileLoader("{module_name}", r"{server_module_path}").load_module()'
+                    if source_import_code not in import_code:
+                        import_code.append(source_import_code)
+
+                    # relatively import the module from the source file
+                    relative_import_code = f'from {module_name} import {key}'
+                    if relative_import_code not in import_code:
+                        import_code.append(relative_import_code)
+
                     break
 
-        return textwrap.indent('\n'.join(list(set(import_code))), ' ' * 4)
+        return textwrap.indent('\n'.join(import_code), ' ' * 4)
 
     def _get_code(self, function):
         """
