@@ -64,6 +64,18 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
                 'frames': [1, 5, 14]
             }})
 
+    def test_groom(self):
+        """
+        Sends a mannequin with curves and hair particles to unreal.
+        """
+        self.move_to_collection(['male_root'], 'Export')
+        self.run_groom_tests({
+            'SK_Mannequin_LOD0': {
+                'curves': ['back_curves', 'shoulder_curves'],
+                'particle_hair': ['particle_hair_head', 'particle_hair_hand_l', 'particle_hair_hand_r'],
+                'particle_emitter': ['particle_emitter']
+            }})
+
     def test_materials(self):
         """
         Sends a mannequin with materials to unreal.

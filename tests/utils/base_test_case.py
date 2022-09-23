@@ -370,7 +370,7 @@ class BaseSend2ueTestCase(BaseTestCase):
         self.assert_asset_exists(asset_name, folder_path, exists)
 
     def assert_groom_import(self, asset_name, exists=True):
-        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
 
     def assert_mesh_origin(self, asset_name, origin):
@@ -417,6 +417,16 @@ class BaseSend2ueTestCase(BaseTestCase):
             collision_info.get('simple'),
             f'The simple collision count is not correct.'
         )
+
+    def assert_import_groom(self, particle_systems, exists):
+        self.send2ue_operation()
+        if exists:
+            self.log(f'Checking that particles systems were imported as groom...')
+        else:
+            self.log(f'Checking that particles systems were not imported as groom...')
+
+        for particle_system in particle_systems:
+            self.assert_groom_import(particle_system, exists)
 
     def assert_material(self, asset_name, material_name, material_index, exists):
         self.log(f'Checking for material slot "{material_name}" on "{asset_name}"...')
@@ -695,6 +705,17 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.unreal.delete_directory(animation_folder)
 
             self.assert_solo_track(rig_name, animation_names)
+
+    def run_groom_tests(self, meshes_and_particles):
+        for mesh, particle_system in meshes_and_particles.items():
+            curves = particle_system.get('curves')
+            particle_hair = particle_system.get('particle_hair')
+            particle_emitter = particle_system.get('particle_emitter')
+
+            self.move_to_collection([mesh, curves], 'Export')
+
+            self.assert_import_groom(particle_hair + curves, True)
+            self.assert_import_groom(particle_emitter, False)
 
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():

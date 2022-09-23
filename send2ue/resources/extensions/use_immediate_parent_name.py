@@ -77,7 +77,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
                 if not properties.unreal_skeleton_asset_path:
                     object_name = asset_data.get('_armature_object_name', '')
                     rig_object = bpy.data.objects.get(object_name)
-                    import_path = self.get_full_import_path(rig_object, properties, AssetTypes.SKELETON)
+                    import_path = self.get_full_import_path(rig_object, properties, AssetTypes.MESH)
 
                     parent_object = rig_object.parent
                     if parent_object and parent_object.type == 'EMPTY':

@@ -132,11 +132,14 @@ def get_export_folder_path(properties, asset_type):
         PathModes.SEND_TO_DISK.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        if asset_type == AssetTypes.MESH or asset_type == AssetTypes.GROOM:
+        if asset_type == AssetTypes.MESH:
             export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
 
         if asset_type == AssetTypes.ANIMATION:
             export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
+
+        if asset_type == AssetTypes.GROOM:
+            export_folder = formatting.resolve_path(properties.disk_groom_folder_path)
 
     return export_folder
 
@@ -153,8 +156,12 @@ def get_import_path(properties, asset_type, scene_object = None):
     if asset_type == AssetTypes.ANIMATION:
         game_path = properties.unreal_animation_folder_path
 
-    else:
+    elif asset_type == AssetTypes.MESH:
         game_path = properties.unreal_mesh_folder_path
+
+    elif asset_type == AssetTypes.GROOM:
+        game_path = properties.unreal_groom_folder_path
+
     return game_path
 
 

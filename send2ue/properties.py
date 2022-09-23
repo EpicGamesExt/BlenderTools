@@ -184,6 +184,15 @@ def get_scene_property_class():
                 "be imported to this location in your open Unreal Project"
             )
         )
+        unreal_groom_folder_path: bpy.props.StringProperty(
+            name="Groom Folder (Unreal)",
+            default=r"/Game/untitled_category/untitled_asset/groom/",
+            update=formatting.update_unreal_groom_folder_path,
+            description=(
+                "This is the groom import path. All your Curves objects and hair particle systems will be imported "
+                "to this location in your open Unreal Project"
+            )
+        )
         unreal_skeleton_asset_path: bpy.props.StringProperty(
             name="Skeleton Asset (Unreal)",
             default=r"",
@@ -220,6 +229,15 @@ def get_scene_property_class():
                 "This is the path to the folder where your actions will be exported to on disk. All your actions that "
                 "are in an Armature object’s NLA strips will be exported to this location. The file names will match the "
                 "action names in Blender"
+            )
+        )
+        disk_groom_folder_path: bpy.props.StringProperty(
+            name="Groom Folder (Disk)",
+            default=os.path.expanduser('~'),
+            update=formatting.update_disk_groom_folder_path,
+            description=(
+                "This is the path to the folder where your curves objects and particle systems will be exported to on "
+                "disk. The file names will match either the name of the curves object or that of the particle system."
             )
         )
         automatically_scale_bones: bpy.props.BoolProperty(

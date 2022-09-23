@@ -12,7 +12,7 @@ class SeparateGroomAssetsExtension(ExtensionBase):
 
     separate_groom_assets: bpy.props.BoolProperty(
         name="Separate groom assets",
-        default=False,
+        default=True,
         description=(
             "This individually exports hair particle systems that are surfaced on the same mesh."
         )

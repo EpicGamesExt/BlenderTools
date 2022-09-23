@@ -751,7 +751,8 @@ def create_groom_asset_data(file_path, hair_name, modifier_name, mesh_object_nam
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return dict: A dictionary of groom import data.
     """
-    import_path = utilities.get_import_path(properties, AssetTypes.GROOM)
+    groom_import_path = utilities.get_import_path(properties, AssetTypes.GROOM)
+    mesh_import_path = utilities.get_import_path(properties, AssetTypes.MESH)
     groom_asset_name = utilities.get_asset_name(hair_name, properties)
     mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
 
@@ -761,9 +762,9 @@ def create_groom_asset_data(file_path, hair_name, modifier_name, mesh_object_nam
         '_modifier_name': modifier_name,
         '_mesh_object_name': mesh_object_name,
         'file_path': file_path,
-        'asset_folder': import_path,
-        'asset_path': f'{import_path}{groom_asset_name}',
-        'mesh_asset_path': f'{import_path}{mesh_asset_name}',
+        'asset_folder': groom_import_path,
+        'asset_path': f'{groom_import_path}{groom_asset_name}',
+        'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}',
         'groom': True
     }
     return asset_data
