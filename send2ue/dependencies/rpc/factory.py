@@ -32,6 +32,7 @@ class RPCFactory:
     def _get_docstring(code, function_name):
         """
         Gets the docstring value from the functions code.
+
         :param list code: A list of code lines.
         :param str function_name: The name of the function.
         :returns: The docstring text.
@@ -48,6 +49,7 @@ class RPCFactory:
     def _save_execution_history(code, function, args):
         """
         Saves out the executed code to a file.
+
         :param list code: A list of code lines.
         :param callable function: A function.
         :param list args: A list of function arguments.
@@ -85,6 +87,7 @@ class RPCFactory:
     def _get_callstack_references(self, code, function):
         """
         Gets all references for the given code.
+
         :param list[str] code: The code of the callable.
         :param callable function: A callable.
         :return str: The new code of the callable with all its references added.
@@ -135,6 +138,7 @@ class RPCFactory:
     def _get_code(self, function):
         """
         Gets the code from a callable.
+
         :param callable function: A callable.
         :return str: The code of the callable.
         """
@@ -158,6 +162,7 @@ class RPCFactory:
     def _register(self, function):
         """
         Registers a given callable with the server.
+
         :param  callable function: A callable.
         :return: The code of the function.
         :rtype: list
@@ -188,6 +193,7 @@ class RPCFactory:
     def run_function_remotely(self, function, args):
         """
         Handles running the given function on remotely.
+
         :param callable function: A function reference.
         :param tuple(Any) args: The function's arguments.
         :return callable: A remote callable.
@@ -223,6 +229,7 @@ class RPCFactory:
 def remote_call(port, default_imports=None, remap_pairs=None):
     """
     A decorator that makes this function run remotely.
+
     :param Enum port: The name of the port application i.e. maya, blender, unreal.
     :param list[str] default_imports: A list of import commands that include modules in every call.
     :param list(tuple) remap_pairs: A list of tuples with first value being the client file path root and the
@@ -246,6 +253,7 @@ def remote_call(port, default_imports=None, remap_pairs=None):
 def remote_class(decorator):
     """
     A decorator that makes this class run remotely.
+
     :param remote_call decorator: The remote call decorator.
     :return: A decorated class.
     """
@@ -270,6 +278,7 @@ class RPCTestCase(unittest.TestCase):
     def run_remotely(cls, method, args):
         """
         Run the given method remotely.
+
         :param callable method: A method to wrap.
         """
         default_imports = cls.__dict__.get('default_imports', None)
@@ -304,6 +313,7 @@ class RPCTestCase(unittest.TestCase):
         Overrides the TestCase._callTestMethod method by capturing the test case method that would be run and then
         passing it to be run remotely. Notice no arguments are passed. This is because only static methods
         are allowed by the RPCClient.
+
         :param callable method: A method from the test case.
         """
         self.run_remotely(method, [])

@@ -76,6 +76,10 @@ class CombineMeshesExtension(ExtensionBase):
                     path, ext = os.path.splitext(asset_data['file_path'])
                     asset_folder = asset_data['asset_folder']
 
+                    # select the corresponding collisions for each selected child mesh
+                    for selected_mesh in bpy.context.selected_objects:
+                        utilities.select_asset_collisions(selected_mesh.name, properties)
+
                     self.update_asset_data({
                         'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}{ext}'),
                         'asset_path': f'{asset_folder}{mesh_object.parent.name}'

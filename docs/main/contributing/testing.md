@@ -85,3 +85,4 @@ specific cases with `EXCLUSIVE_TESTS` can be beneficial.
 | `HOST_TEST_FOLDER`     | The path on disk to the repo tests folder | The current working directory |
 | `CONTAINER_TEST_FOLDER`     | The path in the container where the repo tests folder is mounted |  `/tmp/blender_tools/tests` |
 | `RPC_TIME_OUT` | When running a Non-Blocking server, the is a timeout value for command execution. If a command has been sent from the client, the server will try to give the client the response up until 20 seconds has passed. Once the response or timeout has been reached, the server will let the event loop of the DCC continue again.| `20` |
+| `RPC_EXECUTION_HISTORY_FILE` | Lets you specify a file path to write out the python execution history by the rpc module. This is useful for debugging.| `None` |
