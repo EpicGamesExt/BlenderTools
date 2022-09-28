@@ -89,6 +89,12 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
             'SK_Mannequin_Female'
         ], 'Export')
 
+        self.move_to_collection([
+            'back_curves',
+            'shoulder_curves'
+        ], 'Export')
+
+
         self.run_groom_tests({
             'SK_Mannequin_LOD1': {
                 'curves': ['back_curves', 'shoulder_curves'],
