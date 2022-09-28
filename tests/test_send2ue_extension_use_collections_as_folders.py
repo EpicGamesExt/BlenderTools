@@ -5,7 +5,10 @@ from test_send2ue_mannequins import TestSend2UeMannequins
 
 class TestSend2UeExtensionCollectionsAsFoldersBase(BaseSend2ueTestCaseCore, BaseSend2ueTestCase):
     def run_use_collections_as_folders_option_tests(self, objects_and_collections):
-        for object_name, collection_hierarchy in objects_and_collections.items():
+        for object_name, collections_and_groom in objects_and_collections.items():
+            collection_hierarchy = collections_and_groom.get('collections')
+            groom_systems = collections_and_groom.get('grooms')
+
             self.blender.create_scene_collections(collection_hierarchy)
             self.blender.set_scene_collection_hierarchy(collection_hierarchy)
             self.move_to_collection([object_name], collection_hierarchy[-1])
@@ -20,6 +23,12 @@ class TestSend2UeExtensionCollectionsAsFoldersBase(BaseSend2ueTestCaseCore, Base
             # check that the mesh name the object name
             self.assert_mesh_import(object_name)
 
+            # check that the groom assets have the correct binding target mesh
+            for groom in groom_systems:
+                self.assert_binding_asset(groom, object_name)
+
+            self.tearDown()
+
             # turn use collections as folders on
             self.blender.set_addon_property(
                 'scene',
@@ -32,6 +41,10 @@ class TestSend2UeExtensionCollectionsAsFoldersBase(BaseSend2ueTestCaseCore, Base
             mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
             folder_path = mesh_folder_path + '/'.join(collection_hierarchy[1:]) + '/'
             self.assert_asset_exists(object_name, folder_path, True)
+
+            # check that the groom assets have the correct binding target mesh
+            for groom in groom_systems:
+                self.assert_binding_asset(groom, object_name, folder_path)
 
 
 class TestSend2UeExtensionCollectionsAsFoldersCubes(
@@ -57,7 +70,10 @@ class TestSend2UeExtensionCollectionsAsFoldersCubes(
         """
         self.run_use_collections_as_folders_option_tests(
             objects_and_collections={
-                'Cube1_LOD0': ['Export', 'SomeFolder', 'Another']
+                'Cube1_LOD0': {
+                    'collections': ['Export', 'SomeFolder', 'Another'],
+                    'grooms': []
+                }
             })
 
     def test_extension(self):
@@ -97,7 +113,10 @@ class TestSend2UeExtensionCollectionsAsFoldersMannequins(
         self.move_to_collection(['female_root', 'SK_Mannequin_Female'], 'Export')
         self.run_use_collections_as_folders_option_tests(
             objects_and_collections={
-                'SK_Mannequin_Female': ['Export', 'SomeFolder', 'Another']
+                'SK_Mannequin_Female': {
+                    'collections': ['Export', 'SomeFolder', 'Another'],
+                    'grooms': ['particle_hair_head']
+                }
             })
 
     def test_animations(self):

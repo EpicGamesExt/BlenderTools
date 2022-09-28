@@ -730,6 +730,7 @@ def create_groom_data(mesh_objects, curves_objects, properties):
 
             # this is for extensions that might use pre groom export callbacks to populate asset data
             groom_data[asset_id] = {
+                '_asset_type': AssetTypes.GROOM,
                 '_mesh_object_name': mesh_object.name,
                 'converted_curves': curves_object_names
             }

@@ -25,29 +25,36 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.use_collections_as_folders:
-            asset_type = asset_data['_asset_type']
-            if asset_type == AssetTypes.ANIMATION:
+            asset_type = asset_data.get('_asset_type')
+            if asset_type and asset_type == AssetTypes.ANIMATION:
                 object_name = asset_data['_armature_object_name']
                 scene_object = bpy.data.objects.get(object_name)
                 # update skeletal asset path now that it is under new collections path
                 self.update_asset_data({
                     'skeleton_asset_path': utilities.get_skeleton_asset_path(
+                        scene_object,
                         properties,
                         self.get_full_import_path,
-                        scene_object
                     )
                 })
-            else:
-                object_name = asset_data['_mesh_object_name']
-                scene_object = bpy.data.objects.get(object_name)
-                asset_name = utilities.get_asset_name(object_name, properties)
-                # get import path when using blender collections as folders
-                import_path = self.get_full_import_path(properties, asset_type, scene_object)
+            elif asset_type:
+                object_name = asset_data.get('_mesh_object_name')
+                if object_name:
+                    scene_object = bpy.data.objects.get(object_name)
+                    asset_name = utilities.get_asset_name(object_name, properties)
+                    # get import path when using blender collections as folders
+                    import_path = self.get_full_import_path(properties, AssetTypes.MESH, scene_object)
 
-                self.update_asset_data({
-                    'asset_folder': import_path,
-                    'asset_path': f'{import_path}{asset_name}'
-                })
+                    if asset_type == AssetTypes.GROOM:
+                        # correct the target mesh path for groom asset data
+                        self.update_asset_data({
+                            'mesh_asset_path': f'{import_path}{asset_name}'
+                        })
+                    else:
+                        self.update_asset_data({
+                            'asset_folder': import_path,
+                            'asset_path': f'{import_path}{asset_name}'
+                        })
 
     def get_full_import_path(self, properties, asset_type, scene_object):
         """

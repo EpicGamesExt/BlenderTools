@@ -374,12 +374,13 @@ class BaseSend2ueTestCase(BaseTestCase):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
 
-    def assert_binding_asset(self, groom_asset_name, target_mesh_name):
+    def assert_binding_asset(self, groom_asset_name, target_mesh_name, mesh_folder_path=None):
         self.log(f'Checking that binding asset is created correctly for "{groom_asset_name}"...')
 
         binding_asset_name = groom_asset_name + '_binding_asset'
 
-        mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        if not mesh_folder_path:
+            mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
         groom_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
 
         self.assert_asset_exists(binding_asset_name, groom_folder_path, True)

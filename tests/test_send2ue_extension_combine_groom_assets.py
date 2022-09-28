@@ -136,6 +136,30 @@ class TestSend2UeExtensionCombineGroomAssetsMannequins(
     TestSend2UeMannequins,
     TestSend2UeExtensionCombineGroomAssetsBase
 ):
+    def test_extension(self):
+        """
+        Checks that the combine groom assets extension loaded properly.
+        """
+        self.run_extension_tests({
+            'default': {
+                'combine_groom_assets': {
+                    'properties': {
+                        'combine_groom_assets': 'off'
+                    },
+                    'tasks': [
+                        'pre_operation',
+                        'filter_objects',
+                        'pre_groom_export',
+                        'post_groom_export',
+                        'post_import'
+                    ],
+                    'draws': [
+                        'draw_export'
+                    ]
+                }
+            }
+        })
+
     """
     Runs several test cases with the use immediate parent name extension on the mannequin meshes.
     """
@@ -212,17 +236,17 @@ class TestSend2UeExtensionCombineGroomAssetsMannequins(
                 combine_option=option
             )
 
-    # def test_animations(self):
-    #     """
-    #     Sends the mannequin animations to unreal with various options and ensures they are identical.
-    #     """
-    #     # disable the auto remove option so the tests get the right animations
-    #     self.blender.set_addon_property('scene', 'send2ue', 'auto_remove_original_asset_names', False)
-    #
-    #     self.run_animation_tests({
-    #         'SK_Mannequin_Female': {
-    #             'rig': 'female_root',
-    #             'animations': ['third_person_run_01', 'third_person_walk_01'],
-    #             'bones': ['pelvis', 'calf_r', 'hand_l'],
-    #             'frames': [1, 5, 14]
-    #         }})
+    def test_animations(self):
+        """
+        Sends the mannequin animations to unreal with various options and ensures they are identical.
+        """
+        # disable the auto remove option so the tests get the right animations
+        self.blender.set_addon_property('scene', 'send2ue', 'auto_remove_original_asset_names', False)
+
+        self.run_animation_tests({
+            'SK_Mannequin_Female': {
+                'rig': 'female_root',
+                'animations': ['third_person_run_01', 'third_person_walk_01'],
+                'bones': ['pelvis', 'calf_r', 'hand_l'],
+                'frames': [1, 5, 14]
+            }})
