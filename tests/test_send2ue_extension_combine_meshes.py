@@ -117,7 +117,7 @@ class TestSend2UeExtensionCombineMeshesMannequins(
         self.run_combine_child_meshes_tests(
             asset_name='SK_Mannequin_Female',
             parent='female_root',
-            children=['SK_Mannequin_Female', 'Head'],
+            children=['SK_Mannequin_Female', 'SK_Mannequin_Female_Head'],
             mesh_type='skeletal_mesh'
         )
 

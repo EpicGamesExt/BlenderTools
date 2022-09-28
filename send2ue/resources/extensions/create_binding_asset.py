@@ -26,9 +26,10 @@ class CreateBindingAsset(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.create_binding_asset and asset_data.get('groom'):
-            groom_asset_path = asset_data['asset_path']
-            mesh_asset_path = asset_data['mesh_asset_path']
-            UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+            groom_asset_path = asset_data.get('asset_path')
+            mesh_asset_path = asset_data.get('mesh_asset_path')
+            if groom_asset_path and mesh_asset_path:
+                UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
 
     def draw_import(self, dialog, layout, properties):
         """

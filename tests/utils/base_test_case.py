@@ -339,7 +339,8 @@ class BaseSend2ueTestCase(BaseTestCase):
         # delete all folders
         for property_name in [
             'unreal_mesh_folder_path',
-            'unreal_animation_folder_path'
+            'unreal_animation_folder_path',
+            'unreal_groom_folder_path'
         ]:
             unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
             self.unreal.delete_directory(unreal_folder_path)
@@ -372,6 +373,29 @@ class BaseSend2ueTestCase(BaseTestCase):
     def assert_groom_import(self, asset_name, exists=True):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
+
+    def assert_binding_asset(self, groom_asset_name, target_mesh_name):
+        self.log(f'Checking that binding asset is created correctly for "{groom_asset_name}"...')
+
+        binding_asset_name = groom_asset_name + '_binding_asset'
+
+        mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        groom_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
+
+        self.assert_asset_exists(binding_asset_name, groom_folder_path, True)
+
+        groom_assert_path = groom_folder_path + groom_asset_name
+        target_mesh_path = mesh_folder_path + target_mesh_name
+        binding_asset_path = groom_folder_path + binding_asset_name
+
+        self.assertTrue(
+            self.unreal.has_binding_groom_asset(binding_asset_path, groom_assert_path),
+            f'The groom asset "{groom_asset_name}" is not set for "{binding_asset_name}"!'
+        )
+        self.assertTrue(
+            self.unreal.has_binding_target(binding_asset_path, target_mesh_path),
+            f'The target mesh "{target_mesh_name}" is not set for "{binding_asset_name}"!'
+        )
 
     def assert_mesh_origin(self, asset_name, origin):
         self.log(f'Checking "{asset_name}" for matching origins...')
@@ -417,16 +441,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             collision_info.get('simple'),
             f'The simple collision count is not correct.'
         )
-
-    def assert_import_groom(self, particle_systems, exists):
-        self.send2ue_operation()
-        if exists:
-            self.log(f'Checking that particles systems were imported as groom...')
-        else:
-            self.log(f'Checking that particles systems were not imported as groom...')
-
-        for particle_system in particle_systems:
-            self.assert_groom_import(particle_system, exists)
 
     def assert_material(self, asset_name, material_name, material_index, exists):
         self.log(f'Checking for material slot "{material_name}" on "{asset_name}"...')
@@ -707,15 +721,18 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.assert_solo_track(rig_name, animation_names)
 
     def run_groom_tests(self, meshes_and_particles):
-        for mesh, particle_system in meshes_and_particles.items():
-            curves = particle_system.get('curves')
-            particle_hair = particle_system.get('particle_hair')
-            particle_emitter = particle_system.get('particle_emitter')
+        self.send2ue_operation()
 
-            self.move_to_collection([mesh, curves], 'Export')
+        for mesh, particle_systems in meshes_and_particles.items():
+            curves = particle_systems.get('curves')
+            particle_hair = particle_systems.get('particle_hair')
+            particle_emitter = particle_systems.get('particle_emitter')
 
-            self.assert_import_groom(particle_hair + curves, True)
-            self.assert_import_groom(particle_emitter, False)
+            for hair_particle in particle_hair + curves:
+                self.assert_groom_import(hair_particle, True)
+
+            for emitter in particle_emitter:
+                self.assert_groom_import(emitter, False)
 
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():
@@ -942,6 +959,10 @@ class SkipSend2UeTests(unittest.TestCase):
 
     @unittest.skip
     def test_animations(self):
+        pass
+
+    @unittest.skip
+    def test_grooms(self):
         pass
 
     @unittest.skip

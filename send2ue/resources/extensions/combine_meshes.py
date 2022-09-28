@@ -24,12 +24,13 @@ class CombineMeshesExtension(ExtensionBase):
 
         :param list[object] armature_objects: A list of armature objects.
         :param list[object] mesh_objects: A list of mesh objects.
-        :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
-        :rtype: tuple(list, list)
+        :returns: A tuple which contains filtered lists of armature objects, mesh objects and groom surface objects.
+        :rtype: tuple(list, list, list)
         """
+        groom_surface_objects = mesh_objects
         if self.combine_child_meshes:
-            mesh_objects = self.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
-        return armature_objects, mesh_objects
+            mesh_objects = utilities.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
+        return armature_objects, mesh_objects, groom_surface_objects
 
     def pre_operation(self, properties):
         """
@@ -79,34 +80,3 @@ class CombineMeshesExtension(ExtensionBase):
                         'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}{ext}'),
                         'asset_path': f'{asset_folder}{mesh_object.parent.name}'
                     })
-
-    @staticmethod
-    def get_unique_parent_mesh_objects(rig_objects, mesh_objects):
-        """
-        Gets only meshes that have a unique same armature parent.
-
-        :param list rig_objects: A list of rig objects.
-        :param list mesh_objects: A list of mesh objects.
-        :returns: A list of mesh objects.
-        :rtype: list
-        """
-        unique_parent_armatures = []
-        unique_parent_empties = []
-        meshes_with_unique_parents = []
-        for mesh_object in mesh_objects:
-            if mesh_object.parent:
-                # for static meshes it combines by empty
-                if mesh_object.parent.type == 'EMPTY' and mesh_object.parent not in unique_parent_empties:
-                    meshes_with_unique_parents.append(mesh_object)
-                    unique_parent_empties.append(mesh_object.parent)
-
-                # for skeletal meshes it combines by armature
-                if mesh_object.parent.type == 'ARMATURE' and (
-                    mesh_object.parent in rig_objects and mesh_object.parent not in unique_parent_armatures
-                ):
-                    meshes_with_unique_parents.append(mesh_object)
-                    unique_parent_armatures.append(mesh_object.parent)
-            else:
-                meshes_with_unique_parents.append(mesh_object)
-
-        return meshes_with_unique_parents

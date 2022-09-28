@@ -21,19 +21,21 @@ def import_asset(asset_id, property_data):
     # get the asset data
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
 
-    # import the asset
-    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)
+    # if file_path is not populated, skip import
+    file_path = asset_data.get('file_path')
+    if file_path:
+        # import the asset
+        UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
 
-    # import fcurves
-    if asset_data.get('fcurve_file_path'):
-        UnrealRemoteCalls.import_animation_fcurves(
-            asset_data.get('asset_path'),
-            asset_data.get('fcurve_file_path')
-        )
+        # import fcurves
+        if asset_data.get('fcurve_file_path'):
+            UnrealRemoteCalls.import_animation_fcurves(
+                asset_data.get('asset_path'),
+                asset_data.get('fcurve_file_path')
+            )
 
-    # TODO: post import extension using Unreal class to create bp assets with skeletal mesh component
-    # run the post import extensions
-    extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
+        # run the post import extensions
+        extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
 
 
 @track_progress(message='Creating static mesh sockets for "{attribute}"...', attribute='asset_path')
@@ -123,10 +125,7 @@ def assets(properties):
             PathModes.SEND_TO_PROJECT.value,
             PathModes.SEND_TO_DISK_THEN_PROJECT.value
         ]:
-            for asset_data in bpy.context.window_manager.send2ue.asset_data.values():
-                # get the asset id
-                asset_id = get_asset_id(asset_data.get('file_path'))
-
+            for asset_id, asset_data in bpy.context.window_manager.send2ue.asset_data.items():
                 # imports static mesh, skeletal mesh, animation or groom
                 import_asset(asset_id, property_data)
 

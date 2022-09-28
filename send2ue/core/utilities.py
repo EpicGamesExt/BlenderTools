@@ -54,7 +54,8 @@ def get_asset_name_from_file_name(file_path):
     :param str file_path: A file path.
     :return str: A asset name.
     """
-    return os.path.splitext(os.path.basename(file_path))[0]
+    if file_path:
+        return os.path.splitext(os.path.basename(file_path))[0]
 
 
 def get_operator_class_by_bl_idname(bl_idname):
@@ -144,7 +145,7 @@ def get_export_folder_path(properties, asset_type):
     return export_folder
 
 
-def get_import_path(properties, asset_type, scene_object = None):
+def get_import_path(properties, asset_type, scene_object=None):
     """
     Gets the unreal import path.
 
@@ -156,11 +157,11 @@ def get_import_path(properties, asset_type, scene_object = None):
     if asset_type == AssetTypes.ANIMATION:
         game_path = properties.unreal_animation_folder_path
 
-    elif asset_type == AssetTypes.MESH:
-        game_path = properties.unreal_mesh_folder_path
-
     elif asset_type == AssetTypes.GROOM:
         game_path = properties.unreal_groom_folder_path
+
+    else:
+        game_path = properties.unreal_mesh_folder_path
 
     return game_path
 
@@ -311,8 +312,8 @@ def get_pose(rig_object):
 
 def get_from_collection(object_type, properties):
     """
-    This function fetches the objects inside each collection according to type and returns the
-    the list of object references.
+    This function fetches the objects inside each collection according to type and returns
+    an alphabetically sorted list of object references.
 
     :param str object_type: The object type you would like to get.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
@@ -333,7 +334,7 @@ def get_from_collection(object_type, properties):
                     if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
                         # add it to the group of objects
                         collection_objects.append(collection_object)
-    return collection_objects
+    return sorted(collection_objects, key=lambda obj: obj.name)
 
 
 def get_meshes_using_armature_modifier(rig_object, properties):
@@ -350,6 +351,25 @@ def get_meshes_using_armature_modifier(rig_object, properties):
         if rig_object == get_armature_modifier_rig_object(mesh_object):
             child_meshes.append(mesh_object)
     return child_meshes
+
+
+def get_rig_child_meshes(rig_object, index=None):
+    """
+    This function gets child meshes of a rig object. If an index is provided, the function returns
+    the child mesh at the index.
+
+    :param object rig_object: An object of type armature.
+    :param int index: An index of a list.
+    :return str or list: A list of objects using the given rig in an armature modifier.
+    """
+    if rig_object.type == AssetTypes.SKELETON:
+        child_meshes = list(filter(lambda obj: obj.type == AssetTypes.MESH, rig_object.children))
+        if index is not None:
+            if len(child_meshes) > index:
+                return child_meshes[index]
+            else:
+                return None
+        return child_meshes
 
 
 def get_asset_name(asset_name, properties, lod=False):
@@ -390,7 +410,7 @@ def get_parent_collection(scene_object, collection):
         return collection
 
 
-def get_skeleton_asset_path(rig_object, properties, get_path_function = get_import_path):
+def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path):
     """
     Gets the asset path to the skeleton.
 
@@ -445,6 +465,97 @@ def get_armature_modifier_rig_object(mesh_object):
             return modifier.object
 
     return None
+
+
+def get_unique_parent_mesh_objects(rig_objects, mesh_objects):
+    """
+    Gets only meshes that have a unique same armature parent.
+
+    :param list rig_objects: A list of rig objects.
+    :param list mesh_objects: A list of mesh objects.
+    :returns: A list of mesh objects.
+    :rtype: list
+    """
+    unique_parent_armatures = []
+    unique_parent_empties = []
+    meshes_with_unique_parents = []
+    for mesh_object in mesh_objects:
+        if mesh_object.parent:
+            # for static meshes it combines by empty
+            if mesh_object.parent.type == 'EMPTY' and mesh_object.parent not in unique_parent_empties:
+                meshes_with_unique_parents.append(mesh_object)
+                unique_parent_empties.append(mesh_object.parent)
+
+            # for skeletal meshes it combines by armature
+            if mesh_object.parent.type == 'ARMATURE' and (
+                mesh_object.parent in rig_objects and mesh_object.parent not in unique_parent_armatures
+            ):
+                meshes_with_unique_parents.append(mesh_object)
+                unique_parent_armatures.append(mesh_object.parent)
+        else:
+            meshes_with_unique_parents.append(mesh_object)
+
+    return meshes_with_unique_parents
+
+
+def get_all_children(scene_object, object_type, properties, exclude_postfix_tokens=False):
+    """
+    Gets all children of a scene object.
+
+    :param object scene_object: A object.
+    :param str object_type: The type of object to select.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param bool exclude_postfix_tokens: Whether or not to exclude objects that have a postfix token.
+    :return list child_objects: A list of child objects of the scene object.
+    """
+    child_objects = []
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object, properties)
+    for child_object in children:
+        if child_object.type == object_type:
+            if exclude_postfix_tokens:
+                if any(child_object.name.startswith(f'{token.value}_') for token in PreFixToken):
+                    continue
+
+            child_objects.append(child_object)
+            if child_object.children:
+                get_all_children(child_object, object_type, properties, exclude_postfix_tokens)
+
+    return child_objects
+
+
+def get_particle_systems(mesh_object, particle_type, index=None):
+    """
+    Gets particle systems of a certain type on a mesh. If an index is provided, the method returns the particle system
+    at the specified index. Particle systems are sorted in creation order by blender.
+
+    :param object mesh_object: A mesh object
+    :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param int index: An index.
+    :return particle or list(particle): A particle system or a list of particle systems.
+    """
+    systems = list(filter(lambda particle: particle.settings.type == particle_type, mesh_object.particle_systems))
+    if index is not None:
+        if len(systems) > index:
+            return systems[index]
+        else:
+            return None
+    return systems
+
+
+def get_particle_modifiers(mesh_object, particle_type):
+    """
+    Gets particle modifiers and the associated particle systems on a mesh as a list of tuples.
+
+    :param object mesh_object: A mesh object
+    :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
+    """
+    particle_systems = []
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            if modifier.particle_system.settings.type == particle_type:
+                particle_systems.append((modifier, modifier.particle_system))
+    return particle_systems
 
 
 def set_to_title(text):
@@ -750,28 +861,31 @@ def remove_unpacked_files(unpacked_files):
             remove_from_disk(folder, directory=True)
 
 
-def remove_particle_system(particle_name, mesh_object):
+def remove_particle_systems(particle_names, mesh_objects):
     """
-    Removes a particle system on a mesh object.
+    Removes particle systems with certain names on each mesh object in the list mesh_objects.
 
-    :param str particle_name: The name of the particle system to be removed.
-    :param str mesh_object: The name of the mesh object with the particle system.
+    :param list(str) particle_names: A list of the particle system names to be removed.
+    :param str mesh_objects: The name of the mesh object with the particle system.
     """
-    # deselect everything
-    deselect_all_objects()
+    for mesh_object in mesh_objects:
+        # deselect everything
+        deselect_all_objects()
 
-    # select the scene object
-    mesh_object.select_set(True)
-    bpy.context.view_layer.objects.active = mesh_object
+        # select the scene object
+        mesh_object.select_set(True)
+        bpy.context.view_layer.objects.active = mesh_object
 
-    # get index of hair particle to be deleted
-    particle_list = mesh_object.particle_systems.keys()
-    particle_index = particle_list.index(particle_name)
+        for particle_name in particle_names:
+            if mesh_object.particle_systems.get(particle_name):
+                # get index of hair particle to be deleted
+                particle_list = mesh_object.particle_systems.keys()
+                particle_index = particle_list.index(particle_name)
 
-    # select hair particle to be deleted
-    mesh_object.particle_systems.active_index = particle_index
-    # remove the active particle system
-    bpy.ops.object.particle_system_remove()
+                # select hair particle to be deleted
+                mesh_object.particle_systems.active_index = particle_index
+                # remove the active particle system
+                bpy.ops.object.particle_system_remove()
 
 
 def refresh_all_areas():
@@ -878,20 +992,28 @@ def convert_unreal_to_blender_location(location):
     return [x, -y, z]
 
 
-def convert_curves_to_particle_system(curves_object):
+def convert_curves_to_particle_systems(curves_objects):
     """
-    Converts a curves object to a particle system on the mesh it's surfaced to.
+    Converts curves objects to particle systems on the mesh they are surfaced to and returns the names of the converted
+    curves in a list.
 
-    :param object curves_object: A curves object.
+    :param object curves_objects: A list of curves objects.
+    :return list(str) curves_object_names: A list of strings that are the names of the converted curves objects.
     """
-    # deselect everything
-    deselect_all_objects()
-    # select the curves object
-    curves_object.select_set(True)
-    bpy.context.view_layer.objects.active = curves_object
+    curves_object_names = []
+    for curves_object in curves_objects:
+        # deselect everything
+        deselect_all_objects()
+        # select the curves object
+        curves_object.select_set(True)
+        bpy.context.view_layer.objects.active = curves_object
 
-    # convert to a particle system
-    bpy.ops.curves.convert_to_particle_system()
+        # convert to a particle system
+        bpy.ops.curves.convert_to_particle_system()
+
+        curves_object_names.append(curves_object.name)
+
+    return curves_object_names
 
 
 def addon_enabled(*args):

@@ -22,6 +22,7 @@ def run_extension_filters(armature_objects, mesh_objects):
     :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
     :rtype: tuple(list, list)
     """
+    groom_surface_objects = mesh_objects
     for attribute in dir(bpy.context.scene.send2ue.extensions):
         filter_objects = getattr(
             getattr(bpy.context.scene.send2ue.extensions, attribute, object),
@@ -29,13 +30,22 @@ def run_extension_filters(armature_objects, mesh_objects):
             None
         )
         if filter_objects:
-            filtered_armature_objects, filtered_mesh_objects = filter_objects(armature_objects, mesh_objects)
+            filtered_armature_objects, filtered_mesh_objects, filtered_groom_surface_objects = filter_objects(
+                armature_objects,
+                mesh_objects
+            )
 
             # get the intersection of the previous list values and the new filtered
             armature_objects = set(armature_objects).intersection(filtered_armature_objects)
             mesh_objects = set(mesh_objects).intersection(filtered_mesh_objects)
+            groom_surface_objects = set(groom_surface_objects).intersection(filtered_groom_surface_objects)
 
-    return list(armature_objects), list(mesh_objects)
+            # reorder the objects by name
+            armature_objects = sorted(armature_objects, key=lambda obj: obj.name)
+            mesh_objects = sorted(mesh_objects, key=lambda obj: obj.name)
+            groom_surface_objects = sorted(groom_surface_objects, key=lambda obj: obj.name)
+
+    return list(armature_objects), list(mesh_objects), list(groom_surface_objects)
 
 
 def run_extension_tasks(name_space):
@@ -242,6 +252,16 @@ class ExtensionBase:
         asset_id = bpy.context.window_manager.send2ue.asset_id
         bpy.context.window_manager.send2ue.asset_data[asset_id].update(asset_data)
 
+    def del_asset_data_items(self, keys):
+        """
+        Deletes items from asset data dictionary on the current asset.
+
+        :param list type(str) keys: Keys of items to delete from asset data.
+        """
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        for key in keys:
+            bpy.context.window_manager.send2ue.asset_data[asset_id].pop(key, None)
+
 
 class ExtensionCollector(ast.NodeVisitor):
     """
@@ -382,6 +402,9 @@ class ExtensionFactory:
 
             # add the update asset method to the class
             data[Extensions.NAME][extension_class.name]['update_asset_data'] = ExtensionBase.update_asset_data
+
+            # add the del asset data items method to the class
+            data[Extensions.NAME][extension_class.name]['del_asset_data_items'] = ExtensionBase.del_asset_data_items
 
         return settings.create_property_group_class(
             class_name=f"{ToolInfo.NAME.value}SettingsGroup",

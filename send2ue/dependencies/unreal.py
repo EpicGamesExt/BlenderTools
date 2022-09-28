@@ -745,6 +745,39 @@ class UnrealRemoteCalls:
         return bool(mesh.find_socket(socket_name))
 
     @staticmethod
+    def has_binding_groom_asset(binding_asset_path, groom_asset_path):
+        """
+        Checks to see if the binding asset at binding_asset_path has the groom asset set at groom_asset_path.
+
+        :param str binding_asset_path: The path to the unreal binding asset.
+        :param str groom_asset_path: The path to the unreal groom asset.
+        :return bool: Whether or not the binding asset has the given groom.
+        """
+        binding_asset = unreal.load_asset(binding_asset_path)
+        groom_asset = unreal.load_asset(groom_asset_path)
+
+        if binding_asset and groom_asset:
+            return bool(binding_asset.get_editor_property('groom') == groom_asset)
+        return False
+
+    @staticmethod
+    def has_binding_target(binding_asset_path, target_mesh_path):
+        """
+        Checks to see if the binding asset at binding_asset_path has the target skeletal mesh asset
+        set at target_mesh_path.
+
+        :param str binding_asset_path: The path to the unreal binding asset.
+        :param str target_mesh_path: The path to the unreal skeletal mesh asset.
+        :return bool: Whether or not the binding asset has the given skeletal mesh target.
+        """
+        binding_asset = unreal.load_asset(binding_asset_path)
+        mesh_asset = unreal.load_asset(target_mesh_path)
+
+        if binding_asset and mesh_asset:
+            return bool(binding_asset.get_editor_property('target_skeletal_mesh') == mesh_asset)
+        return False
+
+    @staticmethod
     def delete_asset(asset_path):
         """
         Deletes an asset in unreal.

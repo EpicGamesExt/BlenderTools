@@ -418,8 +418,6 @@ def export_file(properties, lod=0):
 
     # if the folder does not exists create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
-    # TODO: replace
-    # os.makedirs(self.disk_folder, exist_ok=True)
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
@@ -528,43 +526,43 @@ def export_animation(asset_id, rig_object, action_name, properties):
 
 
 @utilities.track_progress(message='Exporting hair "{attribute}"...', attribute='file_path')
-def export_hair(asset_id, mesh_object, curves_object_names, properties):
+def export_hair(asset_id, mesh_object, properties):
     """
     Exports a mesh to a file.
 
     :param str asset_id: The unique id of the asset.
     :param object mesh_object: A object of type mesh.
-    :param list curves_object_names: A list of all curves object names.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    # run the pre groom export extensions
-    extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
     # deselect everything
     utilities.deselect_all_objects()
 
-    # select the scene object
-    mesh_object.select_set(True)
-    bpy.context.view_layer.objects.active = mesh_object
-
-    # get file path to export
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-    file_path = asset_data['file_path']
-
-    # if the folder does not exist create it
-    folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    # export the abc file
-    export_alembic_file(file_path, properties)
-
     # run the pre groom export extensions
-    extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)
+    extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
 
-    # delete particle systems that were converted from curves objects
-    for curves_object_name in curves_object_names:
-        if mesh_object.particle_systems.get(curves_object_name):
-            utilities.remove_particle_system(curves_object_name, mesh_object)
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+
+    # only export if asset_data contains file_path attribute
+    file_path = asset_data.get('file_path')
+    if file_path:
+        # select the scene object if there is particle systems present
+        if len(mesh_object.particle_systems) > 0:
+            mesh_object.select_set(True)
+
+        # if the folder does not exist create it
+        folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        # export the abc file
+        export_alembic_file(file_path, properties)
+
+        # run the pre groom export extensions
+        extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)
+
+        # delete particle systems that were converted from curves objects
+        curves_object_names = asset_data['converted_curves']
+        utilities.remove_particle_systems(curves_object_names, [mesh_object])
 
 
 def create_animation_data(rig_objects, properties):
@@ -681,92 +679,102 @@ def create_groom_data(mesh_objects, curves_objects, properties):
     :return list: A list of dictionaries containing the groom import data.
     """
     groom_data = {}
-    curves_object_names = []
 
-    # convert curves objects to particle systems
-    for curves_object in curves_objects:
-        utilities.convert_curves_to_particle_system(curves_object)
-        # store the converted curves object name for deletion post export
-        curves_object_names.append(curves_object.name)
+    # convert curves objects to particle systems and store the names of the converted curves objects
+    curves_object_names = utilities.convert_curves_to_particle_systems(curves_objects)
 
-    # get the asset data for the scene objects
     for mesh_object in mesh_objects:
-        # only export particle systems on meshes that are lod 0
+        # only export particle systems on meshes that are lod 0 if lod option is on
         if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
             continue
         # turn show_emitter off in particle system render settings
         mesh_object.show_instancer_for_render = False
 
-        modifiers = list(bpy.data.objects[mesh_object.name].modifiers)
-        particle_modifiers = list(filter(lambda mod: type(mod) == bpy.types.ParticleSystemModifier, modifiers))
+        # get all particle systems of type 'HAIR' and its modifier on the current mesh
+        hair_systems = utilities.get_particle_modifiers(mesh_object, 'HAIR')
 
-        # get all particle systems of type 'HAIR' on the current mesh
-        hair_particle_systems = []
-        for modifier in particle_modifiers:
-            particle_system = modifier.particle_system
-            if particle_system.settings.type == 'HAIR':
-                hair_particle_systems.append((modifier, particle_system))
+        if len(hair_systems) > 0:
+            groom_systems_data = {}
+            # get head particle from the particle system list sorted by creation order
+            head_particle = utilities.get_particle_systems(mesh_object, 'HAIR', index=0)
 
-        if len(hair_particle_systems) > 0:
-            # get head particle
-            head_particle = list(bpy.data.objects[mesh_object.name].particle_systems)[0]
-
-            groom_assets_data = {}
-            # populate groom_assets_data dictionary, storing assets data of particle systems on the current mesh
-            for modifier, particle in hair_particle_systems:
+            # populate groom_systems_data dictionary, storing assets data of particle systems on the current mesh
+            for modifier, particle in hair_systems:
                 # get file path and asset id
                 file_path = get_file_path(particle.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
                 asset_id = utilities.get_asset_id(file_path)
-                # create groom asset data in groom_assets_data dictionary
-                groom_assets_data[asset_id] = create_groom_asset_data(
-                    file_path,
+                # create groom asset data in groom_systems_data dictionary
+                groom_systems_data[asset_id] = create_groom_system_data(
+                    properties,
                     particle.name,
-                    modifier.name,
                     mesh_object.name,
-                    properties
+                    modifier.name
                 )
                 # if this is the head particle, add created groom asset data to groom_data dictionary to be returned
                 if particle == head_particle:
-                    groom_data[asset_id] = dict(groom_assets_data[asset_id])
+                    groom_data[asset_id] = dict(groom_systems_data[asset_id])
                     head_particle_id = asset_id
 
-            # append groom_assets_data dictionary as an attribute to head particle's asset data
+            # append groom_systems_data dictionary as an attribute to head particle's asset data
             groom_data[head_particle_id].update({
-                'groom_assets_data': groom_assets_data
+                'groom_systems_data': groom_systems_data,
+                'converted_curves': curves_object_names
             })
             # export particle hair systems as alembic file
-            export_hair(head_particle_id, mesh_object, curves_object_names, properties)
+            export_hair(head_particle_id, mesh_object, properties)
+
+        # when there is no hair systems surfaced on the current mesh
+        else:
+            temp_path = get_file_path(mesh_object.name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
+            asset_id = utilities.get_asset_id(temp_path)
+
+            # this is for extensions that might use pre groom export callbacks to populate asset data
+            groom_data[asset_id] = {
+                '_mesh_object_name': mesh_object.name,
+                'converted_curves': curves_object_names
+            }
+            # export particle hair systems as alembic file
+            export_hair(asset_id, mesh_object, properties)
 
     return groom_data
 
 
-def create_groom_asset_data(file_path, hair_name, modifier_name, mesh_object_name, properties):
+def create_groom_system_data(properties, hair_name, mesh_object_name=None, modifier_name=None):
     """
-    Creates asset data for a groom asset.
+    Returns a dictionary that is the asset data for a groom system.
 
-    :param str file_path: the export path for the alembic file.
-    :param str hair_name: the name of the particle system.
-    :param str modifier_name: the name of the modifier controlling the particle system.
-    :param str mesh_object_name: the name of the mesh that the particle system is surfaced on.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str hair_name: the name of the particle system.
+    :param str mesh_object_name: the name of the mesh that the particle system is surfaced on.
+    :param str modifier_name: the name of the modifier controlling the particle system.
     :return dict: A dictionary of groom import data.
     """
     groom_import_path = utilities.get_import_path(properties, AssetTypes.GROOM)
-    mesh_import_path = utilities.get_import_path(properties, AssetTypes.MESH)
     groom_asset_name = utilities.get_asset_name(hair_name, properties)
-    mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
+
+    file_path = get_file_path(hair_name, properties, AssetTypes.GROOM, lod=False, file_extension='abc')
 
     asset_data = {
         '_asset_type': AssetTypes.GROOM,
         '_hair_particle_name': hair_name,
-        '_modifier_name': modifier_name,
-        '_mesh_object_name': mesh_object_name,
         'file_path': file_path,
         'asset_folder': groom_import_path,
         'asset_path': f'{groom_import_path}{groom_asset_name}',
-        'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}',
         'groom': True
     }
+
+    if mesh_object_name:
+        mesh_import_path = utilities.get_import_path(properties, AssetTypes.MESH)
+        mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
+        asset_data.update({
+            '_mesh_object_name': mesh_object_name,
+            'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}'
+        })
+
+    if modifier_name:
+        asset_data.update({
+            '_modifier_name': modifier_name
+        })
     return asset_data
 
 
@@ -782,7 +790,10 @@ def create_asset_data(properties):
     curves_objects = utilities.get_from_collection(AssetTypes.CURVES, properties)
 
     # filter the rigs and meshes based on the extension filter methods
-    rig_objects, mesh_objects = extension.run_extension_filters(rig_objects, mesh_objects)
+    rig_objects, mesh_objects, groom_surface_objects = extension.run_extension_filters(
+        rig_objects,
+        mesh_objects
+    )
 
     # get the asset data for all the mesh objects
     mesh_data = create_mesh_data(mesh_objects, rig_objects, properties)
@@ -790,8 +801,8 @@ def create_asset_data(properties):
     # get the asset data for all the actions on the rig objects
     animation_data = create_animation_data(rig_objects, properties)
 
-    # get the asset data for all the hair objects
-    hair_data = create_groom_data(mesh_objects, curves_objects, properties)
+    # get the asset data for all the hair systems
+    hair_data = create_groom_data(groom_surface_objects, curves_objects, properties)
 
     # update the properties with the asset data
     bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data, **hair_data})

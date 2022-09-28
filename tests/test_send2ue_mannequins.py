@@ -64,17 +64,53 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
                 'frames': [1, 5, 14]
             }})
 
-    def test_groom(self):
+    def test_grooms(self):
         """
         Sends a mannequin with curves and hair particles to unreal.
         """
-        self.move_to_collection(['male_root'], 'Export')
+        self.move_to_collection([
+            'male_root',
+            'SK_Mannequin_LOD0',
+            'SK_Mannequin_LOD1',
+            'SK_Mannequin_LOD2',
+            'SK_Mannequin_LOD3'
+        ], 'Export')
+
+        self.move_to_collection([
+            'male_root_no_groom',
+            'SK_NG_Mannequin_LOD0',
+            'SK_NG_Mannequin_LOD1',
+            'SK_NG_Mannequin_LOD2',
+            'SK_NG_Mannequin_LOD3'
+        ], 'Export')
+
+        self.move_to_collection([
+            'female_root',
+            'SK_Mannequin_Female'
+        ], 'Export')
+
         self.run_groom_tests({
-            'SK_Mannequin_LOD0': {
+            'SK_Mannequin_LOD1': {
                 'curves': ['back_curves', 'shoulder_curves'],
-                'particle_hair': ['particle_hair_head', 'particle_hair_hand_l', 'particle_hair_hand_r'],
-                'particle_emitter': ['particle_emitter']
-            }})
+                'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
+                'particle_emitter': ['particle_emitter'],
+            },
+            'SK_Mannequin_LOD2': {
+                'curves': [],
+                'particle_hair': ['particle_hair_hand_l'],
+                'particle_emitter': ['particle_emitter2'],
+            },
+            'SK_Mannequin_LOD3': {
+                'curves': [],
+                'particle_hair': [],
+                'particle_emitter': ['particle_emitter3'],
+            },
+            'SK_Mannequin_Female': {
+                'curves': [],
+                'particle_hair': ['particle_hair_head'],
+                'particle_emitter': [],
+            }
+        })
 
     def test_materials(self):
         """
