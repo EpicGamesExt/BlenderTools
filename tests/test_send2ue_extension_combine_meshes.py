@@ -133,5 +133,6 @@ class TestSend2UeExtensionCombineMeshesMannequins(
                 'rig': 'female_root',
                 'animations': ['third_person_run_01', 'third_person_walk_01'],
                 'bones': ['pelvis', 'calf_r', 'hand_l'],
-                'frames': [1, 5, 14]
+                'frames': [1, 5, 14],
+                'grooms': ['particle_hair_head']
             }})

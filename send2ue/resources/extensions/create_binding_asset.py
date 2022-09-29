@@ -25,7 +25,7 @@ class CreateBindingAsset(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        if self.create_binding_asset and asset_data.get('groom'):
+        if self.create_binding_asset and asset_data.get('groom') and properties.import_meshes:
             groom_asset_path = asset_data.get('asset_path')
             mesh_asset_path = asset_data.get('mesh_asset_path')
             if groom_asset_path and mesh_asset_path:

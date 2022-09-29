@@ -425,7 +425,7 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
 
     children = rig_object.children or get_meshes_using_armature_modifier(rig_object, properties)
 
-    if children:
+    if children and properties.import_meshes:
         # get all meshes from the mesh collection
         mesh_collection_objects = get_from_collection(AssetTypes.MESH, properties)
 

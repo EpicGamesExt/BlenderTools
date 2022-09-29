@@ -281,6 +281,11 @@ def get_scene_property_class():
                 "manually edit NLA strips."
             )
         )
+        import_meshes: bpy.props.BoolProperty(
+            name="Meshes",
+            default=True,
+            description="Whether or not to import the meshes from the FBX file"
+        )
         import_materials_and_textures: bpy.props.BoolProperty(
             name="Materials and Textures",
             default=True,
@@ -290,6 +295,11 @@ def get_scene_property_class():
             name="Animations",
             default=True,
             description="Whether or not to import the animation from the FBX file"
+        )
+        import_grooms: bpy.props.BoolProperty(
+            name="Grooms",
+            default=True,
+            description="Whether or not to import groom assets"
         )
         advanced_ui_import: bpy.props.BoolProperty(
             name="Launch FBX Import UI",

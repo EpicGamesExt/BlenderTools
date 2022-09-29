@@ -223,8 +223,10 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
+        self.draw_property(properties, layout, 'import_meshes')
         self.draw_property(properties, layout, 'import_materials_and_textures')
         self.draw_property(properties, layout, 'import_animations')
+        self.draw_property(properties, layout, 'import_grooms')
         self.draw_property(properties, layout, 'advanced_ui_import')
 
         #  fbx import settings box

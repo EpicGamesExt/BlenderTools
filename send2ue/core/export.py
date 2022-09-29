@@ -625,6 +625,9 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
     :return list: A list of dictionaries containing the mesh import data.
     """
     mesh_data = {}
+    if not properties.import_meshes:
+        return mesh_data
+
     previous_asset_names = []
 
     # get the asset data for the scene objects
@@ -679,7 +682,8 @@ def create_groom_data(mesh_objects, curves_objects, properties):
     :return list: A list of dictionaries containing the groom import data.
     """
     groom_data = {}
-
+    if not properties.import_grooms:
+        return groom_data
     # convert curves objects to particle systems and store the names of the converted curves objects
     curves_object_names = utilities.convert_curves_to_particle_systems(curves_objects)
 
