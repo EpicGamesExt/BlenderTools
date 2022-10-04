@@ -392,6 +392,10 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.unreal.has_socket(asset_path, socket_name),
             f'The socket "{socket_name}" could not be found on "{asset_name}" in unreal.'
         )
+        self.assertTrue(
+            self.unreal.has_socket_outer(asset_path, socket_name),
+            f'The socket "{socket_name}" is not owned by "{asset_name}" in unreal.'
+        )
 
     def assert_collision(self, asset_name, simple_count=0, convex_count=0):
         self.log(f'Checking "{asset_name}" for collision...')
