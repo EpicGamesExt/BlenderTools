@@ -672,12 +672,13 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
     return mesh_data
 
 
-def create_groom_data(mesh_objects, curves_objects, properties):
+def create_groom_data(mesh_objects, curves_objects, rig_objects, properties):
     """
     Collects and creates all the asset data needed for the import process.
 
     :param list mesh_objects: A list of mesh objects.
     :param list curves_objects: A list of curves objects.
+    :param list rig_objects: A list of armature objects.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of dictionaries containing the groom import data.
     """
@@ -686,6 +687,13 @@ def create_groom_data(mesh_objects, curves_objects, properties):
         return groom_data
     # convert curves objects to particle systems and store the names of the converted curves objects
     curves_object_names = utilities.convert_curves_to_particle_systems(curves_objects)
+
+    # clear animation transformations prior to export, so groom exports with no distortion
+    for rig_object in rig_objects:
+        if rig_object.animation_data.action:
+            rig_object.animation_data.action = None
+        utilities.set_all_action_mute_values(rig_object, mute=True)
+        utilities.clear_pose(rig_object)
 
     for mesh_object in mesh_objects:
         # only export particle systems on meshes that are lod 0 if lod option is on
@@ -807,7 +815,7 @@ def create_asset_data(properties):
     animation_data = create_animation_data(rig_objects, properties)
 
     # get the asset data for all the hair systems
-    hair_data = create_groom_data(groom_surface_objects, curves_objects, properties)
+    hair_data = create_groom_data(groom_surface_objects, curves_objects, rig_objects, properties)
 
     # update the properties with the asset data
     bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data, **hair_data})

@@ -33,7 +33,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
         self.blender.set_addon_property(
             'scene',
             'send2ue',
-            'extensions.create_binding_asset.create_binding_asset',
+            'extensions.create_post_import_assets_for_groom.binding_asset',
             True
         )
 
@@ -137,12 +137,9 @@ class TestSend2UeExtensionCombineAssetsCubes(
     TestSend2UeCubes,
     TestSend2UeExtensionCombineAssetsBase
 ):
-    """
-    Runs several test cases with the combine assets extension on the cube meshes.
-    """
-
     def test_combine_assets_option(self):
         """
+        Runs several test cases with the combine assets extension on the cube meshes.
         """
         cubes = [
             'Cube1_LOD0',
@@ -222,11 +219,9 @@ class TestSend2UeExtensionCombineAssetsMannequins(
             }
         })
 
-    """
-    Runs several test cases with the combine assets extension on the mannequin meshes.
-    """
     def test_combine_assets_option(self):
         """
+        Runs several test cases with the combine assets extension on the mannequin meshes.
         """
         self.move_to_collection([
             'male_root',

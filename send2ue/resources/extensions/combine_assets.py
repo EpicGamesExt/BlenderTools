@@ -30,28 +30,28 @@ class CombineAssetsExtension(ExtensionBase):
             ),
             (
                 'groom_per_mesh',
-                'Combine groom for each mesh',
+                'Groom for each mesh',
                 'For each mesh in the Export collection, this combines every hair objects/systems surfaced on the mesh as a single groom asset',
                 '',
                 2
             ),
             (
                 'groom_per_combined_mesh',
-                'Combine groom for each combined mesh',
+                'Groom for each combined mesh',
                 'For each empty object or armature parent, this combines its child meshes into a single mesh when exported. For each combined mesh, all hair objects/systems surfaced on it are exported as a single groom asset',
                 '',
                 3
             ),
             (
                 'all_groom',
-                'Combine all groom',
+                'All groom',
                 'Combines all hair particle systems and curves objects in the Export collection into a single groom asset',
                 '',
                 4
             ),
             (
                 'child_meshes_and_all_groom',
-                'Combine child meshes and combine all groom',
+                'Child meshes and all groom',
                 'For each empty object or armature parent, this combines its child meshes into a single mesh when exported. This also combines all hair particles/objects in the Export collection into a single groom asset',
                 '',
                 5
@@ -230,12 +230,13 @@ class CombineAssetsExtension(ExtensionBase):
         if self.combine == Options.GROOM_PER_COMBINED_MESH:
             mesh_object_name = asset_data.get('_mesh_object_name')
             mesh_object = bpy.data.objects.get(mesh_object_name)
-            mesh_objects = utilities.get_all_children(
-                mesh_object.parent,
-                AssetTypes.MESH,
-                properties,
-                exclude_postfix_tokens=True
-            )
+            if mesh_object.parent:
+                mesh_objects = utilities.get_all_children(
+                    mesh_object.parent,
+                    AssetTypes.MESH,
+                    properties,
+                    exclude_postfix_tokens=True
+                )
 
         if self.combine in [Options.ALL_GROOM, Options.CHILD_MESHES_ALL_GROOM]:
             mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
@@ -264,11 +265,18 @@ class CombineAssetsExtension(ExtensionBase):
                         property_data
                     )
                     # if create_binding_asset extension is on, create binding asset for each additional groom asset
-                    if properties.extensions.create_binding_asset.create_binding_asset:
+                    if properties.extensions.create_post_import_assets_for_groom.binding_asset and properties.import_meshes:
                         groom_asset_path = system_data['asset_path']
                         # use mesh_asset_path from asset_data instead of system_data because pre-export could update it
                         mesh_asset_path = asset_data['mesh_asset_path']
-                        UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+                        binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+
+                        if binding_asset_path and properties.extensions.create_post_import_assets_for_groom.blueprint_with_groom:
+                            UnrealRemoteCalls.create_blueprint_with_groom(
+                                groom_asset_path,
+                                mesh_asset_path,
+                                binding_asset_path
+                            )
 
     def export_individual_hair_systems(self, assets_data, properties):
         """

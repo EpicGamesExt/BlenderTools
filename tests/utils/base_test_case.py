@@ -377,7 +377,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def assert_binding_asset(self, groom_asset_name, target_mesh_name, mesh_folder_path=None):
         self.log(f'Checking that binding asset is created correctly for "{groom_asset_name}"...')
 
-        binding_asset_name = groom_asset_name + '_binding_asset'
+        binding_asset_name = groom_asset_name + '_' + target_mesh_name + '_Binding'
 
         if not mesh_folder_path:
             mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
@@ -396,6 +396,39 @@ class BaseSend2ueTestCase(BaseTestCase):
         self.assertTrue(
             self.unreal.has_binding_target(binding_asset_path, target_mesh_path),
             f'The target mesh "{target_mesh_name}" is not set for "{binding_asset_name}"!'
+        )
+
+    def assert_blueprint_asset(self, asset_name, exists=True):
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        self.assert_asset_exists(asset_name, folder_path, exists)
+
+    def assert_blueprint_with_groom(self, blueprint_asset_name, groom_asset_name, binding_asset_name, mesh_asset_name):
+        self.log(f'Checking that groom component "{groom_asset_name}" and mesh component "{mesh_asset_name}" '
+                 f'are created correctly for "{blueprint_asset_name}"...')
+
+        mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        groom_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
+
+        groom_path = groom_folder_path + groom_asset_name
+        binding_path = groom_folder_path + binding_asset_name
+        mesh_path = mesh_folder_path + mesh_asset_name
+        blueprint_path = mesh_folder_path + blueprint_asset_name
+
+        self.assertTrue(
+            self.unreal.has_groom_component(blueprint_path, binding_path, groom_path),
+            f'The groom component "{groom_asset_name}" on blueprint asset "{blueprint_asset_name}" does not exist '
+            f'or have incorrect assets assigned"!'
+        )
+
+        self.assertTrue(
+            self.unreal.has_mesh_component(blueprint_path, mesh_path),
+            f'The skeletal mesh component "{mesh_asset_name}" on blueprint asset "{blueprint_asset_name}" does not '
+            f'exist or have incorrect assets assigned"!'
+        )
+
+        self.assertTrue(
+            self.unreal.has_groom_and_mesh_components(blueprint_path, binding_path, groom_path, mesh_path),
+            f'Component "{groom_asset_name}" is not correctly parented under "{mesh_asset_name}"!'
         )
 
     def assert_mesh_origin(self, asset_name, origin):

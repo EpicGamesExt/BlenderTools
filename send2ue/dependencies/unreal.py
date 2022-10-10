@@ -269,6 +269,61 @@ class Unreal:
         return asset
 
     @staticmethod
+    def get_component_handles(blueprint_asset_path):
+        """
+        Gets all subobject data handles of a blueprint asset.
+
+        :param str blueprint_asset_path: The unreal path to the blueprint asset.
+        :return list(subobjectDataHandle) data_handle: A list of subobject data handles within the blueprint asset.
+        """
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+
+        blueprint_asset = unreal.load_asset(blueprint_asset_path)
+        subobject_data_handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint_asset)
+        return subobject_data_handles
+
+    @staticmethod
+    def get_groom_handle(component_handles, binding_asset_path, groom_asset_path):
+        """
+        Gets the subobject data handle of a groom component from a list of component handles that contains assets drawn
+        from binding_asset_path and groom_asset_path.
+
+        :param str component_handles: A list of component handles.
+        :param str binding_asset_path: The path to the unreal binding asset.
+        :param str groom_asset_path: The path to the unreal groom asset.
+        :return subobjectDataHandle data_handle: The subobject data handle of the groom component.
+        """
+        bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
+
+        for data_handle in component_handles:
+            subobject = bp_subobject_library.get_object(bp_subobject_library.get_data(data_handle))
+            if type(subobject) == unreal.GroomComponent:
+                has_groom = subobject.get_editor_property('groom_asset') == unreal.load_asset(groom_asset_path)
+                has_binding = subobject.get_editor_property('binding_asset') == unreal.load_asset(binding_asset_path)
+                if has_groom and has_binding:
+                    return data_handle
+        return None
+
+    @staticmethod
+    def get_skeletal_mesh_handle(component_handles, mesh_asset_path):
+        """
+        Gets the subobject data handle of a skeletal mesh component from a list of component handles that contains
+        asset drawn from mesh_asset_path.
+
+        :param str component_handles: A list of component handles.
+        :param str mesh_asset_path: The path to the unreal mesh asset.
+        :return subobjectDataHandle data_handle: The subobject data handle of the skeletal mesh component.
+        """
+        bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
+
+        for data_handle in component_handles:
+            subobject = bp_subobject_library.get_object(bp_subobject_library.get_data(data_handle))
+            if type(subobject) == unreal.SkeletalMeshComponent:
+                if subobject.get_skeletal_mesh_asset() == unreal.load_asset(mesh_asset_path):
+                    return data_handle
+        return None
+
+    @staticmethod
     def set_settings(property_group, data_object):
         """
         Sets a group of properties onto an unreal object.
@@ -283,6 +338,20 @@ class Unreal:
             )
             data_object.set_editor_property(attribute, value)
         return data_object
+
+    @staticmethod
+    def is_parent_component_of_child(parent_data_handle, child_data_handle):
+        """
+        Checks to see if the component associated with child_data_handle is parented under a component associated with
+        parent_data_handle.
+
+        :param subobjectDataHandle parent_data_handle: The unreal handle of the parent component.
+        :param subobjectDataHandle child_data_handle: The unreal handle of the child component.
+        :return bool: Whether or not the child_data_handle is a child of parent_data_handle.
+        """
+        bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
+        child_data = bp_subobject_library.get_data(child_data_handle)
+        return bp_subobject_library.is_attached_to(child_data, parent_data_handle)
 
     @staticmethod
     def object_attributes_to_dict(object_instance):
@@ -337,12 +406,13 @@ class Unreal:
 
         mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
         # only create binding asset if the particle system's mesh asset is a skeletal mesh
-        # TODO: in 5.2+ asset_class (5.0.3) is deprecated. Use asset_class_path.asset_name instead.
-        if mesh_asset_data.asset_class == 'SkeletalMesh':
+        if mesh_asset_data.asset_class_path.asset_name == 'SkeletalMesh':
             groom_asset = Unreal.get_asset(groom_asset_path)
             skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
 
-            binding_asset_path = groom_asset_path + '_binding_asset'
+            mesh_asset_name = mesh_asset_path.split('/')[-1]
+
+            binding_asset_path = groom_asset_path + '_' + mesh_asset_name + '_Binding'
             temp_asset_path = binding_asset_path + '_temp'
 
             # renames the existing binding asset (one that had the same name) that will be consolidated
@@ -371,6 +441,158 @@ class Unreal:
                 unreal.EditorAssetLibrary.delete_asset(temp_asset_path)
 
         return binding_asset_path
+
+    @staticmethod
+    def create_blueprint_asset(blueprint_asset_path):
+        """
+        Creates a blueprint asset at the specified path.
+        :param str blueprint_asset_path: The unreal path where the blueprint asset will be created.
+        :return object(Blueprint): The blueprint asset created.
+        """
+        bp_factory = unreal.BlueprintFactory()
+        bp_factory.set_editor_property("parent_class", unreal.Actor)
+
+        return Unreal.create_asset(blueprint_asset_path, None, bp_factory, False)
+
+    @staticmethod
+    def create_blueprint_component(blueprint_asset, parent_handle, component_class, component_name='untitled_component'):
+        """
+        Creates a blueprint component for a blueprint asset.
+
+        :param object(Blueprint) blueprint_asset: The blueprint context for the component to be created.
+        :param SubobjectDataHandle parent_handle: The parent handle of the new component.
+        :param type(Class) component_class: The class of the new subobject (component) that will be created.
+        :param str component_name: The unreal path where the blueprint asset will be created.
+        :return object(component), sub_handle: The component and its data handle.
+        """
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        # add sub object
+        sub_handle, fail_reason = subsystem.add_new_subobject(
+            unreal.AddNewSubobjectParams(
+                parent_handle=parent_handle,
+                new_class=component_class,
+                blueprint_context=blueprint_asset))
+
+        if not fail_reason.is_empty():
+            raise Exception("ERROR from sub_object_subsystem.add_new_subobject: {fail_reason}")
+
+        # Need futher investigation to whether attach_subobject call is actually necessary
+        subsystem.attach_subobject(parent_handle, sub_handle)
+        subsystem.rename_subobject(handle=sub_handle, new_name=unreal.Text(component_name))
+
+        bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
+        component = bp_subobject_library.get_object(bp_subobject_library.get_data(sub_handle))
+
+        return component, sub_handle
+
+    @staticmethod
+    def create_blueprint_for_groom(groom_asset_path, mesh_asset_path, binding_asset_path):
+        """
+        Creates a blueprint asset with a skeletal mesh component that has a child groom component populated by a
+        groom asset and binding asset.
+
+        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
+        :param str binding_asset_path: The unreal asset path to the created binding asset.
+        :return str blueprint_asset_path: The unreal path to the blueprint asset.
+        """
+        groom_asset_name = groom_asset_path.split('/')[-1]
+        mesh_asset_name = mesh_asset_path.split('/')[-1]
+
+        blueprint_asset_path = mesh_asset_path + '_BP'
+        blueprint_asset = Unreal.create_blueprint_asset(blueprint_asset_path)
+
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        root_handle = subsystem.k2_gather_subobject_data_for_blueprint(context=blueprint_asset)[0]
+
+        skeletal_comp, skeletal_comp_handle = Unreal.create_blueprint_component(
+            blueprint_asset,
+            root_handle,
+            unreal.SkeletalMeshComponent,
+            mesh_asset_name
+        )
+
+        # add imported skeletal mesh asset to skeletal mesh component
+        skeletal_comp.set_skeletal_mesh_asset(unreal.load_asset(mesh_asset_path))
+
+        groom_comp, groom_comp_handle = Unreal.create_blueprint_component(
+            blueprint_asset,
+            skeletal_comp_handle,
+            unreal.GroomComponent,
+            groom_asset_name
+        )
+
+        # add binding asset and groom asset to groom component
+        groom_comp.set_groom_asset(unreal.load_asset(groom_asset_path))
+        groom_comp.set_binding_asset(unreal.load_asset(binding_asset_path))
+
+        return blueprint_asset_path
+
+    @staticmethod
+    def add_groom_component_to_blueprint(groom_asset_path, mesh_asset_path, binding_asset_path):
+        """
+        Adds a groom component to a blueprint asset with specific skeletal mesh. If queried blueprint asset does not
+        exist, creates a blueprint asset with a skeletal mesh component that has a child groom component populated by a
+        groom asset and binding asset.
+
+        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
+        :param str binding_asset_path: The unreal asset path to the created binding asset.
+        :return str blueprint_asset_path: The unreal path to the blueprint asset.
+        """
+
+        asset_registry = unreal.AssetRegistryHelpers.get_asset_registry()
+        registry_options = unreal.AssetRegistryDependencyOptions()
+        registry_options.include_hard_package_references = True
+
+        groom_asset_name = groom_asset_path.split('/')[-1]
+
+        references = asset_registry.get_referencers(mesh_asset_path, registry_options)
+
+        asset_library = unreal.EditorAssetLibrary
+        subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
+        bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
+
+        if references:
+            for reference_path in list(references):
+                if asset_library.find_asset_data(reference_path).asset_class_path.asset_name == 'Blueprint':
+
+                    blueprint_asset = unreal.load_asset(reference_path)
+                    subobject_data_handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint_asset)
+
+                    skeletal_mesh_component_handle = None
+                    groom_component = None
+
+                    for data_handle in subobject_data_handles:
+                        subobject = bp_subobject_library.get_object(bp_subobject_library.get_data(data_handle))
+                        if type(subobject) == unreal.SkeletalMeshComponent:
+                            # note: using get_skeletal_mesh_asset() because get_editor_property('skeletal_mesh') is deprecating in 5.1
+                            if subobject.get_skeletal_mesh_asset() == unreal.load_asset(mesh_asset_path):
+                                skeletal_mesh_component_handle = data_handle
+                        if type(subobject) == unreal.GroomComponent:
+                            if subobject.get_editor_property('groom_asset') == unreal.load_asset(groom_asset_path):
+                                groom_component = subobject
+
+                    if not groom_component:
+                        groom_component, groom_component_handle = Unreal.create_blueprint_component(
+                            blueprint_asset,
+                            skeletal_mesh_component_handle,
+                            unreal.GroomComponent,
+                            groom_asset_name
+                        )
+
+                        # add binding asset and groom asset to groom component
+                        groom_component.set_groom_asset(unreal.load_asset(groom_asset_path))
+                        groom_component.set_binding_asset(unreal.load_asset(binding_asset_path))
+                        asset_library.save_loaded_asset(blueprint_asset)
+
+                    return str(reference_path)
+        # if there is no references to the surface mesh asset, create new blueprint
+        else:
+            blueprint_asset_path = Unreal.create_blueprint_for_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
+            asset_library.save_loaded_asset(unreal.load_asset(blueprint_asset_path))
+
+            return blueprint_asset_path
 
 
 class UnrealImportAsset(Unreal):
@@ -778,6 +1000,57 @@ class UnrealRemoteCalls:
         return False
 
     @staticmethod
+    def has_groom_and_mesh_components(blueprint_asset_path, binding_asset_path, groom_asset_path, mesh_asset_path):
+        """
+        Checks if a blueprint asset has mesh and groom components with the correct assets.
+
+        :param str blueprint_asset_path: The path to the unreal blueprint asset.
+        :param str binding_asset_path: The path to the unreal binding asset.
+        :param str groom_asset_path: The path to the unreal groom asset.
+        :param str mesh_asset_path: The path to the unreal mesh asset.
+        :return bool: Whether the blueprint asset has the right mesh and groom components configured.
+        """
+        component_handles = Unreal.get_component_handles(blueprint_asset_path)
+
+        groom_handle = Unreal.get_groom_handle(component_handles, binding_asset_path, groom_asset_path)
+        mesh_handle = Unreal.get_skeletal_mesh_handle(component_handles, mesh_asset_path)
+
+        return groom_handle and mesh_handle and Unreal.is_parent_component_of_child(mesh_handle, groom_handle)
+
+    @staticmethod
+    def has_groom_component(blueprint_asset_path, binding_asset_path, groom_asset_path):
+        """
+        Checks if a blueprint asset has groom component with the correct assets.
+
+        :param str blueprint_asset_path: The path to the unreal blueprint asset.
+        :param str binding_asset_path: The path to the unreal binding asset.
+        :param str groom_asset_path: The path to the unreal groom asset.
+        :return bool: Whether the blueprint asset has the right groom component configured.
+        """
+        component_handles = Unreal.get_component_handles(blueprint_asset_path)
+        groom_handle = Unreal.get_groom_handle(component_handles, binding_asset_path, groom_asset_path)
+
+        if groom_handle:
+            return True
+        return False
+
+    @staticmethod
+    def has_mesh_component(blueprint_asset_path, mesh_asset_path):
+        """
+        Checks if a blueprint asset has mesh component with the correct assets.
+
+        :param str blueprint_asset_path: The path to the unreal blueprint asset.
+        :param str mesh_asset_path: The path to the unreal mesh asset.
+        :return bool: Whether the blueprint asset has the right mesh and groom components configured.
+        """
+        component_handles = Unreal.get_component_handles(blueprint_asset_path)
+        mesh_handle = Unreal.get_skeletal_mesh_handle(component_handles, mesh_asset_path)
+
+        if mesh_handle:
+            return True
+        return False
+
+    @staticmethod
     def delete_asset(asset_path):
         """
         Deletes an asset in unreal.
@@ -849,6 +1122,20 @@ class UnrealRemoteCalls:
         :return str binding_asset_path: The unreal asset path to the created binding asset.
         """
         return Unreal.create_binding_asset(groom_asset_path, mesh_asset_path)
+
+    @staticmethod
+    def create_blueprint_with_groom(groom_asset_path, mesh_asset_path, binding_asset_path):
+        """
+        Adds a groom component to a blueprint asset with specific skeletal mesh. If queried blueprint asset does not
+        exist, create a blueprint asset with a skeletal mesh component that has a child groom component with the
+        imported groom asset and binding asset.
+
+        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
+        :param str binding_asset_path: The unreal asset path to the created binding asset.
+        :return str blueprint_asset_path: The unreal path to the blueprint asset.
+        """
+        return Unreal.add_groom_component_to_blueprint(groom_asset_path, mesh_asset_path, binding_asset_path)
 
     @staticmethod
     def import_sequence_track(asset_path, file_path, track_name, start=None, end=None):

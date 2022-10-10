@@ -91,21 +91,10 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
             'SK_Mannequin_LOD3'
         ]
 
-        sk_ng_mannequin_meshes = [
-            'SK_NG_Mannequin_LOD0',
-            'SK_NG_Mannequin_LOD1',
-            'SK_NG_Mannequin_LOD2',
-            'SK_NG_Mannequin_LOD3'
-        ]
-
         sk_mannequin_female_meshes = ['SK_Mannequin_Female']
 
         self.move_to_collection(
             ['male_root'] + sk_mannequin_meshes,
-            'Export')
-
-        self.move_to_collection(
-            ['male_root_no_groom'] + sk_ng_mannequin_meshes,
             'Export')
 
         self.move_to_collection(
@@ -143,7 +132,7 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
         self.tearDown()
 
         animation_names = ['third_person_walk_01', 'third_person_run_01']
-        mesh_names = sk_mannequin_meshes + sk_ng_mannequin_meshes + sk_mannequin_female_meshes
+        mesh_names = sk_mannequin_meshes + sk_mannequin_female_meshes
 
         self.blender.set_addon_property('scene', 'send2ue', 'import_meshes', False)
         self.blender.set_addon_property('scene', 'send2ue', 'import_animations', False)
