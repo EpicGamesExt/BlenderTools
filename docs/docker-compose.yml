@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  builds-docs:
+    image: node:18-alpine
+    volumes:
+      - ./:/home/node
+    working_dir: /home/node
+    entrypoint: npm
+    command: run build
+    environment:
+      NODE_OPTIONS: --openssl-legacy-provider

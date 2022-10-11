@@ -12,7 +12,7 @@
     "dev-main": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev main",
     "dev-send2ue": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev send2ue",
     "dev-ue2rigify": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev ue2rigify",
-    "build": "rm -f -r dist && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && cp -r ./main/.vuepress/dist ./dist && cp -r ./ue2rigify/.vuepress/dist ./dist/ue2rigify && cp -r ./send2ue/.vuepress/dist ./dist/send2ue"
+    "build": "npm install && rm -f -r dist && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && cp -r ./main/.vuepress/dist ./dist && cp -r ./ue2rigify/.vuepress/dist ./dist/ue2rigify && cp -r ./send2ue/.vuepress/dist ./dist/send2ue"
   },
   "license": "MIT",
   "devDependencies": {
