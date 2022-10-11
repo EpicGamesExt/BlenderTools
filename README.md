@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" src="https://github.com/EpicGames/BlenderTools/blob/master/docs/main/images/1.png?raw=true" alt="icon"/>
+  <img width="300" src="https://github.com/EpicGames/BlenderTools/blob/main/docs/main/images/1.png?raw=true" alt="icon"/>
 </p>
 <h1 align="center">Blender Tools</h1>
 <br></br>

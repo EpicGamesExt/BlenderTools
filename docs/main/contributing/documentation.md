@@ -50,6 +50,14 @@ All the sites get built on a linux machine into a single static html site when r
 npm run build
 ```
 
+::: tip Note
+  The build script is in bash, but you can alternatively build with docker using
+```shell
+cd ./docs
+docker-compose up
+```
+:::
+
 If successful, a `dist` folder should get generated in the `docs` folder. These files are what is deployed to the server.
 You can serve them locally with:
 ```shell
