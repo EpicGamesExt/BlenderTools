@@ -3,8 +3,9 @@ home: true
 heroImage: /images/unreal.png
 heroText: Send to Unreal
 tagline: A one-click solution for sending data from your DCC to Unreal Engine.
-actionText: Quick Start
-actionLink: /introduction/quickstart
+actions:
+  - text: Quick Start
+    link: /introduction/quickstart
 features:
 - title: Static Meshes
   details: Supports static mesh workflows with lods, mesh origins, and batched exports.

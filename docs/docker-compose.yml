@@ -8,5 +8,3 @@ services:
     working_dir: /home/node
     entrypoint: npm
     command: run build
-    environment:
-      NODE_OPTIONS: --openssl-legacy-provider

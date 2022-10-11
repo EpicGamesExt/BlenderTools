@@ -51,7 +51,7 @@ npm run build
 ```
 
 ::: tip Note
-  You can alternatively build with docker using
+  The build script is in bash, but you can alternatively build with docker using
 ```shell
 cd ./docs
 docker-compose up
