@@ -42,21 +42,14 @@ There are multiple sites in the `docs` folder each site can be run like so:
 * `npm run dev-ue2rigify`
 
 For further information on how to customize this site check out
-the [vuepress documentation](https://vuepress.vuejs.org/)
+the [vuepress documentation](https://v2.vuepress.vuejs.org/)
 
 # Building
-All the sites get built on a linux machine into a single static html site when running:
-```shell
-npm run build
-```
-
-::: tip Note
-  The build script is in bash, but you can alternatively build with docker using
+All the sites get built into a single static html site when running:
 ```shell
 cd ./docs
 docker-compose up
 ```
-:::
 
 If successful, a `dist` folder should get generated in the `docs` folder. These files are what is deployed to the server.
 You can serve them locally with:
