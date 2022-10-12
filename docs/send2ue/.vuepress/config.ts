@@ -1,4 +1,5 @@
-const {description, repository, name} = require('../../package')
+const {description, repository} = require('../../package')
+const { getRootPath } = require('../../path')
 import { defaultTheme } from '@vuepress/theme-default'
 import { defineUserConfig } from '@vuepress/cli'
 import { palettePlugin } from '@vuepress/plugin-palette'
@@ -9,9 +10,7 @@ import { googleAnalyticsPlugin } from '@vuepress/plugin-google-analytics'
 export default defineUserConfig({
     title: 'Send to Unreal',
     description: description,
-    // @ts-ignore
-    base: process.env.PROD === '1' ? `/${name}/` : '/',
-
+    base: getRootPath('send2ue'),
     theme: defaultTheme({
         repo: repository,
         docsDir: 'docs/send2ue',
@@ -22,8 +21,7 @@ export default defineUserConfig({
             {
                 text: 'Home',
                 link: process.env.PROD === '1' ? 'https://epicgames.github.io/BlenderTools/' : '/',
-                target:'_self',
-                // rel:false
+                target:'_self'
             }
         ],
         sidebar: {
