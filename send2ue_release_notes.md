@@ -8,7 +8,7 @@
   * [#491](https://github.com/EpicGames/BlenderTools/issues/491)
 
 ## Tests Passing On
-* Blender `3.3`
+* Blender `3.2`, `3.3`
 * Unreal `5.0.3`
 
 ## Special Thanks
