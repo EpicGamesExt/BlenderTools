@@ -73,3 +73,8 @@ Any child mesh that has the pre fix `SOCKET_` in its name will be separately imp
 ::: tip Note
   Socket names have the `SOCKET_` prefix stripped out. `SOCKET_socket_01` in blender becomes `socket_01` in unreal.
 :::
+
+## Only Mesh
+
+To run a strictly mesh asset import (ex: excluding import of particle systems as groom assets), all import options
+must be turned off in your [import settings](/settings/import.html) except for `Mesh`.

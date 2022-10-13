@@ -56,3 +56,8 @@ Also notice that the LOD build settings can be set under the
 ::: tip Note
   The Editor Settings corresponds to what is available in the [EditorSkeletalMeshLibrary](https://docs.unrealengine.com/4.27/en-US/PythonAPI/class/EditorSkeletalMeshLibrary.html) in the Unreal Python API:
 :::
+
+## Only Mesh
+
+To run a strictly mesh asset import (ex: excluding import of particle systems as groom assets), all import options
+must be turned off in your [import settings](/settings/import.html) except for `Mesh`.

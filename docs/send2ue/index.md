@@ -13,6 +13,8 @@ features:
   details: Bring a skeletal mesh into unreal with its lods and customized lod build settings.
 - title: Animations
   details: Batch export or send individual animations directly to the editor.
+- title: Grooms
+  details: Batch export or send individual hair systems as alembic files to the editor as groom assets.
 footer: Copyright © Epic Games Inc.
 ---
 ## Overview

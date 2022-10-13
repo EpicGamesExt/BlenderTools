@@ -81,4 +81,4 @@ Congrats, Send to Unreal is now working! To customize Send to Unreal to your nee
 `Pipeline > Export > Settings Dialog`. Here you can customize the paths for exports and imports
 as well as the export and import settings, and validations.
 
-![15](./images/15.png)
+<img src="./images/15.png" alt="15" width="450"/>

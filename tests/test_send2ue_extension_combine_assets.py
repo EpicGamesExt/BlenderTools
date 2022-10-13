@@ -71,7 +71,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                                 self.assert_groom_import(particle, False)
 
             elif combine_option == 'all_groom':
-                self.assert_groom_import('combined_groom', True)
+                self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
                     curves, hair, emitter = self.get_particles_by_type(particle_systems)
                     for particle in curves + hair + emitter:
@@ -89,7 +89,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             elif combine_option == 'groom_per_combined_mesh':
                 if head_mesh:
-                    groom_asset_name = head_mesh + '_groom'
+                    groom_asset_name = head_mesh + '_Groom'
                     self.assert_groom_import(groom_asset_name, True)
                     self.run_binding_assets_tests(groom_asset_name, head_mesh, mesh_type)
                     for particle_systems in meshes_and_particles.values():
@@ -98,7 +98,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                             self.assert_groom_import(particle, False)
 
             elif combine_option == 'child_meshes_and_all_groom':
-                self.assert_groom_import('combined_groom', True)
+                self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
                     curves, hair, emitter = self.get_particles_by_type(particle_systems)
                     for particle in curves + hair + emitter:

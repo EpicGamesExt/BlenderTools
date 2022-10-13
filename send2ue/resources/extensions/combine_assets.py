@@ -163,7 +163,7 @@ class CombineAssetsExtension(ExtensionBase):
                 )
 
                 if self.hair_particles_exist(child_mesh_objects + [mesh_object]):
-                    groom_asset_name = mesh_object_name + '_groom'
+                    groom_asset_name = mesh_object_name + '_Groom'
                     # update and populate asset data if asset data is empty (when the head mesh has no particle systems)
                     self.update_asset_data(
                         export.create_groom_system_data(properties, groom_asset_name, mesh_object_name)
@@ -195,7 +195,7 @@ class CombineAssetsExtension(ExtensionBase):
                     })
 
         elif self.combine in [Options.ALL_GROOM, Options.CHILD_MESHES_ALL_GROOM]:
-            groom_asset_name = 'combined_groom'
+            groom_asset_name = 'Combined_Groom'
             # get all mesh objects
             child_mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
             if self.hair_particles_exist(child_mesh_objects):

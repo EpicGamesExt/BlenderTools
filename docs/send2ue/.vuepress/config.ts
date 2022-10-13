@@ -37,7 +37,8 @@ export default defineUserConfig({
                     children: [
                         '/asset-types/skeletal-mesh',
                         '/asset-types/static-mesh',
-                        '/asset-types/animation'
+                        '/asset-types/animation',
+                        '/asset-types/groom'
                     ]
                 },
                 {
@@ -58,11 +59,22 @@ export default defineUserConfig({
                     ]
                 },
                 {
+                    text: 'Supported Extensions',
+                    children: [
+                        '/extensions/affixes',
+                        '/extensions/combine-assets',
+                        '/extensions/create-post-import-groom-assets',
+                        '/extensions/object-origin',
+                        '/extensions/ue2rigify',
+                        '/extensions/use-immediate-parent-name',
+                        '/extensions/use-collections-as-folders',
+                    ]
+                },
+                {
                     text: 'Extras',
                     children: [
                         '/extras/pipeline-menu',
                         '/extras/addon-preferences',
-                        '/extras/supported-extensions',
                         '/extras/community-extensions',
                     ]
                 },
