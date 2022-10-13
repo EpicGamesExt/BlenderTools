@@ -451,6 +451,16 @@ class BlenderRemoteCalls:
         bpy.ops.wm.open_mainfile(filepath=file_path)
 
     @staticmethod
+    def save_file(test_folder, file_name):
+        file_path = os.path.join(test_folder, 'test_files', 'blender_files', file_name)
+        bpy.ops.wm.save_mainfile(filepath=file_path)
+
+    @staticmethod
+    def delete_file(test_folder, file_name):
+        file_path = os.path.join(test_folder, 'test_files', 'blender_files', file_name)
+        os.remove(file_path)
+
+    @staticmethod
     def open_default():
         # restore blend file to the default test file
         bpy.ops.wm.read_homefile(app_template="")

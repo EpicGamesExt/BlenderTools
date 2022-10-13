@@ -1,14 +1,15 @@
 ## Minor Changes
-* Fixed combine meshes extension so that all collisions associated with a child mesh get selected before export
-  * [#486](https://github.com/EpicGames/BlenderTools/issues/352)
-* added env `RPC_EXECUTION_HISTORY_FILE` that lets you specify a file path to write out the python execution history of the rpc module. This is useful for debugging.
-
-## Documentation Changes
-* Updated [testing docs](https://epicgames.github.io/BlenderTools/contributing/testing.html#environment-variables) to include the new env `RPC_EXECUTION_HISTORY_FILE`
+* Fixed an issue where exported sockets on static meshes would be lost
+  * [#492](https://github.com/EpicGames/BlenderTools/issues/492)
+  * [#443](https://github.com/EpicGames/BlenderTools/issues/443)
+* Fixed an issue where collisions do not use object origin when `Use object origin` is on
+  * [#500](https://github.com/EpicGames/BlenderTools/issues/500)
+* Fixed an issue where properties where not persisting when blend gets saved. Also updated the default template to include the latest extension defaults
+  * [#491](https://github.com/EpicGames/BlenderTools/issues/491)
 
 ## Tests Passing On
-* Blender `3.2`, `3.3`
-* Unreal `5.0.1`, `5.0.3`
+* Blender `3.3`
+* Unreal `5.0.3`
 
 ## Special Thanks
-* @iigindesign
+* @nmaillet
