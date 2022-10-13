@@ -9,13 +9,18 @@
   },
   "repository": "https://github.com/EpicGames/BlenderTools",
   "scripts": {
-    "dev-main": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev main",
-    "dev-send2ue": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev send2ue",
-    "dev-ue2rigify": "set NODE_OPTIONS=--openssl-legacy-provider && vuepress dev ue2rigify",
-    "build": "rm -f -r dist && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && cp -r ./main/.vuepress/dist ./dist && cp -r ./ue2rigify/.vuepress/dist ./dist/ue2rigify && cp -r ./send2ue/.vuepress/dist ./dist/send2ue"
+    "dev-main": "vuepress dev main",
+    "dev-send2ue": "vuepress dev send2ue",
+    "dev-ue2rigify": "vuepress dev ue2rigify",
+    "build": "npm install && rm -f -r dist && vuepress build main && vuepress build send2ue && vuepress build ue2rigify && cp -r ./main/.vuepress/dist ./dist && cp -r ./ue2rigify/.vuepress/dist ./dist/ue2rigify && cp -r ./send2ue/.vuepress/dist ./dist/send2ue"
   },
   "license": "MIT",
+  "dependencies": {
+    "vuepress": "^2.0.0-beta.51"
+  },
   "devDependencies": {
-    "vuepress": "^1.9.7"
+    "@vuepress/cli": "^2.0.0-beta.51",
+    "@vuepress/plugin-google-analytics": "^2.0.0-beta.51",
+    "@vuepress/plugin-palette": "^2.0.0-beta.51"
   }
 }

@@ -1049,6 +1049,22 @@ class UnrealRemoteCalls:
         if mesh_handle:
             return True
         return False
+    
+    @staticmethod
+    def has_socket_outer(asset_path, socket_name):
+        """
+        Checks to see if an asset has a socket and the owner (outer) is assigned to the mesh.
+
+        :param str asset_path: The path to the unreal asset.
+        :param str socket_name: The name of the socket to look for.
+        :return bool: Whether or not the asset has the given socket and the owner (outer) is properly assigned or not.
+        """
+        mesh = Unreal.get_asset(asset_path)
+        socket = mesh.find_socket(socket_name)
+        if socket:
+            return socket.get_outer() == mesh
+        else:
+            return False
 
     @staticmethod
     def delete_asset(asset_path):
@@ -1267,7 +1283,7 @@ class UnrealRemoteCalls:
         """
         static_mesh = Unreal.get_asset(asset_path)
         for socket_name, socket_data in asset_data.get('sockets').items():
-            socket = unreal.StaticMeshSocket()
+            socket = unreal.StaticMeshSocket(static_mesh)
 
             # apply the socket settings
             socket.set_editor_property('relative_location', socket_data.get('relative_location'))

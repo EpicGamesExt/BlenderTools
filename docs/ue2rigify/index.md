@@ -2,8 +2,9 @@
 home: true
 heroText: UE to Rigify
 tagline: A node based retargeting system for Blender's Rigify addon.
-actionText: Quick Start
-actionLink: /introduction/quickstart
+actions:
+  - text: Quick Start
+    link: /introduction/quickstart
 features:
 - title: Retarget Animation
   details: Use nodes and operators to create relationships between your rig and the rigify controls.
