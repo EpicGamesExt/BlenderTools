@@ -59,8 +59,12 @@
       "static_mesh_name_affix": "SM_",
       "texture_name_affix": "T_"
     },
-    "combine_meshes": {
-      "combine_child_meshes": false
+    "combine_assets": {
+      "combine": "off"
+    },
+    "create_post_import_assets_for_groom": {
+      "binding_asset": true,
+      "blueprint_with_groom": false
     },
     "object_origin": {
       "use_object_origin": false,
@@ -78,7 +82,9 @@
       "use_immediate_parent_name": false
     }
   },
+  "import_meshes": true,
   "import_animations": true,
+  "import_grooms": true,
   "import_lods": false,
   "import_materials_and_textures": true,
   "lod_regex": "(?i)(_LOD\\d).*",

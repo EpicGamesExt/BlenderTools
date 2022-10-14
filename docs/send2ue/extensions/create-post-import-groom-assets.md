@@ -1,5 +1,5 @@
-# Create Post Import Groom Assets
-The _Post Import Groom Assets_ extension provides a convenient way to create additional unreal assets related to the
+# Create Post Import Assets For Groom
+The _Post Import Assets For Groom_ extension provides a convenient way to create additional unreal assets related to the
 imported groom asset.
 
 ![0](./images/create-post-import-groom-assets/0.png)
@@ -20,7 +20,7 @@ will yeeeeield a binding asset named `hair_SK_Mannequin_Female_Binding`.
 A binding asset can only be created when the groom's surface mesh is a [skeletal mesh](/asset-types/skeletal-mesh.html).
 :::
 
-### _Blueprint Asset with Groom Binding_
+### _Blueprint Asset with Groom_
 This creates a blueprint asset for each imported skeletal mesh and its surface hairs. The blueprint asset will have
 one skeletal mesh component and one or more groom components created from the imported mesh and groom assets. The
 blueprint asset uses the name of the skeletal mesh asset with a postfix `_BP`.
