@@ -267,7 +267,6 @@ class ReloadExtensions(bpy.types.Operator):
         extension_factory.remove_utility_operators()
 
         # remove the properties
-        extension_factory.remove_property_data()
         unregister_scene_properties()
 
         # re-create the utility operators

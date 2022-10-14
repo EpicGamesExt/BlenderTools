@@ -40,7 +40,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
                 'validate_materials': False,
                 'validate_textures': False,
                 'import_lods': False,
-                'blender.export_method.fbx.geometry.mesh_smooth_type': 'OFF',
+                'blender.export_method.fbx.geometry.mesh_smooth_type': 'FACE',
                 'unreal.import_method.fbx.skeletal_mesh_import_data.normal_generation_method': (
                     'unreal.FBXNormalGenerationMethod.MIKK_T_SPACE'
                 ),
@@ -49,7 +49,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
                 'validate_materials': True,
                 'validate_textures': True,
                 'import_lods': True,
-                'blender.export_method.fbx.geometry.mesh_smooth_type': 'FACE',
+                'blender.export_method.fbx.geometry.mesh_smooth_type': 'OFF',
                 'unreal.import_method.fbx.skeletal_mesh_import_data.normal_generation_method': (
                     'unreal.FBXNormalGenerationMethod.BUILT_IN'
                 ),
@@ -93,3 +93,30 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
                 'SK_Mannequin_LodGroup'
             ]
         })
+
+    def test_scene_data_persistence(self):
+        """
+        Tests that the scene data is actually persisting in a saved blend file.
+        https://github.com/EpicGames/BlenderTools/issues/491
+        """
+        self.run_scene_data_persistence_tests(
+            file_name='temp_test.blend',
+            property_data={
+                'validate_textures': {
+                    'non-default': True,
+                    'default': False,
+                },
+                'export_custom_property_fcurves': {
+                    'non-default': False,
+                    'default': True,
+                },
+                'extensions.use_collections_as_folders.use_collections_as_folders': {
+                    'non-default': True,
+                    'default': False,
+                },
+                'extensions.object_origin.use_object_origin': {
+                    'non-default': True,
+                    'default': False,
+                }
+            }
+        )
