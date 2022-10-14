@@ -1,5 +1,5 @@
 # Create Post Import Assets For Groom
-The _Post Import Assets For Groom_ extension provides a convenient way to create additional unreal assets related to the
+The _Create Post Import Assets For Groom_ extension provides a convenient way to create additional unreal assets related to the
 imported groom asset.
 
 ![0](./images/create-post-import-groom-assets/0.png)
@@ -14,7 +14,7 @@ The binding asset will use the name of the groom asset and the name of the targe
 underscore, and a postfix `_Binding`. Note this is the unreal convention of naming binding assets.
 
 For example, a groom asset sourced from a particle system named `hair` with a surface mesh named `SK_Mannequin_Female`
-will yeeeeield a binding asset named `hair_SK_Mannequin_Female_Binding`.
+will yield a binding asset named `hair_SK_Mannequin_Female_Binding`.
 
 ::: tip Note
 A binding asset can only be created when the groom's surface mesh is a [skeletal mesh](/asset-types/skeletal-mesh.html).
