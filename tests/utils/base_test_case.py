@@ -318,6 +318,47 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
                     f'{object_name} has a location of {location} when it should be [1, 1, 1]'
                 )
 
+    def run_scene_data_persistence_tests(self, file_name, property_data):
+        # open a default blend file
+        self.blender.open_default()
+
+        # set some non-default property values
+        for property_name, values in property_data.items():
+            self.blender.set_addon_property('scene', 'send2ue', property_name, values['non-default'])
+
+        # save that file
+        self.blender.save_file(self.test_folder, file_name)
+
+        # open a new default blend file again
+        self.blender.open_default()
+
+        # assert the values are default
+        for property_name, values in property_data.items():
+            value = values['default']
+            self.assertEqual(
+                self.blender.get_addon_property('scene', 'send2ue', property_name),
+                value,
+                f'{property_name} is not equal to the default value {value}'
+            )
+
+        # now open the file previously saved
+        self.blender.open_file(self.test_folder, file_name)
+
+        # assert the values are non-default
+        for property_name, values in property_data.items():
+            value = values['non-default']
+            self.assertEqual(
+                self.blender.get_addon_property('scene', 'send2ue', property_name),
+                value,
+                f'{property_name} is not equal to the default value {value}'
+            )
+
+        # open a new default blend file again
+        self.blender.open_default()
+
+        # delete the created blend
+        self.blender.delete_file(self.test_folder, file_name)
+
 
 class BaseSend2ueTestCase(BaseTestCase):
     def setUp(self):
@@ -1011,6 +1052,10 @@ class SkipSend2UeTests(unittest.TestCase):
 
     @unittest.skip
     def test_import_asset_operator(self):
+        pass
+
+    @unittest.skip
+    def test_scene_data_persistence(self):
         pass
 
     @unittest.skip

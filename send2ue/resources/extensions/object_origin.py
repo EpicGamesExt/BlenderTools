@@ -2,6 +2,7 @@
 
 import bpy
 from send2ue.core.extension import ExtensionBase
+from send2ue.core import utilities
 
 
 class ObjectOriginExtension(ExtensionBase):
@@ -35,7 +36,7 @@ class ObjectOriginExtension(ExtensionBase):
         """
         # saves original location of asset to asset_data dictionary and sets location to 0
         if self.use_object_origin:
-            self.center_object_locations(asset_data['_mesh_object_name'])
+            self.center_object_locations(asset_data['_mesh_object_name'], properties)
 
     def pre_animation_export(self, asset_data, properties):
         """
@@ -76,11 +77,12 @@ class ObjectOriginExtension(ExtensionBase):
         if self.use_object_origin:
             self.restore_action_locations(asset_data)
 
-    def center_object_locations(self, mesh_name):
+    def center_object_locations(self, mesh_name, properties):
         """
         Centers a object and its active action to world center.
 
         :param str mesh_name: The name of the object.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         original_locations = {}
         mesh_object = bpy.data.objects.get(mesh_name)
@@ -111,6 +113,8 @@ class ObjectOriginExtension(ExtensionBase):
                         mesh_object,
                         self.world_center
                     )
+                    self.center_collision_locations(mesh_object, original_locations['_objects'], properties)
+
         # update the asset data so that it can be accessed in the post export methods
         self.update_asset_data({'_original_locations': original_locations})
 
@@ -127,6 +131,28 @@ class ObjectOriginExtension(ExtensionBase):
                 # center the action location keyframes
                 action_locations[action.name] = self.set_action_location(action, self.world_center)
         return action_locations
+
+    def center_collision_locations(self, mesh_object, original_locations, properties):
+        """
+        Centers all collisions related to the mesh object to world center.
+
+        :param bpy.types.Object mesh_object: The name of the object.
+        :param dict original_locations: A dictionary of object names and their original locations.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        original_collision_locations = {}
+
+        for collision_mesh_object in utilities.get_asset_collisions(mesh_object.name, properties):
+            # get local offset from the mesh the collision corresponds to so the offset is maintained
+            local_offset = utilities.subtract_lists(
+                collision_mesh_object.location[:],
+                original_locations[mesh_object.name]
+            )
+            original_collision_locations[collision_mesh_object.name] = self.set_object_location(
+                collision_mesh_object,
+                local_offset
+            )
+        original_locations.update(original_collision_locations)
 
     def restore_object_locations(self, asset_data):
         """

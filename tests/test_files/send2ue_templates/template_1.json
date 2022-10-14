@@ -23,7 +23,7 @@
           "use_metadata": true
         },
         "geometry": {
-          "mesh_smooth_type": "FACE",
+          "mesh_smooth_type": "OFF",
           "use_mesh_edges": false,
           "use_mesh_modifiers": true,
           "use_subsurf": false,
@@ -50,26 +50,40 @@
   "export_object_name_as_root": true,
   "extensions": {
     "affixes": {
-      "animation_sequence_name_affix": "Animation_",
+      "animation_sequence_name_affix": "Anim_",
       "auto_add_asset_name_affixes": false,
       "auto_remove_asset_name_affixes": false,
-      "material_name_affix": "Material_",
+      "material_name_affix": "M_",
       "show_name_affix_settings": false,
-      "skeletal_mesh_name_affix": "SkeletalMesh_",
-      "static_mesh_name_affix": "StaticMesh_",
-      "texture_name_affix": "Texture_"
+      "skeletal_mesh_name_affix": "SK_",
+      "static_mesh_name_affix": "SM_",
+      "texture_name_affix": "T_"
     },
-    "example": {
-      "some_property": "Hello world"
+    "combine_meshes": {
+      "combine_child_meshes": false
     },
-    "ue2rigify": {}
+    "object_origin": {
+      "use_object_origin": false,
+      "world_center": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "ue2rigify": {},
+    "use_collections_as_folders": {
+      "use_collections_as_folders": false
+    },
+    "use_immediate_parent_name": {
+      "use_immediate_parent_name": false
+    }
   },
   "import_animations": true,
   "import_lods": true,
   "import_materials_and_textures": true,
   "lod_regex": "(?i)(_LOD\\d).*",
   "path_mode": "send_to_project",
-  "tab": "validations",
+  "tab": "paths",
   "template_version": 1.0,
   "unreal": {
     "editor_skeletal_mesh_library": {
@@ -189,6 +203,7 @@
         "static_mesh_import_data": {
           "auto_generate_collision": true,
           "bake_pivot_in_vertex": false,
+          "build_nanite": false,
           "build_reversed_index_buffer": true,
           "combine_meshes": false,
           "compute_weighted_normals": true,
@@ -252,8 +267,6 @@
     }
   },
   "unreal_animation_folder_path": "/Game/untitled_category/untitled_asset/animations/",
-  "unreal_collision_folder_path": "/Game/untitled_category/untitled_asset/collisions/",
-  "unreal_level_sequence_asset_path": "",
   "unreal_mesh_folder_path": "/Game/untitled_category/untitled_asset/",
   "unreal_physics_asset_path": "",
   "unreal_skeletal_mesh_lod_settings_path": "",

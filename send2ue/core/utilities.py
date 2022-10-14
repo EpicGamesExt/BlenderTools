@@ -558,6 +558,24 @@ def get_particle_modifiers(mesh_object, particle_type):
     return particle_systems
 
 
+def get_asset_collisions(asset_name, properties):
+    """
+    Gets the collision assets for the given asset name.
+
+    :param str asset_name: The name of the asset to export.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :returns: A list of collision mesh objects.
+    :rtype: list
+    """
+    collision_meshes = []
+    export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
+    if export_collection:
+        for mesh_object in export_collection.all_objects:
+            if is_collision_of(asset_name, mesh_object.name, properties):
+                collision_meshes.append(mesh_object)
+    return collision_meshes
+
+
 def set_to_title(text):
     """
     Converts text to titles.
@@ -905,11 +923,8 @@ def select_asset_collisions(asset_name, properties):
     :param str asset_name: The name of the asset to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
-    if export_collection:
-        for mesh_object in export_collection.all_objects:
-            if is_collision_of(asset_name, mesh_object.name, properties):
-                mesh_object.select_set(True)
+    for mesh_object in get_asset_collisions(asset_name, properties):
+        mesh_object.select_set(True)
 
 
 def clear_pose(rig_object):
@@ -1373,6 +1388,22 @@ def scale_object(scene_object, scale_factor):
     scene_object.scale.x = scene_object.scale.x * scale_factor
     scene_object.scale.y = scene_object.scale.y * scale_factor
     scene_object.scale.z = scene_object.scale.z * scale_factor
+
+
+def subtract_lists(list1, list2):
+    """
+    Subtracts each element of two lists.
+
+    :param list list1: The minuend.
+    :param list list2: The subtrahend.
+    :returns: The difference of the lists.
+    :rtype: list
+    """
+    result = []
+    for item1, item2 in zip(list1, list2):
+        result.append(item1 - item2)
+
+    return result
 
 
 def scale_object_actions(unordered_objects, actions, scale_factor):
