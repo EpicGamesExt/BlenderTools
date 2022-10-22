@@ -112,6 +112,18 @@ class BlenderRemoteCalls:
             properties = getattr(properties, sub_property_name)
 
     @staticmethod
+    def check_particles(mesh_name, particle_names):
+        """
+        Checks whether the given mesh has any of the particles specified in particle_names.
+
+        :param str mesh_name: The name of the mesh to query.
+        :param str particle_names: The name of the property attribute to check.
+        :return list(str): A list of names that is a subset of particle_names that exist on the specified mesh.
+        """
+        mesh_particles_names = set(bpy.data.objects.get(mesh_name).particle_systems.keys())
+        return list(filter(lambda name: name in mesh_particles_names, particle_names))
+
+    @staticmethod
     def check_property_attribute(addon, attribute_name, excluded=None):
         """
         Checks that the given addon property attribute is unique and not empty.
@@ -143,6 +155,23 @@ class BlenderRemoteCalls:
 
                 # save each unique attribute
                 attributes[attribute_value] = key
+
+    @staticmethod
+    def set_particles_visible(mesh_name, particle_modifier_names, visible_in, visible=True):
+        """
+        Sets a list of particle systems on a mesh to be visible/invisible in viewport/render.
+
+        :param str mesh_name: A mesh object name.
+        :param list(str) particle_modifier_names: A list of particle modifier names.
+        :param str visible_in: 'VIEWPORT' or 'RENDER'
+        :param bool visible: Whether to the set the list of particles visible or invisible.
+        """
+        mesh_object = bpy.data.objects.get(mesh_name)
+        if mesh_object:
+            for name in particle_modifier_names:
+                particle = mesh_object.modifiers.get(name)
+                if particle:
+                    setattr(particle, 'show_' + visible_in.lower(), visible)
 
     @staticmethod
     def set_scene_collection_hierarchy(collection_names):

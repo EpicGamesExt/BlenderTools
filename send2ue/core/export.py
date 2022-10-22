@@ -75,6 +75,21 @@ def get_pre_scaled_context():
     return context
 
 
+def get_visible_particle_modifiers(mesh_object, properties, particle_type=None):
+    """
+    Gets particle modifiers and the associated particle systems (that are visible by user visibility setting)
+    on a mesh as a list of tuples.
+
+    :param object mesh_object: A mesh object
+    :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
+    :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
+    """
+    # dynamically uses what the user selected in export settings ('RENDER' or 'VIEWPORT') to decide visibility
+    context = properties.blender.export_method.abc.scene_options.evaluation_mode
+    return utilities.get_particle_modifiers(mesh_object, particle_type, visible=context)
+
+
 def set_parent_rig_selection(mesh_object, properties):
     """
     Recursively selects all parents of an object as long as the parent are in the rig collection.
@@ -703,12 +718,15 @@ def create_groom_data(mesh_objects, curves_objects, rig_objects, properties):
         mesh_object.show_instancer_for_render = False
 
         # get all particle systems of type 'HAIR' and its modifier on the current mesh
-        hair_systems = utilities.get_particle_modifiers(mesh_object, 'HAIR')
+        hair_systems = get_visible_particle_modifiers(mesh_object, properties, particle_type='HAIR')
 
         if len(hair_systems) > 0:
             groom_systems_data = {}
+
             # get head particle from the particle system list sorted by creation order
-            head_particle = utilities.get_particle_systems(mesh_object, 'HAIR', index=0)
+            head_particle = utilities.get_particle_systems(
+                mesh_object, particle_type='HAIR', index=0, exclusive_list=list(dict(hair_systems).values())
+            )
 
             # populate groom_systems_data dictionary, storing assets data of particle systems on the current mesh
             for modifier, particle in hair_systems:

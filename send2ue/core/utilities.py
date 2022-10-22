@@ -523,17 +523,28 @@ def get_all_children(scene_object, object_type, properties, exclude_postfix_toke
     return child_objects
 
 
-def get_particle_systems(mesh_object, particle_type, index=None):
+def get_particle_systems(mesh_object, particle_type=None, index=None, exclusive_list=None):
     """
-    Gets particle systems of a certain type on a mesh. If an index is provided, the method returns the particle system
-    at the specified index. Particle systems are sorted in creation order by blender.
+    Gets particle systems on a mesh. If a particle type is provided, the method filters for the particle systems with
+    the provided type. If an index is provided, the method returns the particle system
+    at the specified index. If exclusive_list is provided, the method only queries for particle systems that are in the
+    exclusive list. Note: Particle systems are sorted in creation order by blender.
 
     :param object mesh_object: A mesh object
     :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
     :param int index: An index.
+    :param list(particles) exclusive_list: A list of particles.
     :return particle or list(particle): A particle system or a list of particle systems.
     """
-    systems = list(filter(lambda particle: particle.settings.type == particle_type, mesh_object.particle_systems))
+    systems = mesh_object.particle_systems
+
+    if particle_type:
+        systems = list(filter(lambda particle: particle.settings.type == particle_type, systems))
+
+    if exclusive_list:
+        exclusive_set = set(exclusive_list)
+        systems = list(filter(lambda particle: particle in exclusive_set, systems))
+
     if index is not None:
         if len(systems) > index:
             return systems[index]
@@ -542,19 +553,29 @@ def get_particle_systems(mesh_object, particle_type, index=None):
     return systems
 
 
-def get_particle_modifiers(mesh_object, particle_type):
+def get_particle_modifiers(mesh_object, particle_type=None, visible=None):
     """
-    Gets particle modifiers and the associated particle systems on a mesh as a list of tuples.
+    Gets particle modifiers and the associated particle systems on a mesh as a list of tuples. If visible is provided,
+    get only modifiers that are visible in the context defined by the parameter.
 
     :param object mesh_object: A mesh object
     :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param str visible: The asset visibility setting that is either 'RENDER' or 'VIEWPORT'.
     :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
     """
     particle_systems = []
+
     for modifier in mesh_object.modifiers:
+        # skip modifiers that are not visible
+        if visible and (getattr(modifier, 'show_' + visible.lower()) is False):
+            continue
+
         if type(modifier) == bpy.types.ParticleSystemModifier:
-            if modifier.particle_system.settings.type == particle_type:
-                particle_systems.append((modifier, modifier.particle_system))
+            # skip particle modifiers that is not of the specified type
+            if particle_type and modifier.particle_system.settings.type != particle_type:
+                continue
+            particle_systems.append((modifier, modifier.particle_system))
+
     return particle_systems
 
 
@@ -894,16 +915,21 @@ def remove_particle_systems(particle_names, mesh_objects):
         mesh_object.select_set(True)
         bpy.context.view_layer.objects.active = mesh_object
 
-        for particle_name in particle_names:
-            if mesh_object.particle_systems.get(particle_name):
-                # get index of hair particle to be deleted
-                particle_list = mesh_object.particle_systems.keys()
-                particle_index = particle_list.index(particle_name)
+        mesh_particle_names = mesh_object.particle_systems.keys()
+        particle_names = set(particle_names)
 
+        # dynamically track the active index of particle systems for deletion
+        index = 0
+        for name in mesh_particle_names:
+            if name in particle_names:
                 # select hair particle to be deleted
-                mesh_object.particle_systems.active_index = particle_index
+                mesh_object.particle_systems.active_index = index
                 # remove the active particle system
                 bpy.ops.object.particle_system_remove()
+
+                del mesh_particle_names[index]
+            else:
+                index += 1
 
 
 def refresh_all_areas():

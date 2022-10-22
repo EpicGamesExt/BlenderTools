@@ -30,6 +30,25 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
     def run_combine_assets_option_tests(self, parents_meshes_and_particles, combine_option, mesh_type):
         self.log(f'>>> Testing for the combine assets option: "{combine_option}"...')
 
+        visible_context = self.blender.get_addon_property(
+            'scene',
+            'send2ue',
+            'blender.export_method.abc.scene_options.evaluation_mode'
+        )
+
+        for meshes_and_particles in parents_meshes_and_particles.values():
+            for mesh_name, particle_names in meshes_and_particles.items():
+                curves, hair, emitter, disabled = self.get_particles_by_type(particle_names)
+
+                all_particle_names = {
+                    'enabled': hair + emitter,
+                    'disabled': disabled
+                }
+
+                # NOTE: passing in particle system names here only works because all particle modifiers share the
+                # same name as their associated particle systems in the .blend mannequin test file
+                self.set_select_particles_visible(mesh_name, all_particle_names, visible_context)
+
         self.blender.set_addon_property(
             'scene',
             'send2ue',
@@ -44,7 +63,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             if combine_option == 'off':
                 for mesh, particle_systems in meshes_and_particles.items():
-                    curves, hair, emitter = self.get_particles_by_type(particle_systems)
+                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
                     for particle in hair + curves:
                         self.assert_groom_import(particle, True)
                         self.run_binding_assets_tests(particle, mesh, mesh_type)
@@ -53,38 +72,38 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             elif combine_option == 'groom_per_mesh':
                 for mesh, particle_systems in meshes_and_particles.items():
-                    curves, hair, emitter = self.get_particles_by_type(particle_systems)
+                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
                     if len(hair + curves) > 0:
                         if len(hair) > 0:
                             self.assert_groom_import(hair[0], True)
                             self.run_binding_assets_tests(hair[0], mesh, mesh_type)
 
-                            particles = hair + curves + emitter
+                            particles = hair + curves + emitter + disabled
                             for particle in particles[1:]:
                                 self.assert_groom_import(particle, False)
                         else:
                             self.assert_groom_import(curves[0], True)
                             self.run_binding_assets_tests(curves[0], mesh, mesh_type)
 
-                            particles = curves + emitter
+                            particles = curves + emitter + disabled
                             for particle in particles[1:]:
                                 self.assert_groom_import(particle, False)
 
             elif combine_option == 'all_groom':
                 self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
-                    curves, hair, emitter = self.get_particles_by_type(particle_systems)
-                    for particle in curves + hair + emitter:
+                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
+                    for particle in curves + hair + emitter + disabled:
                         self.assert_groom_import(particle, False)
 
             elif combine_option == 'child_meshes':
                 if head_mesh:
                     for particle_systems in meshes_and_particles.values():
-                        curves, hair, emitter = self.get_particles_by_type(particle_systems)
+                        curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
                         for particle in hair + curves:
                             self.assert_groom_import(particle, True)
                             self.run_binding_assets_tests(particle, head_mesh, mesh_type)
-                        for particle in emitter:
+                        for particle in emitter + disabled:
                             self.assert_groom_import(particle, False)
 
             elif combine_option == 'groom_per_combined_mesh':
@@ -93,15 +112,15 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                     self.assert_groom_import(groom_asset_name, True)
                     self.run_binding_assets_tests(groom_asset_name, head_mesh, mesh_type)
                     for particle_systems in meshes_and_particles.values():
-                        curves, hair, emitter = self.get_particles_by_type(particle_systems)
-                        for particle in curves + hair + emitter:
+                        curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
+                        for particle in curves + hair + emitter + disabled:
                             self.assert_groom_import(particle, False)
 
             elif combine_option == 'child_meshes_and_all_groom':
                 self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
-                    curves, hair, emitter = self.get_particles_by_type(particle_systems)
-                    for particle in curves + hair + emitter:
+                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
+                    for particle in curves + hair + emitter + disabled:
                         self.assert_groom_import(particle, False)
 
         self.tearDown()
@@ -110,7 +129,9 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
         curves = particle_systems.get('curves')
         particle_hair = particle_systems.get('particle_hair')
         particle_emitter = particle_systems.get('particle_emitter')
-        return curves, particle_hair, particle_emitter
+        disabled = particle_systems.get('disabled')
+
+        return curves, particle_hair, particle_emitter, disabled
 
     def set_combine_option(self, option):
         self.blender.set_addon_property(
@@ -171,16 +192,19 @@ class TestSend2UeExtensionCombineAssetsCubes(
                         'curves': [],
                         'particle_hair': [],
                         'particle_emitter': [],
+                        'disabled': []
                     },
                     'Cube1_LOD1': {
                         'curves': [],
                         'particle_hair': ['cube_particle_hair'],
                         'particle_emitter': ['cube_particle_emitter'],
+                        'disabled': []
                     },
                     'Cube1_LOD2': {
                         'curves': ['Cube1_hair_curves'],
                         'particle_hair': [],
                         'particle_emitter': [],
+                        'disabled': []
                     }
                 }
             },
@@ -258,21 +282,25 @@ class TestSend2UeExtensionCombineAssetsMannequins(
                         'curves': [],
                         'particle_hair': [],
                         'particle_emitter': [],
+                        'disabled': ['particle_hair_disabled']
                     },
                     'SK_Mannequin_LOD1': {
                         'curves': ['back_curves', 'shoulder_curves'],
                         'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
                         'particle_emitter': ['particle_emitter'],
+                        'disabled': []
                     },
                     'SK_Mannequin_LOD2': {
                         'curves': [],
                         'particle_hair': ['particle_hair_hand_l'],
                         'particle_emitter': ['particle_emitter2'],
+                        'disabled': []
                     },
                     'SK_Mannequin_LOD3': {
                         'curves': [],
                         'particle_hair': [],
                         'particle_emitter': ['particle_emitter3'],
+                        'disabled': []
                     }
                 },
                 'female_root': {
@@ -280,6 +308,7 @@ class TestSend2UeExtensionCombineAssetsMannequins(
                         'curves': [],
                         'particle_hair': ['particle_hair_head'],
                         'particle_emitter': [],
+                        'disabled': []
                     }
                 }
             },

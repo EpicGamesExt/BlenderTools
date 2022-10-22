@@ -411,6 +411,17 @@ class BaseSend2ueTestCase(BaseTestCase):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_animation_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
 
+    def assert_curves_removal(self, mesh_name, curves_names):
+        self.log(f'Ensuring that particles converted from curves objects do not exist post operation...')
+
+        curves_names = self.blender.check_particles(mesh_name, curves_names)
+
+        if curves_names:
+            self.assertFalse(
+                len(curves_names) == 0,
+                ', '.join(name for name in curves_names) + f' exists on {mesh_name} when they should not!'
+            )
+
     def assert_groom_import(self, asset_name, exists=True):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
@@ -700,6 +711,19 @@ class BaseSend2ueTestCase(BaseTestCase):
 
         self.blender.set_object_transforms(object_name, transforms)
 
+    def set_select_particles_visible(self, mesh_name, particles, context):
+        enabled_names = particles.get('enabled')
+        disabled_names = particles.get('disabled')
+        all_names = enabled_names + disabled_names
+
+        if all_names:
+            self.log('Setting ' + ', '.join(name for name in all_names) + f' on {mesh_name} invisible in {context}')
+            self.blender.set_particles_visible(mesh_name, all_names, context, False)
+
+        if enabled_names:
+            self.log('Setting ' + ', '.join(name for name in enabled_names) + f' on {mesh_name} visible in {context}')
+            self.blender.set_particles_visible(mesh_name, enabled_names, context)
+
     def move_to_collection(self, object_names, collection_name):
         for object_name in object_names:
             self.log(f'Moving "{object_name}" to "{collection_name}" collection...')
@@ -818,18 +842,41 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.assert_solo_track(rig_name, animation_names)
 
     def run_groom_tests(self, meshes_and_particles):
+        visible_context = self.blender.get_addon_property(
+            'scene',
+            'send2ue',
+            'blender.export_method.abc.scene_options.evaluation_mode'
+        )
+
+        for mesh_name, particle_names in meshes_and_particles.items():
+            particle_hair = particle_names.get('particle_hair')
+            particle_emitter = particle_names.get('particle_emitter')
+            disabled = particle_names.get('disabled')
+
+            all_particle_names = {
+                'enabled': particle_hair + particle_emitter,
+                'disabled': disabled
+            }
+
+            # NOTE: passing in particle system names here only works because all particle modifiers share the same name
+            # as their associated particle systems in the .blend mannequin test file
+            self.set_select_particles_visible(mesh_name, all_particle_names, visible_context)
+
         self.send2ue_operation()
 
-        for mesh, particle_systems in meshes_and_particles.items():
-            curves = particle_systems.get('curves')
-            particle_hair = particle_systems.get('particle_hair')
-            particle_emitter = particle_systems.get('particle_emitter')
+        for mesh, particle_names in meshes_and_particles.items():
+            curves = particle_names.get('curves')
+            particle_hair = particle_names.get('particle_hair')
+            particle_emitter = particle_names.get('particle_emitter')
+            disabled = particle_names.get('disabled')
 
-            for hair_particle in particle_hair + curves:
-                self.assert_groom_import(hair_particle, True)
+            for particle in particle_hair + curves:
+                self.assert_groom_import(particle, True)
 
-            for emitter in particle_emitter:
-                self.assert_groom_import(emitter, False)
+            for particle in particle_emitter + disabled:
+                self.assert_groom_import(particle, False)
+
+            self.assert_curves_removal(mesh, curves)
 
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():

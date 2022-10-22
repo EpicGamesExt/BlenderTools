@@ -111,21 +111,25 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
                 'curves': ['back_curves', 'shoulder_curves'],
                 'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
                 'particle_emitter': ['particle_emitter'],
+                'disabled': ['particle_hair_disabled']
             },
             'SK_Mannequin_LOD2': {
                 'curves': [],
                 'particle_hair': ['particle_hair_hand_l'],
                 'particle_emitter': ['particle_emitter2'],
+                'disabled': []
             },
             'SK_Mannequin_LOD3': {
                 'curves': [],
                 'particle_hair': [],
                 'particle_emitter': ['particle_emitter3'],
+                'disabled': []
             },
             'SK_Mannequin_Female': {
                 'curves': [],
                 'particle_hair': ['particle_hair_head'],
                 'particle_emitter': [],
+                'disabled': []
             }
         })
 
@@ -142,6 +146,8 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
             self.assert_animation_import(animation_name, False)
         for mesh_name in mesh_names:
             self.assert_mesh_import(mesh_name, False)
+
+        self.tearDown()
 
     def test_materials(self):
         """

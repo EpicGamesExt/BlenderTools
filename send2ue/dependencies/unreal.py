@@ -955,6 +955,26 @@ class UnrealRemoteCalls:
                     return index
 
     @staticmethod
+    def check_plugins(plugin_names):
+        """
+        Checks to see if the current project has certain plugins enabled.
+
+        :param list(str) plugin_names: A list of plugin names.
+        :return list(str): Returns a list of missing plugins if any.
+        """
+        uproject_path = unreal.Paths.get_project_file_path()
+        with open(uproject_path, 'r') as uproject:
+            project_data = json.load(uproject)
+
+        active_plugins = project_data.get('Plugins')
+        if active_plugins:
+            active_plugin_names = set(map(lambda plugin: plugin.get('Name'), active_plugins))
+            missing_plugins = list(filter(lambda plugin: plugin not in active_plugin_names, plugin_names))
+            return missing_plugins
+
+        return plugin_names
+
+    @staticmethod
     def has_socket(asset_path, socket_name):
         """
         Checks to see if an asset has a socket.
@@ -1049,7 +1069,7 @@ class UnrealRemoteCalls:
         if mesh_handle:
             return True
         return False
-    
+
     @staticmethod
     def has_socket_outer(asset_path, socket_name):
         """

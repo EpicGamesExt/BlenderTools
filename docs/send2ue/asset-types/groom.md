@@ -1,5 +1,10 @@
 # Groom
 
+::: warning Required UE Plugins
+Make sure to have the unreal plugins "Alembic Groom Importer" and "Groom" enabled for the addon to work properly.
+![3](./images/groom/3.png)
+:::
+
 The tool infers an Unreal groom asset based strictly on the content of your `Export` collection. By default, each
 particle system of type 'Hair' on each mesh in the collection is exported as an individual alembic file, which is
 imported to unreal as a groom asset.

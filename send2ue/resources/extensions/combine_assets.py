@@ -331,7 +331,7 @@ class CombineAssetsExtension(ExtensionBase):
         :return bool: Whether any hair particle systems exist on list of meshes.
         """
         for mesh_object in mesh_objects:
-            hair_particles = utilities.get_particle_systems(mesh_object, 'HAIR')
+            hair_particles = utilities.get_particle_systems(mesh_object, particle_type='HAIR')
             if len(hair_particles) > 0:
                 return True
         return False
