@@ -311,3 +311,15 @@ class ValidationManager:
             return False
 
         return True
+
+    # TODO: temporary validation before lods support for groom is added
+    def validate_groom_unsupported_lods(self):
+        """
+        Checks that import groom and import lods are not both selected.
+        """
+        if self.properties.import_lods and self.properties.import_grooms:
+            utilities.report_error(
+                'Groom LODs are currently unsupported at this time. Please disable either import LODs or import groom.'
+            )
+            return False
+        return True

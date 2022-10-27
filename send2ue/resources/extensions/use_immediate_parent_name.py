@@ -27,7 +27,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
         if self.use_immediate_parent_name:
             if properties.extensions.use_collections_as_folders.use_collections_as_folders:
                 utilities.report_error(
-                    f'Cannot use both use_collections_as_folders'
+                    f'Cannot use both use collections as folders '
                     f'and use immediate parent name extensions!'
                 )
                 return False
