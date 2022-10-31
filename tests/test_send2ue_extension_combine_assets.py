@@ -8,7 +8,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
         child_meshes = list(meshes_and_particles.keys())
         if len(child_meshes) > 0:
             head_mesh_name = child_meshes[0]
-            if combine_option in ['off', 'groom_per_mesh', 'all_groom']:
+            if combine_option in ['off', 'groom_per_mesh', 'all_grooms']:
                 for mesh in child_meshes:
                     self.assert_mesh_import(mesh, True)
             else:
@@ -89,7 +89,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                             for particle in particles[1:]:
                                 self.assert_groom_import(particle, False)
 
-            elif combine_option == 'all_groom':
+            elif combine_option == 'all_grooms':
                 self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
                     curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
@@ -116,7 +116,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                         for particle in curves + hair + emitter + disabled:
                             self.assert_groom_import(particle, False)
 
-            elif combine_option == 'child_meshes_and_all_groom':
+            elif combine_option == 'child_meshes_and_all_grooms':
                 self.assert_groom_import('Combined_Groom', True)
                 for particle_systems in meshes_and_particles.values():
                     curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
@@ -180,8 +180,8 @@ class TestSend2UeExtensionCombineAssetsCubes(
             'child_meshes',
             'groom_per_mesh',
             'groom_per_combined_mesh',
-            'all_groom',
-            'child_meshes_and_all_groom'
+            'all_grooms',
+            'child_meshes_and_all_grooms'
         ]
 
         for option in combine_options:
@@ -270,8 +270,8 @@ class TestSend2UeExtensionCombineAssetsMannequins(
             'child_meshes',
             'groom_per_mesh',
             'groom_per_combined_mesh',
-            'all_groom',
-            'child_meshes_and_all_groom'
+            'all_grooms',
+            'child_meshes_and_all_grooms'
         ]
 
         for option in combine_options:

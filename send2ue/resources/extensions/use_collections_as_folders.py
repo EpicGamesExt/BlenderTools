@@ -3,7 +3,7 @@
 import bpy
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import utilities
-from send2ue.constants import ToolInfo, AssetTypes
+from send2ue.constants import ToolInfo, UnrealTypes
 
 
 class UseCollectionsAsFoldersExtension(ExtensionBase):
@@ -26,7 +26,7 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         """
         if self.use_collections_as_folders:
             asset_type = asset_data.get('_asset_type')
-            if asset_type and asset_type == AssetTypes.ANIMATION:
+            if asset_type and asset_type == UnrealTypes.ANIMATION:
                 object_name = asset_data['_armature_object_name']
                 scene_object = bpy.data.objects.get(object_name)
                 # update skeletal asset path now that it is under new collections path
@@ -42,10 +42,11 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
                 if object_name:
                     scene_object = bpy.data.objects.get(object_name)
                     asset_name = utilities.get_asset_name(object_name, properties)
+                    mesh_asset_type = utilities.get_mesh_unreal_type(scene_object)
                     # get import path when using blender collections as folders
-                    import_path = self.get_full_import_path(properties, AssetTypes.MESH, scene_object)
+                    import_path = self.get_full_import_path(properties, mesh_asset_type, scene_object)
 
-                    if asset_type == AssetTypes.GROOM:
+                    if asset_type == UnrealTypes.GROOM:
                         # correct the target mesh path for groom asset data
                         self.update_asset_data({
                             'mesh_asset_path': f'{import_path}{asset_name}'
@@ -61,7 +62,7 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         Gets the unreal import path when use_collections_as_folders extension is active.
 
         :param object properties: The property group that contains variables that maintain the addon's correct state.
-        :param str asset_type: The type of asset.
+        :param str asset_type: The unreal type of asset.
         :param object scene_object: A object.
         :return str: The full import path for the given asset.
         """

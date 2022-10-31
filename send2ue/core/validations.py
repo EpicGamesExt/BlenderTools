@@ -5,7 +5,7 @@ import os
 import bpy
 from . import utilities, formatting, extension
 from ..dependencies.unreal import UnrealRemoteCalls
-from ..constants import AssetTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
+from ..constants import BlenderTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
 
 
 class ValidationManager:
@@ -15,8 +15,8 @@ class ValidationManager:
 
     def __init__(self, properties):
         self.properties = properties
-        self.mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
-        self.rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
+        self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
+        self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
         self._validators = []
         self._register_validators()
 
@@ -304,9 +304,11 @@ class ValidationManager:
             }
             missing_plugins += UnrealRemoteCalls.check_plugins(list(groom_plugins.keys()))
 
+        plugin_names = ', '.join(groom_plugins[name] for name in missing_plugins)
+
         if missing_plugins:
             utilities.report_error(
-                'Please enable missing plugins in Unreal: ' + ', '.join(groom_plugins[name] for name in missing_plugins)
+                f'Please enable missing plugins in Unreal: {plugin_names}'
             )
             return False
 

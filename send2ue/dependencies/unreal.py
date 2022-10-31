@@ -10,6 +10,7 @@ from http.client import RemoteDisconnected
 sys.path.append(os.path.dirname(__file__))
 import rpc.factory
 import remote_execution
+from send2ue.constants import UnrealTypes
 
 try:
     import unreal
@@ -412,8 +413,8 @@ class Unreal:
 
             mesh_asset_name = mesh_asset_path.split('/')[-1]
 
-            binding_asset_path = groom_asset_path + '_' + mesh_asset_name + '_Binding'
-            temp_asset_path = binding_asset_path + '_temp'
+            binding_asset_path = f'{groom_asset_path}_{mesh_asset_name}_Binding'
+            temp_asset_path = f'{binding_asset_path}_Temp'
 
             # renames the existing binding asset (one that had the same name) that will be consolidated
             existing_binding_asset = unreal.load_asset(binding_asset_path)
@@ -641,14 +642,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the static mesh import options.
         """
-        # TODO: the 'skeletal_mesh' attribute isn't used since the importer automatically infers type
-        if not self._asset_data.get(
-            'skeletal_mesh'
-        ) and not self._asset_data.get(
-            'animation'
-        ) and not self._asset_data.get(
-            'groom'
-        ):
+        if self._asset_data.get('_asset_type') == UnrealTypes.STATIC_MESH:
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
             self._options.static_mesh_import_data.import_mesh_lo_ds = False
 
@@ -663,7 +657,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the skeletal mesh import options.
         """
-        if self._asset_data.get('skeletal_mesh'):
+        if self._asset_data.get('_asset_type') == UnrealTypes.SKELETAL_MESH:
             self.set_skeleton()
             self.set_physics_asset()
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH
@@ -679,7 +673,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the animation import options.
         """
-        if self._asset_data.get('animation'):
+        if self._asset_data.get('_asset_type') == UnrealTypes.ANIMATION:
             self.set_skeleton()
             self.set_physics_asset()
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_ANIMATION
@@ -1118,19 +1112,21 @@ class UnrealRemoteCalls:
         :param dict asset_data: A dictionary of import parameters.
         :param dict property_data: A dictionary representation of the properties.
         """
-        unreal_import_asset = UnrealImportAsset(
-            file_path=file_path,
-            asset_data=asset_data,
-            property_data=property_data
-        )
-        file_path, file_type = os.path.splitext(file_path)
-        if file_type.lower() == '.fbx':
-            unreal_import_asset.set_fbx_import_task_options()
-        elif file_type.lower() == '.abc':
-            unreal_import_asset.set_abc_import_task_options()
+        # import if valid file_path was provided
+        if file_path:
+            unreal_import_asset = UnrealImportAsset(
+                file_path=file_path,
+                asset_data=asset_data,
+                property_data=property_data
+            )
+            file_path, file_type = os.path.splitext(file_path)
+            if file_type.lower() == '.fbx':
+                unreal_import_asset.set_fbx_import_task_options()
+            elif file_type.lower() == '.abc':
+                unreal_import_asset.set_abc_import_task_options()
 
-        # run the import task
-        return unreal_import_asset.run_import()
+            # run the import task
+            return unreal_import_asset.run_import()
 
     @staticmethod
     def create_asset(asset_path, asset_class=None, asset_factory=None, unique_name=True):

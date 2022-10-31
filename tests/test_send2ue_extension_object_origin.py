@@ -76,7 +76,7 @@ class TestSend2UeExtensionObjectOriginCubes(
 
     def test_extension(self):
         """
-        Checks that the combine_meshes extension loaded properly.
+        Checks that the use object origin extension loaded properly.
         """
         self.run_extension_tests({
             'default': {

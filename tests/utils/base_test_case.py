@@ -126,6 +126,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
     """
     Base test cases for core features of send to unreal
     """
+
     def __init__(self, *args, **kwargs):
         super(BaseSend2ueTestCaseCore, self).__init__(*args, **kwargs)
         self.addon_name = 'send2ue'
@@ -417,9 +418,10 @@ class BaseSend2ueTestCase(BaseTestCase):
         curves_names = self.blender.check_particles(mesh_name, curves_names)
 
         if curves_names:
+            curves_names_string = ', '.join(name for name in curves_names)
             self.assertFalse(
                 len(curves_names) == 0,
-                ', '.join(name for name in curves_names) + f' exists on {mesh_name} when they should not!'
+                f'{curves_names_string} exist(s) on {mesh_name} when they should not!'
             )
 
     def assert_groom_import(self, asset_name, exists=True):
@@ -429,7 +431,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def assert_binding_asset(self, groom_asset_name, target_mesh_name, mesh_folder_path=None):
         self.log(f'Checking that binding asset is created correctly for "{groom_asset_name}"...')
 
-        binding_asset_name = groom_asset_name + '_' + target_mesh_name + '_Binding'
+        binding_asset_name = f'{groom_asset_name}_{target_mesh_name}_Binding'
 
         if not mesh_folder_path:
             mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
@@ -717,11 +719,13 @@ class BaseSend2ueTestCase(BaseTestCase):
         all_names = enabled_names + disabled_names
 
         if all_names:
-            self.log('Setting ' + ', '.join(name for name in all_names) + f' on {mesh_name} invisible in {context}')
+            all_names_string = ', '.join(name for name in all_names)
+            self.log(f'Setting {all_names_string} on {mesh_name} invisible in {context}')
             self.blender.set_particles_visible(mesh_name, all_names, context, False)
 
         if enabled_names:
-            self.log('Setting ' + ', '.join(name for name in enabled_names) + f' on {mesh_name} visible in {context}')
+            enabled_names_string = ', '.join(name for name in enabled_names)
+            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in {context}')
             self.blender.set_particles_visible(mesh_name, enabled_names, context)
 
     def move_to_collection(self, object_names, collection_name):
@@ -768,6 +772,10 @@ class BaseSend2ueTestCase(BaseTestCase):
 
     def run_lod_tests(self, asset_name, lod_names, lod_build_settings, mesh_type):
         self.blender.set_addon_property('scene', 'send2ue', 'import_lods', True)
+
+        # TODO: temporary disabling import_groom before groom lods support is added
+        self.blender.set_addon_property('scene', 'send2ue', 'import_grooms', False)
+
         # set the lod build settings
         for key, value in lod_build_settings.items():
             self.blender.set_addon_property(
@@ -880,7 +888,7 @@ class BaseSend2ueTestCase(BaseTestCase):
 
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():
-            self.move_to_collection([object_name]+socket_names, 'Export')
+            self.move_to_collection([object_name] + socket_names, 'Export')
 
             for socket_name in socket_names:
                 self.blender.parent_to(socket_name, object_name)

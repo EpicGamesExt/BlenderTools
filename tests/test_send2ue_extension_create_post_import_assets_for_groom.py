@@ -53,11 +53,11 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
         self.send2ue_operation()
 
         for mesh_name, hairs in meshes_and_hairs.items():
-            blueprint_asset_name = mesh_name + '_BP'
+            blueprint_asset_name = f'{mesh_name}_BP'
             self.assert_blueprint_asset(blueprint_asset_name)
 
             for hair_name in hairs:
-                binding_asset_name = hair_name + '_' + mesh_name + '_Binding'
+                binding_asset_name = f'{hair_name}_{mesh_name}_Binding'
                 self.assert_blueprint_with_groom(blueprint_asset_name, hair_name, binding_asset_name, mesh_name)
 
         self.tearDown()

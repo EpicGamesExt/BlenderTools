@@ -171,7 +171,7 @@ class BlenderRemoteCalls:
             for name in particle_modifier_names:
                 particle = mesh_object.modifiers.get(name)
                 if particle:
-                    setattr(particle, 'show_' + visible_in.lower(), visible)
+                    setattr(particle, f'show_{visible_in.lower()}', visible)
 
     @staticmethod
     def set_scene_collection_hierarchy(collection_names):

@@ -27,7 +27,7 @@ across all meshes.
 
 ## Curves Objects
 
-Curves object type is introduced in [Blender 3.3](https://www.blender.org/download/releases/3-3/), enabling a revamped hair sculpting workflow. The send2ue addon
+The Curves object type was introduced in [Blender 3.3](https://www.blender.org/download/releases/3-3/), enabling a revamped hair sculpting workflow. The send2ue addon
 supports the export of a curves object into a groom asset in unreal. Make sure the curves objects that you want to
 export are in the `Export` collection, along with their surface meshes. Under the hood, the addon temporarily converts
 the curves object into a hair particle system on the mesh that it’s surfaced to, which would then be exported as an alembic file.

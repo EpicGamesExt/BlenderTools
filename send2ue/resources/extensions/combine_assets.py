@@ -5,7 +5,7 @@ import bpy
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import export, settings, utilities
 from send2ue.dependencies.unreal import UnrealRemoteCalls
-from send2ue.constants import AssetTypes
+from send2ue.constants import BlenderTypes, FileTypes
 
 
 class CombineAssetsExtension(ExtensionBase):
@@ -43,15 +43,15 @@ class CombineAssetsExtension(ExtensionBase):
                 3
             ),
             (
-                'all_groom',
-                'All groom',
+                'all_grooms',
+                'All grooms',
                 'Combines all hair particle systems and curves objects in the Export collection into a single groom asset',
                 '',
                 4
             ),
             (
-                'child_meshes_and_all_groom',
-                'Child meshes and all groom',
+                'child_meshes_and_all_grooms',
+                'Child meshes and all grooms',
                 'For each empty object or armature parent, this combines its child meshes into a single mesh when exported. This also combines all hair particles/objects in the Export collection into a single groom asset',
                 '',
                 5
@@ -81,7 +81,7 @@ class CombineAssetsExtension(ExtensionBase):
         """
         properties.unreal.import_method.fbx.static_mesh_import_data.combine_meshes = False
         # turn on the combine meshes option on the static meshes fbx importer
-        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOM, Options.GROOM_PER_COMBINED_MESH]:
+        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOMS, Options.GROOM_PER_COMBINED_MESH]:
             properties.unreal.import_method.fbx.static_mesh_import_data.combine_meshes = True
 
     def filter_objects(self, armature_objects, mesh_objects):
@@ -95,14 +95,14 @@ class CombineAssetsExtension(ExtensionBase):
         """
         groom_surface_objects = mesh_objects
 
-        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOM, Options.GROOM_PER_COMBINED_MESH]:
+        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOMS, Options.GROOM_PER_COMBINED_MESH]:
             mesh_objects = utilities.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
 
         if self.combine == Options.GROOM_PER_COMBINED_MESH:
             # groom surface objects are meshes with unique parents
             groom_surface_objects = utilities.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
-        # enum set to combine all groom
-        elif self.combine in [Options.ALL_GROOM, Options.CHILD_MESHES_ALL_GROOM]:
+        # enum set to combine all grooms
+        elif self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
             if len(mesh_objects) > 0:
                 # select one mesh object to be the groom surface object so that export groom runs once
                 groom_surface_objects = [mesh_objects[0]]
@@ -116,14 +116,14 @@ class CombineAssetsExtension(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOM, Options.GROOM_PER_COMBINED_MESH]:
+        if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOMS, Options.GROOM_PER_COMBINED_MESH]:
             mesh_object_name = asset_data.get('_mesh_object_name', '')
             mesh_object = bpy.data.objects.get(mesh_object_name)
             if mesh_object and mesh_object.parent:
                 # select the child hierarchy of the mesh parent excluding socket, collision, etc.
                 utilities.select_all_children(
                     mesh_object.parent,
-                    AssetTypes.MESH,
+                    BlenderTypes.MESH,
                     properties,
                     exclude_postfix_tokens=True
                 )
@@ -157,13 +157,13 @@ class CombineAssetsExtension(ExtensionBase):
                 # get the child hierarchy of the mesh parent excluding socket, collision, etc.
                 child_mesh_objects = utilities.get_all_children(
                     mesh_object.parent,
-                    AssetTypes.MESH,
+                    BlenderTypes.MESH,
                     properties,
                     exclude_postfix_tokens=True
                 )
 
                 if self.hair_particles_exist(child_mesh_objects + [mesh_object]):
-                    groom_asset_name = mesh_object_name + '_Groom'
+                    groom_asset_name = f'{mesh_object_name}_Groom'
                     # update and populate asset data if asset data is empty (when the head mesh has no particle systems)
                     self.update_asset_data(
                         export.create_groom_system_data(properties, groom_asset_name, mesh_object_name)
@@ -185,7 +185,8 @@ class CombineAssetsExtension(ExtensionBase):
                     scene_object = utilities.get_rig_child_meshes(surface_object.parent, index=0)
 
                 if scene_object:
-                    mesh_import_path = utilities.get_import_path(properties, AssetTypes.MESH)
+                    asset_type = utilities.get_mesh_unreal_type(scene_object)
+                    mesh_import_path = utilities.get_import_path(properties, asset_type)
                     mesh_asset_name = utilities.get_asset_name(scene_object.name, properties)
 
                     # update surface mesh so binding asset factory can find appropriate target skeletal mesh
@@ -194,17 +195,20 @@ class CombineAssetsExtension(ExtensionBase):
                         'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}'
                     })
 
-        elif self.combine in [Options.ALL_GROOM, Options.CHILD_MESHES_ALL_GROOM]:
+        elif self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
             groom_asset_name = 'Combined_Groom'
             # get all mesh objects
-            child_mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
+            child_mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
             if self.hair_particles_exist(child_mesh_objects):
-                # only updates asset name since no binding asset will be created
+                # update asset data with new groom name
                 self.update_asset_data(
                     export.create_groom_system_data(properties, groom_asset_name)
                 )
-                # delete mesh object related attributes so binding asset won't be created for the combine all groom
-                self.del_asset_data_items(['_mesh_object_name', 'mesh_asset_path'])
+                # combine all grooms does not have a valid surface mesh
+                self.update_asset_data({
+                    'mesh_object_name': None,
+                    'mesh_asset_path': None
+                })
 
                 # select appropriate child mesh objects to export groom as combined asset
                 self.select_for_groom_export(child_mesh_objects)
@@ -219,12 +223,12 @@ class CombineAssetsExtension(ExtensionBase):
         # if export each system individually, get and export all systems on the current mesh individually
         if self.combine in [Options.OFF, Options.CHILD_MESHES]:
             # Gets the asset data of each hair particle system on the current mesh from the head particle system
-            groom_systems_data = asset_data.get('groom_systems_data')
+            groom_systems_data = asset_data.get('_groom_systems_data')
             if groom_systems_data and len(groom_systems_data) > 1:
                 self.export_individual_hair_systems(groom_systems_data.values(), properties)
 
         # remove particle systems converted from curves for options that don't get to iterate through every mesh
-        curves_object_names = asset_data['converted_curves']
+        curves_object_names = asset_data['_converted_curves']
         mesh_objects = []
 
         if self.combine == Options.GROOM_PER_COMBINED_MESH:
@@ -233,13 +237,13 @@ class CombineAssetsExtension(ExtensionBase):
             if mesh_object.parent:
                 mesh_objects = utilities.get_all_children(
                     mesh_object.parent,
-                    AssetTypes.MESH,
+                    BlenderTypes.MESH,
                     properties,
                     exclude_postfix_tokens=True
                 )
 
-        if self.combine in [Options.ALL_GROOM, Options.CHILD_MESHES_ALL_GROOM]:
-            mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
+        if self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
+            mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
 
         # remove particle systems that were converted from curves on associated mesh objects of the current mesh
         utilities.remove_particle_systems(curves_object_names, mesh_objects)
@@ -255,7 +259,7 @@ class CombineAssetsExtension(ExtensionBase):
             property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
 
             # Gets the asset data of each hair particle system on the current mesh from the head particle system
-            systems_data = asset_data.get('groom_systems_data')
+            systems_data = asset_data.get('_groom_systems_data')
             if systems_data and len(systems_data) > 1:
                 for system_data in systems_data.values():
                     # import individual particle systems on the current mesh
@@ -292,15 +296,8 @@ class CombineAssetsExtension(ExtensionBase):
             # select the particle system to export
             self.disable_particles_visibility([asset_data], properties, disable_particles_render=False)
 
-            # export selection to a file
-            file_path = asset_data['file_path']
-            # if the folder does not exist create it
-            folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
-            if not os.path.exists(folder_path):
-                os.makedirs(folder_path)
-
             # export the alembic file
-            export.export_alembic_file(file_path, properties)
+            export.export_file(properties, file_type=FileTypes.ABC, asset_data=asset_data)
 
             # deselect the particle system that exported
             self.disable_particles_visibility([asset_data], properties)
@@ -331,7 +328,7 @@ class CombineAssetsExtension(ExtensionBase):
         :return bool: Whether any hair particle systems exist on list of meshes.
         """
         for mesh_object in mesh_objects:
-            hair_particles = utilities.get_particle_systems(mesh_object, particle_type='HAIR')
+            hair_particles = utilities.get_particle_systems(mesh_object, p_type=BlenderTypes.PARTICLE_HAIR)
             if len(hair_particles) > 0:
                 return True
         return False
@@ -351,7 +348,7 @@ class CombineAssetsExtension(ExtensionBase):
         for asset_data in assets_data:
             mesh_object = bpy.data.objects[asset_data['_mesh_object_name']]
             hair_particle = mesh_object.modifiers[asset_data['_modifier_name']]
-            setattr(hair_particle, 'show_' + show.lower(), not disable_particles_render)
+            setattr(hair_particle, f'show_{show.lower()}', not disable_particles_render)
 
 
 class Options:
@@ -359,5 +356,5 @@ class Options:
     CHILD_MESHES = 'child_meshes'
     GROOM_PER_MESH = 'groom_per_mesh'
     GROOM_PER_COMBINED_MESH = 'groom_per_combined_mesh'
-    ALL_GROOM = 'all_groom'
-    CHILD_MESHES_ALL_GROOM = 'child_meshes_and_all_groom'
+    ALL_GROOMS = 'all_grooms'
+    CHILD_MESHES_ALL_GROOMS = 'child_meshes_and_all_grooms'

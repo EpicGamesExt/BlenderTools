@@ -11,12 +11,24 @@ class PreFixToken(Enum):
     CONVEX_COLLISION = 'UCX'
 
 
-class AssetTypes:
+class BlenderTypes:
     SKELETON = 'ARMATURE'
     MESH = 'MESH'
     ANIMATION = 'ANIMATION'
-    GROOM = 'HAIR'
+    PARTICLE_HAIR = 'HAIR'
     CURVES = 'CURVES'
+
+
+class UnrealTypes:
+    SKELETAL_MESH = 'skeletal_mesh'
+    STATIC_MESH = 'static_mesh'
+    ANIMATION = 'animation'
+    GROOM = 'groom'
+
+
+class FileTypes:
+    ABC = 'abc'
+    FBX = 'fbx'
 
 
 class ToolInfo(Enum):

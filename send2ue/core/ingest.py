@@ -21,21 +21,18 @@ def import_asset(asset_id, property_data):
     # get the asset data
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
 
-    # if file_path is not populated, skip import
     file_path = asset_data.get('file_path')
-    if file_path:
-        # import the asset
-        UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
+    UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
 
-        # import fcurves
-        if asset_data.get('fcurve_file_path'):
-            UnrealRemoteCalls.import_animation_fcurves(
-                asset_data.get('asset_path'),
-                asset_data.get('fcurve_file_path')
-            )
+    # import fcurves
+    if asset_data.get('fcurve_file_path'):
+        UnrealRemoteCalls.import_animation_fcurves(
+            asset_data.get('asset_path'),
+            asset_data.get('fcurve_file_path')
+        )
 
-        # run the post import extensions
-        extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
+    # run the post import extensions
+    extension.run_extension_tasks(ExtensionTasks.POST_IMPORT.value)
 
 
 @track_progress(message='Creating static mesh sockets for "{attribute}"...', attribute='asset_path')

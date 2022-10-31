@@ -12,7 +12,7 @@ import base64
 from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import AssetTypes, ToolInfo, PreFixToken, PathModes
+from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -133,37 +133,51 @@ def get_export_folder_path(properties, asset_type):
         PathModes.SEND_TO_DISK.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        if asset_type == AssetTypes.MESH:
+        if asset_type in [UnrealTypes.STATIC_MESH, UnrealTypes.SKELETAL_MESH]:
             export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
 
-        if asset_type == AssetTypes.ANIMATION:
+        if asset_type == UnrealTypes.ANIMATION:
             export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
 
-        if asset_type == AssetTypes.GROOM:
+        if asset_type == UnrealTypes.GROOM:
             export_folder = formatting.resolve_path(properties.disk_groom_folder_path)
 
     return export_folder
 
 
-def get_import_path(properties, asset_type, scene_object=None):
+def get_import_path(properties, unreal_asset_type, scene_object=None):
     """
     Gets the unreal import path.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param str asset_type: The type of asset.
-    :param object scene_object: A object.
+    :param str unreal_asset_type: The type of asset.
+    :param object scene_object: A scene object.
     :return str: The full import path for the given asset.
     """
-    if asset_type == AssetTypes.ANIMATION:
+    if unreal_asset_type == UnrealTypes.ANIMATION:
         game_path = properties.unreal_animation_folder_path
 
-    elif asset_type == AssetTypes.GROOM:
+    elif unreal_asset_type == UnrealTypes.GROOM:
         game_path = properties.unreal_groom_folder_path
 
     else:
         game_path = properties.unreal_mesh_folder_path
 
     return game_path
+
+
+def get_mesh_unreal_type(mesh_object):
+    """
+    Gets the unreal type of the mesh object.
+
+    :param object mesh_object: A object of type mesh.
+    :return str(UnrealType): The type of mesh that is either 'skeletal_mesh' or 'static_mesh'.
+    """
+    has_parent_rig = mesh_object.parent and mesh_object.parent.type == BlenderTypes.SKELETON
+    rig = get_armature_modifier_rig_object(mesh_object)
+    if has_parent_rig or rig:
+        return UnrealTypes.SKELETAL_MESH
+    return UnrealTypes.STATIC_MESH
 
 
 def get_custom_property_fcurve_data(action_name):
@@ -345,7 +359,7 @@ def get_meshes_using_armature_modifier(rig_object, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects using the given rig in an armature modifier.
     """
-    mesh_objects = get_from_collection(AssetTypes.MESH, properties)
+    mesh_objects = get_from_collection(BlenderTypes.MESH, properties)
     child_meshes = []
     for mesh_object in mesh_objects:
         if rig_object == get_armature_modifier_rig_object(mesh_object):
@@ -362,8 +376,8 @@ def get_rig_child_meshes(rig_object, index=None):
     :param int index: An index of a list.
     :return str or list: A list of objects using the given rig in an armature modifier.
     """
-    if rig_object.type == AssetTypes.SKELETON:
-        child_meshes = list(filter(lambda obj: obj.type == AssetTypes.MESH, rig_object.children))
+    if rig_object.type == BlenderTypes.SKELETON:
+        child_meshes = list(filter(lambda obj: obj.type == BlenderTypes.MESH, rig_object.children))
         if index is not None:
             if len(child_meshes) > index:
                 return child_meshes[index]
@@ -427,13 +441,13 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
 
     if children and properties.import_meshes:
         # get all meshes from the mesh collection
-        mesh_collection_objects = get_from_collection(AssetTypes.MESH, properties)
+        mesh_collection_objects = get_from_collection(BlenderTypes.MESH, properties)
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_path_function(properties, AssetTypes.MESH, child)
+                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH, child)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(
@@ -523,7 +537,7 @@ def get_all_children(scene_object, object_type, properties, exclude_postfix_toke
     return child_objects
 
 
-def get_particle_systems(mesh_object, particle_type=None, index=None, exclusive_list=None):
+def get_particle_systems(mesh_object, p_type=None, index=None, exclusive_list=None):
     """
     Gets particle systems on a mesh. If a particle type is provided, the method filters for the particle systems with
     the provided type. If an index is provided, the method returns the particle system
@@ -531,15 +545,15 @@ def get_particle_systems(mesh_object, particle_type=None, index=None, exclusive_
     exclusive list. Note: Particle systems are sorted in creation order by blender.
 
     :param object mesh_object: A mesh object
-    :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param str p_type: The type of the particle is either 'HAIR' or 'EMITTER'.
     :param int index: An index.
     :param list(particles) exclusive_list: A list of particles.
     :return particle or list(particle): A particle system or a list of particle systems.
     """
     systems = mesh_object.particle_systems
 
-    if particle_type:
-        systems = list(filter(lambda particle: particle.settings.type == particle_type, systems))
+    if p_type:
+        systems = list(filter(lambda particle: particle.settings.type == p_type, systems))
 
     if exclusive_list:
         exclusive_set = set(exclusive_list)
@@ -553,13 +567,13 @@ def get_particle_systems(mesh_object, particle_type=None, index=None, exclusive_
     return systems
 
 
-def get_particle_modifiers(mesh_object, particle_type=None, visible=None):
+def get_particle_modifiers(mesh_object, p_type=None, visible=None):
     """
     Gets particle modifiers and the associated particle systems on a mesh as a list of tuples. If visible is provided,
     get only modifiers that are visible in the context defined by the parameter.
 
     :param object mesh_object: A mesh object
-    :param str particle_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param str p_type: The type of the particle is either 'HAIR' or 'EMITTER'.
     :param str visible: The asset visibility setting that is either 'RENDER' or 'VIEWPORT'.
     :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
     """
@@ -572,7 +586,7 @@ def get_particle_modifiers(mesh_object, particle_type=None, visible=None):
 
         if type(modifier) == bpy.types.ParticleSystemModifier:
             # skip particle modifiers that is not of the specified type
-            if particle_type and modifier.particle_system.settings.type != particle_type:
+            if p_type and modifier.particle_system.settings.type != p_type:
                 continue
             particle_systems.append((modifier, modifier.particle_system))
 
