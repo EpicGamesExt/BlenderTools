@@ -14,7 +14,7 @@ bl_info = {
     "author": "Epic Games Inc.",
     "description": "Allows you to drive a given rig and its animations with a Rigify rig.",
     "blender": (2, 93, 0),
-    "version": (1, 6, 0),
+    "version": (1, 6, 1),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://epicgames.github.io/BlenderTools/ue2rigify",
     "warning": "",

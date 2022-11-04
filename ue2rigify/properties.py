@@ -47,6 +47,12 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
         description=tool_tips.overwrite_animation
     )
 
+    bake_every_bone: bpy.props.BoolProperty(
+        default=True,
+        name="Bake every bone",
+        description=tool_tips.bake_every_bone
+    )
+
     selected_starter_metarig_template: bpy.props.EnumProperty(
         name="Metarig",
         description=tool_tips.starter_metarig_template_tool_tip,
