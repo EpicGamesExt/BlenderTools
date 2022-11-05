@@ -26,7 +26,7 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         """
         if self.use_collections_as_folders:
             asset_type = asset_data.get('_asset_type')
-            if asset_type and asset_type == UnrealTypes.ANIMATION:
+            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
                 object_name = asset_data['_armature_object_name']
                 scene_object = bpy.data.objects.get(object_name)
                 # update skeletal asset path now that it is under new collections path

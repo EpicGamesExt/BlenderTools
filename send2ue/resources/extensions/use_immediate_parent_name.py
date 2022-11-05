@@ -58,7 +58,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
         """
         if self.use_immediate_parent_name:
             asset_type = asset_data.get('_asset_type')
-            if asset_type and asset_type == UnrealTypes.ANIMATION:
+            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
                 # if unreal skeleton path has not been set by user
                 if not properties.unreal_skeleton_asset_path:
                     object_name = asset_data.get('_armature_object_name', '')

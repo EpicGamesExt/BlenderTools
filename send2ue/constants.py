@@ -22,7 +22,7 @@ class BlenderTypes:
 class UnrealTypes:
     SKELETAL_MESH = 'skeletal_mesh'
     STATIC_MESH = 'static_mesh'
-    ANIMATION = 'animation'
+    ANIM_SEQUENCE = 'animation'
     GROOM = 'groom'
 
 

@@ -1,6 +1,5 @@
 ---
 home: true
-heroImage: /images/unreal.png
 heroText: Send to Unreal
 tagline: A one-click solution for sending data from your DCC to Unreal Engine.
 actions:

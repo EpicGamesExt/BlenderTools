@@ -43,10 +43,24 @@ The settings can be found under the `Import` tab
 ## Usage with _Combine Assets_
 Combined usage of the _**create post import groom assets**_ and
 [_combine assets_](https://github.com/EpicGames/BlenderTools/docs/send2ue/extensions/combine-assets.html)
-extensions is supported. See chart below for the expected behaviors of binding asset and blueprint asset creation
-when used with _combine assets_ options.
+extensions is supported.
 
-![1](./images/create-post-import-groom-assets/1.png)
+**Create Groom Binding Asset**
+
+A binding asset is created for each imported groom asset.
+* When using 'child meshes' and 'grooms per combined mesh' options in _combine assets_, the binding asset's
+  target skeletal mesh is the combined mesh asset that contains the groom asset's original
+  surface mesh.
+
+* When using 'grooms per mesh' option in _combine asset_, the binding asset's
+  the target mesh is the mesh asset that grooms in the combined groom asset
+  are surfaced to in blender.
+
+**Create Blueprint Asset For Groom**
+
+A blueprint asset and associated components are created for each imported skeletal mesh
+asset. The surfacing relationship between a blender mesh and hairs is retained
+through component parenting in the blueprint asset.
 
 ::: tip Note
 No binding asset or blueprint asset will be created when using _Combine Assets_ options _**all groom**_ and

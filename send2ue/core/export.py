@@ -604,7 +604,7 @@ def create_animation_data(rig_objects, properties):
 
             # export the actions and create the action import data
             for action_name in action_names:
-                file_path = get_file_path(action_name, properties, UnrealTypes.ANIMATION)
+                file_path = get_file_path(action_name, properties, UnrealTypes.ANIM_SEQUENCE)
                 asset_name = utilities.get_asset_name(action_name, properties)
 
                 # export the animation
@@ -614,7 +614,7 @@ def create_animation_data(rig_objects, properties):
                 # save the import data
                 asset_id = utilities.get_asset_id(file_path)
                 animation_data[asset_id] = {
-                    '_asset_type': UnrealTypes.ANIMATION,
+                    '_asset_type': UnrealTypes.ANIM_SEQUENCE,
                     '_action_name': action_name,
                     '_armature_object_name': rig_object.name,
                     'file_path': file_path,

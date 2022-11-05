@@ -136,7 +136,7 @@ def get_export_folder_path(properties, asset_type):
         if asset_type in [UnrealTypes.STATIC_MESH, UnrealTypes.SKELETAL_MESH]:
             export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
 
-        if asset_type == UnrealTypes.ANIMATION:
+        if asset_type == UnrealTypes.ANIM_SEQUENCE:
             export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
 
         if asset_type == UnrealTypes.GROOM:
@@ -154,7 +154,7 @@ def get_import_path(properties, unreal_asset_type, scene_object=None):
     :param object scene_object: A scene object.
     :return str: The full import path for the given asset.
     """
-    if unreal_asset_type == UnrealTypes.ANIMATION:
+    if unreal_asset_type == UnrealTypes.ANIM_SEQUENCE:
         game_path = properties.unreal_animation_folder_path
 
     elif unreal_asset_type == UnrealTypes.GROOM:

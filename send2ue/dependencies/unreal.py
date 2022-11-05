@@ -673,7 +673,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the animation import options.
         """
-        if self._asset_data.get('_asset_type') == UnrealTypes.ANIMATION:
+        if self._asset_data.get('_asset_type') == UnrealTypes.ANIM_SEQUENCE:
             self.set_skeleton()
             self.set_physics_asset()
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_ANIMATION
