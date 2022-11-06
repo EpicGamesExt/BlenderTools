@@ -12,9 +12,9 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                 for mesh in child_meshes:
                     self.assert_mesh_import(mesh, True)
             else:
-                if mesh_type == 'static_mesh':
+                if mesh_type == 'StaticMesh':
                     self.assert_mesh_import(parent_name, True)
-                elif mesh_type == 'skeletal_mesh':
+                elif mesh_type == 'SkeletalMesh':
                     self.assert_mesh_import(head_mesh_name, True)
                     child_meshes.remove(head_mesh_name)
                 for mesh in child_meshes:
@@ -24,7 +24,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
             return None
 
     def run_binding_assets_tests(self, groom_asset_name, target_mesh_name, mesh_type):
-        if mesh_type == 'skeletal_mesh':
+        if mesh_type == 'SkeletalMesh':
             self.assert_binding_asset(groom_asset_name, target_mesh_name)
 
     def run_combine_assets_option_tests(self, parents_meshes_and_particles, combine_option, mesh_type):
@@ -140,8 +140,8 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
             'extensions.combine_assets.combine',
             option)
 
-    def setup_parents(self, children, parent_name, mesh_type='static_mesh'):
-        if mesh_type == 'static_mesh':
+    def setup_parents(self, children, parent_name, mesh_type='StaticMesh'):
+        if mesh_type == 'StaticMesh':
             self.blender.create_empty(parent_name)
             for offset, child_name in enumerate(children, 1):
                 self.set_object_transforms(child_name, location=[0.0, offset * 2, 0.0])
@@ -149,7 +149,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
                 self.blender.parent_to(child_name, parent_name)
 
         # TODO: separation is not used currently
-        elif mesh_type == 'skeletal_mesh':
+        elif mesh_type == 'SkeletalMesh':
             self.blender.separate_mesh_by_selection(children[0], children[-1])
 
 
@@ -209,7 +209,7 @@ class TestSend2UeExtensionCombineAssetsCubes(
                 }
             },
                 combine_option=option,
-                mesh_type='static_mesh'
+                mesh_type='StaticMesh'
             )
 
 
@@ -262,7 +262,8 @@ class TestSend2UeExtensionCombineAssetsMannequins(
 
         self.move_to_collection([
             'back_curves',
-            'shoulder_curves'
+            'shoulder_curves',
+            'back_sparse_curves'
         ], 'Export')
 
         combine_options = [
@@ -285,7 +286,7 @@ class TestSend2UeExtensionCombineAssetsMannequins(
                         'disabled': ['particle_hair_disabled']
                     },
                     'SK_Mannequin_LOD1': {
-                        'curves': ['back_curves', 'shoulder_curves'],
+                        'curves': ['back_curves', 'shoulder_curves', 'back_sparse_curves'],
                         'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
                         'particle_emitter': ['particle_emitter'],
                         'disabled': []
@@ -313,7 +314,7 @@ class TestSend2UeExtensionCombineAssetsMannequins(
                 }
             },
                 combine_option=option,
-                mesh_type='skeletal_mesh'
+                mesh_type='SkeletalMesh'
             )
 
     def test_animations(self):

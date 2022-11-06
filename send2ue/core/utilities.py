@@ -171,7 +171,7 @@ def get_mesh_unreal_type(mesh_object):
     Gets the unreal type of the mesh object.
 
     :param object mesh_object: A object of type mesh.
-    :return str(UnrealType): The type of mesh that is either 'skeletal_mesh' or 'static_mesh'.
+    :return str(UnrealType): The type of mesh that is either 'SkeletalMesh' or 'StaticMesh'.
     """
     has_parent_rig = mesh_object.parent and mesh_object.parent.type == BlenderTypes.SKELETON
     rig = get_armature_modifier_rig_object(mesh_object)
@@ -933,17 +933,12 @@ def remove_particle_systems(particle_names, mesh_objects):
         particle_names = set(particle_names)
 
         # dynamically track the active index of particle systems for deletion
-        index = 0
-        for name in mesh_particle_names:
+        for index, name in reversed(list(enumerate(mesh_particle_names))):
             if name in particle_names:
                 # select hair particle to be deleted
                 mesh_object.particle_systems.active_index = index
                 # remove the active particle system
                 bpy.ops.object.particle_system_remove()
-
-                del mesh_particle_names[index]
-            else:
-                index += 1
 
 
 def refresh_all_areas():

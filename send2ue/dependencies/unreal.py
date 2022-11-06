@@ -10,7 +10,6 @@ from http.client import RemoteDisconnected
 sys.path.append(os.path.dirname(__file__))
 import rpc.factory
 import remote_execution
-from send2ue.constants import UnrealTypes
 
 try:
     import unreal
@@ -642,7 +641,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the static mesh import options.
         """
-        if self._asset_data.get('_asset_type') == UnrealTypes.STATIC_MESH:
+        if self._asset_data.get('_asset_type') == 'StaticMesh':
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_STATIC_MESH
             self._options.static_mesh_import_data.import_mesh_lo_ds = False
 
@@ -657,7 +656,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the skeletal mesh import options.
         """
-        if self._asset_data.get('_asset_type') == UnrealTypes.SKELETAL_MESH:
+        if self._asset_data.get('_asset_type') == 'SkeletalMesh':
             self.set_skeleton()
             self.set_physics_asset()
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_SKELETAL_MESH
@@ -673,7 +672,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the animation import options.
         """
-        if self._asset_data.get('_asset_type') == UnrealTypes.ANIM_SEQUENCE:
+        if self._asset_data.get('_asset_type') == 'AnimSequence':
             self.set_skeleton()
             self.set_physics_asset()
             self._options.mesh_type_to_import = unreal.FBXImportType.FBXIT_ANIMATION

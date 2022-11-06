@@ -20,10 +20,10 @@ class BlenderTypes:
 
 
 class UnrealTypes:
-    SKELETAL_MESH = 'skeletal_mesh'
-    STATIC_MESH = 'static_mesh'
-    ANIM_SEQUENCE = 'animation'
-    GROOM = 'groom'
+    SKELETAL_MESH = 'SkeletalMesh'
+    STATIC_MESH = 'StaticMesh'
+    ANIM_SEQUENCE = 'AnimSequence'
+    GROOM = 'Groom'
 
 
 class FileTypes:

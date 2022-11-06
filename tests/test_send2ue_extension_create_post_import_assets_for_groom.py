@@ -101,13 +101,15 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomMannequins(
 
         self.move_to_collection([
             'back_curves',
-            'shoulder_curves'
+            'shoulder_curves',
+            'back_sparse_curves'
         ], 'Export')
 
         self.run_create_post_import_assets_for_groom_option_tests(meshes_and_hairs={
             'SK_Mannequin_LOD1': [
                 'back_curves',
                 'shoulder_curves',
+                'back_sparse_curves',
                 'particle_hair_waist',
                 'particle_hair_hand_r'
             ]

@@ -103,12 +103,13 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
 
         self.move_to_collection([
             'back_curves',
-            'shoulder_curves'
+            'shoulder_curves',
+            'back_sparse_curves'
         ], 'Export')
 
         self.run_groom_tests({
             'SK_Mannequin_LOD1': {
-                'curves': ['back_curves', 'shoulder_curves'],
+                'curves': ['back_curves', 'shoulder_curves', 'back_sparse_curves'],
                 'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
                 'particle_emitter': ['particle_emitter'],
                 'disabled': ['particle_hair_disabled']
