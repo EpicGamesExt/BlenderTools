@@ -54,7 +54,9 @@ class Send2UeWindowMangerProperties(bpy.types.PropertyGroup):
     # ----------- read/write variables -----------
     show_animation_settings: bpy.props.BoolProperty(default=False)
     show_fbx_export_settings: bpy.props.BoolProperty(default=False)
+    show_abc_export_settings: bpy.props.BoolProperty(default=False)
     show_fbx_import_settings: bpy.props.BoolProperty(default=False)
+    show_abc_import_settings: bpy.props.BoolProperty(default=False)
     show_lod_settings: bpy.props.BoolProperty(default=False)
     show_editor_library_settings: bpy.props.BoolProperty(default=False)
     show_export_extensions: bpy.props.BoolProperty(default=False)
@@ -182,6 +184,15 @@ def get_scene_property_class():
                 "be imported to this location in your open Unreal Project"
             )
         )
+        unreal_groom_folder_path: bpy.props.StringProperty(
+            name="Groom Folder (Unreal)",
+            default=r"/Game/untitled_category/untitled_asset/groom/",
+            update=formatting.update_unreal_groom_folder_path,
+            description=(
+                "This is the groom import path. All your Curves objects and hair particle systems will be imported "
+                "to this location in your open Unreal Project"
+            )
+        )
         unreal_skeleton_asset_path: bpy.props.StringProperty(
             name="Skeleton Asset (Unreal)",
             default=r"",
@@ -218,6 +229,15 @@ def get_scene_property_class():
                 "This is the path to the folder where your actions will be exported to on disk. All your actions that "
                 "are in an Armature object’s NLA strips will be exported to this location. The file names will match the "
                 "action names in Blender"
+            )
+        )
+        disk_groom_folder_path: bpy.props.StringProperty(
+            name="Groom Folder (Disk)",
+            default=os.path.expanduser('~'),
+            update=formatting.update_disk_groom_folder_path,
+            description=(
+                "This is the path to the folder where your curves objects and particle systems will be exported to on "
+                "disk. The file names will match either the name of the curves object or that of the particle system."
             )
         )
         automatically_scale_bones: bpy.props.BoolProperty(
@@ -261,6 +281,11 @@ def get_scene_property_class():
                 "manually edit NLA strips."
             )
         )
+        import_meshes: bpy.props.BoolProperty(
+            name="Meshes",
+            default=True,
+            description="Whether or not to import the meshes from the FBX file"
+        )
         import_materials_and_textures: bpy.props.BoolProperty(
             name="Materials and Textures",
             default=True,
@@ -270,6 +295,11 @@ def get_scene_property_class():
             name="Animations",
             default=True,
             description="Whether or not to import the animation from the FBX file"
+        )
+        import_grooms: bpy.props.BoolProperty(
+            name="Grooms",
+            default=True,
+            description="Whether or not to import groom assets"
         )
         advanced_ui_import: bpy.props.BoolProperty(
             name="Launch FBX Import UI",

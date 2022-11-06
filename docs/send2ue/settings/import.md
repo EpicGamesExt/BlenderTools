@@ -1,14 +1,20 @@
 # Import
 The following properties dictate what and how assets are imported into unreal.
 
-### Materials and Textures
+![2](./images/import/2.png)
+#### Meshes
+Whether or not to import meshes from the FBX file.
+
+#### Materials and Textures
 Whether or not to import the materials and textures from the FBX file.
 
-### Animation
+#### Animation
 Whether or not to import the animation from the FBX file.
 
+#### Groom
+Whether or not to export groom as an alembic file and import to unreal.
 
-### Launch FBX Import UI
+#### Launch FBX Import UI
 When enabled this option launches the FBX import UI in Unreal.
 
 ::: tip Note
@@ -21,10 +27,10 @@ unreal project and then just run Send to Unreal again.
 The section contains the settings related to LOD workflows. You can read more about these under the
 [Skeletal Mesh](/asset-types/skeletal-mesh.html#lods) and [Static Mesh](/asset-types/static-mesh.html#lods) pages.
 
-### LODs
+#### LODs
 Whether or not to export the custom LODs
 
-### LOD Regex
+#### LOD Regex
 Set a regular expression to determine an asset's lod identifier. The remaining unmatched string will be used as the
 asset name. The first matched group's last character should be the LOD index.
 

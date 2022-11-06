@@ -126,6 +126,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
     """
     Base test cases for core features of send to unreal
     """
+
     def __init__(self, *args, **kwargs):
         super(BaseSend2ueTestCaseCore, self).__init__(*args, **kwargs)
         self.addon_name = 'send2ue'
@@ -380,7 +381,8 @@ class BaseSend2ueTestCase(BaseTestCase):
         # delete all folders
         for property_name in [
             'unreal_mesh_folder_path',
-            'unreal_animation_folder_path'
+            'unreal_animation_folder_path',
+            'unreal_groom_folder_path'
         ]:
             unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
             self.unreal.delete_directory(unreal_folder_path)
@@ -409,6 +411,79 @@ class BaseSend2ueTestCase(BaseTestCase):
     def assert_animation_import(self, asset_name, exists=True):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_animation_folder_path')
         self.assert_asset_exists(asset_name, folder_path, exists)
+
+    def assert_curves_removal(self, mesh_name, curves_names):
+        self.log(f'Ensuring that particles converted from curves objects do not exist post operation...')
+
+        curves_names = self.blender.check_particles(mesh_name, curves_names)
+
+        if curves_names:
+            curves_names_string = ', '.join(name for name in curves_names)
+            self.assertFalse(
+                len(curves_names) == 0,
+                f'{curves_names_string} exist(s) on {mesh_name} when they should not!'
+            )
+
+    def assert_groom_import(self, asset_name, exists=True):
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
+        self.assert_asset_exists(asset_name, folder_path, exists)
+
+    def assert_binding_asset(self, groom_asset_name, target_mesh_name, mesh_folder_path=None):
+        self.log(f'Checking that binding asset is created correctly for "{groom_asset_name}"...')
+
+        binding_asset_name = f'{groom_asset_name}_{target_mesh_name}_Binding'
+
+        if not mesh_folder_path:
+            mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        groom_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
+
+        self.assert_asset_exists(binding_asset_name, groom_folder_path, True)
+
+        groom_assert_path = groom_folder_path + groom_asset_name
+        target_mesh_path = mesh_folder_path + target_mesh_name
+        binding_asset_path = groom_folder_path + binding_asset_name
+
+        self.assertTrue(
+            self.unreal.has_binding_groom_asset(binding_asset_path, groom_assert_path),
+            f'The groom asset "{groom_asset_name}" is not set for "{binding_asset_name}"!'
+        )
+        self.assertTrue(
+            self.unreal.has_binding_target(binding_asset_path, target_mesh_path),
+            f'The target mesh "{target_mesh_name}" is not set for "{binding_asset_name}"!'
+        )
+
+    def assert_blueprint_asset(self, asset_name, exists=True):
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        self.assert_asset_exists(asset_name, folder_path, exists)
+
+    def assert_blueprint_with_groom(self, blueprint_asset_name, groom_asset_name, binding_asset_name, mesh_asset_name):
+        self.log(f'Checking that groom component "{groom_asset_name}" and mesh component "{mesh_asset_name}" '
+                 f'are created correctly for "{blueprint_asset_name}"...')
+
+        mesh_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        groom_folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_groom_folder_path')
+
+        groom_path = groom_folder_path + groom_asset_name
+        binding_path = groom_folder_path + binding_asset_name
+        mesh_path = mesh_folder_path + mesh_asset_name
+        blueprint_path = mesh_folder_path + blueprint_asset_name
+
+        self.assertTrue(
+            self.unreal.has_groom_component(blueprint_path, binding_path, groom_path),
+            f'The groom component "{groom_asset_name}" on blueprint asset "{blueprint_asset_name}" does not exist '
+            f'or have incorrect assets assigned"!'
+        )
+
+        self.assertTrue(
+            self.unreal.has_mesh_component(blueprint_path, mesh_path),
+            f'The skeletal mesh component "{mesh_asset_name}" on blueprint asset "{blueprint_asset_name}" does not '
+            f'exist or have incorrect assets assigned"!'
+        )
+
+        self.assertTrue(
+            self.unreal.has_groom_and_mesh_components(blueprint_path, binding_path, groom_path, mesh_path),
+            f'Component "{groom_asset_name}" is not correctly parented under "{mesh_asset_name}"!'
+        )
 
     def assert_mesh_origin(self, asset_name, origin):
         self.log(f'Checking "{asset_name}" for matching origins...')
@@ -514,10 +589,25 @@ class BaseSend2ueTestCase(BaseTestCase):
         for animation_name in animation_names:
             self.assert_animation_import(animation_name, True)
 
-    def assert_animation_only_import(self, object_name, animation_names):
+    def assert_animation_only_import(self, object_name, animation_names, groom_names):
         """
         Assert a animation only import.
         """
+        self.blender.set_addon_property('scene', 'send2ue', 'import_meshes', False)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_animations', True)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_grooms', False)
+
+        self.send2ue_operation()
+        self.log(f'Checking that only animations were imported when other import options are off...')
+
+        self.assert_mesh_import(object_name, False)
+        for groom_name in groom_names:
+            self.assert_groom_import(groom_name, False)
+        for animation_name in animation_names:
+            self.assert_animation_import(animation_name, True)
+
+        self.tearDown()
+
         self.blender.set_addon_property('scene', 'send2ue', 'import_animations', True)
         self.remove_from_collection([object_name], 'Export')
         self.send2ue_operation()
@@ -623,6 +713,21 @@ class BaseSend2ueTestCase(BaseTestCase):
 
         self.blender.set_object_transforms(object_name, transforms)
 
+    def set_select_particles_visible(self, mesh_name, particles, context):
+        enabled_names = particles.get('enabled')
+        disabled_names = particles.get('disabled')
+        all_names = enabled_names + disabled_names
+
+        if all_names:
+            all_names_string = ', '.join(name for name in all_names)
+            self.log(f'Setting {all_names_string} on {mesh_name} invisible in {context}')
+            self.blender.set_particles_visible(mesh_name, all_names, context, False)
+
+        if enabled_names:
+            enabled_names_string = ', '.join(name for name in enabled_names)
+            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in {context}')
+            self.blender.set_particles_visible(mesh_name, enabled_names, context)
+
     def move_to_collection(self, object_names, collection_name):
         for object_name in object_names:
             self.log(f'Moving "{object_name}" to "{collection_name}" collection...')
@@ -667,6 +772,10 @@ class BaseSend2ueTestCase(BaseTestCase):
 
     def run_lod_tests(self, asset_name, lod_names, lod_build_settings, mesh_type):
         self.blender.set_addon_property('scene', 'send2ue', 'import_lods', True)
+
+        # TODO: temporary disabling import_groom before groom lods support is added
+        self.blender.set_addon_property('scene', 'send2ue', 'import_grooms', False)
+
         # set the lod build settings
         for key, value in lod_build_settings.items():
             self.blender.set_addon_property(
@@ -699,12 +808,13 @@ class BaseSend2ueTestCase(BaseTestCase):
                     f'The lod build setting "{key}" value "{value}" does not match the unreal value "{unreal_value}"'
                 )
 
-    def run_animation_tests(self, objects_and_animations):
-        for object_name, data in objects_and_animations.items():
+    def run_animation_tests(self, objects_and_attributes):
+        for object_name, data in objects_and_attributes.items():
             rig_name = data.get('rig')
             animation_names = data.get('animations')
             bones = data.get('bones')
             frames = data.get('frames')
+            groom_names = data.get('grooms')
             self.move_to_collection([object_name, rig_name], 'Export')
 
             self.assert_export_all_actions(animation_names)
@@ -718,12 +828,14 @@ class BaseSend2ueTestCase(BaseTestCase):
 
             mesh_folder = '/Game/mesh_test/'
             animation_folder = '/Game/animation_test/'
+            groom_folder = '/Game/groom_test/'
             skeleton_path = f'/Game/untitled_category/untitled_asset/{object_name}_Skeleton'
             self.blender.set_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path', mesh_folder)
             self.blender.set_addon_property('scene', 'send2ue', 'unreal_animation_folder_path', animation_folder)
+            self.blender.set_addon_property('scene', 'send2ue', 'unreal_groom_folder_path', groom_folder)
             self.blender.set_addon_property('scene', 'send2ue', 'unreal_skeleton_asset_path', skeleton_path)
 
-            self.assert_animation_only_import(object_name, animation_names)
+            self.assert_animation_only_import(object_name, animation_names, groom_names)
 
             # clear the import area
             self.unreal.delete_directory(mesh_folder)
@@ -737,9 +849,46 @@ class BaseSend2ueTestCase(BaseTestCase):
 
             self.assert_solo_track(rig_name, animation_names)
 
+    def run_groom_tests(self, meshes_and_particles):
+        visible_context = self.blender.get_addon_property(
+            'scene',
+            'send2ue',
+            'blender.export_method.abc.scene_options.evaluation_mode'
+        )
+
+        for mesh_name, particle_names in meshes_and_particles.items():
+            particle_hair = particle_names.get('particle_hair')
+            particle_emitter = particle_names.get('particle_emitter')
+            disabled = particle_names.get('disabled')
+
+            all_particle_names = {
+                'enabled': particle_hair + particle_emitter,
+                'disabled': disabled
+            }
+
+            # NOTE: passing in particle system names here only works because all particle modifiers share the same name
+            # as their associated particle systems in the .blend mannequin test file
+            self.set_select_particles_visible(mesh_name, all_particle_names, visible_context)
+
+        self.send2ue_operation()
+
+        for mesh, particle_names in meshes_and_particles.items():
+            curves = particle_names.get('curves')
+            particle_hair = particle_names.get('particle_hair')
+            particle_emitter = particle_names.get('particle_emitter')
+            disabled = particle_names.get('disabled')
+
+            for particle in particle_hair + curves:
+                self.assert_groom_import(particle, True)
+
+            for particle in particle_emitter + disabled:
+                self.assert_groom_import(particle, False)
+
+            self.assert_curves_removal(mesh, curves)
+
     def run_socket_tests(self, objects_and_sockets):
         for object_name, socket_names in objects_and_sockets.items():
-            self.move_to_collection([object_name]+socket_names, 'Export')
+            self.move_to_collection([object_name] + socket_names, 'Export')
 
             for socket_name in socket_names:
                 self.blender.parent_to(socket_name, object_name)
@@ -966,6 +1115,10 @@ class SkipSend2UeTests(unittest.TestCase):
 
     @unittest.skip
     def test_animations(self):
+        pass
+
+    @unittest.skip
+    def test_grooms(self):
         pass
 
     @unittest.skip

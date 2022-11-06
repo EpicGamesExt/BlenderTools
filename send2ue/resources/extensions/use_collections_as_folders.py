@@ -3,7 +3,7 @@
 import bpy
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import utilities
-from send2ue.constants import ToolInfo, AssetTypes
+from send2ue.constants import ToolInfo, UnrealTypes
 
 
 class UseCollectionsAsFoldersExtension(ExtensionBase):
@@ -25,8 +25,8 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.use_collections_as_folders:
-            asset_type = asset_data['_asset_type']
-            if asset_type == AssetTypes.ANIMATION:
+            asset_type = asset_data.get('_asset_type')
+            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
                 object_name = asset_data['_armature_object_name']
                 scene_object = bpy.data.objects.get(object_name)
                 # update skeletal asset path now that it is under new collections path
@@ -34,31 +34,39 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
                     'skeleton_asset_path': utilities.get_skeleton_asset_path(
                         scene_object,
                         properties,
-                        self.get_full_import_path
+                        self.get_full_import_path,
                     )
                 })
-            else:
-                object_name = asset_data['_mesh_object_name']
-                scene_object = bpy.data.objects.get(object_name)
-                asset_name = utilities.get_asset_name(object_name, properties)
-                # get import path when using blender collections as folders
-                import_path = self.get_full_import_path(scene_object, properties, asset_type)
+            elif asset_type:
+                object_name = asset_data.get('_mesh_object_name')
+                if object_name:
+                    scene_object = bpy.data.objects.get(object_name)
+                    asset_name = utilities.get_asset_name(object_name, properties)
+                    mesh_asset_type = utilities.get_mesh_unreal_type(scene_object)
+                    # get import path when using blender collections as folders
+                    import_path = self.get_full_import_path(properties, mesh_asset_type, scene_object)
 
-                self.update_asset_data({
-                    'asset_folder': import_path,
-                    'asset_path': f'{import_path}{asset_name}'
-                })
+                    if asset_type == UnrealTypes.GROOM:
+                        # correct the target mesh path for groom asset data
+                        self.update_asset_data({
+                            'mesh_asset_path': f'{import_path}{asset_name}'
+                        })
+                    else:
+                        self.update_asset_data({
+                            'asset_folder': import_path,
+                            'asset_path': f'{import_path}{asset_name}'
+                        })
 
-    def get_full_import_path(self, scene_object, properties, asset_type):
+    def get_full_import_path(self, properties, asset_type, scene_object):
         """
         Gets the unreal import path when use_collections_as_folders extension is active.
 
-        :param object scene_object: A object.
         :param object properties: The property group that contains variables that maintain the addon's correct state.
-        :param str asset_type: The type of asset.
+        :param str asset_type: The unreal type of asset.
+        :param object scene_object: A object.
         :return str: The full import path for the given asset.
         """
-        game_path = utilities.get_import_path(scene_object, properties, asset_type)
+        game_path = utilities.get_import_path(properties, asset_type)
         sub_path = self.get_collections_as_path(scene_object, properties)
         import_path = f'{game_path}{sub_path}/'
         return import_path

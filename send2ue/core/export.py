@@ -6,7 +6,7 @@ import os
 import re
 import bpy
 from . import utilities, validations, settings, formatting, ingest, extension
-from ..constants import PathModes, AssetTypes, PreFixToken, ToolInfo, ExtensionTasks
+from ..constants import PathModes, BlenderTypes, UnrealTypes, FileTypes, PreFixToken, ToolInfo, ExtensionTasks
 
 
 def get_file_path(asset_name, properties, asset_type, lod=False, file_extension='fbx'):
@@ -15,7 +15,7 @@ def get_file_path(asset_name, properties, asset_type, lod=False, file_extension=
 
     :param str asset_name: The name of the asset that will be exported to a file.
     :param PropertyData properties: A property data instance that contains all property values of the tool.
-    :param str asset_type: The type of data being exported.
+    :param str asset_type: The unreal type of data being exported.
     :param bool lod: Whether to use the lod post fix of not.
     :param str file_extension: The file extension in the file path.
     :return str: The full path to the file.
@@ -38,12 +38,13 @@ def export_lods(asset_id, asset_name, properties):
     """
     lods = {}
     if properties.import_lods:
-        mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
+        mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
         for mesh_object in mesh_objects:
             if utilities.is_lod_of(asset_name, mesh_object.name, properties):
                 if mesh_object.name != utilities.get_lod0_name(mesh_object.name, properties):
                     lod_index = utilities.get_lod_index(mesh_object.name, properties)
-                    file_path = get_file_path(mesh_object.name, properties, asset_type=AssetTypes.MESH, lod=True)
+                    asset_type = utilities.get_mesh_unreal_type(mesh_object)
+                    file_path = get_file_path(mesh_object.name, properties, asset_type, lod=True)
                     export_mesh(asset_id, mesh_object, properties, lod=lod_index)
                     if file_path:
                         lods[str(lod_index)] = file_path
@@ -75,6 +76,21 @@ def get_pre_scaled_context():
     return context
 
 
+def get_visible_particle_modifiers(mesh_object, properties, p_type=None):
+    """
+    Gets particle modifiers and the associated particle systems (that are visible by user visibility setting)
+    on a mesh as a list of tuples.
+
+    :param object mesh_object: A mesh object
+    :param str p_type: The type of the particle is either 'HAIR' or 'EMITTER'.
+    :param PropertyData properties: A property data instance that contains all property values of the tool.
+    :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
+    """
+    # dynamically uses what the user selected in export settings ('RENDER' or 'VIEWPORT') to decide visibility
+    context = properties.blender.export_method.abc.scene_options.evaluation_mode
+    return utilities.get_particle_modifiers(mesh_object, p_type, visible=context)
+
+
 def set_parent_rig_selection(mesh_object, properties):
     """
     Recursively selects all parents of an object as long as the parent are in the rig collection.
@@ -89,7 +105,7 @@ def set_parent_rig_selection(mesh_object, properties):
     if rig_object:
 
         # if the scene object's parent is in the rig collection
-        if rig_object in utilities.get_from_collection(AssetTypes.SKELETON, properties):
+        if rig_object in utilities.get_from_collection(BlenderTypes.SKELETON, properties):
             # select the parent object
             rig_object.select_set(True)
 
@@ -147,7 +163,7 @@ def set_armatures_as_parents(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
-    mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
+    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
 
     for mesh_object in mesh_objects:
         rig_object = utilities.get_armature_modifier_rig_object(mesh_object)
@@ -331,25 +347,37 @@ def restore_rig_objects(context, properties):
             source_object.data.name = context['source_object']['armature_name']
 
 
-def export_fbx_file(file_path, properties):
+def export_fbx_file(file_path, export_settings):
     """
     Exports a fbx file.
 
     :param str file_path: A file path where the file will be exported.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param dict export_settings: A dictionary of blender export settings for the specific file type.
     """
-    export_settings = {}
-    for group_name, group_data in settings.get_settings_by_path('blender-export_method', 'fbx').items():
-        prefix = settings.get_generated_prefix('blender-export_method-fbx', group_name)
-        for attribute_name in group_data.keys():
-            export_settings[attribute_name] = settings.get_property_by_path(prefix, attribute_name, properties)
-
     bpy.ops.export_scene.fbx(
         filepath=file_path,
         use_selection=True,
         bake_anim_use_nla_strips=True,
         bake_anim_use_all_actions=False,
         object_types={'ARMATURE', 'MESH', 'EMPTY'},
+        **export_settings
+    )
+
+
+def export_alembic_file(file_path, export_settings):
+    """
+    Exports an abc file.
+
+    :param str file_path: A file path where the file will be exported.
+    :param dict export_settings: A dictionary of blender export settings for the specific file type.
+    """
+    bpy.ops.wm.alembic_export(
+        filepath=file_path,
+        end=1,
+        selected=True,
+        visible_objects_only=True,
+        export_hair=True,
+        export_particles=False,
         **export_settings
     )
 
@@ -376,32 +404,46 @@ def export_custom_property_fcurves(action_name, properties):
     bpy.context.window_manager.send2ue.asset_data[asset_id]['fcurve_file_path'] = fcurve_file_path
 
 
-def export_file(properties, lod=0):
+def export_file(properties, lod=0, file_type=FileTypes.FBX, asset_data=None):
     """
     Calls the blender export operator with specific settings.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool lod: Whether the exported mesh is a lod.
+    :param str file_type: File type of the export.
+    :param dict asset_data: A mutable dictionary of asset data for the current asset.
     """
-    asset_id = bpy.context.window_manager.send2ue.asset_id
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
-    file_path = asset_data['file_path']
+    if not asset_data:
+        asset_id = bpy.context.window_manager.send2ue.asset_id
+        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+
+    file_path = asset_data.get('file_path')
     if lod != 0:
         file_path = asset_data['lods'][str(lod)]
-
-    # change the scene scale and scale the rig objects and get their original context
-    context = scale_rig_objects(properties)
 
     # if the folder does not exists create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
 
-    # export the fbx file
-    export_fbx_file(file_path, properties)
+    # get blender export settings
+    export_settings = {}
+    for group_name, group_data in settings.get_settings_by_path('blender-export_method', file_type).items():
+        prefix = settings.get_generated_prefix(f'blender-export_method-{file_type}', group_name)
+        for attribute_name in group_data.keys():
+            export_settings[attribute_name] = settings.get_property_by_path(prefix, attribute_name, properties)
 
-    # restores the original rig objects
-    restore_rig_objects(context, properties)
+    if file_type == FileTypes.FBX:
+        # change the scene scale and scale the rig objects and get their original context
+        context = scale_rig_objects(properties)
+
+        export_fbx_file(file_path, export_settings)
+
+        # restores the original rig objects
+        restore_rig_objects(context, properties)
+
+    elif file_type == FileTypes.ABC:
+        export_alembic_file(file_path, export_settings)
 
 
 def get_asset_sockets(asset_name, properties):
@@ -434,7 +476,6 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     :param object mesh_object: A object of type mesh.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool lod: Whether the exported mesh is a lod.
-    :return str: The fbx file path of the exported mesh
     """
     # deselect everything
     utilities.deselect_all_objects()
@@ -470,7 +511,6 @@ def export_animation(asset_id, rig_object, action_name, properties):
     :param object rig_object: A object of type armature with animation data.
     :param str action_name: The name of the action to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return str: The fbx file path of the exported action
     """
     # run the pre animation export extensions
     extension.run_extension_tasks(ExtensionTasks.PRE_ANIMATION_EXPORT.value)
@@ -503,6 +543,40 @@ def export_animation(asset_id, rig_object, action_name, properties):
     extension.run_extension_tasks(ExtensionTasks.POST_ANIMATION_EXPORT.value)
 
 
+@utilities.track_progress(message='Exporting curves/hair particle system "{attribute}"...', attribute='file_path')
+def export_hair(asset_id, mesh_object, properties):
+    """
+    Exports a mesh to a file.
+
+    :param str asset_id: The unique id of the asset.
+    :param object mesh_object: A object of type mesh.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    """
+    # deselect everything
+    utilities.deselect_all_objects()
+
+    # run the pre groom export extensions
+    extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
+
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+
+    # only export if asset_data contains groom attribute (indicates there is hair present on a mesh)
+    if asset_data.get('groom'):
+        # select the scene object if there is particle systems present
+        if len(mesh_object.particle_systems) > 0:
+            mesh_object.select_set(True)
+
+        # export the abc file
+        export_file(properties, file_type=FileTypes.ABC)
+
+        # run the pre groom export extensions
+        extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)
+
+        # delete particle systems that were converted from curves objects
+        curves_object_names = asset_data['_converted_curves']
+        utilities.remove_particle_systems(curves_object_names, [mesh_object])
+
+
 def create_animation_data(rig_objects, properties):
     """
     Collects and creates all the action data needed for an animation import.
@@ -530,7 +604,7 @@ def create_animation_data(rig_objects, properties):
 
             # export the actions and create the action import data
             for action_name in action_names:
-                file_path = get_file_path(action_name, properties, AssetTypes.ANIMATION)
+                file_path = get_file_path(action_name, properties, UnrealTypes.ANIM_SEQUENCE)
                 asset_name = utilities.get_asset_name(action_name, properties)
 
                 # export the animation
@@ -540,7 +614,7 @@ def create_animation_data(rig_objects, properties):
                 # save the import data
                 asset_id = utilities.get_asset_id(file_path)
                 animation_data[asset_id] = {
-                    '_asset_type': AssetTypes.ANIMATION,
+                    '_asset_type': UnrealTypes.ANIM_SEQUENCE,
                     '_action_name': action_name,
                     '_armature_object_name': rig_object.name,
                     'file_path': file_path,
@@ -563,6 +637,9 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
     :return list: A list of dictionaries containing the mesh import data.
     """
     mesh_data = {}
+    if not properties.import_meshes:
+        return mesh_data
+
     previous_asset_names = []
 
     # get the asset data for the scene objects
@@ -574,6 +651,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
         if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
             continue
 
+        # TODO: don't think this block is needed, how would the code ever reach this block since all LODs except LOD0 are skipped?
         # check each previous asset name for its lod mesh
         for previous_asset in previous_asset_names:
             if utilities.is_lod_of(previous_asset, mesh_object.name, properties):
@@ -581,16 +659,17 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 break
 
         if not already_exported:
+            asset_type = utilities.get_mesh_unreal_type(mesh_object)
             # get file path
-            file_path = get_file_path(mesh_object.name, properties, AssetTypes.MESH, lod=False)
+            file_path = get_file_path(mesh_object.name, properties, asset_type, lod=False)
             # export the object
             asset_id = utilities.get_asset_id(file_path)
             export_mesh(asset_id, mesh_object, properties)
-            import_path = utilities.get_import_path(mesh_object, properties, AssetTypes.MESH)
+            import_path = utilities.get_import_path(properties, asset_type)
 
             # save the asset data
             mesh_data[asset_id] = {
-                '_asset_type': AssetTypes.MESH,
+                '_asset_type': asset_type,
                 '_mesh_object_name': mesh_object.name,
                 'file_path': file_path,
                 'asset_folder': import_path,
@@ -606,6 +685,129 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
     return mesh_data
 
 
+def create_groom_data(mesh_objects, curves_objects, rig_objects, properties):
+    """
+    Collects and creates all the asset data needed for the import process.
+
+    :param list mesh_objects: A list of mesh objects.
+    :param list curves_objects: A list of curves objects.
+    :param list rig_objects: A list of armature objects.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :return list: A list of dictionaries containing the groom import data.
+    """
+    groom_data = {}
+    if not properties.import_grooms:
+        return groom_data
+    # convert curves objects to particle systems and store the names of the converted curves objects
+    curves_object_names = utilities.convert_curves_to_particle_systems(curves_objects)
+
+    # clear animation transformations prior to export, so groom exports with no distortion
+    for rig_object in rig_objects:
+        if rig_object.animation_data.action:
+            rig_object.animation_data.action = None
+        utilities.set_all_action_mute_values(rig_object, mute=True)
+        utilities.clear_pose(rig_object)
+
+    for mesh_object in mesh_objects:
+        # only export particle systems on meshes that are lod 0 if lod option is on
+        if properties.import_lods and utilities.get_lod_index(mesh_object.name, properties) != 0:
+            continue
+        # turn show_emitter off in particle system render settings
+        mesh_object.show_instancer_for_render = False
+
+        # get all particle systems of type 'HAIR' and its modifier on the current mesh
+        hair_systems = get_visible_particle_modifiers(mesh_object, properties, p_type=BlenderTypes.PARTICLE_HAIR)
+
+        if len(hair_systems) > 0:
+            groom_systems_data = {}
+
+            # get head particle from the particle system list sorted by creation order
+            hair_particles = list(dict(hair_systems).values())
+            head_particle = utilities.get_particle_systems(
+                mesh_object, p_type=BlenderTypes.PARTICLE_HAIR, index=0, exclusive_list=hair_particles
+            )
+
+            # populate groom_systems_data dictionary, storing assets data of particle systems on the current mesh
+            for modifier, particle in hair_systems:
+                # get file path and asset id
+                file_path = get_file_path(particle.name, properties, UnrealTypes.GROOM, lod=False, file_extension='abc')
+                asset_id = utilities.get_asset_id(file_path)
+                # create groom asset data in groom_systems_data dictionary
+                groom_systems_data[asset_id] = create_groom_system_data(
+                    properties,
+                    particle.name,
+                    mesh_object.name,
+                    modifier.name
+                )
+                # if this is the head particle, add created groom asset data to groom_data dictionary to be returned
+                if particle == head_particle:
+                    groom_data[asset_id] = groom_systems_data[asset_id].copy()
+                    head_particle_id = asset_id
+
+            # append groom_systems_data dictionary as an attribute to head particle's asset data
+            groom_data[head_particle_id].update({
+                '_groom_systems_data': groom_systems_data,
+                '_converted_curves': curves_object_names
+            })
+            # export particle hair systems as alembic file
+            export_hair(head_particle_id, mesh_object, properties)
+
+        # when there is no hair systems surfaced on the current mesh
+        else:
+            temp_path = get_file_path(mesh_object.name, properties, UnrealTypes.GROOM, lod=False, file_extension='abc')
+            asset_id = utilities.get_asset_id(temp_path)
+
+            # this is for extensions that might use pre groom export callbacks to populate asset data
+            groom_data[asset_id] = {
+                '_asset_type': UnrealTypes.GROOM,
+                '_mesh_object_name': mesh_object.name,
+                '_converted_curves': curves_object_names
+            }
+            # export particle hair systems as alembic file
+            export_hair(asset_id, mesh_object, properties)
+
+    return groom_data
+
+
+def create_groom_system_data(properties, hair_name, mesh_object_name=None, modifier_name=None):
+    """
+    Returns a dictionary that is the asset data for a groom system.
+
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :param str hair_name: the name of the particle system.
+    :param str mesh_object_name: the name of the mesh that the particle system is surfaced on.
+    :param str modifier_name: the name of the modifier controlling the particle system.
+    :return dict: A dictionary of groom import data.
+    """
+    groom_import_path = utilities.get_import_path(properties, UnrealTypes.GROOM)
+    groom_asset_name = utilities.get_asset_name(hair_name, properties)
+
+    file_path = get_file_path(hair_name, properties, UnrealTypes.GROOM, lod=False, file_extension='abc')
+
+    asset_data = {
+        '_asset_type': UnrealTypes.GROOM,
+        '_hair_particle_name': hair_name,
+        'file_path': file_path,
+        'asset_folder': groom_import_path,
+        'asset_path': f'{groom_import_path}{groom_asset_name}',
+        'groom': True
+    }
+
+    if mesh_object_name:
+        mesh_import_path = utilities.get_import_path(properties, UnrealTypes.SKELETAL_MESH)
+        mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
+        asset_data.update({
+            '_mesh_object_name': mesh_object_name,
+            'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}'
+        })
+
+    if modifier_name:
+        asset_data.update({
+            '_modifier_name': modifier_name
+        })
+    return asset_data
+
+
 def create_asset_data(properties):
     """
     Collects and creates all the asset data needed for the import process.
@@ -613,11 +815,15 @@ def create_asset_data(properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the mesh and rig objects from their collections
-    mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
-    rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
+    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
+    rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
+    curves_objects = utilities.get_from_collection(BlenderTypes.CURVES, properties)
 
     # filter the rigs and meshes based on the extension filter methods
-    rig_objects, mesh_objects = extension.run_extension_filters(rig_objects, mesh_objects)
+    rig_objects, mesh_objects, groom_surface_objects = extension.run_extension_filters(
+        rig_objects,
+        mesh_objects
+    )
 
     # get the asset data for all the mesh objects
     mesh_data = create_mesh_data(mesh_objects, rig_objects, properties)
@@ -625,8 +831,11 @@ def create_asset_data(properties):
     # get the asset data for all the actions on the rig objects
     animation_data = create_animation_data(rig_objects, properties)
 
+    # get the asset data for all the hair systems
+    hair_data = create_groom_data(groom_surface_objects, curves_objects, rig_objects, properties)
+
     # update the properties with the asset data
-    bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data})
+    bpy.context.window_manager.send2ue.asset_data.update({**mesh_data, **animation_data, **hair_data})
 
 
 def send2ue(properties):

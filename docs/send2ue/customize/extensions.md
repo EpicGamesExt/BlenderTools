@@ -1,7 +1,12 @@
 # Extensions
 
 ::: warning
-This feature set is still very new and could be subject to change. Navigate to the linked page to see [supported extensions](https://epicgames.github.io/BlenderTools/send2ue/extras/supported-extensions.html).
+This feature set is still very new and could be subject to change.
+:::
+
+::: tip Supported Extensions
+See the Supported Extensions section for details on extensions that ship with the Send to Unreal addon
+and are supported by this repository.
 :::
 
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
@@ -94,7 +99,7 @@ operation. This is done by registering methods on the extension's property group
 operation gets run, the extension tasks get executed. The methods below can be implemented in an extension class and the Send to Unreal
 extension factory will inject the tasks.
 
-### filter_objects
+#### _filter_objects_
 Defines a filter for the armature and mesh objects after they have been initially collected.
 - param `list[bpy.types.Object]` `armature_objects` A list of armature objects.
 - param `list[bpy.types.Object]` `mesh_objects` A list of mesh objects.
@@ -104,21 +109,21 @@ Defines a filter for the armature and mesh objects after they have been initiall
 filter_objects(self, armature_objects, mesh_objects)
 ```
 
-### pre_operation
+#### _pre_operation_
 Defines the pre operation logic that will be run before the send to unreal operation.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
 pre_operation(self, properties)
 ```
 
-### post_operation
+#### _post_operation_
 Defines the post operation logic that will be run before the send to unreal operation.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 ```python
 post_operation(self, properties)
 ```
 
-### pre_validations
+#### _pre_validations_
 Defines the pre validation logic that will be an injected operation.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 - return `bool` Whether or not the validation has passed.
@@ -126,7 +131,7 @@ Defines the pre validation logic that will be an injected operation.
 pre_validations(self, properties)
 ```
 
-### post_validations
+#### _post_validations_
 Defines the post validation logic that will be an injected operation.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
 - return `bool` Whether or not the validation has passed.
@@ -134,7 +139,7 @@ Defines the post validation logic that will be an injected operation.
 post_validations(self, properties)
 ```
 
-### pre_animation_export
+#### _pre_animation_export_
 Defines the pre animation export logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -142,7 +147,7 @@ Defines the pre animation export logic that will be an injected operation.
 pre_animation_export(self, asset_data, properties)
 ```
 
-### post_animation_export
+#### _post_animation_export_
 Defines the post animation export logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -150,7 +155,7 @@ Defines the post animation export logic that will be an injected operation.
 post_animation_export(self, asset_data, properties)
 ```
 
-### pre_mesh_export
+#### _pre_mesh_export_
 Defines the pre mesh export logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -158,7 +163,7 @@ Defines the pre mesh export logic that will be an injected operation.
 pre_mesh_export(self, asset_data, properties)
 ```
 
-### post_mesh_export
+#### _post_mesh_export_
 Defines the post mesh export logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -166,7 +171,7 @@ Defines the post mesh export logic that will be an injected operation.
 post_mesh_export(self, asset_data, properties)
 ```
 
-### pre_import
+#### _pre_import_
 Defines the pre import logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -174,7 +179,7 @@ Defines the pre import logic that will be an injected operation.
 pre_import(self, asset_data, properties)
 ```
 
-### post_import
+#### _post_import_
 Defines the post import logic that will be an injected operation.
 - param `dict` `asset_data` A mutable dictionary of asset data for the current asset.
 - param `Send2UeSceneProperties` `properties` The scene property group that contains all the addon properties.
@@ -182,7 +187,7 @@ Defines the post import logic that will be an injected operation.
 post_import(self, asset_data, properties)
 ```
 
-### Utility Operators
+## Utility Operators
 Utility operators are authored just like you would author any other blender operator. The class attribute
 `utility_operators` is a place where a list of operator classes can be assigned. This list of operator classes will be
 auto registered and added to the utilities submenu under `Pipeline > Utilities`
@@ -223,7 +228,7 @@ bpy.context.scene.send2ue.extensions.example.hello_property
 just like the default properties that exist in the Send to Unreal tool.
 :::
 
-### Asset Data Dictionary
+## Asset Data Dictionary
 During the life cycle of the Send to Unreal operation a dictionary `asset_data` is created that contains all assets
 that will be sent in the operation. Per asset, data gets fetched and passed into the task method via the `asset_data`
 param in certain extension task methods. i.e `pre_mesh_export(self, asset_data, properties)`.
@@ -283,7 +288,7 @@ Unreal Settings Dialog.
 
 ![4](./images/extensions/4.png)
 
-### draw_validations
+#### _draw_validations_
 Can be overridden to draw an interface for the extension under the validations tab.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
@@ -292,7 +297,7 @@ Can be overridden to draw an interface for the extension under the validations t
 draw_validations(self, dialog, layout, properties)
 ```
 
-### draw_export
+#### _draw_export_
 Can be overridden to draw an interface for the extension under the export tab.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
@@ -301,7 +306,7 @@ Can be overridden to draw an interface for the extension under the export tab.
 draw_export(self, dialog, layout, properties)
 ```
 
-### draw_import
+#### _draw_import_
 Can be overridden to draw an interface for the extension under the import tab.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.
@@ -310,7 +315,7 @@ Can be overridden to draw an interface for the extension under the import tab.
 draw_import(self, dialog, layout, properties)
 ```
 
-### draw_paths
+#### _draw_paths_
 Can be overridden to draw an interface for the extension under the paths tab.
 - param `Send2UnrealDialog` `dialog` The dialog class.
 - param `bpy.types.UILayout` `layout` The extension layout area.

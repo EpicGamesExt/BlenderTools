@@ -5,7 +5,7 @@ import os
 import bpy
 from . import utilities, formatting, extension
 from ..dependencies.unreal import UnrealRemoteCalls
-from ..constants import AssetTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
+from ..constants import BlenderTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
 
 
 class ValidationManager:
@@ -15,8 +15,8 @@ class ValidationManager:
 
     def __init__(self, properties):
         self.properties = properties
-        self.mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
-        self.rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
+        self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
+        self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
         self._validators = []
         self._register_validators()
 
@@ -288,4 +288,40 @@ class ValidationManager:
                         f'be zero to avoid unexpected results. Otherwise, turn off this validation to ignore.'
                     )
                     return False
+        return True
+
+    def validate_required_unreal_plugins(self):
+        """
+        Checks whether the required unreal plugins are enabled.
+        """
+        missing_plugins = []
+
+        if self.properties.import_grooms:
+            # A dictionary of plugins where the key is the plugin name and value is the plugin label.
+            groom_plugins = {
+                'HairStrands': 'Groom',
+                'AlembicHairImporter': 'Alembic Groom Importer'
+            }
+            missing_plugins += UnrealRemoteCalls.check_plugins(list(groom_plugins.keys()))
+
+        plugin_names = ', '.join(groom_plugins[name] for name in missing_plugins)
+
+        if missing_plugins:
+            utilities.report_error(
+                f'Please enable missing plugins in Unreal: {plugin_names}'
+            )
+            return False
+
+        return True
+
+    # TODO: temporary validation before lods support for groom is added
+    def validate_groom_unsupported_lods(self):
+        """
+        Checks that import groom and import lods are not both selected.
+        """
+        if self.properties.import_lods and self.properties.import_grooms:
+            utilities.report_error(
+                'Groom LODs are currently unsupported at this time. Please disable either import LODs or import groom.'
+            )
+            return False
         return True

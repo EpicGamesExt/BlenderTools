@@ -10,10 +10,14 @@ class TestSend2UeExtensionUseImmediateParentNameBase(BaseSend2ueTestCaseCore, Ba
         self.blender.parent_to(child_name, parent_name)
 
     def run_use_immediate_parent_name_option_tests(self, objects_and_collections):
-        for object_name, collection_hierarchy in objects_and_collections.items():
+        for object_name, attributes in objects_and_collections.items():
+            collection_hierarchy = attributes.get('collections')
+            grooms = attributes.get('grooms')
+            armature = attributes.get('armature')
+
             self.blender.create_scene_collections(collection_hierarchy)
             self.blender.set_scene_collection_hierarchy(collection_hierarchy)
-            self.move_to_collection([object_name], collection_hierarchy[-1])
+            self.move_to_collection([object_name] + armature, collection_hierarchy[-1])
 
             # turn use immediate parent name off
             self.blender.set_addon_property(
@@ -24,6 +28,12 @@ class TestSend2UeExtensionUseImmediateParentNameBase(BaseSend2ueTestCaseCore, Ba
             self.send2ue_operation()
             # check that the mesh name the object name
             self.assert_mesh_import(object_name)
+
+            # check that the groom assets have the correct binding target mesh
+            for groom in grooms:
+                self.assert_binding_asset(groom, object_name)
+
+            self.tearDown()
 
             # turn use immediate parent name on
             self.blender.set_addon_property(
@@ -37,16 +47,24 @@ class TestSend2UeExtensionUseImmediateParentNameBase(BaseSend2ueTestCaseCore, Ba
             # check that the mesh name is the parent collection
             self.assert_mesh_import(collection_hierarchy[-1])
 
+            # check that the groom assets have the correct binding target mesh
+            for groom in grooms:
+                self.assert_binding_asset(groom, collection_hierarchy[-1])
+
         # reset blender and unreal
         self.tearDown()
         self.setUp()
         self.blender.create_scene_collections(['Export'])
 
         # test when mesh collection's parent is an empty type object
-        for object_name, parent_hierarchy in objects_and_collections.items():
+        for object_name, attributes in objects_and_collections.items():
+            parent_hierarchy = attributes.get('collections')
+            grooms = attributes.get('grooms')
+            armature = attributes.get('armature')
+
             # create an empty type parent with name from parent_hierarchy
             self.setup_parents(object_name, parent_hierarchy[-1])
-            self.move_to_collection([object_name] + [parent_hierarchy[-1]], 'Export')
+            self.move_to_collection([object_name] + armature + [parent_hierarchy[-1]], 'Export')
 
             # turn use immediate parent name on
             self.blender.set_addon_property(
@@ -59,6 +77,10 @@ class TestSend2UeExtensionUseImmediateParentNameBase(BaseSend2ueTestCaseCore, Ba
 
             # check that the mesh name is the parent collection
             self.assert_mesh_import(parent_hierarchy[-1])
+
+            # check that the groom assets have the correct binding target mesh
+            for groom in grooms:
+                self.assert_binding_asset(groom, parent_hierarchy[-1])
 
 
 class TestSend2UeExtensionUseImmediateParentNameCubes(
@@ -83,7 +105,11 @@ class TestSend2UeExtensionUseImmediateParentNameCubes(
         """
         self.run_use_immediate_parent_name_option_tests(
             objects_and_collections={
-                'Cube1_LOD0': ['Export', 'ParentCollectionName']
+                'Cube1_LOD0': {
+                    'collections': ['Export', 'ParentCollectionName'],
+                    'grooms': [],
+                    'armature': []
+                }
             })
 
     def test_extension(self):
@@ -122,7 +148,11 @@ class TestSend2UeExtensionUseImmediateParentNameMannequins(
         """
         self.run_use_immediate_parent_name_option_tests(
             objects_and_collections={
-                'SK_Mannequin_Female': ['Export', 'ParentCollectionName']
+                'SK_Mannequin_Female': {
+                    'collections': ['Export', 'ParentCollectionName'],
+                    'grooms': ['particle_hair_head'],
+                    'armature': ['female_root']
+                }
             })
 
     def test_animations(self):
@@ -137,5 +167,6 @@ class TestSend2UeExtensionUseImmediateParentNameMannequins(
                 'rig': 'female_root',
                 'animations': ['third_person_run_01', 'third_person_walk_01'],
                 'bones': ['pelvis', 'calf_r', 'hand_l'],
-                'frames': [1, 5, 14]
+                'frames': [1, 5, 14],
+                'grooms': ['particle_hair_head']
             }})

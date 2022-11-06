@@ -21,8 +21,8 @@ def import_asset(asset_id, property_data):
     # get the asset data
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
 
-    # import the asset
-    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)
+    file_path = asset_data.get('file_path')
+    UnrealRemoteCalls.import_asset(file_path, asset_data, property_data)
 
     # import fcurves
     if asset_data.get('fcurve_file_path'):
@@ -122,11 +122,8 @@ def assets(properties):
             PathModes.SEND_TO_PROJECT.value,
             PathModes.SEND_TO_DISK_THEN_PROJECT.value
         ]:
-            for asset_data in bpy.context.window_manager.send2ue.asset_data.values():
-                # get the asset id
-                asset_id = get_asset_id(asset_data.get('file_path'))
-
-                # imports static mesh, skeletal mesh or animation
+            for asset_id, asset_data in bpy.context.window_manager.send2ue.asset_data.items():
+                # imports static mesh, skeletal mesh, animation or groom
                 import_asset(asset_id, property_data)
 
                 # import lods

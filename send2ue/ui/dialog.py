@@ -21,6 +21,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         ]:
             self.draw_property(properties, layout, 'unreal_mesh_folder_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_animation_folder_path', header_label=True)
+            self.draw_property(properties, layout, 'unreal_groom_folder_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_skeleton_asset_path', header_label=True)
             self.draw_property(properties, layout, 'unreal_physics_asset_path', header_label=True)
 
@@ -30,6 +31,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         ]:
             self.draw_property(properties, layout, 'disk_mesh_folder_path', header_label=True)
             self.draw_property(properties, layout, 'disk_animation_folder_path', header_label=True)
+            self.draw_property(properties, layout, 'disk_groom_folder_path', header_label=True)
 
     @staticmethod
     def draw_property(properties, layout, property_name, header_label=False, enabled=True):
@@ -77,6 +79,15 @@ class Send2UnrealDialog(bpy.types.Panel):
             self.draw_fbx_export_settings,
             'show_fbx_export_settings',
             'FBX Export Settings',
+            'EXPORT'
+        )
+
+        #  abc settings box
+        self.draw_expanding_section(
+            layout,
+            self.draw_abc_export_settings,
+            'show_abc_export_settings',
+            'ABC Export Settings',
             'EXPORT'
         )
 
@@ -192,6 +203,19 @@ class Send2UnrealDialog(bpy.types.Panel):
             'Miscellaneous'
         )
 
+    def draw_abc_import_settings(self, layout):
+        """
+        Draws all the properties in the ABC import settings.
+
+        :param layout: The layout container for this tab.
+        """
+        self.draw_settings_section(
+            layout,
+            'unreal-import_method-abc',
+            'conversion_settings',
+            'Groom Conversion Settings'
+        )
+
     def draw_import_tab(self, layout):
         """
         Draws all the properties in the Import tab.
@@ -199,8 +223,10 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
+        self.draw_property(properties, layout, 'import_meshes')
         self.draw_property(properties, layout, 'import_materials_and_textures')
         self.draw_property(properties, layout, 'import_animations')
+        self.draw_property(properties, layout, 'import_grooms')
         self.draw_property(properties, layout, 'advanced_ui_import')
 
         #  fbx import settings box
@@ -218,6 +244,14 @@ class Send2UnrealDialog(bpy.types.Panel):
             self.draw_fbx_import_settings,
             'show_fbx_import_settings',
             'FBX Import Settings',
+            'IMPORT'
+        )
+        #  abc import settings box
+        self.draw_expanding_section(
+            layout,
+            self.draw_abc_import_settings,
+            'show_abc_import_settings',
+            'ABC Import Settings',
             'IMPORT'
         )
         #  editor library settings box
@@ -312,6 +346,28 @@ class Send2UnrealDialog(bpy.types.Panel):
             'blender-export_method-fbx',
             'extras',
             'Extras'
+        )
+
+    def draw_abc_export_settings(self, layout):
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'manual_transform',
+            'Manual Transform'
+        )
+
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'scene_options',
+            'Scene Options'
+        )
+
+        self.draw_settings_section(
+            layout,
+            'blender-export_method-abc',
+            'object_options',
+            'Object Options'
         )
 
     @staticmethod

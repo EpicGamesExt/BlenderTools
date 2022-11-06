@@ -37,6 +37,11 @@ already enabled.
 
 ![6](./images/6.png)
 
+If you are also working with groom assets and would like to export alembic files from blender as unreal groom assets,
+make sure to also have the plugins "Alembic Groom Importer" and "Groom" enabled.
+
+![6_1](./images/6_1.png)
+
 Once you have enabled the plugins, you'll be prompted to restart the editor. Go ahead and restart. Once you've restarted, go to `Edit > Project Settings`.
 
 ![7](./images/7.png)
@@ -81,4 +86,4 @@ Congrats, Send to Unreal is now working! To customize Send to Unreal to your nee
 `Pipeline > Export > Settings Dialog`. Here you can customize the paths for exports and imports
 as well as the export and import settings, and validations.
 
-![15](./images/15.png)
+<img src="./images/15.png" alt="15" width="450"/>

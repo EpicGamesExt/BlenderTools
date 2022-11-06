@@ -11,10 +11,24 @@ class PreFixToken(Enum):
     CONVEX_COLLISION = 'UCX'
 
 
-class AssetTypes:
+class BlenderTypes:
     SKELETON = 'ARMATURE'
     MESH = 'MESH'
     ANIMATION = 'ANIMATION'
+    PARTICLE_HAIR = 'HAIR'
+    CURVES = 'CURVES'
+
+
+class UnrealTypes:
+    SKELETAL_MESH = 'SkeletalMesh'
+    STATIC_MESH = 'StaticMesh'
+    ANIM_SEQUENCE = 'AnimSequence'
+    GROOM = 'Groom'
+
+
+class FileTypes:
+    ABC = 'abc'
+    FBX = 'fbx'
 
 
 class ToolInfo(Enum):
@@ -54,6 +68,8 @@ class ExtensionTasks(Enum):
     POST_BONE_SCALE = 'post_bone_scale'
     PRE_MESH_EXPORT = 'pre_mesh_export'
     POST_MESH_EXPORT = 'post_mesh_export'
+    PRE_GROOM_EXPORT = 'pre_groom_export'
+    POST_GROOM_EXPORT = 'post_groom_export'
     PRE_IMPORT = 'pre_import'
     POST_IMPORT = 'post_import'
     POST_OPERATION = 'post_operation'
