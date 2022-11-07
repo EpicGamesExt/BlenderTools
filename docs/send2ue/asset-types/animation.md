@@ -70,6 +70,10 @@ In this example a driver is created so that a custom float property `head_swell`
 value. Furthermore, that custom property value is keyed in the `third_person_walk01` action.
 
 ::: tip Note
+   Both the custom property and the driven shape key must have the same exact name in order for unreal to recognize it!
+:::
+
+::: tip Note
    This is what the driver settings look like:
 ![7](./images/animation/7.png)
 :::
