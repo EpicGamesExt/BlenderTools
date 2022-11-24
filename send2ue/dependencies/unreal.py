@@ -823,7 +823,10 @@ class UnrealRemoteCalls:
         :param str asset_path: The project path to the skeletal mesh in unreal.
         :param dict asset_data: A dictionary of import parameters.
         """
-        static_mesh = Unreal.get_asset(asset_path)
+        absoluteProjectContentDir = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_content_dir())
+        filename = os.path.basename(asset_path)
+        referencepath = "StaticMesh'" + asset_path.replace(absoluteProjectContentDir,"/Game/")+ "."+filename+"'"
+        static_mesh = Unreal.get_asset(referencepath)
         for socket_name, socket_data in asset_data.get('sockets').items():
             socket = unreal.StaticMeshSocket(static_mesh)
 
