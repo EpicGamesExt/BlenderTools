@@ -71,6 +71,9 @@
       ]
     },
     "ue2rigify": {},
+    "use_file_name_as_folder": {
+      "use_file_name_as_folder": false
+    },
     "use_collections_as_folders": {
       "use_collections_as_folders": false
     },
