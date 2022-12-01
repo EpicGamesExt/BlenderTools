@@ -703,8 +703,9 @@ def create_groom_data(mesh_objects, curves_objects, rig_objects, properties):
 
     # clear animation transformations prior to export, so groom exports with no distortion
     for rig_object in rig_objects:
-        if rig_object.animation_data.action:
-            rig_object.animation_data.action = None
+        if rig_object.animation_data:
+            if rig_object.animation_data.action:
+                rig_object.animation_data.action = None
         utilities.set_all_action_mute_values(rig_object, mute=True)
         utilities.clear_pose(rig_object)
 

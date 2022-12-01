@@ -58,6 +58,10 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         }
 
         self.run_lod_tests('Cube1', cube1s, lod_build_settings, 'static')
+
+        # make sure that the import area is clean so assets don't overwrite each other
+        self.tearDown()
+
         self.run_lod_tests('Cube2', cube2s, lod_build_settings, 'static')
 
     def test_sockets(self):

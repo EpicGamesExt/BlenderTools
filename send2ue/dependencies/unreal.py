@@ -687,7 +687,7 @@ class UnrealImportAsset(Unreal):
         """
         Sets the texture import options.
         """
-        if self._property_data.get('import_textures', {}).get('value', False):
+        if self._property_data.get('import_materials_and_textures', {}).get('value', False):
             import_data = unreal.FbxTextureImportData()
             self.set_settings(
                 self._property_data['unreal']['import_method']['fbx']['texture_import_data'],
@@ -948,24 +948,18 @@ class UnrealRemoteCalls:
                     return index
 
     @staticmethod
-    def check_plugins(plugin_names):
+    def get_enabled_plugins():
         """
         Checks to see if the current project has certain plugins enabled.
 
-        :param list(str) plugin_names: A list of plugin names.
-        :return list(str): Returns a list of missing plugins if any.
+        :returns: Returns a list of missing plugins if any.
+        :rtype: list[str]
         """
         uproject_path = unreal.Paths.get_project_file_path()
         with open(uproject_path, 'r') as uproject:
             project_data = json.load(uproject)
 
-        active_plugins = project_data.get('Plugins')
-        if active_plugins:
-            active_plugin_names = set(map(lambda plugin: plugin.get('Name'), active_plugins))
-            missing_plugins = list(filter(lambda plugin: plugin not in active_plugin_names, plugin_names))
-            return missing_plugins
-
-        return plugin_names
+        return [plugin.get('Name') for plugin in project_data.get('Plugins', {}) if plugin.get('Enabled')]
 
     @staticmethod
     def has_socket(asset_path, socket_name):
@@ -1400,6 +1394,17 @@ class UnrealRemoteCalls:
         return mesh.get_bounds().origin.to_tuple()
 
     @staticmethod
+    def get_morph_target_names(asset_path):
+        """
+        Gets the name of the morph targets on the given asset.
+
+        :param str asset_path: The project path to the asset.
+        :return list[str]: A list of morph target names.
+        """
+        skeletal_mesh = Unreal.get_asset(asset_path)
+        return list(skeletal_mesh.get_all_morph_target_names())
+
+    @staticmethod
     def get_sequence_track_keyframe(asset_path, track_name, curve_name, frame):
         """
         Gets the transformations of the given bone on the given frame.
@@ -1449,5 +1454,8 @@ class UnrealRemoteCalls:
         :param str curve_name: The fcurve name.
         """
         animation_sequence = Unreal.get_asset(asset_path)
-        return unreal.AnimationLibrary.does_curve_exist(animation_sequence, curve_name,
-                                                        unreal.RawCurveTrackTypes.RCT_FLOAT)
+        return unreal.AnimationLibrary.does_curve_exist(
+            animation_sequence,
+            curve_name,
+            unreal.RawCurveTrackTypes.RCT_FLOAT
+        )

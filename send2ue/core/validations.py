@@ -294,23 +294,21 @@ class ValidationManager:
         """
         Checks whether the required unreal plugins are enabled.
         """
-        missing_plugins = []
-
         if self.properties.import_grooms:
             # A dictionary of plugins where the key is the plugin name and value is the plugin label.
             groom_plugins = {
                 'HairStrands': 'Groom',
                 'AlembicHairImporter': 'Alembic Groom Importer'
             }
-            missing_plugins += UnrealRemoteCalls.check_plugins(list(groom_plugins.keys()))
+            enabled_plugins = UnrealRemoteCalls.get_enabled_plugins()
+            missing_plugins = [value for key, value in groom_plugins.items() if key not in enabled_plugins]
+            plugin_names = ', '.join(missing_plugins)
 
-        plugin_names = ', '.join(groom_plugins[name] for name in missing_plugins)
-
-        if missing_plugins:
-            utilities.report_error(
-                f'Please enable missing plugins in Unreal: {plugin_names}'
-            )
-            return False
+            if missing_plugins:
+                utilities.report_error(
+                    f'Please enable missing plugins in Unreal: {plugin_names}. Or disable the Groom import setting.'
+                )
+                return False
 
         return True
 

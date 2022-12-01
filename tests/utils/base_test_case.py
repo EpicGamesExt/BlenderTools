@@ -646,6 +646,17 @@ class BaseSend2ueTestCase(BaseTestCase):
         for index, animation_name in enumerate(animation_names):
             self.assert_animation_import(animation_name, not bool(index))
 
+    def assert_morph_targets(self, skeletal_mesh_name, morph_targets):
+        folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
+        self.log(f'Checking skeletal mesh "{skeletal_mesh_name}" for morph targets "{morph_targets}"...')
+        asset_path = f'{folder_path}{skeletal_mesh_name}'
+        unreal_morph_target_names = self.unreal.get_morph_target_names(asset_path)
+        for morph_target in morph_targets:
+            self.assertTrue(
+                morph_target in unreal_morph_target_names,
+                f'No morph target "{morph_target}" exists on skeletal mesh "{skeletal_mesh_name}"!'
+            )
+
     def assert_curve(self, animation_name, curve_name, exists=True):
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_animation_folder_path')
         self.log(f'Checking animation "{animation_name}" for curve "{curve_name}"...')
@@ -1000,7 +1011,11 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.move_to_collection([object_name, rig_name], 'Export')
             self.send2ue_operation()
             self.assert_mesh_import(object_name)
+
             for animation_name, curve_data in animations.items():
+                # asserts that the morph targets exist
+                self.assert_morph_targets(object_name, list(curve_data.keys()))
+
                 for curve_name, exists in curve_data.items():
                     self.assert_curve(animation_name, curve_name, exists)
 

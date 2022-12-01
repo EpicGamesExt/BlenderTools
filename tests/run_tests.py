@@ -73,7 +73,7 @@ if __name__ == '__main__':
                 'connects_to': 'unreal',
                 'refresh': True,
                 'always_pull': False,
-                'tag': 'blender:3.2-cpu-ubuntu18.04',
+                'tag': 'blender:3.3.1-cpu-ubuntu18.04',
                 'repository': 'nytimes',
                 'rpc_port': BLENDER_PORT,
                 'environment': environment,
@@ -94,7 +94,7 @@ if __name__ == '__main__':
                 'rpc_port': UNREAL_PORT,
                 'environment': environment,
                 'volumes': volumes,
-                'tag': 'unreal-engine:dev-slim-5.0.3',
+                'tag': 'unreal-engine:dev-slim-5.1',
                 'repository': 'ghcr.io/epicgames',
                 'user': 'ue4',
                 'command': [
