@@ -1,9 +1,9 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
-import os
 import bpy
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import utilities
+from send2ue.constants import UnrealTypes
 from send2ue.dependencies.unreal import UnrealRemoteCalls
 
 
@@ -49,16 +49,17 @@ class CreatePostImportAssetsForGroom(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        if self.binding_asset and asset_data.get('groom') and properties.import_meshes:
-            groom_asset_path = asset_data.get('asset_path')
-            mesh_asset_path = asset_data.get('mesh_asset_path')
-            binding_asset_path = None
+        if asset_data.get('_asset_type') == UnrealTypes.GROOM:
+            if self.binding_asset and properties.import_meshes:
+                groom_asset_path = asset_data.get('asset_path')
+                mesh_asset_path = asset_data.get('mesh_asset_path')
+                binding_asset_path = None
 
-            if groom_asset_path and mesh_asset_path:
-                binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+                if groom_asset_path and mesh_asset_path:
+                    binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
 
-            if self.blueprint_with_groom and binding_asset_path:
-                UnrealRemoteCalls.create_blueprint_with_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
+                if self.blueprint_with_groom and binding_asset_path:
+                    UnrealRemoteCalls.create_blueprint_with_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
 
     def draw_import(self, dialog, layout, properties):
         """

@@ -2,7 +2,7 @@
 
 import bpy
 from . import settings, extension
-from ..constants import PathModes, ExtensionTasks
+from ..constants import PathModes, ExtensionTasks, UnrealTypes
 from ..dependencies.unreal import UnrealRemoteCalls
 from .utilities import track_progress, get_asset_id
 
@@ -60,7 +60,7 @@ def reset_lods(asset_id, property_data):
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     asset_path = asset_data.get('asset_path')
 
-    if asset_data.get('skeletal_mesh'):
+    if asset_data.get('_asset_type') == UnrealTypes.SKELETAL_MESH:
         UnrealRemoteCalls.reset_skeletal_mesh_lods(asset_path, property_data)
     else:
         UnrealRemoteCalls.reset_static_mesh_lods(asset_path)
@@ -77,7 +77,7 @@ def import_lod_files(asset_id):
     lods = asset_data.get('lods', {})
     for index in range(1, len(lods.keys()) + 1):
         lod_file_path = lods.get(str(index))
-        if asset_data.get('skeletal_mesh'):
+        if asset_data.get('_asset_type') == UnrealTypes.SKELETAL_MESH:
             UnrealRemoteCalls.import_skeletal_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
         else:
             UnrealRemoteCalls.import_static_mesh_lod(asset_data.get('asset_path'), lod_file_path, index)
@@ -94,7 +94,7 @@ def set_lod_build_settings(asset_id, property_data):
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     lods = asset_data.get('lods', {})
     for index in range(0, len(lods.keys()) + 1):
-        if asset_data.get('skeletal_mesh'):
+        if asset_data.get('_asset_type') == UnrealTypes.SKELETAL_MESH:
             UnrealRemoteCalls.set_skeletal_mesh_lod_build_settings(
                 asset_data.get('asset_path'),
                 index,

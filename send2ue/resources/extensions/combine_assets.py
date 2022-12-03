@@ -5,7 +5,7 @@ import bpy
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import export, settings, utilities
 from send2ue.dependencies.unreal import UnrealRemoteCalls
-from send2ue.constants import BlenderTypes, FileTypes
+from send2ue.constants import BlenderTypes, FileTypes, UnrealTypes
 
 
 class CombineAssetsExtension(ExtensionBase):
@@ -84,30 +84,30 @@ class CombineAssetsExtension(ExtensionBase):
         if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOMS, Options.GROOM_PER_COMBINED_MESH]:
             properties.unreal.import_method.fbx.static_mesh_import_data.combine_meshes = True
 
-    def filter_objects(self, armature_objects, mesh_objects):
+    def filter_objects(self, armature_objects, mesh_objects, hair_objects):
         """
         Filters armature and mesh objects for the appropriate combine groom option.
 
         :param list[object] armature_objects: A list of armature objects.
         :param list[object] mesh_objects: A list of mesh objects.
+        :param list[object] hair_objects: A list of hair objects.
         :returns: A tuple which contains filtered lists of armature objects, mesh objects and groom surface objects.
         :rtype: tuple(list, list, list)
         """
-        groom_surface_objects = mesh_objects
-
         if self.combine in [Options.CHILD_MESHES, Options.CHILD_MESHES_ALL_GROOMS, Options.GROOM_PER_COMBINED_MESH]:
             mesh_objects = utilities.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
 
         if self.combine == Options.GROOM_PER_COMBINED_MESH:
-            # groom surface objects are meshes with unique parents
-            groom_surface_objects = utilities.get_unique_parent_mesh_objects(armature_objects, mesh_objects)
+            # TODO get a hair object per mesh object
+            pass
+
         # enum set to combine all grooms
         elif self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
-            if len(mesh_objects) > 0:
+            if hair_objects:
                 # select one mesh object to be the groom surface object so that export groom runs once
-                groom_surface_objects = [mesh_objects[0]]
+                hair_objects = [hair_objects[0]]
 
-        return armature_objects, mesh_objects, groom_surface_objects
+        return armature_objects, mesh_objects, hair_objects
 
     def pre_mesh_export(self, asset_data, properties):
         """
@@ -124,7 +124,6 @@ class CombineAssetsExtension(ExtensionBase):
                 utilities.select_all_children(
                     mesh_object.parent,
                     BlenderTypes.MESH,
-                    properties,
                     exclude_postfix_tokens=True
                 )
                 # rename the asset to match the empty if this is a static mesh export
@@ -158,7 +157,6 @@ class CombineAssetsExtension(ExtensionBase):
                 child_mesh_objects = utilities.get_all_children(
                     mesh_object.parent,
                     BlenderTypes.MESH,
-                    properties,
                     exclude_postfix_tokens=True
                 )
 
@@ -196,9 +194,11 @@ class CombineAssetsExtension(ExtensionBase):
                     })
 
         elif self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
+            # TODO make this groom name customizable, maybe a property in the UI that appears
+            # when either of these are set
             groom_asset_name = 'Combined_Groom'
             # get all mesh objects
-            child_mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
+            child_mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
             if self.hair_particles_exist(child_mesh_objects):
                 # update asset data with new groom name
                 self.update_asset_data(
@@ -228,25 +228,24 @@ class CombineAssetsExtension(ExtensionBase):
                 self.export_individual_hair_systems(groom_systems_data.values(), properties)
 
         # remove particle systems converted from curves for options that don't get to iterate through every mesh
-        curves_object_names = asset_data['_converted_curves']
-        mesh_objects = []
+        # curves_object_names = asset_data['_converted_curves']
+        # mesh_objects = []
 
-        if self.combine == Options.GROOM_PER_COMBINED_MESH:
-            mesh_object_name = asset_data.get('_mesh_object_name')
-            mesh_object = bpy.data.objects.get(mesh_object_name)
-            if mesh_object.parent:
-                mesh_objects = utilities.get_all_children(
-                    mesh_object.parent,
-                    BlenderTypes.MESH,
-                    properties,
-                    exclude_postfix_tokens=True
-                )
+        # if self.combine == Options.GROOM_PER_COMBINED_MESH:
+        #     mesh_object_name = asset_data.get('_mesh_object_name')
+        #     mesh_object = bpy.data.objects.get(mesh_object_name)
+        #     if mesh_object.parent:
+        #         mesh_objects = utilities.get_all_children(
+        #             mesh_object.parent,
+        #             BlenderTypes.MESH,
+        #             exclude_postfix_tokens=True
+        #         )
+        #
+        # if self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
+        #     mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
 
-        if self.combine in [Options.ALL_GROOMS, Options.CHILD_MESHES_ALL_GROOMS]:
-            mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
-
-        # remove particle systems that were converted from curves on associated mesh objects of the current mesh
-        utilities.remove_particle_systems(curves_object_names, mesh_objects)
+        # # remove particle systems that were converted from curves on associated mesh objects of the current mesh
+        # utilities.remove_particle_systems(curves_object_names, mesh_objects)
 
     def post_import(self, asset_data, properties):
         """
@@ -255,32 +254,33 @@ class CombineAssetsExtension(ExtensionBase):
         :param dict asset_data: A mutable dictionary of asset data for the current asset.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        if asset_data.get('groom') and (self.combine in [Options.OFF, Options.CHILD_MESHES]):
-            property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
+        if asset_data.get('_asset_type') == UnrealTypes.GROOM:
+            if self.combine in [Options.OFF, Options.CHILD_MESHES]:
+                property_data = settings.get_extra_property_group_data_as_dictionary(properties, only_key='unreal_type')
 
-            # Gets the asset data of each hair particle system on the current mesh from the head particle system
-            systems_data = asset_data.get('_groom_systems_data')
-            if systems_data and len(systems_data) > 1:
-                for system_data in systems_data.values():
-                    # import individual particle systems on the current mesh
-                    UnrealRemoteCalls.import_asset(
-                        system_data.get('file_path'),
-                        system_data,
-                        property_data
-                    )
-                    # if create_binding_asset extension is on, create binding asset for each additional groom asset
-                    if properties.extensions.create_post_import_assets_for_groom.binding_asset and properties.import_meshes:
-                        groom_asset_path = system_data['asset_path']
-                        # use mesh_asset_path from asset_data instead of system_data because pre-export could update it
-                        mesh_asset_path = asset_data['mesh_asset_path']
-                        binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+                # Gets the asset data of each hair particle system on the current mesh from the head particle system
+                systems_data = asset_data.get('_groom_systems_data')
+                if systems_data and len(systems_data) > 1:
+                    for system_data in systems_data.values():
+                        # import individual particle systems on the current mesh
+                        UnrealRemoteCalls.import_asset(
+                            system_data.get('file_path'),
+                            system_data,
+                            property_data
+                        )
+                        # if create_binding_asset extension is on, create binding asset for each additional groom asset
+                        if properties.extensions.create_post_import_assets_for_groom.binding_asset and properties.import_meshes:
+                            groom_asset_path = system_data['asset_path']
+                            # use mesh_asset_path from asset_data instead of system_data because pre-export could update it
+                            mesh_asset_path = asset_data['mesh_asset_path']
+                            binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
 
-                        if binding_asset_path and properties.extensions.create_post_import_assets_for_groom.blueprint_with_groom:
-                            UnrealRemoteCalls.create_blueprint_with_groom(
-                                groom_asset_path,
-                                mesh_asset_path,
-                                binding_asset_path
-                            )
+                            if binding_asset_path and properties.extensions.create_post_import_assets_for_groom.blueprint_with_groom:
+                                UnrealRemoteCalls.create_blueprint_with_groom(
+                                    groom_asset_path,
+                                    mesh_asset_path,
+                                    binding_asset_path
+                                )
 
     def export_individual_hair_systems(self, assets_data, properties):
         """
@@ -290,20 +290,20 @@ class CombineAssetsExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         # deselect all particle systems
-        self.disable_particles_visibility(assets_data, properties)
+        self.disable_particles_visibility(assets_data)
 
         for asset_data in assets_data:
             # select the particle system to export
-            self.disable_particles_visibility([asset_data], properties, disable_particles_render=False)
+            self.disable_particles_visibility([asset_data], disable_particles_render=False)
 
             # export the alembic file
             export.export_file(properties, file_type=FileTypes.ABC, asset_data=asset_data)
 
             # deselect the particle system that exported
-            self.disable_particles_visibility([asset_data], properties)
+            self.disable_particles_visibility([asset_data])
 
         # reselect all particle systems
-        self.disable_particles_visibility(assets_data, properties, disable_particles_render=False)
+        self.disable_particles_visibility(assets_data, disable_particles_render=False)
 
     @staticmethod
     def select_for_groom_export(mesh_objects):
@@ -328,27 +328,23 @@ class CombineAssetsExtension(ExtensionBase):
         :return bool: Whether any hair particle systems exist on list of meshes.
         """
         for mesh_object in mesh_objects:
-            hair_particles = utilities.get_particle_systems(mesh_object, p_type=BlenderTypes.PARTICLE_HAIR)
+            hair_particles = utilities.get_particle_systems(mesh_object)
             if len(hair_particles) > 0:
                 return True
         return False
 
     @staticmethod
-    def disable_particles_visibility(assets_data, properties, disable_particles_render=True):
+    def disable_particles_visibility(assets_data, disable_particles_render=True):
         """
         Toggles the visibility of multiple particle systems referenced by assets_data.
 
         :param list assets_data: A list of mutable dictionary of asset data for particle systems.
-        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         :param bool disable_particles_render: Whether to disable or enable particle system visibility.
         """
-        # dynamically uses what the user selected in export settings ('RENDER' or 'VIEWPORT') to decide visibility
-        show = properties.blender.export_method.abc.scene_options.evaluation_mode
-
         for asset_data in assets_data:
             mesh_object = bpy.data.objects[asset_data['_mesh_object_name']]
             hair_particle = mesh_object.modifiers[asset_data['_modifier_name']]
-            setattr(hair_particle, f'show_{show.lower()}', not disable_particles_render)
+            hair_particle.show_render = not disable_particles_render
 
 
 class Options:

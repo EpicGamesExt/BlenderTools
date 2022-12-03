@@ -398,21 +398,17 @@ class Unreal:
         """
         Creates a groom binding asset.
 
-        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str groom_asset_path: The unreal asset path to the imported groom asset.
         :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
         :return str binding_asset_path: The unreal asset path to the created binding asset.
         """
-        binding_asset_path = None
+        mesh_asset = Unreal.get_asset(mesh_asset_path)
 
-        mesh_asset_data = unreal.EditorAssetLibrary.find_asset_data(mesh_asset_path)
         # only create binding asset if the particle system's mesh asset is a skeletal mesh
-        if mesh_asset_data.asset_class_path.asset_name == 'SkeletalMesh':
+        if mesh_asset.__class__.__name__ == 'SkeletalMesh':
             groom_asset = Unreal.get_asset(groom_asset_path)
-            skeletal_mesh_asset = Unreal.get_asset(mesh_asset_path)
 
-            mesh_asset_name = mesh_asset_path.split('/')[-1]
-
-            binding_asset_path = f'{groom_asset_path}_{mesh_asset_name}_Binding'
+            binding_asset_path = f'{groom_asset_path}_{mesh_asset.get_name()}_Binding'
             temp_asset_path = f'{binding_asset_path}_Temp'
 
             # renames the existing binding asset (one that had the same name) that will be consolidated
@@ -433,14 +429,14 @@ class Unreal:
 
             # source groom asset and target skeletal mesh for the binding asset
             groom_binding_asset.set_editor_property('groom', groom_asset)
-            groom_binding_asset.set_editor_property('target_skeletal_mesh', skeletal_mesh_asset)
+            groom_binding_asset.set_editor_property('target_skeletal_mesh', mesh_asset)
 
             # if a previous version of the binding asset exists, consolidate all references with new asset
             if existing_binding_asset:
                 unreal.EditorAssetLibrary.consolidate_assets(groom_binding_asset, [existing_binding_asset])
                 unreal.EditorAssetLibrary.delete_asset(temp_asset_path)
 
-        return binding_asset_path
+            return binding_asset_path
 
     @staticmethod
     def create_blueprint_asset(blueprint_asset_path):
@@ -566,7 +562,6 @@ class Unreal:
                     for data_handle in subobject_data_handles:
                         subobject = bp_subobject_library.get_object(bp_subobject_library.get_data(data_handle))
                         if type(subobject) == unreal.SkeletalMeshComponent:
-                            # note: using get_skeletal_mesh_asset() because get_editor_property('skeletal_mesh') is deprecating in 5.1
                             if subobject.get_skeletal_mesh_asset() == unreal.load_asset(mesh_asset_path):
                                 skeletal_mesh_component_handle = data_handle
                         if type(subobject) == unreal.GroomComponent:
@@ -701,7 +696,7 @@ class UnrealImportAsset(Unreal):
         """
         self._options = unreal.GroomImportOptions()
 
-        if self._asset_data.get('groom'):
+        if self._asset_data.get('_asset_type') == 'Groom':
             import_data = unreal.GroomConversionSettings()
             self.set_settings(
                 self._property_data['unreal']['import_method']['abc']['conversion_settings'],
@@ -717,9 +712,9 @@ class UnrealImportAsset(Unreal):
 
         import_materials_and_textures = self._property_data.get('import_materials_and_textures', {}).get('value', True)
 
-        import_mesh = self._asset_data.get('import_mesh', False)
-        import_animations = self._asset_data.get('animation', False)
-        import_as_skeletal = self._asset_data.get('skeletal_mesh', False)
+        import_mesh = self._asset_data.get('_asset_type') in ['SkeletalMesh', 'StaticMesh']
+        import_animations = self._asset_data.get('_asset_type') == 'AnimSequence'
+        import_as_skeletal = self._asset_data.get('_asset_type') == 'SkeletalMesh'
 
         # set the options
         self._options = unreal.FbxImportUI()
@@ -1142,7 +1137,7 @@ class UnrealRemoteCalls:
         """
         Creates a groom binding asset.
 
-        :param dict groom_asset_path: The unreal asset path to the imported groom asset.
+        :param str groom_asset_path: The unreal asset path to the imported groom asset.
         :param str mesh_asset_path: The unreal asset path to the associated mesh asset.
         :return str binding_asset_path: The unreal asset path to the created binding asset.
         """

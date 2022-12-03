@@ -41,6 +41,6 @@ For Curves, make sure that their surface mesh object is also placed inside the `
 
 ## Binding Assets and More
 
-The addon provides an extension called [_create psot import assets for groom_](/extensions/create-post-import-groom-assets.html)
+The addon provides an extension called [create post import assets for groom](/extensions/create-post-import-groom-assets.html)
 to automatically create unreal assets (such as a binding asset) for the imported groom asset. See the extensions section
 for more information on its usage.

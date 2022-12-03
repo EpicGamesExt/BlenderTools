@@ -13,8 +13,8 @@ def add_affixes():
     Adds the defined affixes to the objects selected for export.
     """
     properties = bpy.context.scene.send2ue
-    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
-    rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
+    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
+    rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
 
     for mesh_object in mesh_objects:
         if mesh_object.modifiers:
@@ -58,8 +58,8 @@ def remove_affixes():
     Removes the defined affixes from the objects selected for export.
     """
     properties = bpy.context.scene.send2ue
-    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
-    rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
+    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
+    rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
     max_strip = 30
 
     for mesh_object in mesh_objects:

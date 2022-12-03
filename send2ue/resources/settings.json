@@ -1286,8 +1286,14 @@
             "default": false
           },
           "use_mesh_modifiers": {
-            "name": "Apply Modifiers",
-            "description": "Apply modifiers to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+            "name": "Apply Modifiers Viewport",
+            "description": "Apply modifiers in viewport to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "use_mesh_modifiers_render": {
+            "name": "Apply Modifiers Render",
+            "description": "Apply modifiers in render to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
             "type": "BOOLEAN",
             "default": true
           },
@@ -1515,28 +1521,6 @@
             "description": "Export custom properties to Alembic .userProperties",
             "type": "BOOLEAN",
             "default": true
-          },
-          "evaluation_mode": {
-            "name": "Use Visibility Settings for",
-            "description": "Determines visibility of objects, modifier settings, and other areas where there are different settings for viewport and rendering",
-            "enum_items": [
-              [
-                "RENDER",
-                "RENDER",
-                "",
-                "NONE",
-                0
-              ],
-              [
-                "VIEWPORT",
-                "VIEWPORT",
-                "",
-                "NONE",
-                1
-              ]
-            ],
-            "type": "ENUM",
-            "default": "RENDER"
           }
         },
         "object_options": {

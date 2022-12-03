@@ -28,7 +28,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
             self.assert_binding_asset(groom_asset_name, target_mesh_name)
 
     def run_combine_assets_option_tests(self, parents_meshes_and_particles, combine_option, mesh_type):
-        self.log(f'>>> Testing for the combine assets option: "{combine_option}"...')
+        self.log(f'Testing for the combine assets option: "{combine_option}"...')
 
         visible_context = self.blender.get_addon_property(
             'scene',

@@ -15,8 +15,8 @@ class ValidationManager:
 
     def __init__(self, properties):
         self.properties = properties
-        self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH, properties)
-        self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON, properties)
+        self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
+        self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
         self._validators = []
         self._register_validators()
 

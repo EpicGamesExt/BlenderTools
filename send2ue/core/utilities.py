@@ -324,13 +324,47 @@ def get_pose(rig_object):
     return pose
 
 
-def get_from_collection(object_type, properties):
+def get_hair_objects(properties):
+    """
+    Gets all particle systems for export.
+
+    :returns: A list of hair objects that can be either curve objects or particle systems.
+    :rtype: list
+    """
+    hair_objects = []
+    for mesh_object in get_from_collection(BlenderTypes.MESH):
+        # only export particle systems on meshes that are lod 0 if lod option is on
+        if properties.import_lods and get_lod_index(mesh_object.name, properties) != 0:
+            continue
+
+        # get all particle systems of type 'HAIR' and its modifier on the current mesh
+        modifiers = get_particle_system_modifiers(mesh_object)
+        hair_objects.extend([modifier.particle_system for modifier in modifiers])
+
+    hair_objects.extend(get_from_collection(BlenderTypes.CURVES))
+    return hair_objects
+
+
+def get_mesh_object_for_particle_system(particle_object):
+    """
+    Gets a single mesh object for the given particle system.
+
+    :returns: A mesh object.
+    :rtype: bpy.types.Object
+    """
+    for mesh_object in get_from_collection(BlenderTypes.MESH):
+        for modifier in get_particle_system_modifiers(mesh_object):
+            if particle_object == modifier.particle_system.settings:
+                # Todo validate a single user particle system
+                return mesh_object
+
+
+def get_from_collection(object_type):
     """
     This function fetches the objects inside each collection according to type and returns
     an alphabetically sorted list of object references.
 
     :param str object_type: The object type you would like to get.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects
     """
     collection_objects = []
@@ -351,15 +385,14 @@ def get_from_collection(object_type, properties):
     return sorted(collection_objects, key=lambda obj: obj.name)
 
 
-def get_meshes_using_armature_modifier(rig_object, properties):
+def get_meshes_using_armature_modifier(rig_object):
     """
     This function get the objects using the given rig in an armature modifier.
 
     :param object rig_object: An object of type armature.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects using the given rig in an armature modifier.
     """
-    mesh_objects = get_from_collection(BlenderTypes.MESH, properties)
+    mesh_objects = get_from_collection(BlenderTypes.MESH)
     child_meshes = []
     for mesh_object in mesh_objects:
         if rig_object == get_armature_modifier_rig_object(mesh_object):
@@ -396,7 +429,7 @@ def get_asset_name(asset_name, properties, lod=False):
     :param bool lod: Whether to use the lod post fix of not.
     :return str: The formatted name of the asset to export.
     """
-    asset_name = re.sub(r"[^-+\w]+", "_", asset_name)
+    asset_name = re.sub(r"[^-+\w]+", "_", asset_name.strip())
 
     if properties.import_lods:
         # remove the lod name from the asset
@@ -437,11 +470,11 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
     if properties.unreal_skeleton_asset_path:
         return properties.unreal_skeleton_asset_path
 
-    children = rig_object.children or get_meshes_using_armature_modifier(rig_object, properties)
+    children = rig_object.children or get_meshes_using_armature_modifier(rig_object)
 
     if children and properties.import_meshes:
         # get all meshes from the mesh collection
-        mesh_collection_objects = get_from_collection(BlenderTypes.MESH, properties)
+        mesh_collection_objects = get_from_collection(BlenderTypes.MESH)
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
         for child in children:
@@ -512,18 +545,17 @@ def get_unique_parent_mesh_objects(rig_objects, mesh_objects):
     return meshes_with_unique_parents
 
 
-def get_all_children(scene_object, object_type, properties, exclude_postfix_tokens=False):
+def get_all_children(scene_object, object_type, exclude_postfix_tokens=False):
     """
     Gets all children of a scene object.
 
     :param object scene_object: A object.
     :param str object_type: The type of object to select.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool exclude_postfix_tokens: Whether or not to exclude objects that have a postfix token.
     :return list child_objects: A list of child objects of the scene object.
     """
     child_objects = []
-    children = scene_object.children or get_meshes_using_armature_modifier(scene_object, properties)
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object)
     for child_object in children:
         if child_object.type == object_type:
             if exclude_postfix_tokens:
@@ -532,7 +564,7 @@ def get_all_children(scene_object, object_type, properties, exclude_postfix_toke
 
             child_objects.append(child_object)
             if child_object.children:
-                get_all_children(child_object, object_type, properties, exclude_postfix_tokens)
+                get_all_children(child_object, object_type, exclude_postfix_tokens)
 
     return child_objects
 
@@ -567,30 +599,26 @@ def get_particle_systems(mesh_object, p_type=None, index=None, exclusive_list=No
     return systems
 
 
-def get_particle_modifiers(mesh_object, p_type=None, visible=None):
+def get_particle_system_modifiers(mesh_object):
     """
     Gets particle modifiers and the associated particle systems on a mesh as a list of tuples. If visible is provided,
     get only modifiers that are visible in the context defined by the parameter.
 
     :param object mesh_object: A mesh object
-    :param str p_type: The type of the particle is either 'HAIR' or 'EMITTER'.
-    :param str visible: The asset visibility setting that is either 'RENDER' or 'VIEWPORT'.
-    :return list(modifier, particle_system): A list of tuples that contain the particle modifier and particle system.
+    :return list[modifier]: A list of tuples that contain the particle modifier and particle system.
     """
-    particle_systems = []
+    particle_system_modifiers = []
 
     for modifier in mesh_object.modifiers:
         # skip modifiers that are not visible
-        if visible and (getattr(modifier, 'show_' + visible.lower()) is False):
+        if not modifier.show_render:
             continue
 
+        # get only 'HAIR' particle modifiers
         if type(modifier) == bpy.types.ParticleSystemModifier:
-            # skip particle modifiers that is not of the specified type
-            if p_type and modifier.particle_system.settings.type != p_type:
-                continue
-            particle_systems.append((modifier, modifier.particle_system))
-
-    return particle_systems
+            if modifier.particle_system.settings.type == BlenderTypes.PARTICLE_HAIR:
+                particle_system_modifiers.append(modifier)
+    return particle_system_modifiers
 
 
 def get_asset_collisions(asset_name, properties):
@@ -796,6 +824,9 @@ def is_collision_of(asset_name, mesh_object_name, properties):
     :param str mesh_object_name: The name of the collision mesh.
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
+    # note we strip whitespace out of the collision name since whitespace is already striped out of the asset name
+    # https://github.com/EpicGames/BlenderTools/issues/397#issuecomment-1333982590
+    mesh_object_name = mesh_object_name.strip()
     return bool(
         re.fullmatch(
             r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?",
@@ -1153,16 +1184,15 @@ def report_path_error_message(layout, send2ue_property, report_text):
         row.label(text=report_text)
 
 
-def select_all_children(scene_object, object_type, properties, exclude_postfix_tokens=False):
+def select_all_children(scene_object, object_type, exclude_postfix_tokens=False):
     """
     Selects all of an objects children.
 
     :param object scene_object: A object.
     :param str object_type: The type of object to select.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool exclude_postfix_tokens: Whether or not to exclude objects that have a postfix token.
     """
-    children = scene_object.children or get_meshes_using_armature_modifier(scene_object, properties)
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object)
     for child_object in children:
         if child_object.type == object_type:
             if exclude_postfix_tokens:
@@ -1171,7 +1201,7 @@ def select_all_children(scene_object, object_type, properties, exclude_postfix_t
 
             child_object.select_set(True)
             if child_object.children:
-                select_all_children(child_object, object_type, properties, exclude_postfix_tokens)
+                select_all_children(child_object, object_type, exclude_postfix_tokens)
 
 
 def apply_all_mesh_modifiers(scene_object):

@@ -4,7 +4,7 @@ from test_send2ue_mannequins import TestSend2UeMannequins
 
 class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCaseCore, BaseSend2ueTestCase):
     def run_create_post_import_assets_for_groom_option_tests(self, meshes_and_hairs):
-        self.log(f'>>> Creating binding asset...')
+        self.log(f'Creating binding asset...')
 
         visible_context = self.blender.get_addon_property(
             'scene',
@@ -48,7 +48,7 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
             True
         )
 
-        self.log(f'>>> Creating blueprint asset with skeletal mesh and groom components...')
+        self.log(f'Creating blueprint asset with skeletal mesh and groom components...')
 
         self.send2ue_operation()
 
