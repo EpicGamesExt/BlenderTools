@@ -724,20 +724,20 @@ class BaseSend2ueTestCase(BaseTestCase):
 
         self.blender.set_object_transforms(object_name, transforms)
 
-    def set_select_particles_visible(self, mesh_name, particles, context):
+    def set_select_particles_visible(self, mesh_name, particles):
         enabled_names = particles.get('enabled')
         disabled_names = particles.get('disabled')
         all_names = enabled_names + disabled_names
 
         if all_names:
             all_names_string = ', '.join(name for name in all_names)
-            self.log(f'Setting {all_names_string} on {mesh_name} invisible in {context}')
-            self.blender.set_particles_visible(mesh_name, all_names, context, False)
+            self.log(f'Setting {all_names_string} on {mesh_name} invisible in render')
+            self.blender.set_particles_visible(mesh_name, all_names, False)
 
         if enabled_names:
             enabled_names_string = ', '.join(name for name in enabled_names)
-            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in {context}')
-            self.blender.set_particles_visible(mesh_name, enabled_names, context)
+            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in render')
+            self.blender.set_particles_visible(mesh_name, enabled_names)
 
     def move_to_collection(self, object_names, collection_name):
         for object_name in object_names:
@@ -861,12 +861,6 @@ class BaseSend2ueTestCase(BaseTestCase):
             self.assert_solo_track(rig_name, animation_names)
 
     def run_groom_tests(self, meshes_and_particles):
-        visible_context = self.blender.get_addon_property(
-            'scene',
-            'send2ue',
-            'blender.export_method.abc.scene_options.evaluation_mode'
-        )
-
         for mesh_name, particle_names in meshes_and_particles.items():
             particle_hair = particle_names.get('particle_hair')
             particle_emitter = particle_names.get('particle_emitter')
@@ -879,7 +873,7 @@ class BaseSend2ueTestCase(BaseTestCase):
 
             # NOTE: passing in particle system names here only works because all particle modifiers share the same name
             # as their associated particle systems in the .blend mannequin test file
-            self.set_select_particles_visible(mesh_name, all_particle_names, visible_context)
+            self.set_select_particles_visible(mesh_name, all_particle_names)
 
         self.send2ue_operation()
 

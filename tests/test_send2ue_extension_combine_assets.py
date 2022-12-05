@@ -30,12 +30,6 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
     def run_combine_assets_option_tests(self, parents_meshes_and_particles, combine_option, mesh_type):
         self.log(f'Testing for the combine assets option: "{combine_option}"...')
 
-        visible_context = self.blender.get_addon_property(
-            'scene',
-            'send2ue',
-            'blender.export_method.abc.scene_options.evaluation_mode'
-        )
-
         for meshes_and_particles in parents_meshes_and_particles.values():
             for mesh_name, particle_names in meshes_and_particles.items():
                 curves, hair, emitter, disabled = self.get_particles_by_type(particle_names)
@@ -47,7 +41,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
                 # NOTE: passing in particle system names here only works because all particle modifiers share the
                 # same name as their associated particle systems in the .blend mannequin test file
-                self.set_select_particles_visible(mesh_name, all_particle_names, visible_context)
+                self.set_select_particles_visible(mesh_name, all_particle_names)
 
         self.blender.set_addon_property(
             'scene',

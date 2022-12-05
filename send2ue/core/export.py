@@ -551,16 +551,18 @@ def export_hair(asset_id, properties):
     extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     object_type = asset_data.get('_object_type')
+    object_name = asset_data.get('_object_name')
 
     if object_type == BlenderTypes.PARTICLE_HAIR:
-        particle_system = bpy.data.particles.get(asset_data.get('_particle_object_name', ''))
-        mesh_object = utilities.get_mesh_object_for_particle_system(particle_system)
+        mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
 
     if object_type == BlenderTypes.CURVES:
-        curve_object = bpy.data.objects.get(asset_data.get('_object_name', ''))
-        # Todo create temp object and add curves to that meshes particle systems instead
-        # mesh_object = create_mesh_with_particle_system_from_curve(curve_object)
-        # utilities.convert_curves_to_particle_systems(curves_objects)
+        curves_object = bpy.data.objects.get(object_name)
+        utilities.convert_curve_to_particle_system(curves_object)
+        mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
+
+    # hide all particle systems on the mesh
+    utilities.set_particles_display_option(mesh_object, False)
 
     # get the current value
     existing_show_instancer_for_render_value = mesh_object.show_instancer_for_render
@@ -568,16 +570,21 @@ def export_hair(asset_id, properties):
     # turn show_emitter off in particle system render settings
     mesh_object.show_instancer_for_render = False
 
+    # display the particle to export
+    utilities.set_particles_display_option(mesh_object, True, only=object_name)
+
+    # select the mesh to export
     mesh_object.select_set(True)
+
     # export the abc file
     export_file(properties, file_type=FileTypes.ABC)
 
     # restore the back to its original value
     mesh_object.show_instancer_for_render = existing_show_instancer_for_render_value
 
-    # remove the temp mesh object create for the curves object
+    # remove the particle system that was created from the curves object
     if object_type == BlenderTypes.CURVES:
-        bpy.data.objects.remove(mesh_object)
+        mesh_object.modifiers.remove(mesh_object.modifiers.get(object_name))
 
     # run the pre groom export extensions
     extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)
@@ -717,7 +724,7 @@ def create_groom_data(hair_objects, properties):
             )
             asset_id = utilities.get_asset_id(file_path)
             import_path = utilities.get_import_path(properties, UnrealTypes.GROOM)
-            asset_name = utilities.get_asset_name(hair_object.name, properties, lod=False)
+            asset_name = utilities.get_asset_name(hair_object.name, properties)
 
             groom_data[asset_id] = {
                 '_asset_type': UnrealTypes.GROOM,

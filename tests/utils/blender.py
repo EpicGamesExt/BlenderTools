@@ -157,13 +157,12 @@ class BlenderRemoteCalls:
                 attributes[attribute_value] = key
 
     @staticmethod
-    def set_particles_visible(mesh_name, particle_modifier_names, visible_in, visible=True):
+    def set_particles_visible(mesh_name, particle_modifier_names, visible=True):
         """
         Sets a list of particle systems on a mesh to be visible/invisible in viewport/render.
 
         :param str mesh_name: A mesh object name.
         :param list(str) particle_modifier_names: A list of particle modifier names.
-        :param str visible_in: 'VIEWPORT' or 'RENDER'
         :param bool visible: Whether to the set the list of particles visible or invisible.
         """
         mesh_object = bpy.data.objects.get(mesh_name)
@@ -171,7 +170,7 @@ class BlenderRemoteCalls:
             for name in particle_modifier_names:
                 particle = mesh_object.modifiers.get(name)
                 if particle:
-                    setattr(particle, f'show_{visible_in.lower()}', visible)
+                    particle.show_render = visible
 
     @staticmethod
     def set_scene_collection_hierarchy(collection_names):

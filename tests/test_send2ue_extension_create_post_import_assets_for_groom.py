@@ -6,16 +6,10 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
     def run_create_post_import_assets_for_groom_option_tests(self, meshes_and_hairs):
         self.log(f'Creating binding asset...')
 
-        visible_context = self.blender.get_addon_property(
-            'scene',
-            'send2ue',
-            'blender.export_method.abc.scene_options.evaluation_mode'
-        )
-
         # NOTE: passing in particle system names here only works because all particle modifiers share the same name
         # as their associated particle systems in the .blend mannequin test file
         for mesh_name, particle_names in meshes_and_hairs.items():
-            self.blender.set_particles_visible(mesh_name, particle_names, visible_context)
+            self.blender.set_particles_visible(mesh_name, particle_names)
 
         self.blender.set_addon_property(
             'scene',
@@ -33,7 +27,7 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
         self.tearDown()
 
         for mesh_name, particle_names in meshes_and_hairs.items():
-            self.blender.set_particles_visible(mesh_name, particle_names, visible_context)
+            self.blender.set_particles_visible(mesh_name, particle_names)
 
         self.blender.set_addon_property(
             'scene',
@@ -59,8 +53,6 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
             for hair_name in hairs:
                 binding_asset_name = f'{hair_name}_{mesh_name}_Binding'
                 self.assert_blueprint_with_groom(blueprint_asset_name, hair_name, binding_asset_name, mesh_name)
-
-        self.tearDown()
 
 
 class TestSend2UeExtensionCreatePostImportAssetsForGroomMannequins(

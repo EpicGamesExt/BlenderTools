@@ -145,13 +145,12 @@ def get_export_folder_path(properties, asset_type):
     return export_folder
 
 
-def get_import_path(properties, unreal_asset_type, scene_object=None):
+def get_import_path(properties, unreal_asset_type):
     """
     Gets the unreal import path.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param str unreal_asset_type: The type of asset.
-    :param object scene_object: A scene object.
     :return str: The full import path for the given asset.
     """
     if unreal_asset_type == UnrealTypes.ANIM_SEQUENCE:
@@ -345,7 +344,7 @@ def get_hair_objects(properties):
     return hair_objects
 
 
-def get_mesh_object_for_particle_system(particle_object):
+def get_mesh_object_for_groom_name(groom_name):
     """
     Gets a single mesh object for the given particle system.
 
@@ -354,9 +353,15 @@ def get_mesh_object_for_particle_system(particle_object):
     """
     for mesh_object in get_from_collection(BlenderTypes.MESH):
         for modifier in get_particle_system_modifiers(mesh_object):
-            if particle_object == modifier.particle_system.settings:
+            if groom_name == modifier.name:
                 # Todo validate a single user particle system
                 return mesh_object
+
+    # if not found in the particle systems, check in the curves objects
+    scene_object = bpy.data.objects.get(groom_name)
+    if scene_object and scene_object.type == BlenderTypes.CURVES:
+        if scene_object.data.surface:
+            return scene_object.data.surface
 
 
 def get_from_collection(object_type):
@@ -637,6 +642,30 @@ def get_asset_collisions(asset_name, properties):
             if is_collision_of(asset_name, mesh_object.name, properties):
                 collision_meshes.append(mesh_object)
     return collision_meshes
+
+
+def set_particles_display_option(mesh_object, value, only='', display_type='RENDER'):
+    """
+    Sets the particle display options for the given object.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :param bool value: A boolean value.
+    :param str only: The name of the only modifier to set the value on.
+    :param str display_type: The type of display value to set.
+    """
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            if only and only == modifier.name:
+                if display_type == 'RENDER':
+                    modifier.show_render = value
+                else:
+                    modifier.show_viewport = value
+                return
+            else:
+                if display_type == 'RENDER':
+                    modifier.show_render = value
+                else:
+                    modifier.show_viewport = value
 
 
 def set_to_title(text):
@@ -1073,28 +1102,22 @@ def convert_unreal_to_blender_location(location):
     return [x, -y, z]
 
 
-def convert_curves_to_particle_systems(curves_objects):
+def convert_curve_to_particle_system(curves_object):
     """
     Converts curves objects to particle systems on the mesh they are surfaced to and returns the names of the converted
     curves in a list.
 
-    :param object curves_objects: A list of curves objects.
-    :return list(str) curves_object_names: A list of strings that are the names of the converted curves objects.
+    :param object curves_object: A curves objects.
     """
-    curves_object_names = []
-    for curves_object in curves_objects:
-        # deselect everything
-        deselect_all_objects()
-        # select the curves object
-        curves_object.select_set(True)
-        bpy.context.view_layer.objects.active = curves_object
+    # deselect everything
+    deselect_all_objects()
 
-        # convert to a particle system
-        bpy.ops.curves.convert_to_particle_system()
+    # select the curves object
+    curves_object.select_set(True)
+    bpy.context.view_layer.objects.active = curves_object
 
-        curves_object_names.append(curves_object.name)
-
-    return curves_object_names
+    # convert to a particle system
+    bpy.ops.curves.convert_to_particle_system()
 
 
 def addon_enabled(*args):
@@ -1258,7 +1281,6 @@ def clean_nla_tracks(rig_object, action):
                         rig_object.animation_data.nla_tracks.remove(nla_track)
 
 
-# TODO add to Blender Integration library
 def stash_animation_data(rig_object):
     """
     Stashes the active action on an object into its nla strips.
