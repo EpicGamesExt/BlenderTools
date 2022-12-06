@@ -22,7 +22,7 @@ def import_asset(asset_id, property_data):
     asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
 
     # import the asset
-    UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)
+    asset_data['asset_path'] = UnrealRemoteCalls.import_asset(asset_data.get('file_path'), asset_data, property_data)[0]
 
     # import fcurves
     if asset_data.get('fcurve_file_path'):

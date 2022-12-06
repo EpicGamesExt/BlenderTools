@@ -404,24 +404,36 @@ def export_file(properties, lod=0):
     restore_rig_objects(context, properties)
 
 
-def get_asset_sockets(asset_name, properties):
+def get_asset_sockets(mesh_object_param, properties):
     """
     Gets the socket under the given asset.
 
-    :param str asset_name: The name of the asset to export.
+    :param str mesh_object_param: The mesh_object    to export.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     socket_data = {}
-    mesh_object = bpy.data.objects.get(asset_name)
-    if mesh_object:
-        for child in mesh_object.children:
-            if child.type == 'EMPTY' and child.name.startswith(f'{PreFixToken.SOCKET.value}_'):
-                name = utilities.get_asset_name(child.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
-                socket_data[name] = {
-                    'relative_location': utilities.convert_blender_to_unreal_location(child.matrix_local.translation),
-                    'relative_rotation': [math.degrees(i) for i in child.matrix_local.to_euler()],
-                    'relative_scale': child.matrix_local.to_scale()[:]
-                }
+    combined = False
+    mesh_name = mesh_object_param.name
+    if hasattr(bpy.context.scene.send2ue.extensions,"combine_meshes"):
+        if bpy.context.scene.send2ue.extensions.combine_meshes.combine_child_meshes:
+            combined = True
+            mesh_name = mesh_object_param.parent.name
+
+    def find_socket_in_chilren(o,iterate):
+        if o:
+            for child in o.children:
+                if child.type == 'EMPTY' and child.name.startswith(f'{PreFixToken.SOCKET.value}_'):
+                    name = utilities.get_asset_name(child.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
+                    socket_data[name] = {
+                        'relative_location': utilities.convert_blender_to_unreal_location(child.matrix_local.translation),
+                        'relative_rotation': [math.degrees(i) for i in child.matrix_local.to_euler()],
+                        'relative_scale': child.matrix_local.to_scale()[:]
+                    }
+                elif child.type == 'MESH' and iterate:
+                    find_socket_in_chilren(child,iterate)
+
+    mesh_object = bpy.data.objects.get(mesh_name)
+    find_socket_in_chilren(mesh_object,combined)
     return socket_data
 
 
@@ -598,7 +610,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 'skeletal_mesh': bool(rig_objects),
                 'skeleton_asset_path': properties.unreal_skeleton_asset_path,
                 'lods': export_lods(asset_id, asset_name, properties),
-                'sockets': get_asset_sockets(mesh_object.name, properties),
+                'sockets': get_asset_sockets(mesh_object, properties),
                 'import_mesh': True
             }
             previous_asset_names.append(asset_name)
