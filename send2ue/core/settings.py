@@ -67,38 +67,6 @@ def get_settings_by_path(settings_category, settings_group):
     return settings[settings_group]
 
 
-def get_property_group_by_path(property_group_path, property_group):
-    """
-    Gets a dictionary of properties using its dictionary path.
-
-    :param list[str] property_group_path: A list that is the list of dictionary keys from top to bottom.
-    :param PropertyGroup property_group: A property group instance.
-    """
-    # get the base dictionary
-    properties = get_property_group_as_dictionary(property_group)
-    for key in property_group_path:
-        properties = properties[key]
-
-    # filter out any sub dictionaries
-    return {key: {'value': value} for key, value in properties.items() if not isinstance(value, dict)}
-
-
-def get_settings_group_by_path(settings_group_path):
-    """
-    Gets a dictionary of settings using its dictionary path.
-
-    :param list[str] settings_group_path: A list that is the list of dictionary keys from top to bottom.
-    :return dict: A dictionary of property attributes.
-    """
-    # get the base dictionary
-    settings = get_settings()
-    for key in settings_group_path:
-        settings = settings[key]
-
-    # filter out any sub dictionaries
-    return {key: value for (key, value) in settings.items() if value.get('default') is not None}
-
-
 def merge_groups(property_group, settings_group, path=None, only_key=None):
     """
     Merges the property group and settings group values.
@@ -412,19 +380,6 @@ def create_property_group_class(class_name, properties, methods=None):
         class_name,
         (bpy.types.PropertyGroup,),
         attributes
-    )
-
-
-def create_settings_property_group_class():
-    """
-    Creates a settings property group from the settings file data.
-
-    :return PropertyGroup: A reference to the created property group class.
-    """
-    data = get_settings()
-    return create_property_group_class(
-        class_name=f'{ToolInfo.NAME.value}SettingsGroup',
-        properties=convert_to_property_group(data)
     )
 
 

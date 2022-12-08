@@ -316,27 +316,6 @@ def get_current_context():
     }
 
 
-def get_pose(rig_object):
-    """
-    Gets the transforms of the pose bones on the provided rig object.
-
-    :param object rig_object: An armature object.
-    :return dict: A dictionary of pose bone transforms
-    """
-    pose = {}
-
-    if rig_object:
-        for bone in rig_object.pose.bones:
-            pose[bone.name] = {
-                'location': bone.location,
-                'rotation_quaternion': bone.rotation_quaternion,
-                'rotation_euler': bone.rotation_euler,
-                'scale': bone.scale
-            }
-
-    return pose
-
-
 def get_hair_objects(properties):
     """
     Gets all particle systems for export.
@@ -486,17 +465,6 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
         f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
         f'so it can be imported correctly!'
     )
-
-
-def get_transform_in_degrees(transform, decimals=4):
-    """
-    This function convert the given transform from radians to degrees.
-
-    :param list transform: A list of radians.
-    :param int decimals: The number of decimals to round the values to.
-    :return list: A list of degrees.
-    """
-    return tuple([round(math.degrees(number), decimals) for number in transform])
 
 
 def get_armature_modifier_rig_object(mesh_object):
@@ -658,24 +626,6 @@ def set_to_title(text):
     :return str: The new title text.
     """
     return ' '.join([word.capitalize() for word in text.lower().split('_')]).strip('.json')
-
-
-def set_action_mute_values(rig_object, action_names):
-    """
-    This function un-mutes the values based of the provided list
-
-    :param object rig_object: A object of type armature with animation data.
-    :param list action_names: A list of action names to un-mute
-    """
-    if rig_object:
-        if rig_object.animation_data:
-            for nla_track in rig_object.animation_data.nla_tracks:
-                for strip in nla_track.strips:
-                    if strip.action:
-                        if strip.action.name in action_names:
-                            nla_track.mute = False
-                        else:
-                            nla_track.mute = True
 
 
 def set_pose(rig_object, pose_values):
@@ -958,33 +908,6 @@ def remove_unpacked_files(unpacked_files):
         folder = os.path.dirname(file_path)
         if not os.listdir(folder):
             remove_from_disk(folder, directory=True)
-
-
-def remove_particle_systems(particle_names, mesh_objects):
-    """
-    Removes particle systems with certain names on each mesh object in the list mesh_objects.
-
-    :param list(str) particle_names: A list of the particle system names to be removed.
-    :param str mesh_objects: The name of the mesh object with the particle system.
-    """
-    for mesh_object in mesh_objects:
-        # deselect everything
-        deselect_all_objects()
-
-        # select the scene object
-        mesh_object.select_set(True)
-        bpy.context.view_layer.objects.active = mesh_object
-
-        mesh_particle_names = mesh_object.particle_systems.keys()
-        particle_names = set(particle_names)
-
-        # dynamically track the active index of particle systems for deletion
-        for index, name in reversed(list(enumerate(mesh_particle_names))):
-            if name in particle_names:
-                # select hair particle to be deleted
-                mesh_object.particle_systems.active_index = index
-                # remove the active particle system
-                bpy.ops.object.particle_system_remove()
 
 
 def refresh_all_areas():
@@ -1657,43 +1580,3 @@ def unpack_textures():
                                     unpacked_files[image.name] = image.filepath_from_user()
 
     return unpacked_files
-
-
-def apply_transform(scene_object, use_location=False, use_rotation=False, use_scale=False):
-    """
-    Apply the transform on the given object.
-
-    :param object scene_object: A object.
-    :param bool use_location: Whether or not to apply the location.
-    :param bool use_rotation: Whether or not to apply the rotation.
-    :param bool use_scale: Whether or not to apply the scale.
-    """
-    matrix_basis = scene_object.matrix_basis
-    identity_matrix = Matrix()
-    location, rotation, scale = matrix_basis.decompose()
-
-    # get matrices
-    translation_matrix = Matrix.Translation(location)
-    rotation_matrix = matrix_basis.to_3x3().normalized().to_4x4()
-    scale_matrix = Matrix.Diagonal(scale).to_4x4()
-
-    transform = [identity_matrix, identity_matrix, identity_matrix]
-    basis = [translation_matrix, rotation_matrix, scale_matrix]
-
-    def swap(i):
-        transform[i], basis[i] = basis[i], transform[i]
-
-    if use_location:
-        swap(0)
-    if use_rotation:
-        swap(1)
-    if use_scale:
-        swap(2)
-
-    matrix = transform[0] @ transform[1] @ transform[2]
-    if hasattr(scene_object.data, 'transform'):
-        scene_object.data.transform(matrix)
-    for child in scene_object.children:
-        child.matrix_local = matrix @ child.matrix_local
-
-    scene_object.matrix_basis = basis[0] @ basis[1] @ basis[2]
