@@ -52,19 +52,29 @@ class CreatePostImportAssetsForGroom(ExtensionBase):
         if asset_data.get('_asset_type') == UnrealTypes.GROOM:
             if self.binding_asset and properties.import_meshes:
                 groom_asset_path = asset_data.get('asset_path')
+                groom_object_name = asset_data.get('_object_name')
                 binding_asset_path = None
 
-                # get the mesh object asset in unreal
-                mesh_object = utilities.get_mesh_object_for_groom_name(asset_data.get('_object_name'))
-                import_path = utilities.get_import_path(properties, UnrealTypes.SKELETAL_MESH)
-                asset_name = utilities.get_asset_name(mesh_object.name, properties)
-                mesh_asset_path = f'{import_path}{asset_name}'
+                # get the surface mesh for the groom object
+                surface_mesh_object = utilities.get_mesh_object_for_groom_name(groom_object_name)
+                # find the all asset data for that surface mesh
+                mesh_asset_data = utilities.get_asset_data_by_attribute(
+                    name='_mesh_object_name',
+                    value=surface_mesh_object.name
+                )
+                if mesh_asset_data:
+                    # get the asset path from that meshes asset data
+                    mesh_asset_path = mesh_asset_data.get('asset_path')
 
-                if groom_asset_path and mesh_asset_path:
-                    binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+                    # don't create a binding asset if the mesh doesn't exist. This happens in a groom only export
+                    if not UnrealRemoteCalls.asset_exists(mesh_asset_path):
+                        return
 
-                if self.blueprint_with_groom and binding_asset_path:
-                    UnrealRemoteCalls.create_blueprint_with_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
+                    if groom_asset_path and mesh_asset_path:
+                        binding_asset_path = UnrealRemoteCalls.create_binding_asset(groom_asset_path, mesh_asset_path)
+
+                    if self.blueprint_with_groom and binding_asset_path:
+                        UnrealRemoteCalls.create_blueprint_with_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
 
     def draw_import(self, dialog, layout, properties):
         """

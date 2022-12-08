@@ -17,6 +17,7 @@ class ValidationManager:
         self.properties = properties
         self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
         self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
+        self.curve_objects = utilities.get_from_collection(BlenderTypes.CURVES)
         self._validators = []
         self._register_validators()
 
@@ -85,7 +86,7 @@ class ValidationManager:
             PathModes.SEND_TO_DISK_THEN_PROJECT.value,
             PathModes.SEND_TO_DISK.value
         ]:
-            if not self.mesh_objects + self.rig_objects:
+            if not self.mesh_objects + self.rig_objects + self.curve_objects:
                 utilities.report_error(
                     f'You do not have any objects under the "{ToolInfo.EXPORT_COLLECTION.value}" collection!'
                 )

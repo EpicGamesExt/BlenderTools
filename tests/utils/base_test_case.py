@@ -731,12 +731,12 @@ class BaseSend2ueTestCase(BaseTestCase):
 
         if all_names:
             all_names_string = ', '.join(name for name in all_names)
-            self.log(f'Setting {all_names_string} on {mesh_name} invisible in render')
+            self.log(f'Setting {all_names_string} on {mesh_name} invisible in viewport')
             self.blender.set_particles_visible(mesh_name, all_names, False)
 
         if enabled_names:
             enabled_names_string = ', '.join(name for name in enabled_names)
-            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in render')
+            self.log(f'Setting {enabled_names_string} on {mesh_name} visible in viewport')
             self.blender.set_particles_visible(mesh_name, enabled_names)
 
     def move_to_collection(self, object_names, collection_name):

@@ -478,8 +478,13 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     asset_name = utilities.get_asset_name(mesh_object.name, properties)
     utilities.select_asset_collisions(asset_name, properties)
 
+    # Note: this is a weird work around for morph targets not exporting when
+    # particle systems are on the mesh. Making them not visible fixes this bug
+    existing_display_options = utilities.disable_particles(mesh_object)
     # export selection to a file
     export_file(properties, lod)
+    # restore the particle system display options
+    utilities.restore_particles(mesh_object, existing_display_options)
 
     # run the post mesh export extensions
     if lod == 0:
@@ -535,6 +540,8 @@ def export_hair(asset_id, properties):
     :param str asset_id: The unique id of the asset.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+
     # deselect everything
     utilities.deselect_all_objects()
 
@@ -547,40 +554,35 @@ def export_hair(asset_id, properties):
         if scene_object.type == BlenderTypes.SKELETON:
             utilities.clear_pose(scene_object)
 
-    # run the pre groom export extensions
-    extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
-    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
     object_type = asset_data.get('_object_type')
     object_name = asset_data.get('_object_name')
 
-    if object_type == BlenderTypes.PARTICLE_HAIR:
-        mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
-
+    mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
     if object_type == BlenderTypes.CURVES:
         curves_object = bpy.data.objects.get(object_name)
         utilities.convert_curve_to_particle_system(curves_object)
-        mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
 
     # hide all particle systems on the mesh
-    utilities.set_particles_display_option(mesh_object, False)
-
-    # get the current value
-    existing_show_instancer_for_render_value = mesh_object.show_instancer_for_render
+    existing_display_options = utilities.get_particles_display_options(mesh_object)
 
     # turn show_emitter off in particle system render settings
     mesh_object.show_instancer_for_render = False
 
-    # display the particle to export
+    # display only the particle to export
+    utilities.set_particles_display_option(mesh_object, False)
     utilities.set_particles_display_option(mesh_object, True, only=object_name)
 
     # select the mesh to export
     mesh_object.select_set(True)
 
+    # run the pre groom export extensions
+    extension.run_extension_tasks(ExtensionTasks.PRE_GROOM_EXPORT.value)
+
     # export the abc file
     export_file(properties, file_type=FileTypes.ABC)
 
-    # restore the back to its original value
-    mesh_object.show_instancer_for_render = existing_show_instancer_for_render_value
+    # restore the display options
+    utilities.restore_particles(mesh_object, existing_display_options)
 
     # remove the particle system that was created from the curves object
     if object_type == BlenderTypes.CURVES:
@@ -739,44 +741,6 @@ def create_groom_data(hair_objects, properties):
             export_hair(asset_id, properties)
 
     return groom_data
-
-
-def create_groom_system_data(properties, hair_name, mesh_object_name=None, modifier_name=None):
-    """
-    Returns a dictionary that is the asset data for a groom system.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param str hair_name: the name of the particle system.
-    :param str mesh_object_name: the name of the mesh that the particle system is surfaced on.
-    :param str modifier_name: the name of the modifier controlling the particle system.
-    :return dict: A dictionary of groom import data.
-    """
-    groom_import_path = utilities.get_import_path(properties, UnrealTypes.GROOM)
-    groom_asset_name = utilities.get_asset_name(hair_name, properties)
-
-    file_path = get_file_path(hair_name, properties, UnrealTypes.GROOM, lod=False, file_extension='abc')
-
-    asset_data = {
-        '_asset_type': UnrealTypes.GROOM,
-        '_hair_particle_name': hair_name,
-        'file_path': file_path,
-        'asset_folder': groom_import_path,
-        'asset_path': f'{groom_import_path}{groom_asset_name}'
-    }
-
-    if mesh_object_name:
-        mesh_import_path = utilities.get_import_path(properties, UnrealTypes.SKELETAL_MESH)
-        mesh_asset_name = utilities.get_asset_name(mesh_object_name, properties)
-        asset_data.update({
-            '_mesh_object_name': mesh_object_name,
-            'mesh_asset_path': f'{mesh_import_path}{mesh_asset_name}'
-        })
-
-    if modifier_name:
-        asset_data.update({
-            '_modifier_name': modifier_name
-        })
-    return asset_data
 
 
 def create_asset_data(properties):

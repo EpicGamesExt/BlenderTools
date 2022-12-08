@@ -47,6 +47,18 @@ def get_asset_id(file_path):
     return base64_bytes.decode('utf-8')
 
 
+def get_asset_data_by_attribute(name, value):
+    """
+    Gets the first asset data block that matches the given attribute value.
+
+    :returns: A list of asset data.
+    :rtype: list[dict]
+    """
+    for asset_data in bpy.context.window_manager.send2ue.asset_data.copy().values():
+        if asset_data.get(name) == value:
+            return asset_data
+
+
 def get_asset_name_from_file_name(file_path):
     """
     Get a asset name from a file path.
@@ -126,7 +138,7 @@ def get_export_folder_path(properties, asset_type):
         PathModes.SEND_TO_PROJECT.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        export_folder = os.path.join(get_temp_folder(), asset_type.lower())
+        export_folder = os.path.join(get_temp_folder(), asset_type)
 
     # if saving to a specified location
     if properties.path_mode in [
@@ -145,7 +157,7 @@ def get_export_folder_path(properties, asset_type):
     return export_folder
 
 
-def get_import_path(properties, unreal_asset_type):
+def get_import_path(properties, unreal_asset_type, *args):
     """
     Gets the unreal import path.
 
@@ -287,7 +299,9 @@ def get_current_context():
             'hide': scene_object.hide_get(),
             'select': scene_object.select_get(),
             'active_action': active_action_name,
-            'actions': get_all_action_attributes(scene_object)
+            'actions': get_all_action_attributes(scene_object),
+            'particle_systems': get_particles_display_options(scene_object),
+            'show_instancer_for_render': scene_object.show_instancer_for_render
         }
 
     active_object = None
@@ -353,8 +367,7 @@ def get_mesh_object_for_groom_name(groom_name):
     """
     for mesh_object in get_from_collection(BlenderTypes.MESH):
         for modifier in get_particle_system_modifiers(mesh_object):
-            if groom_name == modifier.name:
-                # Todo validate a single user particle system
+            if groom_name == modifier.particle_system.name:
                 return mesh_object
 
     # if not found in the particle systems, check in the curves objects
@@ -403,25 +416,6 @@ def get_meshes_using_armature_modifier(rig_object):
         if rig_object == get_armature_modifier_rig_object(mesh_object):
             child_meshes.append(mesh_object)
     return child_meshes
-
-
-def get_rig_child_meshes(rig_object, index=None):
-    """
-    This function gets child meshes of a rig object. If an index is provided, the function returns
-    the child mesh at the index.
-
-    :param object rig_object: An object of type armature.
-    :param int index: An index of a list.
-    :return str or list: A list of objects using the given rig in an armature modifier.
-    """
-    if rig_object.type == BlenderTypes.SKELETON:
-        child_meshes = list(filter(lambda obj: obj.type == BlenderTypes.MESH, rig_object.children))
-        if index is not None:
-            if len(child_meshes) > index:
-                return child_meshes[index]
-            else:
-                return None
-        return child_meshes
 
 
 def get_asset_name(asset_name, properties, lod=False):
@@ -485,7 +479,7 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH, child)
+                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(
@@ -574,40 +568,10 @@ def get_all_children(scene_object, object_type, exclude_postfix_tokens=False):
     return child_objects
 
 
-def get_particle_systems(mesh_object, p_type=None, index=None, exclusive_list=None):
-    """
-    Gets particle systems on a mesh. If a particle type is provided, the method filters for the particle systems with
-    the provided type. If an index is provided, the method returns the particle system
-    at the specified index. If exclusive_list is provided, the method only queries for particle systems that are in the
-    exclusive list. Note: Particle systems are sorted in creation order by blender.
-
-    :param object mesh_object: A mesh object
-    :param str p_type: The type of the particle is either 'HAIR' or 'EMITTER'.
-    :param int index: An index.
-    :param list(particles) exclusive_list: A list of particles.
-    :return particle or list(particle): A particle system or a list of particle systems.
-    """
-    systems = mesh_object.particle_systems
-
-    if p_type:
-        systems = list(filter(lambda particle: particle.settings.type == p_type, systems))
-
-    if exclusive_list:
-        exclusive_set = set(exclusive_list)
-        systems = list(filter(lambda particle: particle in exclusive_set, systems))
-
-    if index is not None:
-        if len(systems) > index:
-            return systems[index]
-        else:
-            return None
-    return systems
-
-
 def get_particle_system_modifiers(mesh_object):
     """
     Gets particle modifiers and the associated particle systems on a mesh as a list of tuples. If visible is provided,
-    get only modifiers that are visible in the context defined by the parameter.
+    get only modifiers that are visible in the viewport.
 
     :param object mesh_object: A mesh object
     :return list[modifier]: A list of tuples that contain the particle modifier and particle system.
@@ -615,8 +579,8 @@ def get_particle_system_modifiers(mesh_object):
     particle_system_modifiers = []
 
     for modifier in mesh_object.modifiers:
-        # skip modifiers that are not visible
-        if not modifier.show_render:
+        # skip modifiers that are not visible in the viewport
+        if not modifier.show_viewport:
             continue
 
         # get only 'HAIR' particle modifiers
@@ -624,6 +588,24 @@ def get_particle_system_modifiers(mesh_object):
             if modifier.particle_system.settings.type == BlenderTypes.PARTICLE_HAIR:
                 particle_system_modifiers.append(modifier)
     return particle_system_modifiers
+
+
+def get_particles_display_options(mesh_object):
+    """
+    Gets the particle display options for the given object.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :returns: A dictionary of particle modifier names and their 'VIEWPORT' and 'RENDER' values.
+    :rtype: dict
+    """
+    display_options = {}
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            display_options[modifier.name] = {
+                'RENDER': modifier.show_render,
+                'VIEWPORT': modifier.show_viewport
+            }
+    return display_options
 
 
 def get_asset_collisions(asset_name, properties):
@@ -732,7 +714,11 @@ def set_context(context):
             if active_action:
                 scene_object.animation_data.action = bpy.data.actions.get(active_action)
 
+            # restore the actions
             set_all_action_attributes(scene_object, attributes.get('actions', {}))
+            # restore the particles systems
+            restore_particles(scene_object, attributes.get('particle_systems', {}))
+            scene_object.show_instancer_for_render = attributes.get('show_instancer_for_render', False)
 
     # set the active object
     if active_object_name:
@@ -1255,7 +1241,6 @@ def deselect_all_objects():
         scene_object.select_set(False)
 
 
-# TODO add to Blender Integration library
 def clean_nla_tracks(rig_object, action):
     """
     This function removes any nla tracks that have a action that matches the provided action. Also it removes
@@ -1491,6 +1476,32 @@ def subtract_lists(list1, list2):
         result.append(item1 - item2)
 
     return result
+
+
+def disable_particles(mesh_object):
+    """
+    Disables the particles in the viewport and render.
+
+    :returns: The values before they were disabled.
+    :rtype: dict
+    """
+    existing_display_options = get_particles_display_options(mesh_object)
+    set_particles_display_option(mesh_object, False, display_type='RENDER')
+    set_particles_display_option(mesh_object, False, display_type='VIEWPORT')
+    return existing_display_options
+
+
+def restore_particles(mesh_object, display_options):
+    """
+    Restores the particle visibility values.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :param dict display_options: The display options to restore.
+    """
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            for display_type, value in display_options.get(modifier.name, {}).items():
+                set_particles_display_option(mesh_object, value, display_type=display_type)
 
 
 def scale_object_actions(unordered_objects, actions, scale_factor):
