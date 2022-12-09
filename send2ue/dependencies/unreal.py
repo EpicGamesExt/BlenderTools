@@ -542,15 +542,14 @@ class Unreal:
         registry_options.include_hard_package_references = True
 
         groom_asset_name = groom_asset_path.split('/')[-1]
-
-        references = asset_registry.get_referencers(mesh_asset_path, registry_options)
+        references = list(asset_registry.get_referencers(mesh_asset_path, registry_options) or [])
 
         asset_library = unreal.EditorAssetLibrary
         subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
         bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
 
         if references:
-            for reference_path in list(references):
+            for reference_path in references:
                 if asset_library.find_asset_data(reference_path).asset_class_path.asset_name == 'Blueprint':
 
                     blueprint_asset = unreal.load_asset(reference_path)

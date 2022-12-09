@@ -8,7 +8,7 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
         child_meshes = list(meshes_and_particles.keys())
         if child_meshes:
             head_mesh_name = child_meshes[0]
-            if combine_option in ['off', 'groom_per_mesh', 'all_grooms']:
+            if combine_option in ['off', 'groom_per_mesh']:
                 for mesh in child_meshes:
                     self.assert_mesh_import(mesh, True)
             else:
@@ -57,12 +57,6 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
         for parent, meshes_and_particles in parents_meshes_and_particles.items():
             head_mesh = self.run_meshes_tests(parent, meshes_and_particles, combine_option, mesh_type)
-            # get the name of the combined groom
-            combined_groom_name = self.blender.get_addon_property(
-                'scene',
-                'send2ue',
-                'extensions.combine_assets.combined_groom_name'
-            )
 
             if combine_option == 'off':
                 for mesh, particle_systems in meshes_and_particles.items():
@@ -75,29 +69,16 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             elif combine_option == 'groom_per_mesh':
                 for mesh, particle_systems in meshes_and_particles.items():
-                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
-                    if hair + curves:
-                        if hair:
-                            self.assert_groom_import(hair[0], True)
-                            self.run_binding_assets_tests(hair[0], mesh, mesh_type)
+                    curves, hair_names, emitter, disabled = self.get_particles_by_type(particle_systems)
+                    # TODO this is the correct value, but why is mesh not?
+                    combined_groom_name = f'{mesh_name}_Groom'
 
-                            particles = hair + curves + emitter + disabled
-                            for particle in particles[1:]:
-                                self.assert_groom_import(particle, False)
-                        else:
-                            self.assert_groom_import(curves[0], True)
-                            self.run_binding_assets_tests(curves[0], mesh, mesh_type)
+                    self.assert_groom_import(combined_groom_name, True)
+                    self.run_binding_assets_tests(combined_groom_name, mesh, mesh_type)
 
-                            particles = curves + emitter + disabled
-                            for particle in particles[1:]:
-                                self.assert_groom_import(particle, False)
-
-            elif combine_option == 'all_grooms':
-                self.assert_groom_import(combined_groom_name, True)
-                for particle_systems in meshes_and_particles.values():
-                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
-                    for particle in curves + hair + emitter + disabled:
-                        self.assert_groom_import(particle, False)
+                    # check that these dont exist
+                    for particle_name in hair_names + curves + emitter + disabled:
+                        self.assert_groom_import(particle_name, False)
 
             elif combine_option == 'child_meshes':
                 if head_mesh:
@@ -111,20 +92,13 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             elif combine_option == 'groom_per_combined_mesh':
                 if head_mesh:
-                    groom_asset_name = head_mesh + '_Groom'
+                    groom_asset_name = parent + '_Groom'
                     self.assert_groom_import(groom_asset_name, True)
                     self.run_binding_assets_tests(groom_asset_name, head_mesh, mesh_type)
                     for particle_systems in meshes_and_particles.values():
                         curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
                         for particle in curves + hair + emitter + disabled:
                             self.assert_groom_import(particle, False)
-
-            elif combine_option == 'child_meshes_and_all_grooms':
-                self.assert_groom_import(combined_groom_name, True)
-                for particle_systems in meshes_and_particles.values():
-                    curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
-                    for particle in curves + hair + emitter + disabled:
-                        self.assert_groom_import(particle, False)
 
         self.tearDown()
 
@@ -182,9 +156,7 @@ class TestSend2UeExtensionCombineAssetsCubes(
             'off',
             'child_meshes',
             'groom_per_mesh',
-            'groom_per_combined_mesh',
-            'all_grooms',
-            'child_meshes_and_all_grooms'
+            'groom_per_combined_mesh'
         ]
 
         for option in combine_options:
@@ -272,8 +244,6 @@ class TestSend2UeExtensionCombineAssetsMannequins(
             'child_meshes',
             'groom_per_mesh',
             'groom_per_combined_mesh',
-            'all_grooms',
-            'child_meshes_and_all_grooms'
         ]
 
         for option in combine_options:
@@ -317,19 +287,3 @@ class TestSend2UeExtensionCombineAssetsMannequins(
                 combine_option=option,
                 mesh_type='SkeletalMesh'
             )
-
-    def test_animations(self):
-        """
-        Sends the mannequin animations to unreal with various options and ensures they are identical.
-        """
-        # disable the auto remove option so the tests get the right animations
-        self.blender.set_addon_property('scene', 'send2ue', 'auto_remove_original_asset_names', False)
-
-        self.run_animation_tests({
-            'SK_Mannequin_Female': {
-                'rig': 'female_root',
-                'animations': ['third_person_run_01', 'third_person_walk_01'],
-                'bones': ['pelvis', 'calf_r', 'hand_l'],
-                'frames': [1, 5, 14],
-                'grooms': ['particle_hair_head']
-            }})

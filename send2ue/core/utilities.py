@@ -51,12 +51,13 @@ def get_asset_data_by_attribute(name, value):
     """
     Gets the first asset data block that matches the given attribute value.
 
-    :returns: A list of asset data.
-    :rtype: list[dict]
+    :returns: A asset data dict.
+    :rtype: dict
     """
     for asset_data in bpy.context.window_manager.send2ue.asset_data.copy().values():
         if asset_data.get(name) == value:
             return asset_data
+    return {}
 
 
 def get_asset_name_from_file_name(file_path):
@@ -479,6 +480,37 @@ def get_armature_modifier_rig_object(mesh_object):
             return modifier.object
 
     return None
+
+
+def get_related_mesh_asset_data_from_groom_asset_data(groom_asset_data):
+    """
+    Gets the mesh asset data block that is related to the given groom asset data.
+
+    :returns: A asset data dict.
+    :rtype: dict
+    """
+    groom_object_name = groom_asset_data.get('_object_name')
+
+    # get the surface mesh for the groom object
+    surface_mesh_object = get_mesh_object_for_groom_name(groom_object_name)
+    # find the all asset data for that surface mesh
+    mesh_asset_data = get_asset_data_by_attribute(
+        name='_mesh_object_name',
+        value=surface_mesh_object.name
+    )
+    # when the asset data can not be found by the surface mesh name
+    if not mesh_asset_data:
+        rig_object = get_armature_modifier_rig_object(surface_mesh_object)
+        unique_parent_meshes = get_unique_parent_mesh_objects([rig_object], [surface_mesh_object])
+        # check if the surface mesh has a unique parent
+        if len(unique_parent_meshes) == 1:
+            # then get the asset data for the child of that unique parent
+            return get_asset_data_by_attribute(
+                name='_mesh_object_name',
+                value=unique_parent_meshes[0].parent.children[0].name
+            )
+    else:
+        return mesh_asset_data
 
 
 def get_unique_parent_mesh_objects(rig_objects, mesh_objects):

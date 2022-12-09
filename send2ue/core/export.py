@@ -98,6 +98,7 @@ def set_parent_rig_selection(mesh_object, properties):
             set_parent_rig_selection(rig_object, properties)
     return rig_object
 
+
 def set_armatures_as_parents():
     """
     Sets the armature in a mesh modifier as a rig's parent.
