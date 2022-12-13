@@ -48,6 +48,7 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomBase(BaseSend2ueTestCase
 
         for mesh_name, hairs in meshes_and_hairs.items():
             blueprint_asset_name = f'{mesh_name}_BP'
+            # Todo there is currently a failure on linux
             self.assert_blueprint_asset(blueprint_asset_name)
 
             for hair_name in hairs:

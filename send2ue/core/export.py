@@ -515,12 +515,13 @@ def export_hair(asset_id, properties):
     object_name = asset_data.get('_object_name')
 
     mesh_object = utilities.get_mesh_object_for_groom_name(object_name)
+
+    # get all particle systems display options on all mesh objects
+    all_existing_display_options = utilities.get_all_particles_display_options()
+
     if object_type == BlenderTypes.CURVES:
         curves_object = bpy.data.objects.get(object_name)
         utilities.convert_curve_to_particle_system(curves_object)
-
-    # hide all particle systems on the mesh
-    existing_display_options = utilities.get_particles_display_options(mesh_object)
 
     # turn show_emitter off in particle system render settings
     mesh_object.show_instancer_for_render = False
@@ -538,12 +539,8 @@ def export_hair(asset_id, properties):
     # export the abc file
     export_file(properties, file_type=FileTypes.ABC)
 
-    # restore the display options
-    utilities.restore_particles(mesh_object, existing_display_options)
-
-    # remove the particle system that was created from the curves object
-    if object_type == BlenderTypes.CURVES:
-        mesh_object.modifiers.remove(mesh_object.modifiers.get(object_name))
+    # restore all the display options on all objects
+    utilities.restore_all_particles(all_existing_display_options)
 
     # run the pre groom export extensions
     extension.run_extension_tasks(ExtensionTasks.POST_GROOM_EXPORT.value)

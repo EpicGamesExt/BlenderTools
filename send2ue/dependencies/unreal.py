@@ -467,7 +467,8 @@ class Unreal:
             unreal.AddNewSubobjectParams(
                 parent_handle=parent_handle,
                 new_class=component_class,
-                blueprint_context=blueprint_asset))
+                blueprint_context=blueprint_asset)
+        )
 
         if not fail_reason.is_empty():
             raise Exception("ERROR from sub_object_subsystem.add_new_subobject: {fail_reason}")
@@ -495,33 +496,35 @@ class Unreal:
         groom_asset_name = groom_asset_path.split('/')[-1]
         mesh_asset_name = mesh_asset_path.split('/')[-1]
 
-        blueprint_asset_path = mesh_asset_path + '_BP'
+        blueprint_asset_path = f'{mesh_asset_path}_BP'
+
+        # Todo figure out why create blueprint in None sometimes on linux
         blueprint_asset = Unreal.create_blueprint_asset(blueprint_asset_path)
-
         subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
-        root_handle = subsystem.k2_gather_subobject_data_for_blueprint(context=blueprint_asset)[0]
+        root_handles = subsystem.k2_gather_subobject_data_for_blueprint(context=blueprint_asset) or []
 
-        skeletal_comp, skeletal_comp_handle = Unreal.create_blueprint_component(
-            blueprint_asset,
-            root_handle,
-            unreal.SkeletalMeshComponent,
-            mesh_asset_name
-        )
+        if root_handles:
+            skeletal_comp, skeletal_comp_handle = Unreal.create_blueprint_component(
+                blueprint_asset,
+                root_handles[0],
+                unreal.SkeletalMeshComponent,
+                mesh_asset_name
+            )
 
-        # add imported skeletal mesh asset to skeletal mesh component
-        skeletal_comp.set_skeletal_mesh_asset(unreal.load_asset(mesh_asset_path))
+            if skeletal_comp and skeletal_comp_handle:
+                # add imported skeletal mesh asset to skeletal mesh component
+                skeletal_comp.set_skeletal_mesh_asset(unreal.load_asset(mesh_asset_path))
 
-        groom_comp, groom_comp_handle = Unreal.create_blueprint_component(
-            blueprint_asset,
-            skeletal_comp_handle,
-            unreal.GroomComponent,
-            groom_asset_name
-        )
+                groom_comp, groom_comp_handle = Unreal.create_blueprint_component(
+                    blueprint_asset,
+                    skeletal_comp_handle,
+                    unreal.GroomComponent,
+                    groom_asset_name
+                )
 
-        # add binding asset and groom asset to groom component
-        groom_comp.set_groom_asset(unreal.load_asset(groom_asset_path))
-        groom_comp.set_binding_asset(unreal.load_asset(binding_asset_path))
-
+                # add binding asset and groom asset to groom component
+                groom_comp.set_groom_asset(unreal.load_asset(groom_asset_path))
+                groom_comp.set_binding_asset(unreal.load_asset(binding_asset_path))
         return blueprint_asset_path
 
     @staticmethod
@@ -536,35 +539,37 @@ class Unreal:
         :param str binding_asset_path: The unreal asset path to the created binding asset.
         :return str blueprint_asset_path: The unreal path to the blueprint asset.
         """
-
         asset_registry = unreal.AssetRegistryHelpers.get_asset_registry()
         registry_options = unreal.AssetRegistryDependencyOptions()
-        registry_options.include_hard_package_references = True
+        registry_options.set_editor_property('include_hard_package_references', True)
 
         groom_asset_name = groom_asset_path.split('/')[-1]
-        references = list(asset_registry.get_referencers(mesh_asset_path, registry_options) or [])
 
-        asset_library = unreal.EditorAssetLibrary
+        references = list(asset_registry.get_referencers(mesh_asset_path, registry_options) or [])
         subsystem = unreal.get_engine_subsystem(unreal.SubobjectDataSubsystem)
         bp_subobject_library = unreal.SubobjectDataBlueprintFunctionLibrary
 
         if references:
             for reference_path in references:
-                if asset_library.find_asset_data(reference_path).asset_class_path.asset_name == 'Blueprint':
+                if unreal.EditorAssetLibrary.find_asset_data(reference_path).asset_class_path.asset_name == 'Blueprint':
 
-                    blueprint_asset = unreal.load_asset(reference_path)
+                    blueprint_asset = Unreal.get_asset(reference_path)
                     subobject_data_handles = subsystem.k2_gather_subobject_data_for_blueprint(blueprint_asset)
 
                     skeletal_mesh_component_handle = None
                     groom_component = None
 
+                    groom_asset = Unreal.get_asset(groom_asset_path)
+                    mesh_asset = Unreal.get_asset(mesh_asset_path)
+                    binding_asset = Unreal.get_asset(binding_asset_path)
+
                     for data_handle in subobject_data_handles:
                         subobject = bp_subobject_library.get_object(bp_subobject_library.get_data(data_handle))
                         if type(subobject) == unreal.SkeletalMeshComponent:
-                            if subobject.get_skeletal_mesh_asset() == unreal.load_asset(mesh_asset_path):
+                            if subobject.get_skeletal_mesh_asset() == mesh_asset:
                                 skeletal_mesh_component_handle = data_handle
                         if type(subobject) == unreal.GroomComponent:
-                            if subobject.get_editor_property('groom_asset') == unreal.load_asset(groom_asset_path):
+                            if subobject.get_editor_property('groom_asset') == groom_asset:
                                 groom_component = subobject
 
                     if not groom_component:
@@ -576,16 +581,19 @@ class Unreal:
                         )
 
                         # add binding asset and groom asset to groom component
-                        groom_component.set_groom_asset(unreal.load_asset(groom_asset_path))
-                        groom_component.set_binding_asset(unreal.load_asset(binding_asset_path))
-                        asset_library.save_loaded_asset(blueprint_asset)
+                        groom_component.set_groom_asset(groom_asset)
+                        groom_component.set_binding_asset(binding_asset)
+                        unreal.EditorAssetLibrary.save_loaded_asset(blueprint_asset)
 
                     return str(reference_path)
         # if there is no references to the surface mesh asset, create new blueprint
         else:
-            blueprint_asset_path = Unreal.create_blueprint_for_groom(groom_asset_path, mesh_asset_path, binding_asset_path)
-            asset_library.save_loaded_asset(unreal.load_asset(blueprint_asset_path))
-
+            blueprint_asset_path = Unreal.create_blueprint_for_groom(
+                groom_asset_path,
+                mesh_asset_path,
+                binding_asset_path
+            )
+            unreal.EditorAssetLibrary.save_loaded_asset(unreal.load_asset(blueprint_asset_path))
             return blueprint_asset_path
 
 

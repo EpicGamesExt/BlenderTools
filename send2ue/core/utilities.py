@@ -503,14 +503,13 @@ def get_related_mesh_asset_data_from_groom_asset_data(groom_asset_data):
         rig_object = get_armature_modifier_rig_object(surface_mesh_object)
         unique_parent_meshes = get_unique_parent_mesh_objects([rig_object], [surface_mesh_object])
         # check if the surface mesh has a unique parent
-        if len(unique_parent_meshes) == 1:
+        if len(unique_parent_meshes) == 1 and unique_parent_meshes[0].parent:
             # then get the asset data for the child of that unique parent
             return get_asset_data_by_attribute(
                 name='_mesh_object_name',
                 value=unique_parent_meshes[0].parent.children[0].name
             )
-    else:
-        return mesh_asset_data
+    return mesh_asset_data
 
 
 def get_unique_parent_mesh_objects(rig_objects, mesh_objects):
@@ -606,6 +605,20 @@ def get_particles_display_options(mesh_object):
                 'VIEWPORT': modifier.show_viewport
             }
     return display_options
+
+
+def get_all_particles_display_options():
+    """
+    Get all the particle display options for all objects.
+
+    :returns: All particle modifier names and their 'VIEWPORT' and 'RENDER' values per object.
+    :rtype: dict
+    """
+    all_display_options = {}
+    for scene_object in bpy.data.objects.values():
+        if scene_object.type == BlenderTypes.MESH:
+            all_display_options[scene_object.name] = get_particles_display_options(scene_object)
+    return all_display_options
 
 
 def get_asset_collisions(asset_name, properties):
@@ -1441,8 +1454,9 @@ def disable_particles(mesh_object):
     :rtype: dict
     """
     existing_display_options = get_particles_display_options(mesh_object)
-    set_particles_display_option(mesh_object, False, display_type='RENDER')
-    set_particles_display_option(mesh_object, False, display_type='VIEWPORT')
+    if existing_display_options:
+        set_particles_display_option(mesh_object, False, display_type='RENDER')
+        set_particles_display_option(mesh_object, False, display_type='VIEWPORT')
     return existing_display_options
 
 
@@ -1455,8 +1469,28 @@ def restore_particles(mesh_object, display_options):
     """
     for modifier in mesh_object.modifiers:
         if type(modifier) == bpy.types.ParticleSystemModifier:
-            for display_type, value in display_options.get(modifier.name, {}).items():
-                set_particles_display_option(mesh_object, value, display_type=display_type)
+            display_option = display_options.get(modifier.name)
+            if display_option:
+                for display_type, value in display_option.items():
+                    if display_type == 'RENDER':
+                        modifier.show_render = value
+                    else:
+                        modifier.show_viewport = value
+            # if this particle system has no given settings, remove it.
+            else:
+                mesh_object.modifiers.remove(modifier)
+
+
+def restore_all_particles(all_display_options):
+    """
+    Restores all particle visibility values per scene object.
+
+    :param dict all_display_options: The display options to restore.
+    """
+    for object_name, display_options in all_display_options.items():
+        scene_object = bpy.data.objects.get(object_name)
+        if scene_object and scene_object.type == BlenderTypes.MESH:
+            restore_particles(scene_object, display_options)
 
 
 def scale_object_actions(unordered_objects, actions, scale_factor):

@@ -101,9 +101,9 @@ class CombineAssetsExtension(ExtensionBase):
                 # get the unique parent meshes related to that surface mesh
                 unique_parent_meshes = utilities.get_unique_parent_mesh_objects(armature_objects, [surface_mesh])
                 for unique_parent_mesh in unique_parent_meshes:
-                    # then only keep this hair object if its unique parents children are also in the list
+                    # then only keep this hair object if any of its unique parents children are also in the list
                     # of filtered meshes from the first condition
-                    if all([mesh_object in unique_parent_mesh.parent.children for mesh_object in mesh_objects]):
+                    if any([mesh_object in mesh_objects for mesh_object in unique_parent_mesh.parent.children]):
                         unique_hair_objects.append(hair_object)
                         unique_surface_objects.append(surface_mesh)
 
@@ -173,8 +173,56 @@ class CombineAssetsExtension(ExtensionBase):
             # get the mesh asset data related to this groom asset data
             mesh_asset_data = utilities.get_related_mesh_asset_data_from_groom_asset_data(asset_data)
             mesh_asset_name = mesh_asset_data.get('asset_path', '').split('/')[-1]
+            mesh_object = bpy.data.objects.get(mesh_asset_data.get('_mesh_object_name', ''))
             if mesh_asset_name:
                 self.update_asset_data({
                     'file_path': os.path.join(os.path.dirname(path), f'{mesh_asset_name}_{UnrealTypes.GROOM}{ext}'),
                     'asset_path': f'{asset_folder}{mesh_asset_name}_{UnrealTypes.GROOM}'
                 })
+            if mesh_object:
+                if self.combine == Options.GROOM_PER_MESH:
+                    self.select_for_groom_export([mesh_object], properties)
+
+                elif self.combine == Options.GROOM_PER_COMBINED_MESH:
+                    rig_object = utilities.get_armature_modifier_rig_object(mesh_object)
+                    unique_parent_meshes = utilities.get_unique_parent_mesh_objects([rig_object], [mesh_object])
+                    if len(unique_parent_meshes) == 1 and unique_parent_meshes[0].parent:
+                        mesh_objects = [
+                            scene_object for scene_object in unique_parent_meshes[0].parent.children if
+                            scene_object.type == BlenderTypes.MESH
+                        ]
+                        # select all child objects under the unique parent
+                        self.select_for_groom_export(mesh_objects, properties)
+
+    @staticmethod
+    def select_for_groom_export(mesh_objects, properties):
+        """
+        Selects multiple mesh objects to prepare for groom export.
+
+        :param list mesh_objects: A list of mesh objects.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        related_mesh_objects = []
+
+        # hide all particle systems on the mesh objects
+        for mesh_object in mesh_objects:
+            utilities.set_particles_display_option(mesh_object, False)
+
+        for hair_object in utilities.get_hair_objects(properties):
+            # if this is a curves object convert it to a particle system
+            if type(hair_object) == bpy.types.Object:
+                utilities.convert_curve_to_particle_system(hair_object)
+            mesh_object = utilities.get_mesh_object_for_groom_name(hair_object.name)
+            # add the hair particle system to the export
+            utilities.set_particles_display_option(mesh_object, True, only=hair_object.name)
+
+            if mesh_object in mesh_objects:
+                related_mesh_objects.append(mesh_object)
+
+        # deselect everything
+        utilities.deselect_all_objects()
+
+        # select all the meshes to export
+        for related_mesh_object in related_mesh_objects:
+            related_mesh_object.select_set(True)
+            related_mesh_object.show_instancer_for_render = False

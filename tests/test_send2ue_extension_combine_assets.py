@@ -70,11 +70,11 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
             elif combine_option == 'groom_per_mesh':
                 for mesh, particle_systems in meshes_and_particles.items():
                     curves, hair_names, emitter, disabled = self.get_particles_by_type(particle_systems)
-                    # TODO this is the correct value, but why is mesh not?
-                    combined_groom_name = f'{mesh_name}_Groom'
-
-                    self.assert_groom_import(combined_groom_name, True)
-                    self.run_binding_assets_tests(combined_groom_name, mesh, mesh_type)
+                    # only check if there are hair particles or curves on the object
+                    if curves + hair_names:
+                        combined_groom_name = f'{mesh}_Groom'
+                        self.assert_groom_import(combined_groom_name, True)
+                        self.run_binding_assets_tests(combined_groom_name, mesh, mesh_type)
 
                     # check that these dont exist
                     for particle_name in hair_names + curves + emitter + disabled:
@@ -92,13 +92,14 @@ class TestSend2UeExtensionCombineAssetsBase(BaseSend2ueTestCaseCore, BaseSend2ue
 
             elif combine_option == 'groom_per_combined_mesh':
                 if head_mesh:
-                    groom_asset_name = parent + '_Groom'
-                    self.assert_groom_import(groom_asset_name, True)
-                    self.run_binding_assets_tests(groom_asset_name, head_mesh, mesh_type)
                     for particle_systems in meshes_and_particles.values():
                         curves, hair, emitter, disabled = self.get_particles_by_type(particle_systems)
-                        for particle in curves + hair + emitter + disabled:
-                            self.assert_groom_import(particle, False)
+                        if curves + hair:
+                            groom_asset_name = f'{head_mesh}_Groom'
+                            self.assert_groom_import(groom_asset_name, True)
+                            self.run_binding_assets_tests(groom_asset_name, head_mesh, mesh_type)
+                            for particle in curves + hair + emitter + disabled:
+                                self.assert_groom_import(particle, False)
 
         self.tearDown()
 

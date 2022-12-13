@@ -57,6 +57,9 @@ class CreatePostImportAssetsForGroom(ExtensionBase):
                 groom_asset_path = asset_data.get('asset_path', '')
                 mesh_asset_path = mesh_asset_data.get('asset_path', '')
 
+                if not UnrealRemoteCalls.asset_exists(groom_asset_path):
+                    return
+
                 # don't create a binding asset if the mesh doesn't exist. This happens in a groom only export
                 if not UnrealRemoteCalls.asset_exists(mesh_asset_path):
                     return
