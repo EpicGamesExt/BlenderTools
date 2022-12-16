@@ -27,7 +27,7 @@ Create a branch in your fork with the name of the task/issue you are working on.
 Clone your fork and checkout that branch:
 ```shell
 git clone https://github.com/<your-username>/BlenderTools.git
-cd epic-tool-send2ue
+cd BlenderTools
 git checkout some-task-branch
 ```
 
