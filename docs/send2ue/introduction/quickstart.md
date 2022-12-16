@@ -42,7 +42,12 @@ make sure to also have the plugins "Alembic Groom Importer" and "Groom" enabled.
 
 ![6_1](./images/6_1.png)
 
-Once you have enabled the plugins, you'll be prompted to restart the editor. Go ahead and restart. Once you've restarted, go to `Edit > Project Settings`.
+Additionally, make sure the "Support Compute Skin Cache" setting is turned on in Project Settings > Engine > Rendering > Optimizations.
+This ensures grooms to render properly when bind to a skeletal mesh.
+
+![16](./images/16.png)
+
+Once you have enabled the plugins and project settings, you'll be prompted to restart the editor. Go ahead and restart. Once you've restarted, go to `Edit > Project Settings`.
 
 ![7](./images/7.png)
 

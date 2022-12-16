@@ -313,6 +313,39 @@ class ValidationManager:
 
         return True
 
+    def validate_required_unreal_project_settings(self):
+        """
+        Checks whether the required project settings are set.
+        """
+        if self.properties.import_grooms:
+            required_project_settings = {
+                'Support Compute Skin Cache': {
+                    'setting_name': 'r.SkinCache.CompileShaders',
+                    'section_name': '/Script/Engine.RendererSettings',
+                    'config_file_name': 'DefaultEngine',
+                    'expected_value': 'True',
+                    'setting_location': 'Project Settings > Engine > Rendering > Optimizations'
+                }
+            }
+            for setting, properties in required_project_settings.items():
+                actual_value = UnrealRemoteCalls.get_project_settings_value(
+                    properties.get('config_file_name'),
+                    properties.get('section_name'),
+                    properties.get('setting_name')
+                )
+                if properties.get('expected_value') != actual_value:
+                    utilities.report_error(
+                        "Setting '{setting_name}' to '{expected_value}' is required to import grooms! Please either make the "
+                        "suggested changes in {location_msg}, or disable groom import.".format(
+                            setting_name=setting,
+                            expected_value=properties.get('expected_value'),
+                            location_msg=properties.get('setting_location')
+                        )
+                    )
+                    return False
+
+            return True
+
     # TODO: temporary validation before lods support for groom is added
     def validate_groom_unsupported_lods(self):
         """

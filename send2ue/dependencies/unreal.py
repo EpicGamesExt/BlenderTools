@@ -964,6 +964,27 @@ class UnrealRemoteCalls:
         return [plugin.get('Name') for plugin in project_data.get('Plugins', {}) if plugin.get('Enabled')]
 
     @staticmethod
+    def get_project_settings_value(config_name, section_name, setting_name):
+        """
+        Gets a specified setting value from a project settings file. Note: method only works correctly
+        with config sections with unique setting names.
+
+        :param str config_name: The config file to use in the unreal project config directory.
+        :param str section_name: The section to query in the config file.
+        :param str setting_name: The setting to query in the supplied section.
+        :return: Value of the queried setting.
+        """
+        engine_config_dir = unreal.Paths.project_config_dir()
+        config_path = f'{engine_config_dir}{config_name}.ini'
+
+        from configparser import ConfigParser
+        # setting strict to False to bypass duplicate keys in the config file
+        parser = ConfigParser(strict=False)
+        parser.read(config_path)
+
+        return parser.get(section_name, setting_name)
+
+    @staticmethod
     def has_socket(asset_path, socket_name):
         """
         Checks to see if an asset has a socket.

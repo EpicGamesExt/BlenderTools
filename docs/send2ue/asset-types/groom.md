@@ -5,6 +5,11 @@ Make sure to have the unreal plugins "Alembic Groom Importer" and "Groom" enable
 ![3](./images/groom/3.png)
 :::
 
+::: warning Required UE Project Setting
+Make sure to have the setting "Support Compute Skin Cache" in Project Settings > Engine > Rendering > Optimizations enabled for grooms to render properly when bind to a skeletal mesh.
+![3](./images/groom/4.png)
+:::
+
 The tool infers an Unreal groom asset based strictly on the content of your `Export` collection. By default, each
 particle system of type 'Hair' on each mesh in the collection is exported as an individual alembic file, which is
 imported to unreal as a groom asset.
