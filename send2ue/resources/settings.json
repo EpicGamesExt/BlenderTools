@@ -870,6 +870,34 @@
             "default": 1.0
           }
         }
+      },
+      "abc": {
+        "conversion_settings": {
+          "rotation": {
+            "name": "Rotation",
+            "description": "Rotation in Euler angles in degrees to fix up or front axes",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "size": 3,
+            "default": [
+              90.0,
+              0.0,
+              0.0
+            ]
+          },
+          "scale": {
+            "name": "Scale",
+            "description": "Scale value to convert file unit into centimeters",
+            "type": "FLOATVECTOR",
+            "unreal_type": "Vector",
+            "size": 3,
+            "default": [
+              1.0,
+              -1.0,
+              1.0
+            ]
+          }
+        }
       }
     },
     "editor_static_mesh_library": {
@@ -1258,8 +1286,14 @@
             "default": false
           },
           "use_mesh_modifiers": {
-            "name": "Apply Modifiers",
-            "description": "Apply modifiers to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+            "name": "Apply Modifiers Viewport",
+            "description": "Apply modifiers in viewport to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "use_mesh_modifiers_render": {
+            "name": "Apply Modifiers Render",
+            "description": "Apply modifiers in render to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
             "type": "BOOLEAN",
             "default": true
           },
@@ -1459,6 +1493,64 @@
           "use_metadata": {
             "name": "Use Metadata",
             "description": "",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        }
+      },
+      "abc": {
+        "manual_transform": {
+          "global_scale": {
+            "name": "Scale",
+            "description": "Value by which to enlarge or shrink the objects with respect to the world’s origin",
+            "type": "FLOAT",
+            "default": 100.0,
+            "min": 0.001,
+            "max": 1000.0
+          }
+        },
+        "scene_options": {
+          "use_instancing": {
+            "name": "Use Instancing",
+            "description": "Export data of duplicated objects as Alembic instances; speeds up the export and can be disabled for compatibility with other software",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "export_custom_properties": {
+            "name": "Export Custom Properties",
+            "description": "Export custom properties to Alembic .userProperties",
+            "type": "BOOLEAN",
+            "default": true
+          }
+        },
+        "object_options": {
+          "uvs": {
+            "name": "UVs",
+            "description": "Export UVs",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "packuv": {
+            "name": "Pack UV Islands",
+            "description": "Export UVs with packed island",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "normals": {
+            "name": "Normals",
+            "description": "Export normals",
+            "type": "BOOLEAN",
+            "default": true
+          },
+          "vcolors": {
+            "name": "Color Attributes",
+            "description": "Export color attributes",
+            "type": "BOOLEAN",
+            "default": false
+          },
+          "orcos": {
+            "name": "Generated Coordinates",
+            "description": "Export undeformed mesh vertex coordinates",
             "type": "BOOLEAN",
             "default": true
           }

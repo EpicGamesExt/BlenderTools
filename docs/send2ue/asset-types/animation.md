@@ -39,8 +39,11 @@ all sent in a single operation.
 
 ## Only Animation
 What if the skeleton and skeletal mesh already exist in your project, and you just want to
-import animation onto an existing skeleton? That can be done by placing only the armature object in the `Export` collection and
-setting the project path to the Skeleton asset under the [Paths](https://epicgames.github.io/BlenderTools/send2ue/settings/paths.html#skeleton-asset-unreal) tab in the settings dialog.
+import animation onto an existing skeleton? That can be done in two ways: (1) by turning off all
+import options in the [import settings](/settings/import.html) except for Animations;
+(2) or by placing only the armature object in the `Export` collection. Both ways require you to set the project path
+to the Skeleton asset under the [Paths](https://epicgames.github.io/BlenderTools/send2ue/settings/paths.html#skeleton-asset-unreal)
+tab in the settings dialog.
 
 ![4](./images/animation/4.gif)
 

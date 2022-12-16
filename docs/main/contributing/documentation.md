@@ -44,6 +44,11 @@ There are multiple sites in the `docs` folder each site can be run like so:
 For further information on how to customize this site check out
 the [vuepress documentation](https://v2.vuepress.vuejs.org/)
 
+::: tip Note
+If you notice a local site taking longer than expected to load, the issue may be caused by browser plugins
+(ex: adblock). Disable browser plugins that may block .gif content to resolve the issue.
+:::
+
 # Building
 All the sites get built into a single static html site when running:
 ```shell

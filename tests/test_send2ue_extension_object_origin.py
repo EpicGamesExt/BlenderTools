@@ -41,6 +41,9 @@ class TestSend2UeExtensionObjectOriginBase(BaseSend2ueTestCaseCore, BaseSend2ueT
         else:
             self.assert_mesh_origin(mesh_object, location)
 
+        # make sure that the import area is clean so assets don't overwrite each other
+        self.tearDown()
+
         # turn object origin on
         self.blender.set_addon_property(
             'scene',
@@ -76,7 +79,7 @@ class TestSend2UeExtensionObjectOriginCubes(
 
     def test_extension(self):
         """
-        Checks that the combine_meshes extension loaded properly.
+        Checks that the use object origin extension loaded properly.
         """
         self.run_extension_tests({
             'default': {

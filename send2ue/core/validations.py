@@ -5,7 +5,7 @@ import os
 import bpy
 from . import utilities, formatting, extension
 from ..dependencies.unreal import UnrealRemoteCalls
-from ..constants import AssetTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
+from ..constants import BlenderTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
 
 
 class ValidationManager:
@@ -15,8 +15,9 @@ class ValidationManager:
 
     def __init__(self, properties):
         self.properties = properties
-        self.mesh_objects = utilities.get_from_collection(AssetTypes.MESH, properties)
-        self.rig_objects = utilities.get_from_collection(AssetTypes.SKELETON, properties)
+        self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
+        self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
+        self.curve_objects = utilities.get_from_collection(BlenderTypes.CURVES)
         self._validators = []
         self._register_validators()
 
@@ -85,7 +86,7 @@ class ValidationManager:
             PathModes.SEND_TO_DISK_THEN_PROJECT.value,
             PathModes.SEND_TO_DISK.value
         ]:
-            if not self.mesh_objects + self.rig_objects:
+            if not self.mesh_objects + self.rig_objects + self.curve_objects:
                 utilities.report_error(
                     f'You do not have any objects under the "{ToolInfo.EXPORT_COLLECTION.value}" collection!'
                 )
@@ -288,4 +289,71 @@ class ValidationManager:
                         f'be zero to avoid unexpected results. Otherwise, turn off this validation to ignore.'
                     )
                     return False
+        return True
+
+    def validate_required_unreal_plugins(self):
+        """
+        Checks whether the required unreal plugins are enabled.
+        """
+        if self.properties.import_grooms:
+            # A dictionary of plugins where the key is the plugin name and value is the plugin label.
+            groom_plugins = {
+                'HairStrands': 'Groom',
+                'AlembicHairImporter': 'Alembic Groom Importer'
+            }
+            enabled_plugins = UnrealRemoteCalls.get_enabled_plugins()
+            missing_plugins = [value for key, value in groom_plugins.items() if key not in enabled_plugins]
+            plugin_names = ', '.join(missing_plugins)
+
+            if missing_plugins:
+                utilities.report_error(
+                    f'Please enable missing plugins in Unreal: {plugin_names}. Or disable the Groom import setting.'
+                )
+                return False
+
+        return True
+
+    def validate_required_unreal_project_settings(self):
+        """
+        Checks whether the required project settings are set.
+        """
+        if self.properties.import_grooms:
+            required_project_settings = {
+                'Support Compute Skin Cache': {
+                    'setting_name': 'r.SkinCache.CompileShaders',
+                    'section_name': '/Script/Engine.RendererSettings',
+                    'config_file_name': 'DefaultEngine',
+                    'expected_value': 'True',
+                    'setting_location': 'Project Settings > Engine > Rendering > Optimizations'
+                }
+            }
+            for setting, properties in required_project_settings.items():
+                actual_value = UnrealRemoteCalls.get_project_settings_value(
+                    properties.get('config_file_name'),
+                    properties.get('section_name'),
+                    properties.get('setting_name')
+                )
+                if properties.get('expected_value') != actual_value:
+                    utilities.report_error(
+                        "Setting '{setting_name}' to '{expected_value}' is required to import grooms! Please either make the "
+                        "suggested changes in {location_msg}, or disable groom import.".format(
+                            setting_name=setting,
+                            expected_value=properties.get('expected_value'),
+                            location_msg=properties.get('setting_location')
+                        )
+                    )
+                    return False
+
+            return True
+
+    # TODO: temporary validation before lods support for groom is added
+    def validate_groom_unsupported_lods(self):
+        """
+        Checks that import groom and import lods are not both selected.
+        """
+        if self.properties.import_lods and self.properties.import_grooms:
+            utilities.report_error(
+                'Groom LODs are currently unsupported at this time. Please disable either import LODs or import groom.'
+            )
+            return False
         return True

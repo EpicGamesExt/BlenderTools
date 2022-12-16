@@ -66,7 +66,7 @@ class ExampleExtension(ExtensionBase):
         if self.use_example_extension:
             # the asset data using the current asset id
             path, ext = os.path.splitext(asset_data['file_path'])
-            asset_path = asset_data['asset_path']
+            asset_path = asset_data.get('asset_path')
 
             asset_data['file_path'] = f'{path}_added_this{ext}'
             asset_data['asset_path'] = f'{asset_path}_added_this'
@@ -97,8 +97,9 @@ class ExampleExtension(ExtensionBase):
         """
         if self.use_example_extension:
             print('After the import task')
-            asset_path = asset_data['asset_path']
-            rename_unreal_asset(asset_path, f'{asset_path}_renamed_again')
+            asset_path = asset_data.get('asset_path')
+            if asset_path:
+                rename_unreal_asset(asset_path, f'{asset_path}_renamed_again')
 
     def post_operation(self, properties):
         """

@@ -12,7 +12,7 @@ import base64
 from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import AssetTypes, ToolInfo, PreFixToken, PathModes
+from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -47,6 +47,19 @@ def get_asset_id(file_path):
     return base64_bytes.decode('utf-8')
 
 
+def get_asset_data_by_attribute(name, value):
+    """
+    Gets the first asset data block that matches the given attribute value.
+
+    :returns: A asset data dict.
+    :rtype: dict
+    """
+    for asset_data in bpy.context.window_manager.send2ue.asset_data.copy().values():
+        if asset_data.get(name) == value:
+            return asset_data
+    return {}
+
+
 def get_asset_name_from_file_name(file_path):
     """
     Get a asset name from a file path.
@@ -54,7 +67,8 @@ def get_asset_name_from_file_name(file_path):
     :param str file_path: A file path.
     :return str: A asset name.
     """
-    return os.path.splitext(os.path.basename(file_path))[0]
+    if file_path:
+        return os.path.splitext(os.path.basename(file_path))[0]
 
 
 def get_operator_class_by_bl_idname(bl_idname):
@@ -125,37 +139,57 @@ def get_export_folder_path(properties, asset_type):
         PathModes.SEND_TO_PROJECT.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        export_folder = os.path.join(get_temp_folder(), asset_type.lower())
+        export_folder = os.path.join(get_temp_folder(), asset_type)
 
     # if saving to a specified location
     if properties.path_mode in [
         PathModes.SEND_TO_DISK.value,
         PathModes.SEND_TO_DISK_THEN_PROJECT.value
     ]:
-        if asset_type == AssetTypes.MESH:
+        if asset_type in [UnrealTypes.STATIC_MESH, UnrealTypes.SKELETAL_MESH]:
             export_folder = formatting.resolve_path(properties.disk_mesh_folder_path)
 
-        if asset_type == AssetTypes.ANIMATION:
+        if asset_type == UnrealTypes.ANIM_SEQUENCE:
             export_folder = formatting.resolve_path(properties.disk_animation_folder_path)
+
+        if asset_type == UnrealTypes.GROOM:
+            export_folder = formatting.resolve_path(properties.disk_groom_folder_path)
 
     return export_folder
 
 
-def get_import_path(scene_object, properties, asset_type):
+def get_import_path(properties, unreal_asset_type, *args):
     """
     Gets the unreal import path.
 
-    :param object scene_object: A object.
     :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :param str asset_type: The type of asset.
+    :param str unreal_asset_type: The type of asset.
     :return str: The full import path for the given asset.
     """
-    if asset_type == AssetTypes.ANIMATION:
+    if unreal_asset_type == UnrealTypes.ANIM_SEQUENCE:
         game_path = properties.unreal_animation_folder_path
+
+    elif unreal_asset_type == UnrealTypes.GROOM:
+        game_path = properties.unreal_groom_folder_path
 
     else:
         game_path = properties.unreal_mesh_folder_path
+
     return game_path
+
+
+def get_mesh_unreal_type(mesh_object):
+    """
+    Gets the unreal type of the mesh object.
+
+    :param object mesh_object: A object of type mesh.
+    :return str(UnrealType): The type of mesh that is either 'SkeletalMesh' or 'StaticMesh'.
+    """
+    has_parent_rig = mesh_object.parent and mesh_object.parent.type == BlenderTypes.SKELETON
+    rig = get_armature_modifier_rig_object(mesh_object)
+    if has_parent_rig or rig:
+        return UnrealTypes.SKELETAL_MESH
+    return UnrealTypes.STATIC_MESH
 
 
 def get_custom_property_fcurve_data(action_name):
@@ -266,7 +300,9 @@ def get_current_context():
             'hide': scene_object.hide_get(),
             'select': scene_object.select_get(),
             'active_action': active_action_name,
-            'actions': get_all_action_attributes(scene_object)
+            'actions': get_all_action_attributes(scene_object),
+            'particle_systems': get_particles_display_options(scene_object),
+            'show_instancer_for_render': scene_object.show_instancer_for_render
         }
 
     active_object = None
@@ -281,34 +317,52 @@ def get_current_context():
     }
 
 
-def get_pose(rig_object):
+def get_hair_objects(properties):
     """
-    Gets the transforms of the pose bones on the provided rig object.
+    Gets all particle systems for export.
 
-    :param object rig_object: An armature object.
-    :return dict: A dictionary of pose bone transforms
+    :returns: A list of hair objects that can be either curve objects or particle systems.
+    :rtype: list
     """
-    pose = {}
+    hair_objects = []
+    for mesh_object in get_from_collection(BlenderTypes.MESH):
+        # only export particle systems on meshes that are lod 0 if lod option is on
+        if properties.import_lods and get_lod_index(mesh_object.name, properties) != 0:
+            continue
 
-    if rig_object:
-        for bone in rig_object.pose.bones:
-            pose[bone.name] = {
-                'location': bone.location,
-                'rotation_quaternion': bone.rotation_quaternion,
-                'rotation_euler': bone.rotation_euler,
-                'scale': bone.scale
-            }
+        # get all particle systems of type 'HAIR' and its modifier on the current mesh
+        modifiers = get_particle_system_modifiers(mesh_object)
+        hair_objects.extend([modifier.particle_system for modifier in modifiers])
 
-    return pose
+    hair_objects.extend(get_from_collection(BlenderTypes.CURVES))
+    return hair_objects
 
 
-def get_from_collection(object_type, properties):
+def get_mesh_object_for_groom_name(groom_name):
     """
-    This function fetches the objects inside each collection according to type and returns the
-    the list of object references.
+    Gets a single mesh object for the given particle system.
+
+    :returns: A mesh object.
+    :rtype: bpy.types.Object
+    """
+    for mesh_object in get_from_collection(BlenderTypes.MESH):
+        for modifier in get_particle_system_modifiers(mesh_object):
+            if groom_name == modifier.particle_system.name:
+                return mesh_object
+
+    # if not found in the particle systems, check in the curves objects
+    scene_object = bpy.data.objects.get(groom_name)
+    if scene_object and scene_object.type == BlenderTypes.CURVES:
+        if scene_object.data.surface:
+            return scene_object.data.surface
+
+
+def get_from_collection(object_type):
+    """
+    This function fetches the objects inside each collection according to type and returns
+    an alphabetically sorted list of object references.
 
     :param str object_type: The object type you would like to get.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects
     """
     collection_objects = []
@@ -326,18 +380,17 @@ def get_from_collection(object_type, properties):
                     if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
                         # add it to the group of objects
                         collection_objects.append(collection_object)
-    return collection_objects
+    return sorted(collection_objects, key=lambda obj: obj.name)
 
 
-def get_meshes_using_armature_modifier(rig_object, properties):
+def get_meshes_using_armature_modifier(rig_object):
     """
     This function get the objects using the given rig in an armature modifier.
 
     :param object rig_object: An object of type armature.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :return list: A list of objects using the given rig in an armature modifier.
     """
-    mesh_objects = get_from_collection(AssetTypes.MESH, properties)
+    mesh_objects = get_from_collection(BlenderTypes.MESH)
     child_meshes = []
     for mesh_object in mesh_objects:
         if rig_object == get_armature_modifier_rig_object(mesh_object):
@@ -355,7 +408,7 @@ def get_asset_name(asset_name, properties, lod=False):
     :param bool lod: Whether to use the lod post fix of not.
     :return str: The formatted name of the asset to export.
     """
-    asset_name = re.sub(r"[^-+\w]+", "_", asset_name)
+    asset_name = re.sub(r"[^-+\w]+", "_", asset_name.strip())
 
     if properties.import_lods:
         # remove the lod name from the asset
@@ -383,7 +436,7 @@ def get_parent_collection(scene_object, collection):
         return collection
 
 
-def get_skeleton_asset_path(rig_object, properties, get_path_function = get_import_path):
+def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path):
     """
     Gets the asset path to the skeleton.
 
@@ -396,34 +449,23 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function = get_impo
     if properties.unreal_skeleton_asset_path:
         return properties.unreal_skeleton_asset_path
 
-    children = rig_object.children or get_meshes_using_armature_modifier(rig_object, properties)
+    children = rig_object.children or get_meshes_using_armature_modifier(rig_object)
 
-    if children:
+    if children and properties.import_meshes:
         # get all meshes from the mesh collection
-        mesh_collection_objects = get_from_collection(AssetTypes.MESH, properties)
+        mesh_collection_objects = get_from_collection(BlenderTypes.MESH)
 
         # use the child mesh that is in the mesh collection to build the skeleton game path
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_path_function(child, properties, AssetTypes.MESH)
+                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(
         f'"{rig_object.name}" needs its unreal skeleton asset path specified under the "Path" settings '
         f'so it can be imported correctly!'
     )
-
-
-def get_transform_in_degrees(transform, decimals=4):
-    """
-    This function convert the given transform from radians to degrees.
-
-    :param list transform: A list of radians.
-    :param int decimals: The number of decimals to round the values to.
-    :return list: A list of degrees.
-    """
-    return tuple([round(math.degrees(number), decimals) for number in transform])
 
 
 def get_armature_modifier_rig_object(mesh_object):
@@ -438,6 +480,145 @@ def get_armature_modifier_rig_object(mesh_object):
             return modifier.object
 
     return None
+
+
+def get_related_mesh_asset_data_from_groom_asset_data(groom_asset_data):
+    """
+    Gets the mesh asset data block that is related to the given groom asset data.
+
+    :returns: A asset data dict.
+    :rtype: dict
+    """
+    groom_object_name = groom_asset_data.get('_object_name')
+
+    # get the surface mesh for the groom object
+    surface_mesh_object = get_mesh_object_for_groom_name(groom_object_name)
+    # find the all asset data for that surface mesh
+    mesh_asset_data = get_asset_data_by_attribute(
+        name='_mesh_object_name',
+        value=surface_mesh_object.name
+    )
+    # when the asset data can not be found by the surface mesh name
+    if not mesh_asset_data:
+        rig_object = get_armature_modifier_rig_object(surface_mesh_object)
+        unique_parent_meshes = get_unique_parent_mesh_objects([rig_object], [surface_mesh_object])
+        # check if the surface mesh has a unique parent
+        if len(unique_parent_meshes) == 1 and unique_parent_meshes[0].parent:
+            # then get the asset data for the child of that unique parent
+            return get_asset_data_by_attribute(
+                name='_mesh_object_name',
+                value=unique_parent_meshes[0].parent.children[0].name
+            )
+    return mesh_asset_data
+
+
+def get_unique_parent_mesh_objects(rig_objects, mesh_objects):
+    """
+    Gets only meshes that have a unique same armature parent.
+
+    :param list rig_objects: A list of rig objects.
+    :param list mesh_objects: A list of mesh objects.
+    :returns: A list of mesh objects.
+    :rtype: list
+    """
+    unique_parent_armatures = []
+    unique_parent_empties = []
+    meshes_with_unique_parents = []
+    for mesh_object in mesh_objects:
+        if mesh_object.parent:
+            # for static meshes it combines by empty
+            if mesh_object.parent.type == 'EMPTY' and mesh_object.parent not in unique_parent_empties:
+                meshes_with_unique_parents.append(mesh_object)
+                unique_parent_empties.append(mesh_object.parent)
+
+            # for skeletal meshes it combines by armature
+            if mesh_object.parent.type == 'ARMATURE' and (
+                mesh_object.parent in rig_objects and mesh_object.parent not in unique_parent_armatures
+            ):
+                meshes_with_unique_parents.append(mesh_object)
+                unique_parent_armatures.append(mesh_object.parent)
+        else:
+            meshes_with_unique_parents.append(mesh_object)
+
+    return meshes_with_unique_parents
+
+
+def get_all_children(scene_object, object_type, exclude_postfix_tokens=False):
+    """
+    Gets all children of a scene object.
+
+    :param object scene_object: A object.
+    :param str object_type: The type of object to select.
+    :param bool exclude_postfix_tokens: Whether or not to exclude objects that have a postfix token.
+    :return list child_objects: A list of child objects of the scene object.
+    """
+    child_objects = []
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object)
+    for child_object in children:
+        if child_object.type == object_type:
+            if exclude_postfix_tokens:
+                if any(child_object.name.startswith(f'{token.value}_') for token in PreFixToken):
+                    continue
+
+            child_objects.append(child_object)
+            if child_object.children:
+                get_all_children(child_object, object_type, exclude_postfix_tokens)
+
+    return child_objects
+
+
+def get_particle_system_modifiers(mesh_object):
+    """
+    Gets particle modifiers and the associated particle systems on a mesh as a list of tuples. If visible is provided,
+    get only modifiers that are visible in the viewport.
+
+    :param object mesh_object: A mesh object
+    :return list[modifier]: A list of tuples that contain the particle modifier and particle system.
+    """
+    particle_system_modifiers = []
+
+    for modifier in mesh_object.modifiers:
+        # skip modifiers that are not visible in the viewport
+        if not modifier.show_viewport:
+            continue
+
+        # get only 'HAIR' particle modifiers
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            if modifier.particle_system.settings.type == BlenderTypes.PARTICLE_HAIR:
+                particle_system_modifiers.append(modifier)
+    return particle_system_modifiers
+
+
+def get_particles_display_options(mesh_object):
+    """
+    Gets the particle display options for the given object.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :returns: A dictionary of particle modifier names and their 'VIEWPORT' and 'RENDER' values.
+    :rtype: dict
+    """
+    display_options = {}
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            display_options[modifier.name] = {
+                'RENDER': modifier.show_render,
+                'VIEWPORT': modifier.show_viewport
+            }
+    return display_options
+
+
+def get_all_particles_display_options():
+    """
+    Get all the particle display options for all objects.
+
+    :returns: All particle modifier names and their 'VIEWPORT' and 'RENDER' values per object.
+    :rtype: dict
+    """
+    all_display_options = {}
+    for scene_object in bpy.data.objects.values():
+        if scene_object.type == BlenderTypes.MESH:
+            all_display_options[scene_object.name] = get_particles_display_options(scene_object)
+    return all_display_options
 
 
 def get_asset_collisions(asset_name, properties):
@@ -458,6 +639,30 @@ def get_asset_collisions(asset_name, properties):
     return collision_meshes
 
 
+def set_particles_display_option(mesh_object, value, only='', display_type='RENDER'):
+    """
+    Sets the particle display options for the given object.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :param bool value: A boolean value.
+    :param str only: The name of the only modifier to set the value on.
+    :param str display_type: The type of display value to set.
+    """
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            if only and only == modifier.name:
+                if display_type == 'RENDER':
+                    modifier.show_render = value
+                else:
+                    modifier.show_viewport = value
+                return
+            else:
+                if display_type == 'RENDER':
+                    modifier.show_render = value
+                else:
+                    modifier.show_viewport = value
+
+
 def set_to_title(text):
     """
     Converts text to titles.
@@ -466,24 +671,6 @@ def set_to_title(text):
     :return str: The new title text.
     """
     return ' '.join([word.capitalize() for word in text.lower().split('_')]).strip('.json')
-
-
-def set_action_mute_values(rig_object, action_names):
-    """
-    This function un-mutes the values based of the provided list
-
-    :param object rig_object: A object of type armature with animation data.
-    :param list action_names: A list of action names to un-mute
-    """
-    if rig_object:
-        if rig_object.animation_data:
-            for nla_track in rig_object.animation_data.nla_tracks:
-                for strip in nla_track.strips:
-                    if strip.action:
-                        if strip.action.name in action_names:
-                            nla_track.mute = False
-                        else:
-                            nla_track.mute = True
 
 
 def set_pose(rig_object, pose_values):
@@ -522,7 +709,11 @@ def set_context(context):
             if active_action:
                 scene_object.animation_data.action = bpy.data.actions.get(active_action)
 
+            # restore the actions
             set_all_action_attributes(scene_object, attributes.get('actions', {}))
+            # restore the particles systems
+            restore_particles(scene_object, attributes.get('particle_systems', {}))
+            scene_object.show_instancer_for_render = attributes.get('show_instancer_for_render', False)
 
     # set the active object
     if active_object_name:
@@ -643,6 +834,9 @@ def is_collision_of(asset_name, mesh_object_name, properties):
     :param str mesh_object_name: The name of the collision mesh.
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
+    # note we strip whitespace out of the collision name since whitespace is already striped out of the asset name
+    # https://github.com/EpicGames/BlenderTools/issues/397#issuecomment-1333982590
+    mesh_object_name = mesh_object_name.strip()
     return bool(
         re.fullmatch(
             r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?",
@@ -862,6 +1056,24 @@ def convert_unreal_to_blender_location(location):
     return [x, -y, z]
 
 
+def convert_curve_to_particle_system(curves_object):
+    """
+    Converts curves objects to particle systems on the mesh they are surfaced to and returns the names of the converted
+    curves in a list.
+
+    :param object curves_object: A curves objects.
+    """
+    # deselect everything
+    deselect_all_objects()
+
+    # select the curves object
+    curves_object.select_set(True)
+    bpy.context.view_layer.objects.active = curves_object
+
+    # convert to a particle system
+    bpy.ops.curves.convert_to_particle_system()
+
+
 def addon_enabled(*args):
     """
     This function is designed to be called once after the addon is activated. Since the scene context
@@ -949,16 +1161,15 @@ def report_path_error_message(layout, send2ue_property, report_text):
         row.label(text=report_text)
 
 
-def select_all_children(scene_object, object_type, properties, exclude_postfix_tokens=False):
+def select_all_children(scene_object, object_type, exclude_postfix_tokens=False):
     """
     Selects all of an objects children.
 
     :param object scene_object: A object.
     :param str object_type: The type of object to select.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool exclude_postfix_tokens: Whether or not to exclude objects that have a postfix token.
     """
-    children = scene_object.children or get_meshes_using_armature_modifier(scene_object, properties)
+    children = scene_object.children or get_meshes_using_armature_modifier(scene_object)
     for child_object in children:
         if child_object.type == object_type:
             if exclude_postfix_tokens:
@@ -967,7 +1178,7 @@ def select_all_children(scene_object, object_type, properties, exclude_postfix_t
 
             child_object.select_set(True)
             if child_object.children:
-                select_all_children(child_object, object_type, properties, exclude_postfix_tokens)
+                select_all_children(child_object, object_type, exclude_postfix_tokens)
 
 
 def apply_all_mesh_modifiers(scene_object):
@@ -998,7 +1209,6 @@ def deselect_all_objects():
         scene_object.select_set(False)
 
 
-# TODO add to Blender Integration library
 def clean_nla_tracks(rig_object, action):
     """
     This function removes any nla tracks that have a action that matches the provided action. Also it removes
@@ -1024,7 +1234,6 @@ def clean_nla_tracks(rig_object, action):
                         rig_object.animation_data.nla_tracks.remove(nla_track)
 
 
-# TODO add to Blender Integration library
 def stash_animation_data(rig_object):
     """
     Stashes the active action on an object into its nla strips.
@@ -1237,6 +1446,53 @@ def subtract_lists(list1, list2):
     return result
 
 
+def disable_particles(mesh_object):
+    """
+    Disables the particles in the viewport and render.
+
+    :returns: The values before they were disabled.
+    :rtype: dict
+    """
+    existing_display_options = get_particles_display_options(mesh_object)
+    if existing_display_options:
+        set_particles_display_option(mesh_object, False, display_type='RENDER')
+        set_particles_display_option(mesh_object, False, display_type='VIEWPORT')
+    return existing_display_options
+
+
+def restore_particles(mesh_object, display_options):
+    """
+    Restores the particle visibility values.
+
+    :param bpy.types.Object mesh_object: A mesh object.
+    :param dict display_options: The display options to restore.
+    """
+    for modifier in mesh_object.modifiers:
+        if type(modifier) == bpy.types.ParticleSystemModifier:
+            display_option = display_options.get(modifier.name)
+            if display_option:
+                for display_type, value in display_option.items():
+                    if display_type == 'RENDER':
+                        modifier.show_render = value
+                    else:
+                        modifier.show_viewport = value
+            # if this particle system has no given settings, remove it.
+            else:
+                mesh_object.modifiers.remove(modifier)
+
+
+def restore_all_particles(all_display_options):
+    """
+    Restores all particle visibility values per scene object.
+
+    :param dict all_display_options: The display options to restore.
+    """
+    for object_name, display_options in all_display_options.items():
+        scene_object = bpy.data.objects.get(object_name)
+        if scene_object and scene_object.type == BlenderTypes.MESH:
+            restore_particles(scene_object, display_options)
+
+
 def scale_object_actions(unordered_objects, actions, scale_factor):
     """
     This function scales the provided action's location keyframe on the provided objects by the given scale factor.
@@ -1390,43 +1646,3 @@ def unpack_textures():
                                     unpacked_files[image.name] = image.filepath_from_user()
 
     return unpacked_files
-
-
-def apply_transform(scene_object, use_location=False, use_rotation=False, use_scale=False):
-    """
-    Apply the transform on the given object.
-
-    :param object scene_object: A object.
-    :param bool use_location: Whether or not to apply the location.
-    :param bool use_rotation: Whether or not to apply the rotation.
-    :param bool use_scale: Whether or not to apply the scale.
-    """
-    matrix_basis = scene_object.matrix_basis
-    identity_matrix = Matrix()
-    location, rotation, scale = matrix_basis.decompose()
-
-    # get matrices
-    translation_matrix = Matrix.Translation(location)
-    rotation_matrix = matrix_basis.to_3x3().normalized().to_4x4()
-    scale_matrix = Matrix.Diagonal(scale).to_4x4()
-
-    transform = [identity_matrix, identity_matrix, identity_matrix]
-    basis = [translation_matrix, rotation_matrix, scale_matrix]
-
-    def swap(i):
-        transform[i], basis[i] = basis[i], transform[i]
-
-    if use_location:
-        swap(0)
-    if use_rotation:
-        swap(1)
-    if use_scale:
-        swap(2)
-
-    matrix = transform[0] @ transform[1] @ transform[2]
-    if hasattr(scene_object.data, 'transform'):
-        scene_object.data.transform(matrix)
-    for child in scene_object.children:
-        child.matrix_local = matrix @ child.matrix_local
-
-    scene_object.matrix_basis = basis[0] @ basis[1] @ basis[2]

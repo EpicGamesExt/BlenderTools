@@ -2,7 +2,6 @@
 
 import bpy
 from ..properties import Send2UeAddonProperties
-from ..core import utilities
 from ..constants import ToolInfo
 
 

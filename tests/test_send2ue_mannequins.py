@@ -38,6 +38,20 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
         self.assert_mesh_import('SK_Mannequin_Female')
         self.assert_mesh_import('SK_Mannequin_LOD0')
 
+        self.tearDown()
+
+        animation_names = ['third_person_walk_01', 'third_person_run_01']
+        groom_names = ['particle_hair_head']
+
+        self.blender.set_addon_property('scene', 'send2ue', 'import_meshes', True)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_animations', False)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_grooms', False)
+
+        for animation in animation_names:
+            self.assert_animation_import(animation, False)
+        for groom_name in groom_names:
+            self.assert_groom_import(groom_name, False)
+
     def test_lods(self):
         """
         Sends a mannequin mesh with lods to unreal.
@@ -61,8 +75,80 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
                 'rig': 'female_root',
                 'animations': ['third_person_walk_01', 'third_person_run_01'],
                 'bones': ['pelvis', 'calf_r', 'hand_l'],
-                'frames': [1, 5, 14]
+                'frames': [1, 5, 14],
+                'grooms': ['particle_hair_head']
             }})
+
+    def test_grooms(self):
+        """
+        Sends a mannequin with curves and hair particles to unreal.
+        """
+
+        sk_mannequin_meshes = [
+            'SK_Mannequin_LOD0',
+            'SK_Mannequin_LOD1',
+            'SK_Mannequin_LOD2',
+            'SK_Mannequin_LOD3'
+        ]
+
+        sk_mannequin_female_meshes = ['SK_Mannequin_Female']
+
+        self.move_to_collection(
+            ['male_root'] + sk_mannequin_meshes,
+            'Export')
+
+        self.move_to_collection(
+            ['female_root'] + sk_mannequin_female_meshes,
+            'Export')
+
+        self.move_to_collection([
+            'back_curves',
+            'shoulder_curves',
+            'back_sparse_curves'
+        ], 'Export')
+
+        self.run_groom_tests({
+            'SK_Mannequin_LOD1': {
+                'curves': ['back_curves', 'shoulder_curves', 'back_sparse_curves'],
+                'particle_hair': ['particle_hair_waist', 'particle_hair_hand_r'],
+                'particle_emitter': ['particle_emitter'],
+                'disabled': ['particle_hair_disabled']
+            },
+            'SK_Mannequin_LOD2': {
+                'curves': [],
+                'particle_hair': ['particle_hair_hand_l'],
+                'particle_emitter': ['particle_emitter2'],
+                'disabled': []
+            },
+            'SK_Mannequin_LOD3': {
+                'curves': [],
+                'particle_hair': [],
+                'particle_emitter': ['particle_emitter3'],
+                'disabled': []
+            },
+            'SK_Mannequin_Female': {
+                'curves': [],
+                'particle_hair': ['particle_hair_head'],
+                'particle_emitter': [],
+                'disabled': []
+            }
+        })
+
+        self.tearDown()
+
+        animation_names = ['third_person_walk_01', 'third_person_run_01']
+        mesh_names = sk_mannequin_meshes + sk_mannequin_female_meshes
+
+        self.blender.set_addon_property('scene', 'send2ue', 'import_meshes', False)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_animations', False)
+        self.blender.set_addon_property('scene', 'send2ue', 'import_grooms', True)
+
+        for animation_name in animation_names:
+            self.assert_animation_import(animation_name, False)
+        for mesh_name in mesh_names:
+            self.assert_mesh_import(mesh_name, False)
+
+        self.tearDown()
 
     def test_materials(self):
         """

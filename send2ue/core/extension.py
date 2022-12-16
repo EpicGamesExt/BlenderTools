@@ -12,13 +12,14 @@ from ..constants import ToolInfo, Extensions, ExtensionTasks
 from . import utilities
 
 
-def run_extension_filters(armature_objects, mesh_objects):
+def run_extension_filters(armature_objects, mesh_objects, hair_objects):
     """
     Runs all the filter methods on the registered extensions. The result with be the intersection of
     all filter methods.
 
     :param list[bpy.types.Object] armature_objects: The name space of the task to run.
     :param list[bpy.types.Object] mesh_objects: The name space of the task to run.
+    :param list[Any] hair_objects: The name space of the task to run.
     :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
     :rtype: tuple(list, list)
     """
@@ -29,13 +30,23 @@ def run_extension_filters(armature_objects, mesh_objects):
             None
         )
         if filter_objects:
-            filtered_armature_objects, filtered_mesh_objects = filter_objects(armature_objects, mesh_objects)
+            filtered_armature_objects, filtered_mesh_objects, filtered_hair_objects = filter_objects(
+                armature_objects,
+                mesh_objects,
+                hair_objects,
+            )
 
             # get the intersection of the previous list values and the new filtered
             armature_objects = set(armature_objects).intersection(filtered_armature_objects)
             mesh_objects = set(mesh_objects).intersection(filtered_mesh_objects)
+            hair_objects = set(hair_objects).intersection(filtered_hair_objects)
 
-    return list(armature_objects), list(mesh_objects)
+            # reorder the objects by name
+            armature_objects = sorted(armature_objects, key=lambda obj: obj.name)
+            mesh_objects = sorted(mesh_objects, key=lambda obj: obj.name)
+            hair_objects = sorted(hair_objects, key=lambda obj: obj.name)
+
+    return list(armature_objects), list(mesh_objects), list(hair_objects)
 
 
 def run_extension_tasks(name_space):
@@ -178,6 +189,24 @@ class ExtensionBase:
         """
         pass
 
+    def pre_groom_export(self, asset_data, properties):
+        """
+        Defines the pre groom export logic that will be an injected operation.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        pass
+
+    def post_groom_export(self, asset_data, properties):
+        """
+        Defines the post groom export logic that will be an injected operation.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        pass
+
     def pre_import(self, asset_data, properties):
         """
         Defines the pre import logic that will be an injected operation.
@@ -204,16 +233,17 @@ class ExtensionBase:
         """
         pass
 
-    def filter_objects(self, armature_objects, mesh_objects):
+    def filter_objects(self, armature_objects, mesh_objects, hair_objects):
         """
         Defines a filter for the armature and mesh objects after they have been initially collected.
 
         :param list[object] armature_objects: A list of armature objects.
         :param list[object] mesh_objects: A list of mesh objects.
+        :param list[object] hair_objects: A list of hair objects.
         :returns: A tuple which is a filtered list of armature objects, and a filtered list of meshes objects.
-        :rtype: tuple(list, list)
+        :rtype: tuple(list, list, list)
         """
-        return armature_objects, mesh_objects
+        return armature_objects, mesh_objects, hair_objects
 
     def update_asset_data(self, asset_data):
         """

@@ -4,7 +4,7 @@ import bpy
 import os
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import utilities
-from send2ue.constants import ToolInfo, AssetTypes
+from send2ue.constants import ToolInfo, UnrealTypes
 
 
 class UseImmediateParentNameExtension(ExtensionBase):
@@ -27,7 +27,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
         if self.use_immediate_parent_name:
             if properties.extensions.use_collections_as_folders.use_collections_as_folders:
                 utilities.report_error(
-                    f'Cannot use both use_collections_as_folders'
+                    f'Cannot use both use collections as folders '
                     f'and use immediate parent name extensions!'
                 )
                 return False
@@ -42,8 +42,9 @@ class UseImmediateParentNameExtension(ExtensionBase):
         """
         if self.use_immediate_parent_name:
             object_name = asset_data.get('_mesh_object_name', '')
-
-            file_path = self.get_full_file_path(object_name, properties, AssetTypes.MESH)
+            scene_object = bpy.data.objects[object_name]
+            asset_type = utilities.get_mesh_unreal_type(scene_object)
+            file_path = self.get_full_file_path(object_name, properties, asset_type)
             self.update_asset_data({
                 'file_path': file_path
             })
@@ -56,28 +57,13 @@ class UseImmediateParentNameExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.use_immediate_parent_name:
-            if asset_data.get('_asset_type') != AssetTypes.ANIMATION:
-                object_name = asset_data.get('_mesh_object_name', '')
-                mesh_object = bpy.data.objects[object_name]
-
-                import_path = self.get_full_import_path(
-                    mesh_object,
-                    properties,
-                    asset_data.get('_asset_type')
-                )
-                asset_name = self.get_full_asset_name(mesh_object, properties)
-
-                self.update_asset_data({
-                    'asset_folder': import_path,
-                    'asset_path': f'{import_path}{asset_name}',
-                })
-
-            if asset_data.get('_asset_type') == AssetTypes.ANIMATION:
+            asset_type = asset_data.get('_asset_type')
+            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
                 # if unreal skeleton path has not been set by user
                 if not properties.unreal_skeleton_asset_path:
                     object_name = asset_data.get('_armature_object_name', '')
                     rig_object = bpy.data.objects.get(object_name)
-                    import_path = self.get_full_import_path(rig_object, properties, AssetTypes.SKELETON)
+                    import_path = self.get_full_import_path(rig_object, properties, UnrealTypes.SKELETAL_MESH)
 
                     parent_object = rig_object.parent
                     if parent_object and parent_object.type == 'EMPTY':
@@ -87,6 +73,28 @@ class UseImmediateParentNameExtension(ExtensionBase):
                     self.update_asset_data({
                         'skeleton_asset_path': f'{import_path}{asset_name}_Skeleton',
                     })
+            elif asset_type:
+                object_name = asset_data.get('_mesh_object_name')
+                if object_name:
+                    mesh_object = bpy.data.objects[object_name]
+                    mesh_asset_type = utilities.get_mesh_unreal_type(mesh_object)
+                    import_path = self.get_full_import_path(
+                        mesh_object,
+                        properties,
+                        mesh_asset_type
+                    )
+                    asset_name = self.get_full_asset_name(mesh_object, properties)
+
+                    if asset_type == UnrealTypes.GROOM:
+                        # correct the target mesh path for groom asset data
+                        self.update_asset_data({
+                            'mesh_asset_path': f'{import_path}{asset_name}'
+                        })
+                    else:
+                        self.update_asset_data({
+                            'asset_folder': import_path,
+                            'asset_path': f'{import_path}{asset_name}',
+                        })
 
     def get_full_asset_name(self, mesh_object, properties):
         """
@@ -138,7 +146,7 @@ class UseImmediateParentNameExtension(ExtensionBase):
         :param str asset_type: The type of asset.
         :return str: The import path for the given asset without the immediate parent.
         """
-        import_path = utilities.get_import_path(scene_object, properties, asset_type)
+        import_path = utilities.get_import_path(properties, asset_type)
         if import_path:
             parent_object = scene_object.parent
             if not parent_object or parent_object.type != 'EMPTY':
