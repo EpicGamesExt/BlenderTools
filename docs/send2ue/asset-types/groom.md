@@ -6,7 +6,7 @@ Make sure to have the unreal plugins "Alembic Groom Importer" and "Groom" enable
 :::
 
 ::: warning Required UE Project Setting
-Make sure to have the setting "Support Compute Skin Cache" in Project Settings > Engine > Rendering > Optimizations enabled for grooms to render properly when bind to a skeletal mesh.
+Make sure to have the setting "Support Compute Skin Cache" turned on in Project Settings > Engine > Rendering > Optimizations for grooms to render properly when bound to a skeletal mesh.
 ![3](./images/groom/4.png)
 :::
 
@@ -22,10 +22,10 @@ extension that have options such as _combine groom for each mesh_ and more.
 :::
 
 ::: warning
-In blender, particle systems on the same mesh must have unique names. However, particles on different meshes may share
-the same name. The imported groom asset uses the name of the particle system/curves object it is sourced from. To
-ensure no assets are overwritten in unreal, please give each particle system and curves object a unique name
-across all meshes.
+Please give each particle system and curves object a unique name across all meshes. While Blender lets particles on
+different meshes share the same name, the addon requires each name to be unique to prevent assets getting overwritten
+in Unreal. This is because multiple groom assets can be imported into the same directory in unreal, and any
+asset with duplicate names will get overwritten.
 
 <img src="./images/groom/2.png" alt="drawing" width="200"/>
 :::
@@ -33,8 +33,7 @@ across all meshes.
 ## Curves Objects
 
 The Curves object type was introduced in [Blender 3.3](https://www.blender.org/download/releases/3-3/), enabling a revamped hair sculpting workflow. The send2ue addon
-supports the export of a curves object into a groom asset in unreal. Make sure the curves objects that you want to
-export are in the `Export` collection, along with their surface meshes. Under the hood, the addon temporarily converts
+supports the export of a curves object into a groom asset in unreal. Under the hood, the addon temporarily converts
 the curves object into a hair particle system on the mesh that it’s surfaced to, which would then be exported as an alembic file.
 
 ## Only Groom
@@ -42,7 +41,6 @@ the curves object into a hair particle system on the mesh that it’s surfaced t
 By default, the groom asset will import along with the mesh asset that it is surfaced to. To run a strictly groom asset
 import (meaning no other asset types will be exported from blender and imported to unreal), all import options (mesh,
 animation, textures) must be turned off in your [import settings](/settings/import.html) except for `Groom`.
-For Curves, make sure that their surface mesh object is also placed inside the `Export` collection.
 
 ## Binding Assets and More
 

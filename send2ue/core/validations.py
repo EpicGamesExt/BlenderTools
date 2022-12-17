@@ -344,7 +344,7 @@ class ValidationManager:
                     )
                     return False
 
-            return True
+        return True
 
     # TODO: temporary validation before lods support for groom is added
     def validate_groom_unsupported_lods(self):

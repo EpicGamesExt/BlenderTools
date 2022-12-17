@@ -43,7 +43,7 @@ make sure to also have the plugins "Alembic Groom Importer" and "Groom" enabled.
 ![6_1](./images/6_1.png)
 
 Additionally, make sure the "Support Compute Skin Cache" setting is turned on in Project Settings > Engine > Rendering > Optimizations.
-This ensures grooms to render properly when bind to a skeletal mesh.
+This ensures grooms to render properly when bound to a skeletal mesh.
 
 ![16](./images/16.png)
 

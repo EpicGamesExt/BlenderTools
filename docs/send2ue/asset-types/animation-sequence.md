@@ -1,4 +1,4 @@
-# Animation
+# Animation Sequence
 
 When creating Animation, Send to Unreal looks for [action strips](https://docs.blender.org/manual/en/latest/editors/nla/strips.html#action-strips) in the Blender NLA Editor.
 
