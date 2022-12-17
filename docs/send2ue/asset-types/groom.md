@@ -41,7 +41,7 @@ the curves object into a hair particle system on the mesh that it’s surfaced t
 By default, the groom asset will import along with the mesh asset that it is surfaced to. To run a strictly groom asset
 import (meaning no other asset types will be exported from blender and imported to unreal), all import options (mesh,
 animation, textures) must be turned off in your [import settings](/settings/import.html) except for `Groom`. Alternatively,
-the blender `Curves` objects can be placed the `Export` collection by themselves(without their surface mesh object) which
+the blender `Curves` objects can be placed in the `Export` collection (without their surface mesh objects) which
 denotes an exclusive groom workflow as well.
 
 ## Binding Assets and More
