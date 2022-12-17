@@ -10,7 +10,7 @@ features:
   details: Supports static mesh workflows with lods, mesh origins, and batched exports.
 - title: Skeletal Meshes
   details: Bring a skeletal mesh into unreal with its lods and customized lod build settings.
-- title: Animations
+- title: Animation Sequences
   details: Batch export or send individual animations directly to the editor.
 - title: Grooms
   details: Batch export or send individual hair systems as alembic files to the editor as groom assets.

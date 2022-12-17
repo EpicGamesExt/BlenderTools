@@ -37,7 +37,7 @@ export default defineUserConfig({
                     children: [
                         '/asset-types/skeletal-mesh',
                         '/asset-types/static-mesh',
-                        '/asset-types/animation',
+                        '/asset-types/animation-sequence',
                         '/asset-types/groom'
                     ]
                 },
