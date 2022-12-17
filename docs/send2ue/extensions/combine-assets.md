@@ -1,6 +1,6 @@
 # Combine Assets
 
-The _Combine Assets_ extension provides a convenient way to combine blender objects into one unreal asset. There are 6
+The _Combine Assets_ extension provides a convenient way to combine blender objects into one unreal asset. There are 4
 options, each provides a different way to customize your export.
 
 ## Overview
@@ -8,7 +8,7 @@ options, each provides a different way to customize your export.
 
 ### Properties
 #### _off_
-This exports each object and particle system in the `Export` collection export as individual assets.
+This exports each object and particle system in the `Export` collection as individual assets.
 
 <img src="./images/combine-assets/off.png" alt="off" width="400"/>
 
@@ -28,22 +28,11 @@ For each combined mesh, all hair objects/systems surfaced on it export as a sing
 
 <img src="./images/combine-assets/groom_per_combined_mesh.png" alt="groom_per_combined_mesh" width="400"/>
 
-#### _all groom_
-This combines all hair particle systems and curves objects in the `Export` collection into a single groom asset.
-
-<img src="./images/combine-assets/all_groom.png" alt="all_groom" width="400"/>
-
-#### _all groom and child meshes_
-For each empty object or armature parent, this combines its child meshes into a single mesh when exported.
-This also combines all hair particle systems and curves objects in the Export collection into a single groom asset.
-
-<img src="./images/combine-assets/all_groom_and_child_meshes.png" alt="all_groom_and_child_meshes" width="400"/>
-
 ### UI
 The settings can be found under the `Export` tab
 
 ## Static Meshes
-For options _**child meshes**_, _**groom per combined mesh**_ and _**all groom and child meshes**_, all child meshes under an empty
+For options _**child meshes**_, and _**groom per combined mesh**_, all child meshes under an empty
 will be combined into one static mesh using the name of the empty.
 
 ![0](./images/combine-assets/0.png)
@@ -62,13 +51,13 @@ to each mesh within the combined asset.
 :::
 
 ## Skeletal Meshes
-For options _**child meshes**_, **_groom per combined mesh_** and _**all groom and child meshes**_, all child meshes under an armature
+For options _**child meshes**_, and **_groom per combined mesh_**, all child meshes under an armature
 will be combined into one skeletal mesh using the name of the first child mesh in alphanumerical order by object name
 (the default order of objects in the blender outliner).
 
 ::: tip Note
  This might not give you enough control over the skeletal mesh name, so using the
-[immediate parent name](https://github.com/EpicGames/BlenderTools/docs/send2ue/extensions/use-immediate-parent-name.html)
+[immediate parent name](https://epicgames.github.io/BlenderTools/send2ue/extensions/use-immediate-parent-name.html)
 extension can be useful.
 :::
 
@@ -77,25 +66,8 @@ extension can be useful.
 In this example the name of the combine skeletal mesh in unreal would be `SK_Mannequin_Female`
 
 ## Groom
-For the options _**off**_ and _**child meshes**_, each particle system and curves object exports as an individual alembic file.
+* For the options _**off**_ and _**child meshes**_, each particle system and curves object exports as an individual alembic file.
 The imported groom asset takes on the name of the particle system or curves object.
 
-For the option _**groom per mesh**_, all particle systems and curves objects surfaced to one mesh will be combined into
-one groom asset using the name of the first particle system in creation order (the default order of particle systems in
-the particles properties view).
-
-- In the example below the name of the combined groom asset in unreal would be `particle_hair_waist`
-
-  <img src="./images/combine-assets/4.png" alt="4" width="300"/>
-
-For the option _**groom per combined mesh**_, all particle systems of each child mesh under an armature or empty type object
-will be combined into one groom asset using the name of the combined mesh with a postfix `_Groom`
-
-- In the example below the name of the combined groom asset in unreal would be `SK_Mannequin_Female_Groom`
-
-  <img src="./images/combine-assets/5.png" alt="5" width="300"/>
-
-For the options _**all groom**_ and _**all groom and child meshes**_, all particle systems of each mesh in the `Export` collection
-will be combined into one groom asset using the name `Combined_Groom`
-
-
+* For the option _**groom per mesh**_ and _**groom per combined mesh**_, all particle systems and curves objects surfaced to one mesh
+  will be combined into one groom asset using the name of their surface mesh post fixed with `_Groom`.
