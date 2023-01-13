@@ -982,7 +982,7 @@ class UnrealRemoteCalls:
         parser = ConfigParser(strict=False)
         parser.read(config_path)
 
-        return parser.get(section_name, setting_name)
+        return parser.get(section_name, setting_name, fallback=None)
 
     @staticmethod
     def has_socket(asset_path, socket_name):

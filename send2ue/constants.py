@@ -80,3 +80,8 @@ class PathModes(Enum):
     SEND_TO_PROJECT = 'send_to_project'
     SEND_TO_DISK = 'send_to_disk'
     SEND_TO_DISK_THEN_PROJECT = 'send_to_disk_then_project'
+
+
+class RegexPresets:
+    INVALID_NAME_CHARACTERS = r"[^-+\w]+"
+

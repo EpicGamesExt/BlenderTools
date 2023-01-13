@@ -14,14 +14,26 @@ If an armature object has un-applied transforms (meaning location and rotation a
 
 ### Check if asset has unused materials
 If this option is on it looks at each material index on the object and it checks if that material is
-assigned to a vertex on the mesh object. If there is a unused material, then an error message is thrown to the user
+assigned to a vertex on the mesh object. If there is a unused material, then an error message is thrown to the user.
 
 ### Check texture references
 This checks the texture references and sees if they actually exist on disk.
 
 ### Check paths:
 This checks the export and import paths and makes sure they are valid before preforming
-the operation
+the operation.
+
+### Check project settings:
+This checks whether the required unreal project settings are in place before performing
+the operation.
+
+### Check blender object names:
+This checks whether the blender object names in the Export collection contain any
+invalid special characters or white space. While the following special characters `'".,/.:|&!~\n\r\t@#(){}[]=;^%$\*?<>` or ` have
+valid usage in Blender, they are not valid to use in asset names in Unreal.
+
+Send2UE automatically converts any invalid characters to `_` during the export process
+if this validation is turned off.
 
 ::: tip Note
   Checking the unreal paths makes a few remote calls which requires an open Unreal editor instance with remote

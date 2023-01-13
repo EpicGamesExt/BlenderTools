@@ -275,6 +275,8 @@ class Send2UnrealDialog(bpy.types.Panel):
         self.draw_property(properties, layout, 'validate_armature_transforms')
         self.draw_property(properties, layout, 'validate_materials')
         self.draw_property(properties, layout, 'validate_textures')
+        self.draw_property(properties, layout, 'validate_project_settings')
+        self.draw_property(properties, layout, 'validate_object_names')
 
     def draw_extensions(self, layout):
         """
