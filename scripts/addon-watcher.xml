@@ -1,6 +1,6 @@
 <TaskOptions>
   <TaskOptions>
-    <option name="arguments" value="C:\BlenderTools\scripts\addon_watcher.py $FilePathRelativeToProjectRoot$" />
+    <option name="arguments" value="$ProjectFileDir$\scripts\addon_watcher.py $FilePathRelativeToProjectRoot$" />
     <option name="checkSyntaxErrors" value="true" />
     <option name="description" />
     <option name="exitCodeBehavior" value="ERROR" />
@@ -16,7 +16,7 @@
     <option name="runOnExternalChanges" value="true" />
     <option name="scopeName" value="Project Files" />
     <option name="trackOnlyRoot" value="false" />
-    <option name="workingDir" value="$PROJECT_DIR$" />
+    <option name="workingDir" value="" />
     <envs />
   </TaskOptions>
 </TaskOptions>

@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.basename(__file__), os.path.pardir, 'send2ue', 'dependencies'))
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, 'send2ue', 'dependencies'))
 import rpc
 
 
