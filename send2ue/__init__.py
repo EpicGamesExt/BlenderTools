@@ -9,6 +9,7 @@ from .dependencies import remote_execution, unreal
 from .dependencies.unreal import UnrealRemoteCalls
 from .ui import header_menu, addon_preferences, file_browser, dialog
 from .core import formatting, validations, settings, utilities, export, ingest, extension
+from .core.io import fbx
 
 bl_info = {
     "name": "Send to Unreal",
@@ -37,7 +38,8 @@ modules = [
     constants,
     remote_execution,
     addon_preferences,
-    extension
+    extension,
+    fbx
 ]
 
 
@@ -51,6 +53,9 @@ def register():
             importlib.reload(module)
 
     try:
+        # register fbx operator
+        fbx.register()
+
         # register the properties
         properties.register()
 
@@ -62,6 +67,7 @@ def register():
 
         # register the addon preferences
         addon_preferences.register()
+
     except RuntimeError as error:
         print(error)
 
@@ -95,6 +101,10 @@ def unregister():
 
         # unregister the properties
         properties.unregister()
+
+        # unregister fbx operator
+        fbx.unregister()
+
     except RuntimeError as error:
         print(error)
 

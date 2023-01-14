@@ -15,8 +15,11 @@ except RuntimeError as error:
     print(error)
 
 import io_scene_fbx.export_fbx_bin as export_fbx_bin
-import io_scene_fbx.fbx_utils as fbx_utils
-import io_scene_fbx.data_types as data_types
+from io_scene_fbx.export_fbx_bin import (
+    fbx_data_bindpose_element,
+    AnimationCurveNodeWrapper
+)
+from bpy_extras.io_utils import axis_conversion
 from io_scene_fbx import ExportFBX
 from io_scene_fbx.fbx_utils import (
     # Constants.
@@ -95,145 +98,6 @@ from io_scene_fbx.export_fbx_bin import (
 )
 
 
-class AnimationCurveNodeWrapper:
-    """
-    This class provides a same common interface for all (FBX-wise) AnimationCurveNode and AnimationCurve elements,
-    and easy API to handle those.
-    """
-    __slots__ = (
-        'elem_keys', '_keys', 'default_values', 'fbx_group', 'fbx_gname', 'fbx_props',
-        'force_keying', 'force_startend_keying')
-
-    kinds = {
-        'LCL_TRANSLATION': ("Lcl Translation", "T", ("X", "Y", "Z")),
-        'LCL_ROTATION': ("Lcl Rotation", "R", ("X", "Y", "Z")),
-        'LCL_SCALING': ("Lcl Scaling", "S", ("X", "Y", "Z")),
-        'SHAPE_KEY': ("DeformPercent", "DeformPercent", ("DeformPercent",)),
-        'CAMERA_FOCAL': ("FocalLength", "FocalLength", ("FocalLength",)),
-    }
-
-    def __init__(self, elem_key, kind, force_keying, force_startend_keying, default_values=...):
-        self.elem_keys = [elem_key]
-        assert (kind in self.kinds)
-        self.fbx_group = [self.kinds[kind][0]]
-        self.fbx_gname = [self.kinds[kind][1]]
-        self.fbx_props = [self.kinds[kind][2]]
-        self.force_keying = force_keying
-        self.force_startend_keying = force_startend_keying
-        self._keys = []  # (frame, values, write_flags)
-        if default_values is not ...:
-            assert (len(default_values) == len(self.fbx_props[0]))
-            self.default_values = default_values
-        else:
-            self.default_values = (0.0) * len(self.fbx_props[0])
-
-    def __bool__(self):
-        # We are 'True' if we do have some validated keyframes...
-        return bool(self._keys) and (True in ((True in k[2]) for k in self._keys))
-
-    def add_group(self, elem_key, fbx_group, fbx_gname, fbx_props):
-        """
-        Add another whole group stuff (curvenode, animated item/prop + curvnode/curve identifiers).
-        E.g. Shapes animations is written twice, houra!
-        """
-        assert (len(fbx_props) == len(self.fbx_props[0]))
-        self.elem_keys.append(elem_key)
-        self.fbx_group.append(fbx_group)
-        self.fbx_gname.append(fbx_gname)
-        self.fbx_props.append(fbx_props)
-
-    def add_keyframe(self, frame, values):
-        """
-        Add a new keyframe to all curves of the group.
-        """
-        assert (len(values) == len(self.fbx_props[0]))
-        self._keys.append((frame, values, [True] * len(values)))  # write everything by default.
-
-    def simplify(self, fac, step, force_keep=False):
-        """
-        Simplifies sampled curves by only enabling samples when:
-            * their values relatively differ from the previous sample ones.
-        """
-        if not self._keys:
-            return
-
-        if fac == 0.0:
-            return
-
-        # So that, with default factor and step values (1), we get:
-        min_reldiff_fac = fac * 1.0e-3  # min relative value evolution: 0.1% of current 'order of magnitude'.
-        min_absdiff_fac = 0.1  # A tenth of reldiff...
-        keys = self._keys
-
-        p_currframe, p_key, p_key_write = keys[0]
-        p_keyed = list(p_key)
-        are_keyed = [False] * len(p_key)
-        for currframe, key, key_write in keys:
-            for idx, (val, p_val) in enumerate(zip(key, p_key)):
-                key_write[idx] = False
-                p_keyedval = p_keyed[idx]
-                if val == p_val:
-                    # Never write keyframe when value is exactly the same as prev one!
-                    continue
-                # This is contracted form of relative + absolute-near-zero difference:
-                #     absdiff = abs(a - b)
-                #     if absdiff < min_reldiff_fac * min_absdiff_fac:
-                #         return False
-                #     return (absdiff / ((abs(a) + abs(b)) / 2)) > min_reldiff_fac
-                # Note that we ignore the '/ 2' part here, since it's not much significant for us.
-                if abs(val - p_val) > (min_reldiff_fac * max(abs(val) + abs(p_val), min_absdiff_fac)):
-                    # If enough difference from previous sampled value, key this value *and* the previous one!
-                    key_write[idx] = True
-                    p_key_write[idx] = True
-                    p_keyed[idx] = val
-                    are_keyed[idx] = True
-                elif abs(val - p_keyedval) > (min_reldiff_fac * max((abs(val) + abs(p_keyedval)), min_absdiff_fac)):
-                    # Else, if enough difference from previous keyed value, key this value only!
-                    key_write[idx] = True
-                    p_keyed[idx] = val
-                    are_keyed[idx] = True
-            p_currframe, p_key, p_key_write = currframe, key, key_write
-
-        # If we write nothing (action doing nothing) and are in 'force_keep' mode, we key everything! :P
-        # See T41766.
-        # Also, it seems some importers (e.g. UE4) do not handle correctly armatures where some bones
-        # are not animated, but are children of animated ones, so added an option to systematically force writing
-        # one key in this case.
-        # See T41719, T41605, T41254...
-        if self.force_keying or (force_keep and not self):
-            are_keyed[:] = [True] * len(are_keyed)
-
-        # If we did key something, ensure first and last sampled values are keyed as well.
-        if self.force_startend_keying:
-            for idx, is_keyed in enumerate(are_keyed):
-                if is_keyed:
-                    keys[0][2][idx] = keys[-1][2][idx] = True
-
-    def get_final_data(self, scene, ref_id, force_keep=False):
-        """
-        Yield final anim data for this 'curvenode' (for all curvenodes defined).
-        force_keep is to force to keep a curve even if it only has one valid keyframe.
-        """
-        curves = [[] for k in self._keys[0][1]]
-        for currframe, key, key_write in self._keys:
-            for curve, val, wrt in zip(curves, key, key_write):
-                if wrt:
-                    curve.append((currframe, val))
-
-        force_keep = force_keep or self.force_keying
-        for elem_key, fbx_group, fbx_gname, fbx_props in \
-            zip(self.elem_keys, self.fbx_group, self.fbx_gname, self.fbx_props):
-            group_key = get_blender_anim_curve_node_key(scene, ref_id, elem_key, fbx_group)
-            group = {}
-            for c, def_val, fbx_item in zip(curves, self.default_values, fbx_props):
-                fbx_item = FBX_ANIM_PROPSGROUP_NAME + "|" + fbx_item
-                curve_key = get_blender_anim_curve_key(scene, ref_id, elem_key, fbx_group, fbx_item)
-                # (curve key, default value, keyframes, write flag).
-                group[fbx_item] = (curve_key, def_val, c,
-                                   True if (len(c) > 1 or (len(c) > 0 and force_keep)) else False)
-            yield elem_key, group_key, group, fbx_group, fbx_gname
-
-
 def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=None, force_keep=False):
     """
     Generate animation data (a single AnimStack) from objects, for a given frame range.
@@ -269,9 +133,10 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
         loc, rot, scale, _m, _mr = ob_obj.fbx_object_tx(scene_data)
         rot_deg = tuple(convert_rad_to_deg_iter(rot))
         force_key = (simplify_fac == 0.0) or (ob_obj.is_bone and force_keying)
-        animdata_ob[ob_obj] = (ACNW(ob_obj.key, 'LCL_TRANSLATION', force_key, force_sek, loc * 100),
+
+        animdata_ob[ob_obj] = (ACNW(ob_obj.key, 'LCL_TRANSLATION', force_key, force_sek, loc),
                                ACNW(ob_obj.key, 'LCL_ROTATION', force_key, force_sek, rot_deg),
-                               ACNW(ob_obj.key, 'LCL_SCALING', force_key, force_sek, scale / 100))
+                               ACNW(ob_obj.key, 'LCL_SCALING', force_key, force_sek, scale))
         p_rots[ob_obj] = rot
 
     force_key = (simplify_fac == 0.0)
@@ -302,10 +167,12 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
             pass  # Merely updating dupli matrix of ObjectWrapper...
         for ob_obj, (anim_loc, anim_rot, anim_scale) in animdata_ob.items():
             location_multiple = 100
+            scale_factor = 1
 
             # if this curve is the object root then keep its scale at 1
             if len(str(ob_obj).split('|')) == 1:
                 location_multiple = 1
+                scale_factor = 100
 
             # We compute baked loc/rot/scale for all objects (rot being euler-compat with previous value!).
             p_rot = p_rots.get(ob_obj, None)
@@ -313,9 +180,9 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
             p_rots[ob_obj] = rot
             anim_loc.add_keyframe(real_currframe, loc * location_multiple)
             anim_rot.add_keyframe(real_currframe, tuple(convert_rad_to_deg_iter(rot)))
-            anim_scale.add_keyframe(real_currframe, scale / 100)
+            anim_scale.add_keyframe(real_currframe, scale / scale_factor)
         for anim_shape, me, shape in animdata_shapes.values():
-            anim_shape.add_keyframe(real_currframe, (shape.value * 100.0,))
+            anim_shape.add_keyframe(real_currframe, (shape.value * scale_factor,))
         for anim_camera, camera in animdata_cameras.values():
             anim_camera.add_keyframe(real_currframe, (camera.lens,))
         currframe += bake_step
@@ -363,61 +230,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
         f_end -= f_start
         f_start = 0.0
 
-    # TODO remove
-    import json
-    with open(r"C:\BlenderTools\animation_data.json", "w") as file:
-        json.dump(animations, file)
     return (astack_key, animations, alayer_key, name, f_start, f_end) if animations else None
-
-
-def fbx_data_bindpose_element(root, me_obj, me, scene_data, arm_obj=None, mat_world_arm=None, bones=[]):
-    """
-    Helper, since bindpose are used by both meshes shape keys and armature bones...
-    """
-    if arm_obj is None:
-        arm_obj = me_obj
-    # We assume bind pose for our bones are their "Editmode" pose...
-    # All matrices are expected in global (world) space.
-    bindpose_key = get_blender_bindpose_key(arm_obj.bdata, me)
-    fbx_pose = elem_data_single_int64(root, b"Pose", get_fbx_uuid_from_key(bindpose_key))
-    fbx_pose.add_string(fbx_name_class(me.name.encode(), b"Pose"))
-    fbx_pose.add_string(b"BindPose")
-
-    elem_data_single_string(fbx_pose, b"Type", b"BindPose")
-    elem_data_single_int32(fbx_pose, b"Version", FBX_POSE_BIND_VERSION)
-    elem_data_single_int32(fbx_pose, b"NbPoseNodes", 1 + (1 if (arm_obj != me_obj) else 0) + len(bones))
-
-    # First node is mesh/object.
-    mat_world_obj = me_obj.fbx_object_matrix(scene_data, global_space=True)
-    fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
-    elem_data_single_int64(fbx_posenode, b"Node", me_obj.fbx_uuid)
-    elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(mat_world_obj))
-    # Second node is armature object itself.
-    if arm_obj != me_obj:
-        fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
-        elem_data_single_int64(fbx_posenode, b"Node", arm_obj.fbx_uuid)
-        elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(mat_world_arm))
-
-    # # get the list of objects that do not have parents
-    # no_parents = [unordered_object for unordered_object in unordered_objects if not unordered_object.parent]
-    #
-    # # get the list of objects that have parents
-    # parents = [unordered_object for unordered_object in unordered_objects if unordered_object.parent]
-    #
-    # # re-order the imported objects to have the top of the hierarchies iterated first
-    # ordered_objects = no_parents + parents
-
-    # And all bones of armature!
-    mat_world_bones = {}
-    for bo_obj in bones:
-        bomat = bo_obj.fbx_object_matrix(scene_data, rest=True, global_space=True)
-
-        mat_world_bones[bo_obj] = bomat
-        fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
-        elem_data_single_int64(fbx_posenode, b"Node", bo_obj.fbx_uuid)
-        elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(bomat))
-
-    return mat_world_obj, mat_world_bones
 
 
 def fbx_data_armature_elements(root, arm_obj, scene_data):
@@ -429,11 +242,11 @@ def fbx_data_armature_elements(root, arm_obj, scene_data):
         * BindPose.
     Note armature itself has no data, it is a mere "Null" Model...
     """
-    test_data = {}
     mat_world_arm = arm_obj.fbx_object_matrix(scene_data, global_space=True)
     bones = tuple(bo_obj for bo_obj in arm_obj.bones if bo_obj in scene_data.objects)
 
     bone_radius_scale = 33.0
+    scale_factor = 100
 
     # Bones "data".
     for bo_obj in bones:
@@ -446,7 +259,7 @@ def fbx_data_armature_elements(root, arm_obj, scene_data):
 
         tmpl = elem_props_template_init(scene_data.templates, b"Bone")
         props = elem_properties(fbx_bo)
-        elem_props_template_set(tmpl, props, "p_double", b"Size", bo.head_radius * bone_radius_scale)
+        elem_props_template_set(tmpl, props, "p_double", b"Size", bo.head_radius * bone_radius_scale * scale_factor)
         elem_props_template_finalize(tmpl, props)
 
         # Custom properties.
@@ -516,13 +329,160 @@ def fbx_data_armature_elements(root, arm_obj, scene_data):
                 #                 by-fbxcluster-gettransformmatrix-x-not-same-with-the-value-in-ascii-fbx-file/
                 # test_data[bo_obj.name] = matrix4_to_array(mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj)
 
-                elem_data_single_float64_array(fbx_clstr, b"Transform", matrix4_to_array(mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj))
-                elem_data_single_float64_array(fbx_clstr, b"TransformLink", matrix4_to_array(mat_world_bones[bo_obj]))
-                elem_data_single_float64_array(fbx_clstr, b"TransformAssociateModel", matrix4_to_array(mat_world_arm))
+                # Todo add to FBX addon
+                # transform_matrix = matrix4_to_array(mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj)
+                # transform_link_matrix = matrix4_to_array(mat_world_bones[bo_obj])
+                # transform_associate_model_matrix = matrix4_to_array(mat_world_arm)
 
-    import json
-    with open(r'C:\BlenderTools\skeleton_data.json', 'w') as file:
-        json.dump(test_data, file)
+                transform_matrix = matrix4_to_array((mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj) * Matrix.Scale(0.01, 4))
+                transform_link_matrix = matrix4_to_array(mat_world_bones[bo_obj] * Matrix.Scale(0.01, 4))
+                transform_associate_model_matrix = matrix4_to_array(mat_world_arm * Matrix.Scale(0.01, 4))
+
+                # transform_matrix = tuple(transform_matrix)
+                # transform_link_matrix = tuple(transform_link_matrix)
+                # transform_associate_model_matrix = tuple(transform_associate_model_matrix)
+                #
+                # transform_matrix = tuple([value * 100 for value in transform_matrix[:-4]] + transform_matrix[-4:])
+                # transform_link_matrix = tuple([value * 100 for value in transform_link_matrix[:-4]] + transform_link_matrix[-4:])
+                # transform_associate_model_matrix = tuple([value * 100 for value in transform_link_matrix[:-4]] + transform_associate_model_matrix[-4:])
+
+                elem_data_single_float64_array(fbx_clstr, b"Transform", transform_matrix)
+                elem_data_single_float64_array(fbx_clstr, b"TransformLink", transform_link_matrix)
+                elem_data_single_float64_array(fbx_clstr, b"TransformAssociateModel", transform_associate_model_matrix)
+
+
+def fbx_data_object_elements(root, ob_obj, scene_data):
+    """
+    Write the Object (Model) data blocks.
+    Note this "Model" can also be bone or dupli!
+    """
+    obj_type = b"Null"  # default, sort of empty...
+    if ob_obj.is_bone:
+        obj_type = b"LimbNode"
+    elif (ob_obj.type == 'ARMATURE'):
+        if scene_data.settings.armature_nodetype == 'ROOT':
+            obj_type = b"Root"
+        elif scene_data.settings.armature_nodetype == 'LIMBNODE':
+            obj_type = b"LimbNode"
+        else:  # Default, preferred option...
+            obj_type = b"Null"
+    elif (ob_obj.type in BLENDER_OBJECT_TYPES_MESHLIKE):
+        obj_type = b"Mesh"
+    elif (ob_obj.type == 'LIGHT'):
+        obj_type = b"Light"
+    elif (ob_obj.type == 'CAMERA'):
+        obj_type = b"Camera"
+    model = elem_data_single_int64(root, b"Model", ob_obj.fbx_uuid)
+    model.add_string(fbx_name_class(ob_obj.name.encode(), b"Model"))
+    model.add_string(obj_type)
+
+    elem_data_single_int32(model, b"Version", FBX_MODELS_VERSION)
+
+    # Object transform info.
+    loc, rot, scale, matrix, matrix_rot = ob_obj.fbx_object_tx(scene_data)
+    rot = tuple(convert_rad_to_deg_iter(rot))
+
+    # Added this
+    if ob_obj.type == 'ARMATURE':
+        scale = Vector((scale[0] * 0.01, scale[1] * 0.01, scale[2] * 0.01))
+    else:
+        loc = Vector((loc[0] * 100, loc[1] * 100, loc[2] * 100))
+
+    tmpl = elem_props_template_init(scene_data.templates, b"Model")
+    # For now add only loc/rot/scale...
+    props = elem_properties(model)
+    elem_props_template_set(tmpl, props, "p_lcl_translation", b"Lcl Translation", loc,
+                            animatable=True, animated=((ob_obj.key, "Lcl Translation") in scene_data.animated))
+    elem_props_template_set(tmpl, props, "p_lcl_rotation", b"Lcl Rotation", rot,
+                            animatable=True, animated=((ob_obj.key, "Lcl Rotation") in scene_data.animated))
+    elem_props_template_set(tmpl, props, "p_lcl_scaling", b"Lcl Scaling", scale,
+                            animatable=True, animated=((ob_obj.key, "Lcl Scaling") in scene_data.animated))
+    elem_props_template_set(tmpl, props, "p_visibility", b"Visibility", float(not ob_obj.hide))
+
+    # Absolutely no idea what this is, but seems mandatory for validity of the file, and defaults to
+    # invalid -1 value...
+    elem_props_template_set(tmpl, props, "p_integer", b"DefaultAttributeIndex", 0)
+
+    elem_props_template_set(tmpl, props, "p_enum", b"InheritType", 1)  # RSrs
+
+    # Custom properties.
+    if scene_data.settings.use_custom_props:
+        # Here we want customprops from the 'pose' bone, not the 'edit' bone...
+        bdata = ob_obj.bdata_pose_bone if ob_obj.is_bone else ob_obj.bdata
+        fbx_data_element_custom_properties(props, bdata)
+
+    # Those settings would obviously need to be edited in a complete version of the exporter, may depends on
+    # object type, etc.
+    elem_data_single_int32(model, b"MultiLayer", 0)
+    elem_data_single_int32(model, b"MultiTake", 0)
+    elem_data_single_bool(model, b"Shading", True)
+    elem_data_single_string(model, b"Culling", b"CullingOff")
+
+    if obj_type == b"Camera":
+        # Why, oh why are FBX cameras such a mess???
+        # And WHY add camera data HERE??? Not even sure this is needed...
+        render = scene_data.scene.render
+        width = render.resolution_x * 1.0
+        height = render.resolution_y * 1.0
+        elem_props_template_set(tmpl, props, "p_enum", b"ResolutionMode", 0)  # Don't know what it means
+        elem_props_template_set(tmpl, props, "p_double", b"AspectW", width)
+        elem_props_template_set(tmpl, props, "p_double", b"AspectH", height)
+        elem_props_template_set(tmpl, props, "p_bool", b"ViewFrustum", True)
+        elem_props_template_set(tmpl, props, "p_enum", b"BackgroundMode", 0)  # Don't know what it means
+        elem_props_template_set(tmpl, props, "p_bool", b"ForegroundTransparent", True)
+
+    elem_props_template_finalize(tmpl, props)
+
+
+def fbx_data_bindpose_element(root, me_obj, me, scene_data, arm_obj=None, mat_world_arm=None, bones=[]):
+    """
+    Helper, since bindpose are used by both meshes shape keys and armature bones...
+    """
+    if arm_obj is None:
+        arm_obj = me_obj
+    # We assume bind pose for our bones are their "Editmode" pose...
+    # All matrices are expected in global (world) space.
+    bindpose_key = get_blender_bindpose_key(arm_obj.bdata, me)
+    fbx_pose = elem_data_single_int64(root, b"Pose", get_fbx_uuid_from_key(bindpose_key))
+    fbx_pose.add_string(fbx_name_class(me.name.encode(), b"Pose"))
+    fbx_pose.add_string(b"BindPose")
+
+    elem_data_single_string(fbx_pose, b"Type", b"BindPose")
+    elem_data_single_int32(fbx_pose, b"Version", FBX_POSE_BIND_VERSION)
+    elem_data_single_int32(fbx_pose, b"NbPoseNodes", 1 + (1 if (arm_obj != me_obj) else 0) + len(bones))
+
+    # First node is mesh/object.
+    mat_world_obj = me_obj.fbx_object_matrix(scene_data, global_space=True)
+    fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
+    elem_data_single_int64(fbx_posenode, b"Node", me_obj.fbx_uuid)
+    elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(mat_world_obj))
+
+    # Second node is armature object itself.
+    if arm_obj != me_obj:
+        fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
+        elem_data_single_int64(fbx_posenode, b"Node", arm_obj.fbx_uuid)
+
+        # Todo merge into blenders FBX addon
+        armature_world_matrix = tuple([value/100 for value in list(matrix4_to_array(mat_world_arm))[:-4]] + list(
+            matrix4_to_array(mat_world_arm))[-4:])
+
+        elem_data_single_float64_array(fbx_posenode, b"Matrix", armature_world_matrix)
+
+    # And all bones of armature!
+    mat_world_bones = {}
+    for bo_obj in bones:
+        bomat = bo_obj.fbx_object_matrix(scene_data, rest=True, global_space=True)
+        mat_world_bones[bo_obj] = bomat
+        fbx_posenode = elem_empty(fbx_pose, b"PoseNode")
+        elem_data_single_int64(fbx_posenode, b"Node", bo_obj.fbx_uuid)
+
+        # Todo merge into blenders FBX addon
+        bone_matrix = tuple([value / 100 for value in list(matrix4_to_array(bomat))[:-4]] + list(
+            matrix4_to_array(bomat))[-4:])
+
+        elem_data_single_float64_array(fbx_posenode, b"Matrix", bone_matrix)
+
+    return mat_world_obj, mat_world_bones
 
 
 class Send2UEExportFBX(ExportFBX):
@@ -530,14 +490,14 @@ class Send2UEExportFBX(ExportFBX):
     bl_idname = "send2ue.export_fbx"
 
     def execute(self, context):
+        from mathutils import Matrix
         if not self.filepath:
             raise Exception("filepath not set")
 
-        # global_matrix = (axis_conversion(to_forward=self.axis_forward,
-        #                                  to_up=self.axis_up,
-        #                                  ).to_4x4()
-        #                 if self.use_space_transform else Matrix())
-        global_matrix = Matrix()
+        global_matrix = (axis_conversion(to_forward=self.axis_forward,
+                                         to_up=self.axis_up,
+                                         ).to_4x4()
+                         if self.use_space_transform else Matrix())
 
         keywords = self.as_keywords(ignore=("check_existing",
                                             "filter_glob",
@@ -546,12 +506,16 @@ class Send2UEExportFBX(ExportFBX):
 
         keywords["global_matrix"] = global_matrix
 
-        # export_fbx_bin.fbx_animations_do = fbx_animations_do
+        export_fbx_bin.fbx_animations_do = fbx_animations_do
         export_fbx_bin.fbx_data_armature_elements = fbx_data_armature_elements
-        export_fbx_bin.save(self, context, **keywords)
-        return {'FINISHED'}
+        export_fbx_bin.fbx_data_object_elements = fbx_data_object_elements
+        export_fbx_bin.fbx_data_bindpose_element = fbx_data_bindpose_element
+        return export_fbx_bin.save(self, context, **keywords)
 
 
-if __name__ == '__main__':
-    bpy.utils.register_class(ExportFBX)
-    bpy.ops.send2ue.export_fbx()
+def register():
+    bpy.utils.register_class(Send2UEExportFBX)
+
+
+def unregister():
+    bpy.utils.unregister_class(Send2UEExportFBX)

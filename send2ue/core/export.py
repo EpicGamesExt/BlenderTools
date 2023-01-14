@@ -294,7 +294,15 @@ def export_fbx_file(file_path, export_settings):
     :param str file_path: A file path where the file will be exported.
     :param dict export_settings: A dictionary of blender export settings for the specific file type.
     """
-    bpy.ops.export_scene.fbx(
+    # bpy.ops.export_scene.fbx(
+    #     filepath=file_path,
+    #     use_selection=True,
+    #     bake_anim_use_nla_strips=True,
+    #     bake_anim_use_all_actions=False,
+    #     object_types={'ARMATURE', 'MESH', 'EMPTY'},
+    #     **export_settings
+    # )
+    bpy.ops.send2ue.export_fbx(
         filepath=file_path,
         use_selection=True,
         bake_anim_use_nla_strips=True,
