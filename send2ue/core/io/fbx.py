@@ -330,25 +330,19 @@ def fbx_data_armature_elements(root, arm_obj, scene_data):
                 # test_data[bo_obj.name] = matrix4_to_array(mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj)
 
                 # Todo add to FBX addon
-                # transform_matrix = matrix4_to_array(mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj)
-                # transform_link_matrix = matrix4_to_array(mat_world_bones[bo_obj])
-                # transform_associate_model_matrix = matrix4_to_array(mat_world_arm)
+                transform_matrix = mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj
+                transform_link_matrix = mat_world_bones[bo_obj]
+                transform_associate_model_matrix = mat_world_arm
 
-                transform_matrix = matrix4_to_array((mat_world_bones[bo_obj].inverted_safe() @ mat_world_obj) * Matrix.Scale(0.01, 4))
-                transform_link_matrix = matrix4_to_array(mat_world_bones[bo_obj] * Matrix.Scale(0.01, 4))
-                transform_associate_model_matrix = matrix4_to_array(mat_world_arm * Matrix.Scale(0.01, 4))
+                transform_matrix = transform_matrix.LocRotScale(
+                    [i * 100 for i in transform_matrix.to_translation()],
+                    transform_matrix.to_quaternion(),
+                    [i * 100 for i in transform_matrix.to_scale()],
+                )
 
-                # transform_matrix = tuple(transform_matrix)
-                # transform_link_matrix = tuple(transform_link_matrix)
-                # transform_associate_model_matrix = tuple(transform_associate_model_matrix)
-                #
-                # transform_matrix = tuple([value * 100 for value in transform_matrix[:-4]] + transform_matrix[-4:])
-                # transform_link_matrix = tuple([value * 100 for value in transform_link_matrix[:-4]] + transform_link_matrix[-4:])
-                # transform_associate_model_matrix = tuple([value * 100 for value in transform_link_matrix[:-4]] + transform_associate_model_matrix[-4:])
-
-                elem_data_single_float64_array(fbx_clstr, b"Transform", transform_matrix)
-                elem_data_single_float64_array(fbx_clstr, b"TransformLink", transform_link_matrix)
-                elem_data_single_float64_array(fbx_clstr, b"TransformAssociateModel", transform_associate_model_matrix)
+                elem_data_single_float64_array(fbx_clstr, b"Transform", matrix4_to_array(transform_matrix))
+                elem_data_single_float64_array(fbx_clstr, b"TransformLink", matrix4_to_array(transform_link_matrix))
+                elem_data_single_float64_array(fbx_clstr, b"TransformAssociateModel", matrix4_to_array(transform_associate_model_matrix))
 
 
 def fbx_data_object_elements(root, ob_obj, scene_data):
@@ -463,10 +457,13 @@ def fbx_data_bindpose_element(root, me_obj, me, scene_data, arm_obj=None, mat_wo
         elem_data_single_int64(fbx_posenode, b"Node", arm_obj.fbx_uuid)
 
         # Todo merge into blenders FBX addon
-        armature_world_matrix = tuple([value/100 for value in list(matrix4_to_array(mat_world_arm))[:-4]] + list(
-            matrix4_to_array(mat_world_arm))[-4:])
+        mat_world_arm = mat_world_arm.LocRotScale(
+            mat_world_arm.to_translation(),
+            mat_world_arm.to_quaternion(),
+            [i / 100 for i in mat_world_arm.to_scale()],
+        )
 
-        elem_data_single_float64_array(fbx_posenode, b"Matrix", armature_world_matrix)
+        elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(mat_world_arm))
 
     # And all bones of armature!
     mat_world_bones = {}
@@ -477,10 +474,13 @@ def fbx_data_bindpose_element(root, me_obj, me, scene_data, arm_obj=None, mat_wo
         elem_data_single_int64(fbx_posenode, b"Node", bo_obj.fbx_uuid)
 
         # Todo merge into blenders FBX addon
-        bone_matrix = tuple([value / 100 for value in list(matrix4_to_array(bomat))[:-4]] + list(
-            matrix4_to_array(bomat))[-4:])
+        bomat = bomat.LocRotScale(
+            bomat.to_translation(),
+            bomat.to_quaternion(),
+            [i / 100 for i in bomat.to_scale()]
+        )
 
-        elem_data_single_float64_array(fbx_posenode, b"Matrix", bone_matrix)
+        elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(bomat))
 
     return mat_world_obj, mat_world_bones
 
