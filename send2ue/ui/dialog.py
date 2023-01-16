@@ -62,7 +62,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         """
         properties = bpy.context.scene.send2ue
         self.draw_property(properties, layout, 'use_object_origin')
-        self.draw_property(properties, layout, 'combine_child_meshes')
+        self.draw_property(properties, layout, 'export_object_name_as_root')
 
         #  animation settings box
         self.draw_expanding_section(
@@ -294,10 +294,8 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
-        self.draw_property(properties, layout, 'automatically_scale_bones')
         self.draw_property(properties, layout, 'auto_stash_active_action')
         self.draw_property(properties, layout, 'export_all_actions')
-        self.draw_property(properties, layout, 'export_object_name_as_root')
         self.draw_property(properties, layout, 'export_custom_property_fcurves')
 
     def draw_fbx_export_settings(self, layout):

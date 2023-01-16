@@ -3,10 +3,9 @@
 import json
 import math
 import os
-import re
 import bpy
-from . import utilities, validations, settings, formatting, ingest, extension
-from ..constants import PathModes, BlenderTypes, UnrealTypes, FileTypes, PreFixToken, ToolInfo, ExtensionTasks
+from . import utilities, validations, settings, ingest, extension, io
+from ..constants import BlenderTypes, UnrealTypes, FileTypes, PreFixToken, ToolInfo, ExtensionTasks
 
 
 def get_file_path(asset_name, properties, asset_type, lod=False, file_extension='fbx'):
@@ -51,31 +50,6 @@ def export_lods(asset_id, asset_name, properties):
         return lods
 
 
-def get_pre_scaled_context():
-    """
-    This function fetches the current scene's attributes.
-
-    :return dict: A dictionary containing the current data attributes.
-    """
-    # look for an armature object and get its name
-    context = {}
-    for selected_object in bpy.context.selected_objects:
-        if selected_object.type == 'ARMATURE':
-            context['source_object'] = {}
-            context['source_object']['object_name'] = selected_object.name
-            context['source_object']['armature_name'] = selected_object.data.name
-            bpy.context.view_layer.objects.active = selected_object
-
-            # save the current scene scale
-            context['scene_scale'] = bpy.context.scene.unit_settings.scale_length
-            context['objects'] = bpy.data.objects.values()
-            context['meshes'] = bpy.data.meshes.values()
-            context['armatures'] = bpy.data.armatures.values()
-            context['actions'] = bpy.data.actions.values()
-
-    return context
-
-
 def set_parent_rig_selection(mesh_object, properties):
     """
     Recursively selects all parents of an object as long as the parent are in the rig collection.
@@ -99,194 +73,6 @@ def set_parent_rig_selection(mesh_object, properties):
     return rig_object
 
 
-def set_armatures_as_parents():
-    """
-    Sets the armature in a mesh modifier as a rig's parent.
-    """
-    mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
-
-    for mesh_object in mesh_objects:
-        rig_object = utilities.get_armature_modifier_rig_object(mesh_object)
-        if rig_object and not mesh_object.parent:
-            mesh_object.parent = rig_object
-
-
-def duplicate_objects_for_export(scene_scale, scale_factor, context, properties):
-    """
-    This function duplicates and prepares the selected objects for export.
-
-    :param float scene_scale: The value to set the scene scale to.
-    :param float scale_factor: The amount to scale the control rig by.
-    :param dict context: A dictionary containing the current data attributes.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return dict: A dictionary containing the current data attributes.
-    """
-    # duplicate the the selected objects so the originals are not modified
-    bpy.ops.object.duplicate()
-
-    context['duplicate_objects'] = bpy.context.selected_objects
-
-    return context
-
-
-def rename_duplicate_object(duplicate_object, context, properties):
-    """
-    This function renames the duplicated objects to match their original names and save a reference to them.
-    :param object duplicate_object: A scene object.
-    :param dict context: A dictionary containing the current data attributes.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return dict: A dictionary containing the current data attributes.
-    """
-    # Get a the root object name and save the object reference. This needs to happen so when the
-    # duplicate armature is renamed to correctly to match the original object. For example a
-    # duplicated object named 'Armature' is automatically given the name 'Armature.001' by Blender.
-    # By saving this object reference, its name can be restored back to 'Armature' after the export.
-    context['source_object']['object'] = bpy.data.objects.get(context['source_object']['object_name'])
-    context['source_object']['armature'] = bpy.data.armatures.get(context['source_object']['armature_name'])
-
-    # use the armature objects name as the root in unreal
-    object_name = context['source_object']['object_name']
-    armature_name = context['source_object']['armature_name']
-
-    if properties.export_object_name_as_root:
-        # if the object is already named armature this forces the object name to root
-        if 'armature' in [object_name.lower(), armature_name.lower()]:
-            object_name = 'root'
-            armature_name = 'root'
-    # otherwise don't use the armature objects name as the root in unreal
-    else:
-        # Rename the armature object to 'Armature'. This is important, because this is a special
-        # reserved keyword for the Unreal FBX importer that will be ignored when the bone hierarchy
-        # is imported from the FBX file. That way there is not an additional root bone in the Unreal
-        # skeleton hierarchy.
-        object_name = 'Armature'
-        armature_name = 'Armature'
-
-    duplicate_object.name = object_name
-    duplicate_object.data.name = armature_name
-
-    return context
-
-
-def fix_armature_scale(armature_object, scale_factor, context):
-    """
-    This function scales the provided armature object and it's animations.
-
-    :param object armature_object: A object of type armature.
-    :param float scale_factor: The amount to scale the control rig by.
-    :param dict context: A dictionary containing the current data attributes.
-    :return dict: A dictionary containing the current data attributes.
-    """
-    # deselect all objects
-    bpy.ops.object.select_all(action='DESELECT')
-
-    # scale the duplicate rig object
-    utilities.scale_object(armature_object, scale_factor)
-
-    # select the rig object
-    armature_object.select_set(True)
-
-    # apply the scale transformations on the selected object
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-
-    # scale up the objects action location keyframes to fix the applied scale
-    actions = utilities.get_actions(armature_object)
-    context['source_object']['actions'] = actions
-    utilities.scale_object_actions([armature_object], actions, scale_factor)
-
-    return context
-
-
-def scale_rig_objects(properties):
-    """
-    This function changes the scene scale to 0.01 and scales the selected rig objects to offset that scene scale change.
-    Then it return to original context.
-
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    :return dict: The original context of the scene scale and its selected objects before changes occurred.
-    """
-    scene_scale = 0.01
-    # get the context of the scene before any of the scaling operations
-    context = get_pre_scaled_context()
-
-    # only scale the rig object if there was a root object added to the context and automatically scaling bones is on
-    if properties.automatically_scale_bones and context:
-        # scale the rig objects by the scale factor needed to offset the 0.01 scene scale
-        scale_factor = context['scene_scale'] / scene_scale
-
-        # switch to object mode
-        if bpy.context.mode != 'OBJECT':
-            bpy.ops.object.mode_set(mode='OBJECT')
-
-        # change scene scale to 0.01
-        bpy.context.scene.unit_settings.scale_length = scene_scale
-
-        # run pre bone scale task
-        extension.run_extension_tasks(ExtensionTasks.PRE_BONE_SCALE.value)
-
-        # duplicate objects
-        context = duplicate_objects_for_export(scene_scale, scale_factor, context, properties)
-
-        for duplicate_object in context['duplicate_objects']:
-            if duplicate_object.type == 'ARMATURE':
-                # rename the duplicated objects and save the original object references to the context
-                context = rename_duplicate_object(duplicate_object, context, properties)
-
-                # set each object in a armature modifier to a parent
-                set_armatures_as_parents()
-
-                # fix the armature scale and its animation and save that information to the context
-                context = fix_armature_scale(duplicate_object, scale_factor, context)
-
-        # run post bone scale task
-        extension.run_extension_tasks(ExtensionTasks.MID_BONE_SCALE.value)
-
-        # restore the duplicate object selection for the export
-        for duplicate_object in context['duplicate_objects']:
-            duplicate_object.select_set(True)
-
-    return context
-
-
-def restore_rig_objects(context, properties):
-    """
-    This function takes the previous context of the scene scale and rig objects and sets them to the values in
-    the context dictionary.
-
-    :param dict context: The original context of the scene scale and its selected objects before changes occurred.
-    :param object properties: The property group that contains variables that maintain the addon's correct state.
-    """
-    if properties.automatically_scale_bones and context:
-        scale_factor = bpy.context.scene.unit_settings.scale_length / context['scene_scale']
-
-        # run post bone scale task
-        extension.run_extension_tasks(ExtensionTasks.POST_BONE_SCALE.value)
-
-        # restore action scale the duplicated actions
-        utilities.scale_object_actions(context['duplicate_objects'], context['source_object']['actions'], scale_factor)
-
-        # remove all the duplicate objects
-        utilities.remove_extra_data(bpy.data.objects, context['objects'])
-
-        # remove all the duplicate meshes
-        utilities.remove_extra_data(bpy.data.meshes, context['meshes'])
-
-        # remove all the duplicate armatures
-        utilities.remove_extra_data(bpy.data.armatures, context['armatures'])
-
-        # remove all the duplicate actions
-        utilities.remove_extra_data(bpy.data.actions, context['actions'])
-
-        # restore the scene scale
-        bpy.context.scene.unit_settings.scale_length = context['scene_scale']
-
-        # restore the original object name on the root object name if needed
-        source_object = context['source_object'].get('object')
-        if source_object:
-            source_object.name = context['source_object']['object_name']
-            source_object.data.name = context['source_object']['armature_name']
-
-
 def export_fbx_file(file_path, export_settings):
     """
     Exports a fbx file.
@@ -294,15 +80,7 @@ def export_fbx_file(file_path, export_settings):
     :param str file_path: A file path where the file will be exported.
     :param dict export_settings: A dictionary of blender export settings for the specific file type.
     """
-    # bpy.ops.export_scene.fbx(
-    #     filepath=file_path,
-    #     use_selection=True,
-    #     bake_anim_use_nla_strips=True,
-    #     bake_anim_use_all_actions=False,
-    #     object_types={'ARMATURE', 'MESH', 'EMPTY'},
-    #     **export_settings
-    # )
-    bpy.ops.send2ue.export_fbx(
+    io.fbx.export(
         filepath=file_path,
         use_selection=True,
         bake_anim_use_nla_strips=True,
@@ -370,7 +148,7 @@ def export_file(properties, lod=0, file_type=FileTypes.FBX, asset_data=None):
     if lod != 0:
         file_path = asset_data['lods'][str(lod)]
 
-    # if the folder does not exists create it
+    # if the folder does not exist create it
     folder_path = os.path.abspath(os.path.join(file_path, os.pardir))
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -383,13 +161,7 @@ def export_file(properties, lod=0, file_type=FileTypes.FBX, asset_data=None):
             export_settings[attribute_name] = settings.get_property_by_path(prefix, attribute_name, properties)
 
     if file_type == FileTypes.FBX:
-        # change the scene scale and scale the rig objects and get their original context
-        context = scale_rig_objects(properties)
-
         export_fbx_file(file_path, export_settings)
-
-        # restores the original rig objects
-        restore_rig_objects(context, properties)
 
     elif file_type == FileTypes.ABC:
         export_alembic_file(file_path, export_settings)

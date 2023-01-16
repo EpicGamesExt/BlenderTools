@@ -240,14 +240,6 @@ def get_scene_property_class():
                 "disk. The file names will match either the name of the curves object or that of the particle system."
             )
         )
-        automatically_scale_bones: bpy.props.BoolProperty(
-            name="Automatically scale bones",
-            default=True,
-            description=(
-                "This automatically scales your armature objects so they import at scale of 1. Warning don't enable this "
-                "option if your rig is constrained."
-            )
-        )
         export_all_actions: bpy.props.BoolProperty(
             name="Export all actions",
             default=True,
@@ -279,6 +271,14 @@ def get_scene_property_class():
                 "This is supposed to simplify the process of creating animation and stashing it into the object’s NLA "
                 "strips. With this option turned on you can start animating on an object and export it and not have to "
                 "manually edit NLA strips."
+            )
+        )
+        use_object_origin: bpy.props.BoolProperty(
+            name="Use object origin",
+            default=False,
+            description=(
+                "This forces the unreal asset to use the blender object origin instead of the blender scene's world"
+                " origin"
             )
         )
         import_meshes: bpy.props.BoolProperty(

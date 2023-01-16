@@ -29,17 +29,6 @@ class Ue2RigifyExtension(ExtensionBase):
         )
     )
 
-    def get_source_rig_hide_value(self):
-        """
-        Gets the original hide value of the source rig.
-
-        :return bool: The original hide value of the source rig.
-        """
-        if self.use_ue2rigify:
-            ue2rigify_properties = bpy.context.scene.ue2rigify
-            if ue2rigify_properties.source_rig:
-                self.original_hide_value = ue2rigify_properties.source_rig.hide_get()
-
     def set_source_rig_hide_value(self, hide_value):
         """
         Gets the original hide value of the source rig and sets it to the given value.
@@ -50,6 +39,7 @@ class Ue2RigifyExtension(ExtensionBase):
         if self.use_ue2rigify:
             ue2rigify_properties = bpy.context.scene.ue2rigify
             if ue2rigify_properties.source_rig:
+                self.original_hide_value = ue2rigify_properties.source_rig.hide_get()
                 ue2rigify_properties.source_rig.hide_set(hide_value)
 
     def set_ue2rigify_state(self):
@@ -63,31 +53,11 @@ class Ue2RigifyExtension(ExtensionBase):
                 return
         self.use_ue2rigify = False
 
-    def scale_control_rig(self, scale_factor):
-        """
-        Scales the control rig.
-
-        :param float scale_factor: The amount to scale the control rig by.
-        """
-        # if the using the ue2rigify addon
-        if self.use_ue2rigify:
-            # remove all the constraints
-            bpy.ops.ue2rigify.remove_constraints()
-            # get the control rig
-            control_rig = bpy.data.objects.get(self.control_rig_name)
-            # scale the the control rig
-            utilities.scale_object(control_rig, scale_factor)
-
-    def post_export(self, properties):
-        if self.use_ue2rigify and properties.automatically_scale_bones:
-            bpy.ops.ue2rigify.constrain_source_to_deform()
-
     def pre_operation(self, properties):
         """
         Pre operation logic that un-hides the source rig.
         """
         self.set_ue2rigify_state()
-        self.get_source_rig_hide_value()
         self.set_source_rig_hide_value(False)
         self.current_scale_factor = bpy.context.scene.unit_settings.scale_length
 
@@ -119,7 +89,7 @@ class Ue2RigifyExtension(ExtensionBase):
             # mute all actions
             utilities.set_all_action_mute_values(control_rig_object, mute=True)
 
-            # un-mute the action
+            # unmute the action
             utilities.set_action_mute_value(control_rig_object, action_name, False)
 
             # update the asset and file names
@@ -130,12 +100,6 @@ class Ue2RigifyExtension(ExtensionBase):
                     os.path.basename(file_path).strip(self.action_prefix)
                 )
             })
-
-    def post_mesh_export(self, asset_data, properties):
-        """
-        Defines mesh export logic.
-        """
-        self.post_export(properties)
 
     def post_animation_export(self, asset_data, properties):
         """
@@ -149,23 +113,6 @@ class Ue2RigifyExtension(ExtensionBase):
             # mute the action
             utilities.set_action_mute_value(control_rig_object, action_name, True)
             utilities.clear_pose(control_rig_object)
-
-        self.post_export(properties)
-
-    def pre_bone_scale(self, asset_data, properties):
-        scale_factor = self.current_scale_factor / 0.01
-        self.scale_control_rig(scale_factor)
-
-    def mid_bone_scale(self, asset_data, properties):
-        if self.use_ue2rigify:
-            bpy.ops.ue2rigify.constrain_source_to_deform()
-
-    def post_bone_scale(self, asset_data, properties):
-        control_rig_object = bpy.data.objects.get(self.control_rig_name)
-        if self.use_ue2rigify and control_rig_object:
-            # re-scale the control rig
-            scale_factor = bpy.context.scene.unit_settings.scale_length / self.current_scale_factor
-            self.scale_control_rig(scale_factor)
 
     def draw_export(self, dialog, layout, properties):
         """

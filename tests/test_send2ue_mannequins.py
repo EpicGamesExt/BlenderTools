@@ -208,3 +208,15 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
                     'third_person_run_01': {'head_swell': False}
                 }
             }})
+
+    def test_use_object_origin_option(self):
+        """
+        Offsets SK_Female_Mannequin and tests with the use_object_origin option on and off.
+        """
+        self.run_use_object_origin_option_tests(
+            mesh_object='SK_Mannequin_Female',
+            armature_object='female_root',
+            animation_name='third_person_walk_01',
+            bone_name='pelvis',
+            frame=1
+        )
