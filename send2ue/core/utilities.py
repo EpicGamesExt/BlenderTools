@@ -858,19 +858,6 @@ def create_collections():
             bpy.context.scene.collection.children.link(new_collection)
 
 
-def remove_extra_data(data_blocks, original_data_blocks):
-    """
-    This function remove any data from the provided data block that does not match the original data blocks.
-
-    :param list[object] data_blocks: A blender data block object.
-    :param list[object] original_data_blocks: A list of the original data blocks.
-    """
-    # remove all the duplicate meshes
-    data_blocks_to_remove = [data_block for data_block in data_blocks if data_block not in original_data_blocks]
-    for data_block_to_remove in data_blocks_to_remove:
-        data_blocks.remove(data_block_to_remove)
-
-
 def remove_object_scale_keyframes(actions):
     """
     This function removes all scale keyframes the exist a object in the provided actions.

@@ -1,101 +1,8 @@
-import addon_utils
 import os
 import bpy
-import array
-from mathutils import Vector, Matrix
+from ..utilities import report_error
+from mathutils import Vector
 from importlib.machinery import SourceFileLoader
-from bpy_extras import node_shader_utils
-
-addons = {os.path.basename(os.path.dirname(module.__file__)): module.__file__ for module in addon_utils.modules()}
-addon_folder_path = os.path.dirname(addons.get('io_scene_fbx'))
-
-try:
-    SourceFileLoader('io_scene_fbx', os.path.join(addon_folder_path, '__init__.py')).load_module()
-except RuntimeError as error:
-    print(error)
-
-import io_scene_fbx.export_fbx_bin as export_fbx_bin
-from io_scene_fbx.export_fbx_bin import (
-    fbx_data_bindpose_element,
-    AnimationCurveNodeWrapper
-)
-from bpy_extras.io_utils import axis_conversion
-from io_scene_fbx import ExportFBX
-from io_scene_fbx.fbx_utils import (
-    # Constants.
-    FBX_VERSION, FBX_HEADER_VERSION, FBX_SCENEINFO_VERSION, FBX_TEMPLATES_VERSION,
-    FBX_MODELS_VERSION,
-    FBX_GEOMETRY_VERSION, FBX_GEOMETRY_NORMAL_VERSION, FBX_GEOMETRY_BINORMAL_VERSION, FBX_GEOMETRY_TANGENT_VERSION,
-    FBX_GEOMETRY_SMOOTHING_VERSION, FBX_GEOMETRY_CREASE_VERSION, FBX_GEOMETRY_VCOLOR_VERSION, FBX_GEOMETRY_UV_VERSION,
-    FBX_GEOMETRY_MATERIAL_VERSION, FBX_GEOMETRY_LAYER_VERSION,
-    FBX_GEOMETRY_SHAPE_VERSION, FBX_DEFORMER_SHAPE_VERSION, FBX_DEFORMER_SHAPECHANNEL_VERSION,
-    FBX_POSE_BIND_VERSION, FBX_DEFORMER_SKIN_VERSION, FBX_DEFORMER_CLUSTER_VERSION,
-    FBX_MATERIAL_VERSION, FBX_TEXTURE_VERSION,
-    FBX_ANIM_KEY_VERSION,
-    FBX_ANIM_PROPSGROUP_NAME,
-    FBX_KTIME,
-    BLENDER_OTHER_OBJECT_TYPES, BLENDER_OBJECT_TYPES_MESHLIKE,
-    FBX_LIGHT_TYPES, FBX_LIGHT_DECAY_TYPES,
-    RIGHT_HAND_AXES, FBX_FRAMERATES,
-    # Miscellaneous utils.
-    PerfMon,
-    units_blender_to_fbx_factor, units_convertor, units_convertor_iter,
-    matrix4_to_array, similar_values, similar_values_iter,
-    # Mesh transform helpers.
-    vcos_transformed_gen, nors_transformed_gen,
-    # UUID from key.
-    get_fbx_uuid_from_key,
-    # Key generators.
-    get_blenderID_key, get_blenderID_name,
-    get_blender_mesh_shape_key, get_blender_mesh_shape_channel_key,
-    get_blender_empty_key, get_blender_bone_key,
-    get_blender_bindpose_key, get_blender_armature_skin_key, get_blender_bone_cluster_key,
-    get_blender_anim_id_base, get_blender_anim_stack_key, get_blender_anim_layer_key,
-    get_blender_anim_curve_node_key, get_blender_anim_curve_key,
-    get_blender_nodetexture_key,
-    # FBX element data.
-    elem_empty,
-    elem_data_single_bool, elem_data_single_int16, elem_data_single_int32, elem_data_single_int64,
-    elem_data_single_float32, elem_data_single_float64,
-    elem_data_single_bytes, elem_data_single_string, elem_data_single_string_unicode,
-    elem_data_single_bool_array, elem_data_single_int32_array, elem_data_single_int64_array,
-    elem_data_single_float32_array, elem_data_single_float64_array, elem_data_vec_float64,
-    # FBX element properties.
-    elem_properties, elem_props_set, elem_props_compound,
-    # FBX element properties handling templates.
-    elem_props_template_init, elem_props_template_set, elem_props_template_finalize,
-    # Templates.
-    FBXTemplate, fbx_templates_generate,
-    # Objects.
-    ObjectWrapper, fbx_name_class,
-    # Top level.
-    FBXExportSettingsMedia, FBXExportSettings, FBXExportData,
-)
-
-convert_rad_to_deg_iter = units_convertor_iter("radian", "degree")
-
-from io_scene_fbx.export_fbx_bin import (
-    fbx_template_def_animstack,
-    fbx_template_def_geometry,
-    fbx_template_def_camera,
-    fbx_template_def_bone,
-    fbx_template_def_null,
-    fbx_template_def_light,
-    fbx_template_def_globalsettings,
-    fbx_template_def_video,
-    fbx_template_def_texture_file,
-    fbx_template_def_material,
-    fbx_template_def_deformer,
-    fbx_template_def_pose,
-    fbx_template_def_model,
-    fbx_template_def_animcurvenode,
-    fbx_template_def_animlayer,
-    fbx_animations,
-    fbx_template_def_animcurve,
-    fbx_generate_leaf_bones,
-    PRINCIPLED_TEXTURE_SOCKETS_TO_FBX,
-    fbx_data_element_custom_properties
-)
 
 
 def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=None, force_keep=False):
@@ -165,6 +72,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
 
         for dp_obj in ob_obj.dupli_list_gen(depsgraph):
             pass  # Merely updating dupli matrix of ObjectWrapper...
+
         for ob_obj, (anim_loc, anim_rot, anim_scale) in animdata_ob.items():
             location_multiple = 100
             scale_factor = 1
@@ -172,11 +80,21 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
             # if this curve is the object root then keep its scale at 1
             if len(str(ob_obj).split('|')) == 1:
                 location_multiple = 1
+                # Todo add to FBX addon
                 scale_factor = 100
 
             # We compute baked loc/rot/scale for all objects (rot being euler-compat with previous value!).
             p_rot = p_rots.get(ob_obj, None)
             loc, rot, scale, _m, _mr = ob_obj.fbx_object_tx(scene_data, rot_euler_compat=p_rot)
+
+            # Todo add to FBX addon
+            # the armature object's position is the reference we use to offset all location keyframes
+            if ob_obj.type == 'ARMATURE':
+                location_offset = loc
+                # subtract the location offset from each location keyframe if the use_object_origin is on
+                if bpy.context.scene.send2ue.use_object_origin:
+                    loc = Vector((loc[0]-location_offset[0], loc[1]-location_offset[1], loc[2]-location_offset[2]))
+
             p_rots[ob_obj] = rot
             anim_loc.add_keyframe(real_currframe, loc * location_multiple)
             anim_rot.add_keyframe(real_currframe, tuple(convert_rad_to_deg_iter(rot)))
@@ -366,6 +284,21 @@ def fbx_data_object_elements(root, ob_obj, scene_data):
         obj_type = b"Light"
     elif (ob_obj.type == 'CAMERA'):
         obj_type = b"Camera"
+
+    if ob_obj.type == 'ARMATURE':
+        if bpy.context.scene.send2ue.export_object_name_as_root:
+            # if the object is already named armature this forces the object name to root
+            if 'armature' == ob_obj.name.lower():
+                ob_obj.name = 'root'
+
+        # otherwise don't use the armature objects name as the root in unreal
+        else:
+            # Rename the armature object to 'Armature'. This is important, because this is a special
+            # reserved keyword for the Unreal FBX importer that will be ignored when the bone hierarchy
+            # is imported from the FBX file. That way there is not an additional root bone in the Unreal
+            # skeleton hierarchy.
+            ob_obj.name = 'Armature'
+
     model = elem_data_single_int64(root, b"Model", ob_obj.fbx_uuid)
     model.add_string(fbx_name_class(ob_obj.name.encode(), b"Model"))
     model.add_string(obj_type)
@@ -376,11 +309,29 @@ def fbx_data_object_elements(root, ob_obj, scene_data):
     loc, rot, scale, matrix, matrix_rot = ob_obj.fbx_object_tx(scene_data)
     rot = tuple(convert_rad_to_deg_iter(rot))
 
-    # Added this
+    # Todo add to FBX addon
     if ob_obj.type == 'ARMATURE':
         scale = Vector((scale[0] * 0.01, scale[1] * 0.01, scale[2] * 0.01))
-    else:
+        if bpy.context.scene.send2ue.use_object_origin:
+            loc = Vector((0, 0, 0))
+
+    elif ob_obj.type == 'Ellipsis':
         loc = Vector((loc[0] * 100, loc[1] * 100, loc[2] * 100))
+    elif ob_obj.type == 'MESH':
+        # centers mesh object by their object origin
+        if bpy.context.scene.send2ue.use_object_origin:
+            asset_id = bpy.context.window_manager.send2ue.asset_id
+            asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
+            # if this is a static mesh, then check that its collisions are centered relative to it
+            if asset_data['_asset_type'] == 'StaticMesh':
+                mesh_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
+                loc = Vector((
+                    loc[0] - mesh_object.location[0]*100,
+                    loc[1] - mesh_object.location[1]*100,
+                    loc[2] - mesh_object.location[2]*100
+                ))
+            else:
+                loc = Vector((0, 0, 0))
 
     tmpl = elem_props_template_init(scene_data.templates, b"Model")
     # For now add only loc/rot/scale...
@@ -485,37 +436,70 @@ def fbx_data_bindpose_element(root, me_obj, me, scene_data, arm_obj=None, mat_wo
     return mat_world_obj, mat_world_bones
 
 
-class Send2UEExportFBX(ExportFBX):
-    """Write a FBX file"""
-    bl_idname = "send2ue.export_fbx"
+def export(**keywords):
+    import addon_utils
+    addons = {os.path.basename(os.path.dirname(module.__file__)): module.__file__ for module in addon_utils.modules()}
+    addon_folder_path = os.path.dirname(addons.get('io_scene_fbx'))
 
-    def execute(self, context):
-        from mathutils import Matrix
-        if not self.filepath:
-            raise Exception("filepath not set")
+    try:
+        SourceFileLoader('io_scene_fbx', os.path.join(addon_folder_path, '__init__.py')).load_module()
+    except RuntimeError as error:
+        print(error)
 
-        global_matrix = (axis_conversion(to_forward=self.axis_forward,
-                                         to_up=self.axis_up,
-                                         ).to_4x4()
-                         if self.use_space_transform else Matrix())
+    import io_scene_fbx.export_fbx_bin as export_fbx_bin
+    from io_scene_fbx.export_fbx_bin import (
+        fbx_data_bindpose_element,
+        AnimationCurveNodeWrapper
+    )
+    from bpy_extras.io_utils import axis_conversion
+    from io_scene_fbx.fbx_utils import (
+        FBX_MODELS_VERSION,
+        FBX_POSE_BIND_VERSION,
+        FBX_DEFORMER_SKIN_VERSION,
+        FBX_DEFORMER_CLUSTER_VERSION,
+        BLENDER_OBJECT_TYPES_MESHLIKE,
+        units_convertor_iter,
+        matrix4_to_array,
+        get_fbx_uuid_from_key,
+        get_blenderID_name,
+        get_blender_bindpose_key,
+        get_blender_anim_stack_key,
+        get_blender_anim_layer_key,
+        elem_empty,
+        elem_data_single_bool,
+        elem_data_single_int32,
+        elem_data_single_int64,
+        elem_data_single_float64,
+        elem_data_single_string,
+        elem_data_single_int32_array,
+        elem_data_single_float64_array,
+        elem_properties,
+        elem_props_template_init,
+        elem_props_template_set,
+        elem_props_template_finalize,
+        fbx_name_class
+    )
 
-        keywords = self.as_keywords(ignore=("check_existing",
-                                            "filter_glob",
-                                            "ui_tab",
-                                            ))
+    convert_rad_to_deg_iter = units_convertor_iter("radian", "degree")
 
-        keywords["global_matrix"] = global_matrix
+    from io_scene_fbx.export_fbx_bin import fbx_data_element_custom_properties
 
-        export_fbx_bin.fbx_animations_do = fbx_animations_do
-        export_fbx_bin.fbx_data_armature_elements = fbx_data_armature_elements
-        export_fbx_bin.fbx_data_object_elements = fbx_data_object_elements
-        export_fbx_bin.fbx_data_bindpose_element = fbx_data_bindpose_element
-        return export_fbx_bin.save(self, context, **keywords)
+    keywords["global_matrix"] = (
+        axis_conversion(
+            to_forward=keywords['axis_forward'],
+            to_up=keywords['axis_up'],
+        ).to_4x4()
+    )
 
+    export_fbx_bin.fbx_animations_do = fbx_animations_do
+    export_fbx_bin.fbx_data_armature_elements = fbx_data_armature_elements
+    export_fbx_bin.fbx_data_object_elements = fbx_data_object_elements
+    export_fbx_bin.fbx_data_bindpose_element = fbx_data_bindpose_element
 
-def register():
-    bpy.utils.register_class(Send2UEExportFBX)
-
-
-def unregister():
-    bpy.utils.unregister_class(Send2UEExportFBX)
+    # patch in a report method on self to fake the fbx export operator class
+    self = type(
+        'Send2UeExportFBX',
+        (object,),
+        {'report': report_error}
+    )
+    export_fbx_bin.save(self, bpy.context, **keywords)

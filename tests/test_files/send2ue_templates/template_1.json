@@ -1,7 +1,6 @@
 {
   "advanced_ui_import": false,
   "auto_stash_active_action": true,
-  "automatically_scale_bones": true,
   "blender": {
     "export_method": {
       "fbx": {

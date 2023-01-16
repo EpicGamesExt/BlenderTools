@@ -138,3 +138,12 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
         self.run_texture_tests({
             'Cube2_lod0_mesh': ['unreal-engine-logo'],
         })
+
+    def test_use_object_origin_option(self):
+        """
+        Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
+        https://github.com/EpicGames/BlenderTools/issues/223
+        """
+        self.run_use_object_origin_option_tests(
+            mesh_object='Cube1'
+        )
