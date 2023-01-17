@@ -473,7 +473,23 @@ def get_scene_property_class():
             default=True,
             description=(
                 "This checks the export and import paths and makes sure they are valid before preforming "
-                "the operation."
+                "the operation"
+            )
+        )
+        validate_project_settings: bpy.props.BoolProperty(
+            name="Check project settings",
+            default=True,
+            description=(
+                "This checks whether the required unreal project settings are in place before performing "
+                "the operation"
+            )
+        )
+        validate_object_names: bpy.props.BoolProperty(
+            name="Check blender object names",
+            default=True,
+            description=(
+                "This checks whether object names in the Export folder contain any special characters "
+                "that unreal does not accept"
             )
         )
 

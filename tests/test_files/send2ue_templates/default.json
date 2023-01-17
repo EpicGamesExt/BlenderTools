@@ -276,5 +276,7 @@
   "validate_paths": true,
   "validate_scene_scale": "1.0",
   "validate_textures": false,
-  "validate_time_units": "off"
+  "validate_time_units": "off",
+  "validate_project_settings": true,
+  "validate_object_names": true
 }

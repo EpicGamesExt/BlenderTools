@@ -12,7 +12,7 @@ import base64
 from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
-from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes
+from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes, RegexPresets
 from mathutils import Vector, Quaternion, Matrix
 
 
@@ -408,7 +408,7 @@ def get_asset_name(asset_name, properties, lod=False):
     :param bool lod: Whether to use the lod post fix of not.
     :return str: The formatted name of the asset to export.
     """
-    asset_name = re.sub(r"[^-+\w]+", "_", asset_name.strip())
+    asset_name = re.sub(RegexPresets.INVALID_NAME_CHARACTERS, "_", asset_name.strip())
 
     if properties.import_lods:
         # remove the lod name from the asset

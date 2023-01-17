@@ -5,7 +5,7 @@ import os
 import bpy
 from . import utilities, formatting, extension
 from ..dependencies.unreal import UnrealRemoteCalls
-from ..constants import BlenderTypes, PathModes, ToolInfo, Extensions, ExtensionTasks
+from ..constants import BlenderTypes, PathModes, ToolInfo, Extensions, ExtensionTasks, RegexPresets
 
 
 class ValidationManager:
@@ -17,7 +17,7 @@ class ValidationManager:
         self.properties = properties
         self.mesh_objects = utilities.get_from_collection(BlenderTypes.MESH)
         self.rig_objects = utilities.get_from_collection(BlenderTypes.SKELETON)
-        self.curve_objects = utilities.get_from_collection(BlenderTypes.CURVES)
+        self.hair_objects = utilities.get_hair_objects(properties)
         self._validators = []
         self._register_validators()
 
@@ -86,7 +86,7 @@ class ValidationManager:
             PathModes.SEND_TO_DISK_THEN_PROJECT.value,
             PathModes.SEND_TO_DISK.value
         ]:
-            if not self.mesh_objects + self.rig_objects + self.curve_objects:
+            if not self.mesh_objects + self.rig_objects + self.hair_objects:
                 utilities.report_error(
                     f'You do not have any objects under the "{ToolInfo.EXPORT_COLLECTION.value}" collection!'
                 )
@@ -295,7 +295,7 @@ class ValidationManager:
         """
         Checks whether the required unreal plugins are enabled.
         """
-        if self.properties.import_grooms:
+        if self.properties.import_grooms and self.hair_objects:
             # A dictionary of plugins where the key is the plugin name and value is the plugin label.
             groom_plugins = {
                 'HairStrands': 'Groom',
@@ -310,20 +310,20 @@ class ValidationManager:
                     f'Please enable missing plugins in Unreal: {plugin_names}. Or disable the Groom import setting.'
                 )
                 return False
-
         return True
 
     def validate_required_unreal_project_settings(self):
         """
         Checks whether the required project settings are set.
         """
-        if self.properties.import_grooms:
+        if self.properties.validate_project_settings and self.properties.import_grooms and self.hair_objects:
             required_project_settings = {
                 'Support Compute Skin Cache': {
                     'setting_name': 'r.SkinCache.CompileShaders',
                     'section_name': '/Script/Engine.RendererSettings',
                     'config_file_name': 'DefaultEngine',
-                    'expected_value': 'True',
+                    'expected_value': ['true', '1'],
+                    'expected_value_dscp': 'ON',
                     'setting_location': 'Project Settings > Engine > Rendering > Optimizations'
                 }
             }
@@ -333,17 +333,16 @@ class ValidationManager:
                     properties.get('section_name'),
                     properties.get('setting_name')
                 )
-                if properties.get('expected_value') != actual_value:
+                if str(actual_value).lower() not in properties.get('expected_value'):
                     utilities.report_error(
                         "Setting '{setting_name}' to '{expected_value}' is required to import grooms! Please either make the "
-                        "suggested changes in {location_msg}, or disable groom import.".format(
+                        "suggested changes in {location_msg}, or disable the validate project settings option.".format(
                             setting_name=setting,
-                            expected_value=properties.get('expected_value'),
+                            expected_value=properties.get('expected_value_dscp'),
                             location_msg=properties.get('setting_location')
                         )
                     )
                     return False
-
         return True
 
     # TODO: temporary validation before lods support for groom is added
@@ -356,4 +355,34 @@ class ValidationManager:
                 'Groom LODs are currently unsupported at this time. Please disable either import LODs or import groom.'
             )
             return False
+        return True
+
+    def validate_object_names(self):
+        """
+        Checks that blender object names do not contain any special characters
+        that unreal does not accept.
+        """
+        if self.properties.validate_object_names:
+            export_objects = []
+            if self.properties.import_grooms:
+                export_objects.extend(self.hair_objects)
+            if self.properties.import_meshes:
+                export_objects.extend(self.mesh_objects)
+                export_objects.extend(self.rig_objects)
+
+            invalid_object_names = []
+            for blender_object in export_objects:
+                match = re.search(RegexPresets.INVALID_NAME_CHARACTERS, blender_object.name)
+                if match:
+                    invalid_object_names.append(f'\"{blender_object.name}\"')
+
+            if invalid_object_names:
+                utilities.report_error(
+                    "The following blender object(s) contain special characters or "
+                    "a white space in the name(s):\n{report}\nNote: the only valid special characters "
+                    "are \"+\", \"-\" and \"_\".".format(
+                        report=",".join(invalid_object_names)
+                    )
+                )
+                return False
         return True
