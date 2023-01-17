@@ -25,7 +25,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
             'default': {
                 'ue2rigify': {
                     'tasks': [
-                        'pre_validations'
+                        'pre_operation'
                     ]
                 }
             }
@@ -114,9 +114,9 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
                     'non-default': True,
                     'default': False,
                 },
-                'extensions.object_origin.use_object_origin': {
-                    'non-default': True,
-                    'default': False,
+                'extensions.combine_assets.combine': {
+                    'non-default': 'child_meshes',
+                    'default': 'off',
                 }
             }
         )

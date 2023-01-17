@@ -1212,6 +1212,10 @@ class SkipSend2UeTests(unittest.TestCase):
         pass
 
     @unittest.skip
+    def test_use_object_origin_option(self):
+        pass
+
+    @unittest.skip
     def test_export_custom_property_fcurves_option(self):
         pass
 
