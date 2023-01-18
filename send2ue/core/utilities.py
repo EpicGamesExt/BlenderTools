@@ -990,9 +990,22 @@ def clear_pose(rig_object):
             bone.scale = Vector((1, 1, 1))
 
 
+def escape_local_view():
+    """
+    Escapes the local view state for all scene objects.
+    """
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            for scene_object in bpy.data.objects:
+                try:
+                    scene_object.local_view_set(area.spaces[-1], True)
+                except:
+                    pass
+
+
 def focus_on_selected():
     """
-    This function focuses any 3D view region on the current screen to the selected object.
+    Focuses any 3D view region on the current screen to the selected object.
     """
     for window in bpy.context.window_manager.windows:
         screen = window.screen

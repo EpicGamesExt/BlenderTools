@@ -10,6 +10,7 @@ from xmlrpc.client import (
     Fault,
     ResponseError
 )
+from .base_server import get_keys
 logger = logging.getLogger(__package__)
 
 
@@ -22,7 +23,7 @@ class RPCUnmarshaller(Unmarshaller):
     @staticmethod
     def _get_built_in_exceptions():
         """
-        Gets a list of the built in exception classes in python.
+        Gets a list of the built-in exception classes in python.
 
         :return list[BaseException] A list of the built in exception classes in python:
         """
@@ -72,11 +73,13 @@ class RPCTransport(Transport):
 
 
 class RPCServerProxy(ServerProxy):
+    auth_key = None
+
     def __init__(self, *args, **kwargs):
         """
         Override so we can redefine the ServerProxy to use our custom transport.
         """
-        kwargs['transport'] = RPCTransport()
+        kwargs['transport'] = RPCTransport(headers=[('Authorization', self.auth_key)])
         ServerProxy.__init__(self, *args, **kwargs)
 
 
@@ -86,13 +89,14 @@ class RPCClient:
         Initializes the rpc client.
 
         :param int port: A port number the client should connect to.
-        :param bool marshall_exceptions: Whether or not the exceptions should be marshalled.
+        :param bool marshall_exceptions: Whether the exceptions should be marshalled.
         """
         if marshall_exceptions:
             proxy_class = RPCServerProxy
         else:
             proxy_class = ServerProxy
 
+        proxy_class.auth_key = get_keys().get(str(port), '')
         server_ip = os.environ.get('RPC_SERVER_IP', '127.0.0.1')
 
         self.proxy = proxy_class(

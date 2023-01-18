@@ -16,7 +16,7 @@ class ReleaseAddon:
         :param str repo_name: The repository name.
         :param str zip_file_path: The path to the addon zip file.
         """
-        self.client = Github(login_or_token=os.environ.get('GITHUB_TOKEN'))
+        self.client = Github(login_or_token=os.environ['GITHUB_TOKEN'])
         self.repo = self.client.get_repo(full_name_or_id=repo_name)
         self.zip_file = zip_file_path
         self.addon_name = os.path.basename(zip_file_path).split('_')[0]
@@ -27,7 +27,12 @@ class ReleaseAddon:
 
         :return str: The commit message.
         """
-        release_notes_file_path = os.path.join(os.path.dirname(__file__), os.pardir, f'{self.addon_name}_release_notes.md')
+        release_notes_file_path = os.path.join(
+            os.path.dirname(__file__),
+            os.pardir,
+            self.addon_name,
+            'release_notes.md'
+        )
         with open(release_notes_file_path, 'r') as release_notes_file:
             return release_notes_file.read()
 
