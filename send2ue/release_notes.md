@@ -2,7 +2,7 @@
 * The validation "Check project settings" can be turned off in send2ue validation settings
 * New validation "Check blender object names" scan object names in the Export collection for any invalid characters for unreal import; it can also be toggled off in settings
     * [#529](https://github.com/EpicGames/BlenderTools/issues/529)
-* Updated RPC server security
+* Added [authentication](https://epicgames.github.io/BlenderTools/send2ue/extras/addon-preferences.html#rpc-auth-token) to RPC server
 * Now escapes local view before operation
   * [#549](https://github.com/EpicGames/BlenderTools/issues/549)
 

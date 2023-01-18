@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import uuid
 import bpy
 from .constants import ToolInfo, PathModes, Template
 from .core import settings, formatting, extension
@@ -23,6 +24,19 @@ class Send2UeAddonProperties:
             "This might need to be increased if you plan on importing really large assets, where the import could "
             "be longer then the timeout value"
         )
+    )
+    rpc_auth_token: bpy.props.StringProperty(
+        name="RPC Auth Token",
+        default=os.environ.get('RPC_AUTH_TOKEN', str(uuid.uuid4().hex)),
+        subtype='PASSWORD',
+        description=(
+            "This is the auth token that the client uses to connect to the RPC server. A default value is generated "
+            "automatically when the addon is registered. If this value is modified, Unreal must be restarted for "
+            "the change to take effect. If you want to use a static auth token, then you can set the environment "
+            "variable 'RPC_AUTH_TOKEN' on your system. The addon must be uninstalled and both blender and unreal "
+            "restarted and the addon re-installed for this change to take effect"
+        ),
+        set=settings.set_rpc_auth_token
     )
     extensions_repo_path: bpy.props.StringProperty(
             name="Extensions Repo Path",

@@ -236,6 +236,15 @@ def set_property_group_with_dictionary(property_group, data):
             setattr(property_group, attribute, data.get(attribute))
 
 
+def set_rpc_auth_token(self, value):
+    """
+    Overrides setter method on rpc_auth_token property to update the
+    environment variable as well.
+    """
+    self["rpc_auth_token"] = value
+    os.environ['RPC_AUTH_TOKEN'] = value
+
+
 def set_active_template(self=None, context=None):
     """
     Sets the active template.
@@ -244,7 +253,7 @@ def set_active_template(self=None, context=None):
     :param object context: The context of the object this function is appended to.
     :return list: A list of tuples that define the settings template enumeration.
     """
-    # this prevent path validation from triggering when the template values are set.
+    # this prevents path validations from triggering when the template values are set.
     bpy.context.window_manager.send2ue.path_validation = False
     with open(get_template_path(self.active_settings_template), 'r') as template_file:
         data = json.load(template_file)

@@ -190,6 +190,8 @@ def bootstrap_unreal_with_rpc_server():
             result = run_commands(
                 [
                     'import sys',
+                    'import os',
+                    f'os.environ["RPC_AUTH_TOKEN"] = "{os.environ["RPC_AUTH_TOKEN"]}"',
                     f'sys.path.append(r"{dependencies_path}")',
                     'from rpc import unreal_server',
                     'rpc_server = unreal_server.RPCServer()',

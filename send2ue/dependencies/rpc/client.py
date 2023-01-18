@@ -10,7 +10,6 @@ from xmlrpc.client import (
     Fault,
     ResponseError
 )
-from .base_server import get_keys
 logger = logging.getLogger(__package__)
 
 
@@ -79,7 +78,9 @@ class RPCServerProxy(ServerProxy):
         """
         Override so we can redefine the ServerProxy to use our custom transport.
         """
-        kwargs['transport'] = RPCTransport(headers=[('Authorization', self.auth_key)])
+        kwargs['transport'] = RPCTransport(headers=[
+            ('Authorization', os.environ.get('RPC_AUTH_TOKEN', 'password'))
+        ])
         ServerProxy.__init__(self, *args, **kwargs)
 
 
@@ -91,15 +92,9 @@ class RPCClient:
         :param int port: A port number the client should connect to.
         :param bool marshall_exceptions: Whether the exceptions should be marshalled.
         """
-        if marshall_exceptions:
-            proxy_class = RPCServerProxy
-        else:
-            proxy_class = ServerProxy
-
-        proxy_class.auth_key = get_keys().get(str(port), '')
         server_ip = os.environ.get('RPC_SERVER_IP', '127.0.0.1')
 
-        self.proxy = proxy_class(
+        self.proxy = RPCServerProxy(
             f"http://{server_ip}:{port}",
             allow_none=True,
         )

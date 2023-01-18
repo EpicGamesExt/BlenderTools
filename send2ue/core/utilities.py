@@ -996,11 +996,9 @@ def escape_local_view():
     """
     for area in bpy.context.screen.areas:
         if area.type == 'VIEW_3D':
-            for scene_object in bpy.data.objects:
-                try:
-                    scene_object.local_view_set(area.spaces[-1], True)
-                except:
-                    pass
+            if area.spaces[0].local_view:
+                for scene_object in bpy.data.objects:
+                    scene_object.local_view_set(area.spaces[0], True)
 
 
 def focus_on_selected():
