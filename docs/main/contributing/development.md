@@ -68,6 +68,25 @@ addons. You will need to do this if you are testing features that rely on proper
 `bpy.ops.send2ue.start_rpc_servers()` Ensures that both unreal and blender rpc servers are running. This is needed if
 you want to run the unittests on the open app instances.
 
+## Hot reloading from PyCharm
+These steps must be completed in-order for the addons to hot-reload while you type in PyCharm.
+1. If you have the addons already installed, uninstall them and shutdown Blender and PyCharm.
+1. Set a static value for `RPC_AUTH_TOKEN` in your system environment variables and restart Pycharm and Blender.
+    ::: tip Windows
+    Hit the Windows key then search for `Edit the system environment variables` then add it.
+    :::
+1. You must symlink the addon folders into the blender addon installation location. Then enable the addons
+    ::: tip Windows
+    Run this from a commandline launched as administrator. Swapping out the last path with your own.
+      ```commandline:no-line-numbers
+    mklink /D "%APPDATA%\Blender Foundation\Blender\3.4\scripts\addons\send2ue" "D:\repos\BlenderTools\send2ue"
+    ```
+    :::
+1. You must install the `./scripts/addon-watcher.xml` in Pycharm by going to `Settings > Tools > File Watchers > Import`
+1. And finally blender has to be running with the send2ue addon enabled and clicking `Pipeline > Utilities > Start RPC Servers`
+Now PyCharm should reload your addons on file save events.
+
+
 ## Code Structure
 
 This is how the addon code is structured. You will see this primary file and folder structure in each of the addons.

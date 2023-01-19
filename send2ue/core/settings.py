@@ -6,6 +6,7 @@ import json
 import shutil
 import tempfile
 from ..constants import ToolInfo, Template
+from ..dependencies import unreal
 
 
 def get_settings():
@@ -208,6 +209,13 @@ def get_extra_property_group_data_as_dictionary(property_group, only_key=None):
     return merge_groups(property_group_data, settings_group_data, only_key=only_key)
 
 
+def get_rpc_response_timeout(self):
+    """
+    Overrides getter method for the rpc_response_timeout property.
+    """
+    return self.get('rpc_response_timeout', 60)
+
+
 def set_property_group_with_dictionary(property_group, data):
     """
     Sets the given property group to the values in the provided dictionary.
@@ -236,6 +244,25 @@ def set_property_group_with_dictionary(property_group, data):
             setattr(property_group, attribute, data.get(attribute))
 
 
+def set_rpc_auth_token(self, value):
+    """
+    Overrides setter method on rpc_auth_token property to update the
+    environment variable as well.
+    """
+    os.environ['RPC_AUTH_TOKEN'] = value
+
+
+def set_rpc_response_timeout(self, value):
+    """
+    Overrides setter method on rpc_response_timeout property to update the
+    environment variable on the rpc instance as well.
+    """
+    if unreal.is_connected():
+        unreal.set_rpc_env('RPC_TIME_OUT', value)
+    os.environ['RPC_TIME_OUT'] = str(value)
+    self['rpc_response_timeout'] = value
+
+
 def set_active_template(self=None, context=None):
     """
     Sets the active template.
@@ -244,7 +271,7 @@ def set_active_template(self=None, context=None):
     :param object context: The context of the object this function is appended to.
     :return list: A list of tuples that define the settings template enumeration.
     """
-    # this prevent path validation from triggering when the template values are set.
+    # this prevents path validations from triggering when the template values are set.
     bpy.context.window_manager.send2ue.path_validation = False
     with open(get_template_path(self.active_settings_template), 'r') as template_file:
         data = json.load(template_file)

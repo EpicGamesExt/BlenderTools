@@ -1,6 +1,6 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.basename(__file__), os.path.pardir, 'send2ue', 'dependencies'))
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir, 'send2ue', 'dependencies'))
 import rpc
 
 
@@ -24,5 +24,3 @@ if __name__ == '__main__':
             reload_addon(addon_name, os.path.basename(__file__))
         else:
             print(f'No addon to reload')
-
-

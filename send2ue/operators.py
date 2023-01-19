@@ -285,7 +285,7 @@ class StartRPCServers(bpy.types.Operator):
 
     def execute(self, context):
         # ensure the open unreal editor is bootstrapped with the rpc server
-        unreal.bootstrap_unreal_with_rpc_server()
+        utilities.is_unreal_connected()
 
         # start the blender rpc server if its not already running
         if 'BlenderRPCServer' not in [thread.name for thread in threading.enumerate()]:

@@ -2,9 +2,7 @@
 
 import os
 import re
-import sys
 import bpy
-import math
 import shutil
 import importlib
 import tempfile
@@ -13,7 +11,7 @@ from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
 from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes, RegexPresets
-from mathutils import Vector, Quaternion, Matrix
+from mathutils import Vector, Quaternion
 
 
 def track_progress(message='', attribute=''):
@@ -786,15 +784,6 @@ def set_all_action_mute_values(rig_object, mute):
                 nla_track.mute = mute
 
 
-def set_unreal_rpc_timeout():
-    """
-    Sets the response timeout value of the unreal RPC server.
-    """
-    addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
-    if addon:
-        unreal.set_rpc_timeout(addon.preferences.rpc_response_timeout)
-
-
 def is_unreal_connected():
     """
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
@@ -807,8 +796,6 @@ def is_unreal_connected():
     try:
         # bootstrap the unreal rpc server if it is not already running
         unreal.bootstrap_unreal_with_rpc_server()
-        # update the server timeout value
-        set_unreal_rpc_timeout()
         return True
     except ConnectionError:
         report_error('Could not find an open Unreal Editor instance!', raise_exception=False)
@@ -990,9 +977,20 @@ def clear_pose(rig_object):
             bone.scale = Vector((1, 1, 1))
 
 
+def escape_local_view():
+    """
+    Escapes the local view state for all scene objects.
+    """
+    for area in bpy.context.screen.areas:
+        if area.type == 'VIEW_3D':
+            if area.spaces[0].local_view:
+                for scene_object in bpy.data.objects:
+                    scene_object.local_view_set(area.spaces[0], True)
+
+
 def focus_on_selected():
     """
-    This function focuses any 3D view region on the current screen to the selected object.
+    Focuses any 3D view region on the current screen to the selected object.
     """
     for window in bpy.context.window_manager.windows:
         screen = window.screen
@@ -1089,6 +1087,10 @@ def setup_project(*args):
 
     :param args: This soaks up the extra arguments for the app handler.
     """
+    # set the auth token variable
+    addon_properties = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
+    settings.set_rpc_auth_token(None, addon_properties.preferences.rpc_auth_token)
+
     # remove the cached files
     remove_temp_folder()
 

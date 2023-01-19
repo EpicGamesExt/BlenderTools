@@ -5,6 +5,7 @@ import json
 import time
 import sys
 import inspect
+from xmlrpc.client import ProtocolError
 from http.client import RemoteDisconnected
 
 sys.path.append(os.path.dirname(__file__))
@@ -169,15 +170,15 @@ def is_connected():
     """
     try:
         return rpc_client.proxy.is_running()
-    except (RemoteDisconnected, ConnectionRefusedError):
+    except (RemoteDisconnected, ConnectionRefusedError, ProtocolError):
         return False
 
 
-def set_rpc_timeout(seconds):
+def set_rpc_env(key, value):
     """
-    Sets the response timeout value of the unreal RPC server.
+    Sets an env value on the unreal RPC server.
     """
-    rpc_client.proxy.set_env('RPC_TIME_OUT', seconds)
+    rpc_client.proxy.set_env(key, value)
 
 
 def bootstrap_unreal_with_rpc_server():
@@ -190,6 +191,12 @@ def bootstrap_unreal_with_rpc_server():
             result = run_commands(
                 [
                     'import sys',
+                    'import os',
+                    'import threading',
+                    'for thread in threading.enumerate():',
+                    '\tif thread.name =="UnrealRPCServer":',
+                    '\t\tthread.kill()',
+                    f'os.environ["RPC_AUTH_TOKEN"] = "{os.environ["RPC_AUTH_TOKEN"]}"',
                     f'sys.path.append(r"{dependencies_path}")',
                     'from rpc import unreal_server',
                     'rpc_server = unreal_server.RPCServer()',
@@ -197,7 +204,7 @@ def bootstrap_unreal_with_rpc_server():
                 ]
             )
             if result:
-                raise RuntimeError(result)
+                raise ConnectionError(result)
 
 
 class Unreal:

@@ -734,6 +734,9 @@ def send2ue(properties):
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
+    # get out of local view
+    utilities.escape_local_view()
+
     # clear the asset_data and current id
     bpy.context.window_manager.send2ue.asset_id = ''
     bpy.context.window_manager.send2ue.asset_data.clear()
