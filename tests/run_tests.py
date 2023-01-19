@@ -26,7 +26,7 @@ HOST_TEST_FOLDER = os.environ.get('HOST_TEST_FOLDER', os.getcwd())
 CONTAINER_TEST_FOLDER = os.environ.get('CONTAINER_TEST_FOLDER', f'{CONTAINER_REPO_FOLDER}tests')
 EXCLUSIVE_TEST_FILES = list(filter(None, os.environ.get('EXCLUSIVE_TEST_FILES', '').split(','))) or None
 EXCLUSIVE_TESTS = list(filter(None, os.environ.get('EXCLUSIVE_TESTS', '').split(','))) or None
-RPC_AUTH_TOKEN = os.environ.get('RPC_AUTH_TOKEN')
+RPC_AUTH_TOKEN = os.environ.get('RPC_AUTH_TOKEN', 'password')
 
 
 if __name__ == '__main__':
