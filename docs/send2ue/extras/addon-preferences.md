@@ -17,10 +17,9 @@ indefinitely.
 
 ### RPC auth token
 This is the auth token that the client uses to connect to the RPC server. A default value is generated
-automatically when the addon is registered. If this value is modified, Unreal must be restarted for
-the change to take effect. If you want to use a static auth token, then you can set the environment
-variable `RPC_AUTH_TOKEN` on your system. The addon must be uninstalled and both blender and unreal restarted and the
-addon re-installed for this change to take effect.
+automatically when the addon is registered. If you want to use a static auth token, then you can set the
+environment variable `RPC_AUTH_TOKEN` on your system. The addon must be uninstalled and both blender and unreal
+restarted and the addon re-installed for this change to take effect.
 
 ### Extensions Repo Path
 Set this path to the folder that contains your Send to Unreal python extensions. All extensions in this folder

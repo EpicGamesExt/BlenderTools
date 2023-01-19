@@ -2,9 +2,7 @@
 
 import os
 import re
-import sys
 import bpy
-import math
 import shutil
 import importlib
 import tempfile
@@ -13,7 +11,7 @@ from . import settings, formatting
 from ..ui import header_menu
 from ..dependencies import unreal
 from ..constants import BlenderTypes, UnrealTypes, ToolInfo, PreFixToken, PathModes, RegexPresets
-from mathutils import Vector, Quaternion, Matrix
+from mathutils import Vector, Quaternion
 
 
 def track_progress(message='', attribute=''):
@@ -786,15 +784,6 @@ def set_all_action_mute_values(rig_object, mute):
                 nla_track.mute = mute
 
 
-def set_unreal_rpc_timeout():
-    """
-    Sets the response timeout value of the unreal RPC server.
-    """
-    addon = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
-    if addon:
-        unreal.set_rpc_timeout(addon.preferences.rpc_response_timeout)
-
-
 def is_unreal_connected():
     """
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
@@ -807,8 +796,6 @@ def is_unreal_connected():
     try:
         # bootstrap the unreal rpc server if it is not already running
         unreal.bootstrap_unreal_with_rpc_server()
-        # update the server timeout value
-        set_unreal_rpc_timeout()
         return True
     except ConnectionError:
         report_error('Could not find an open Unreal Editor instance!', raise_exception=False)
