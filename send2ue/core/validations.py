@@ -121,12 +121,12 @@ class ValidationManager:
         """
         Checks that the unit scale is correct.
         """
-        if self.properties.validate_scene_scale != 'off':
-            length_unit = str(round(bpy.context.scene.unit_settings.scale_length, 3))
-            if length_unit != self.properties.validate_scene_scale:
+        if self.properties.validate_scene_scale:
+            length_unit = str(round(bpy.context.scene.unit_settings.scale_length, 1))
+            if length_unit != "1.0":
                 utilities.report_error(
-                    f'The scene scale "{length_unit}" is not recommended. Please change to '
-                    f'"{self.properties.validate_scene_scale}", or disable this validation.'
+                    f'The scene scale "{length_unit}" is not 1. Please change it to 1, '
+                    f'or disable this validation.'
                 )
                 return False
         return True

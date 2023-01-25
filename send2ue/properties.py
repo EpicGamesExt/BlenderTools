@@ -344,34 +344,11 @@ def get_scene_property_class():
                 "by right-clicking on the LOD settings data asset in Unreal and selecting 'Copy Reference'"
             )
         )
-        validate_scene_scale: bpy.props.EnumProperty(
+        validate_scene_scale: bpy.props.BoolProperty(
             name="Check scene scale",
-            items=[
-                (
-                    'off',
-                    'Off',
-                    'Dont run this validation',
-                    '',
-                    0
-                ),
-                (
-                    '0.1',
-                    '0.1',
-                    'Validate that the scene scale is 0.1',
-                    '',
-                    1
-                ),
-                (
-                    '1.0',
-                    '1.0',
-                    'Validate that the scene scale is 1.0',
-                    '',
-                    2
-                )
-            ],
-            default='1.0',
+            default=True,
             description=(
-                "This checks that the scene scale is set to the selected value"
+                "This checks that the scene scale is set to 1"
             )
         )
         validate_time_units: bpy.props.EnumProperty(

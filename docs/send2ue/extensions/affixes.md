@@ -8,12 +8,12 @@ assets of a particular type.  Currently, supported asset types are:
 * `Material`
 * `Texture`
 
-### Properties
-#### _**Automatically add affixes on export**_
+## Properties
+### Automatically add affixes on export
 If true, this will automatically add the affixes (prefix/suffix) by renaming all assets that are currently in the
 `Export` collection when the Send to Unreal operation runs.
 
-#### **_Automatically remove affixes after export_**
+### Automatically remove affixes after export
 If true, this will automatically remove the affixes (prefix/suffix) by renaming all assets that are currently in the
 `Export` collection after the Send to Unreal operation runs.
 
@@ -22,13 +22,13 @@ If true, this will automatically remove the affixes (prefix/suffix) by renaming 
  This will rename the objects in Blender, like Meshes, Textures, Materials and Actions. Be aware that this will also rename the texture image files on your hard-disk.
 :::
 
-### UI
+## UI
 The settings can be found under the `Export` tab
 
 
-### Utility Operators
-#### _**Add Asset Affixes**_
+## Utility Operators
+### Add Asset Affixes
 Adds the affixes (prefix/suffix) by renaming all assets that are currently in the `Export` collection.
 
-#### _**Removes Asset Affixes**_
+### Removes Asset Affixes
 Removes the affixes (prefix/suffix) by renaming all assets that are currently in the `Export` collection.

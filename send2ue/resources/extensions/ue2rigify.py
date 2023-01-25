@@ -17,7 +17,6 @@ class Ue2RigifyExtension(ExtensionBase):
     # ------------ read/write ---------------
     use_ue2rigify: bpy.props.BoolProperty(default=False)
     original_hide_value: bpy.props.BoolProperty(default=True)
-    current_scale_factor: bpy.props.FloatProperty(default=1)
 
     # ------------ ui -----------------------
     auto_sync_control_nla_to_source: bpy.props.BoolProperty(
@@ -59,7 +58,6 @@ class Ue2RigifyExtension(ExtensionBase):
         """
         self.set_ue2rigify_state()
         self.set_source_rig_hide_value(False)
-        self.current_scale_factor = bpy.context.scene.unit_settings.scale_length
 
         # sync the track values
         if self.use_ue2rigify and self.auto_sync_control_nla_to_source:

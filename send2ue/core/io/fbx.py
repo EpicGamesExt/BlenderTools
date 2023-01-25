@@ -4,12 +4,23 @@ from ..utilities import report_error
 from mathutils import Vector
 from importlib.machinery import SourceFileLoader
 
+SCALE_FACTOR = 100
+
 
 def export(**keywords):
+    """
+    Note that this function imports the blender FBX addon's module and monkey patches
+    some functions to fix the scale factor and world origins of the objects, so that they import
+    nicely into unreal engine.
+
+    The functions below have been tweaked from their originals here:
+    https://github.com/blender/blender-addons/blob/master/io_scene_fbx/export_fbx_bin.py
+    """
     import addon_utils
     addons = {os.path.basename(os.path.dirname(module.__file__)): module.__file__ for module in addon_utils.modules()}
     addon_folder_path = os.path.dirname(addons.get('io_scene_fbx'))
 
+    # this load the io_scene_fbx module from the blender FBX addon
     try:
         SourceFileLoader('io_scene_fbx', os.path.join(addon_folder_path, '__init__.py')).load_module()
     except RuntimeError as error:
@@ -129,7 +140,7 @@ def export(**keywords):
                 if len(str(ob_obj).split('|')) == 1:
                     location_multiple = 1
                     # Todo add to FBX addon
-                    scale_factor = 100
+                    scale_factor = SCALE_FACTOR
 
                 # We compute baked loc/rot/scale for all objects (rot being euler-compat with previous value!).
                 p_rot = p_rots.get(ob_obj, None)
@@ -214,7 +225,6 @@ def export(**keywords):
         bones = tuple(bo_obj for bo_obj in arm_obj.bones if bo_obj in scene_data.objects)
 
         bone_radius_scale = 33.0
-        scale_factor = 100
 
         # Bones "data".
         for bo_obj in bones:
@@ -227,7 +237,7 @@ def export(**keywords):
 
             tmpl = elem_props_template_init(scene_data.templates, b"Bone")
             props = elem_properties(fbx_bo)
-            elem_props_template_set(tmpl, props, "p_double", b"Size", bo.head_radius * bone_radius_scale * scale_factor)
+            elem_props_template_set(tmpl, props, "p_double", b"Size", bo.head_radius * bone_radius_scale * SCALE_FACTOR)
             elem_props_template_finalize(tmpl, props)
 
             # Custom properties.
@@ -305,9 +315,9 @@ def export(**keywords):
                     transform_associate_model_matrix = mat_world_arm
 
                     transform_matrix = transform_matrix.LocRotScale(
-                        [i * 100 for i in transform_matrix.to_translation()],
+                        [i * SCALE_FACTOR for i in transform_matrix.to_translation()],
                         transform_matrix.to_quaternion(),
-                        [i * 100 for i in transform_matrix.to_scale()],
+                        [i * SCALE_FACTOR for i in transform_matrix.to_scale()],
                     )
 
                     elem_data_single_float64_array(fbx_clstr, b"Transform", matrix4_to_array(transform_matrix))
@@ -363,12 +373,12 @@ def export(**keywords):
 
         # Todo add to FBX addon
         if ob_obj.type == 'ARMATURE':
-            scale = Vector((scale[0] * 0.01, scale[1] * 0.01, scale[2] * 0.01))
+            scale = Vector((scale[0] / SCALE_FACTOR, scale[1] / SCALE_FACTOR, scale[2] / SCALE_FACTOR))
             if bpy.context.scene.send2ue.use_object_origin:
                 loc = Vector((0, 0, 0))
 
         elif ob_obj.type == 'Ellipsis':
-            loc = Vector((loc[0] * 100, loc[1] * 100, loc[2] * 100))
+            loc = Vector((loc[0] * SCALE_FACTOR, loc[1] * SCALE_FACTOR, loc[2] * SCALE_FACTOR))
         elif ob_obj.type == 'MESH':
             # centers mesh object by their object origin
             if bpy.context.scene.send2ue.use_object_origin:
@@ -378,9 +388,9 @@ def export(**keywords):
                 if asset_data['_asset_type'] == 'StaticMesh':
                     mesh_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                     loc = Vector((
-                        loc[0] - mesh_object.location[0] * 100,
-                        loc[1] - mesh_object.location[1] * 100,
-                        loc[2] - mesh_object.location[2] * 100
+                        loc[0] - mesh_object.location[0] * SCALE_FACTOR,
+                        loc[1] - mesh_object.location[1] * SCALE_FACTOR,
+                        loc[2] - mesh_object.location[2] * SCALE_FACTOR
                     ))
                 else:
                     loc = Vector((0, 0, 0))
@@ -462,7 +472,7 @@ def export(**keywords):
             mat_world_arm = mat_world_arm.LocRotScale(
                 mat_world_arm.to_translation(),
                 mat_world_arm.to_quaternion(),
-                [i / 100 for i in mat_world_arm.to_scale()],
+                [i / SCALE_FACTOR for i in mat_world_arm.to_scale()],
             )
 
             elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(mat_world_arm))
@@ -479,7 +489,7 @@ def export(**keywords):
             bomat = bomat.LocRotScale(
                 bomat.to_translation(),
                 bomat.to_quaternion(),
-                [i / 100 for i in bomat.to_scale()]
+                [i / SCALE_FACTOR for i in bomat.to_scale()]
             )
 
             elem_data_single_float64_array(fbx_posenode, b"Matrix", matrix4_to_array(bomat))
@@ -493,6 +503,7 @@ def export(**keywords):
         ).to_4x4()
     )
 
+    # here is where we patch in our tweaked functions
     export_fbx_bin.fbx_animations_do = fbx_animations_do
     export_fbx_bin.fbx_data_armature_elements = fbx_data_armature_elements
     export_fbx_bin.fbx_data_object_elements = fbx_data_object_elements

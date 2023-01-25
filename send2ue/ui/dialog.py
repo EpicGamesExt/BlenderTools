@@ -270,8 +270,8 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
-        self.draw_property(properties, layout, 'validate_scene_scale')
         self.draw_property(properties, layout, 'validate_time_units')
+        self.draw_property(properties, layout, 'validate_scene_scale')
         self.draw_property(properties, layout, 'validate_armature_transforms')
         self.draw_property(properties, layout, 'validate_materials')
         self.draw_property(properties, layout, 'validate_textures')
@@ -387,7 +387,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         column = row.column()
         column.alignment = 'RIGHT'
         column.operator_context = "INVOKE_DEFAULT"
-        column.operator('wm.send2ue', text='Send to Unreal')
+        column.operator('wm.send2ue', text='Push Assets')
 
     def draw(self, context):
         """

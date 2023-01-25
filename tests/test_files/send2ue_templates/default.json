@@ -272,7 +272,7 @@
   "validate_armature_transforms": true,
   "validate_materials": false,
   "validate_paths": true,
-  "validate_scene_scale": "1.0",
+  "validate_scene_scale": true,
   "validate_textures": false,
   "validate_time_units": "off",
   "validate_project_settings": true,

@@ -3,8 +3,8 @@ Validations are optional checks that can be turned off or configured to check a 
 Send to Unreal operation. This way an error message can be thrown to a user that tells them to correct a detail that
 has been detected as "incorrect".
 
-### Check scene linear units
-This checks the scene linear units and ensures they are set to the specified value.
+### Check scene scale
+This checks that the scene scale is set to 1.
 
 ### Check scene frame rate
 This checks the scene time units and ensures they are set to the specified value.
@@ -23,11 +23,11 @@ This checks the texture references and sees if they actually exist on disk.
 This checks the export and import paths and makes sure they are valid before preforming
 the operation.
 
-### Check project settings:
+### Check project settings
 This checks whether the required unreal project settings are in place before performing
 the operation.
 
-### Check blender object names:
+### Check blender object names
 This checks whether the blender object names in the Export collection contain any
 invalid special characters or white space. While the following special characters `'".,/.:|&!~\n\r\t@#(){}[]=;^%$\*?<>` or ` have
 valid usage in Blender, they are not valid to use in asset names in Unreal.
