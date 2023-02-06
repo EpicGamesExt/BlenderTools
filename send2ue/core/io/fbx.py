@@ -384,13 +384,17 @@ def export(**keywords):
             if bpy.context.scene.send2ue.use_object_origin:
                 asset_id = bpy.context.window_manager.send2ue.asset_id
                 asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
-                # if this is a static mesh, then check that its collisions are centered relative to it
+                # if this is a static mesh then check that all other mesh objects in this export are
+                # centered relative the asset object
                 if asset_data['_asset_type'] == 'StaticMesh':
-                    mesh_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
+                    asset_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
+                    current_object = bpy.data.objects.get(ob_obj.name)
+                    asset_world_location = asset_object.matrix_world.to_translation()
+                    object_world_location = current_object.matrix_world.to_translation()
                     loc = Vector((
-                        loc[0] - mesh_object.location[0] * SCALE_FACTOR,
-                        loc[1] - mesh_object.location[1] * SCALE_FACTOR,
-                        loc[2] - mesh_object.location[2] * SCALE_FACTOR
+                        object_world_location[0] - asset_world_location[0],
+                        object_world_location[1] - asset_world_location[1],
+                        object_world_location[2] - asset_world_location[2]
                     ))
                 else:
                     loc = Vector((0, 0, 0))
