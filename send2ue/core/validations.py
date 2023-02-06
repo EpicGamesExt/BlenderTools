@@ -93,19 +93,6 @@ class ValidationManager:
                 return False
         return True
 
-    def validate_object_names(self):
-        """
-        Checks each object for invalid names.
-        """
-        for scene_object in self.mesh_objects + self.rig_objects:
-            # check if the object name is none
-            if scene_object.name.lower() in ['none']:
-                utilities.report_error(
-                    f'Object "{scene_object.name}" has an invalid name. Please rename it.'
-                )
-                return False
-        return True
-
     def validate_geometry_exists(self):
         """
         Checks the geometry of each object to see if it has vertices.
@@ -372,6 +359,12 @@ class ValidationManager:
 
             invalid_object_names = []
             for blender_object in export_objects:
+                if blender_object.name.lower() in ['none']:
+                    utilities.report_error(
+                        f'Object "{blender_object.name}" has an invalid name. Please rename it.'
+                    )
+                    return False
+
                 match = re.search(RegexPresets.INVALID_NAME_CHARACTERS, blender_object.name)
                 if match:
                     invalid_object_names.append(f'\"{blender_object.name}\"')

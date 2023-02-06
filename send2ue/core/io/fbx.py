@@ -392,9 +392,9 @@ def export(**keywords):
                     asset_world_location = asset_object.matrix_world.to_translation()
                     object_world_location = current_object.matrix_world.to_translation()
                     loc = Vector((
-                        object_world_location[0] - asset_world_location[0],
-                        object_world_location[1] - asset_world_location[1],
-                        object_world_location[2] - asset_world_location[2]
+                        (object_world_location[0] - asset_world_location[0]) * SCALE_FACTOR,
+                        (object_world_location[1] - asset_world_location[1]) * SCALE_FACTOR,
+                        (object_world_location[2] - asset_world_location[2]) * SCALE_FACTOR
                     ))
                 else:
                     loc = Vector((0, 0, 0))
