@@ -64,7 +64,6 @@ export default defineUserConfig({
                         '/extensions/affixes',
                         '/extensions/combine-assets',
                         '/extensions/create-post-import-groom-assets',
-                        '/extensions/object-origin',
                         '/extensions/ue2rigify',
                         '/extensions/use-immediate-parent-name',
                         '/extensions/use-collections-as-folders',

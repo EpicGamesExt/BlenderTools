@@ -402,7 +402,10 @@ class BlenderRemoteCalls:
 
         bpy.context.scene.frame_set(frame)
 
-        return [round(i, decimals) for i in bone.head]
+        # get the world matrix for the bone
+        bone_world_matrix = rig_object.matrix_world @ bone.matrix
+
+        return [round(i, decimals) for i in bone_world_matrix.to_translation()]
 
     @staticmethod
     def send2ue():

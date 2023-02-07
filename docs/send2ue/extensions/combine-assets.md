@@ -6,7 +6,8 @@ options, each provides a different way to customize your export.
 ## Overview
 ![1](./images/combine-assets/1.png)
 
-### Properties
+## Properties
+## Combine
 #### _off_
 This exports each object and particle system in the `Export` collection as individual assets.
 
@@ -28,7 +29,7 @@ For each combined mesh, all hair objects/systems surfaced on it export as a sing
 
 <img src="./images/combine-assets/groom_per_combined_mesh.png" alt="groom_per_combined_mesh" width="400"/>
 
-### UI
+## UI
 The settings can be found under the `Export` tab
 
 ## Static Meshes

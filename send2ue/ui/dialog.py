@@ -62,7 +62,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         """
         properties = bpy.context.scene.send2ue
         self.draw_property(properties, layout, 'use_object_origin')
-        self.draw_property(properties, layout, 'combine_child_meshes')
+        self.draw_property(properties, layout, 'export_object_name_as_root')
 
         #  animation settings box
         self.draw_expanding_section(
@@ -270,8 +270,8 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
-        self.draw_property(properties, layout, 'validate_scene_scale')
         self.draw_property(properties, layout, 'validate_time_units')
+        self.draw_property(properties, layout, 'validate_scene_scale')
         self.draw_property(properties, layout, 'validate_armature_transforms')
         self.draw_property(properties, layout, 'validate_materials')
         self.draw_property(properties, layout, 'validate_textures')
@@ -296,10 +296,8 @@ class Send2UnrealDialog(bpy.types.Panel):
         :param layout: The layout container for this tab.
         """
         properties = bpy.context.scene.send2ue
-        self.draw_property(properties, layout, 'automatically_scale_bones')
         self.draw_property(properties, layout, 'auto_stash_active_action')
         self.draw_property(properties, layout, 'export_all_actions')
-        self.draw_property(properties, layout, 'export_object_name_as_root')
         self.draw_property(properties, layout, 'export_custom_property_fcurves')
 
     def draw_fbx_export_settings(self, layout):
@@ -389,7 +387,7 @@ class Send2UnrealDialog(bpy.types.Panel):
         column = row.column()
         column.alignment = 'RIGHT'
         column.operator_context = "INVOKE_DEFAULT"
-        column.operator('wm.send2ue', text='Send to Unreal')
+        column.operator('wm.send2ue', text='Push Assets')
 
     def draw(self, context):
         """

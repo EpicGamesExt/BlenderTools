@@ -684,7 +684,7 @@ class BaseSend2ueTestCase(BaseTestCase):
             f'The blender bone path to the root {blender_bone_path} does not match {unreal_bone_path} in unreal!'
         )
 
-    def assert_animation_translation(self, rig_name, animation_name, bone_name, frame):
+    def assert_animation_translation(self, rig_name, animation_name, bone_name, frame, offset_amount=None):
         self.log(f'Checking "{animation_name}" to see if "{bone_name}" is in the same world location at frame {frame}')
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_animation_folder_path')
         asset_path = f'{folder_path}{animation_name}'
@@ -698,6 +698,15 @@ class BaseSend2ueTestCase(BaseTestCase):
             animation_name,
             frame
         )
+        # apply the offset to the comparison
+        if offset_amount:
+            blender_world_location = [
+                round(blender_value-offset_value, 2) for blender_value, offset_value in zip(
+                    blender_world_location,
+                    offset_amount
+                )
+            ]
+
         self.assertTrue(
             collections.Counter(unreal_world_location) == collections.Counter(blender_world_location),
             (
@@ -780,6 +789,63 @@ class BaseSend2ueTestCase(BaseTestCase):
             f'The skeleton exists in unreal {test_folder}{skeleton_name} here when it should have been referencing '
             f'the skeleton here {folder_path}{skeleton_name}'
         )
+
+    def run_use_object_origin_option_tests(
+        self,
+        mesh_object,
+        armature_object=None,
+        animation_name=None,
+        bone_name=None,
+        frame=None
+    ):
+        # turn object origin off
+        self.blender.set_addon_property(
+            'scene',
+            'send2ue',
+            'use_object_origin',
+            False
+        )
+        location_offset = [1.0, 1.0, 1.0]
+
+        if armature_object:
+            self.move_to_collection([mesh_object, armature_object], 'Export')
+            self.set_object_transforms(armature_object, location=location_offset)
+            self.blender.set_all_action_locations(location_offset)
+            self.blender.set_addon_property('scene', 'send2ue', 'import_animations', True)
+        else:
+            self.move_to_collection([mesh_object], 'Export')
+            self.set_object_transforms(mesh_object, location=location_offset)
+
+        self.send2ue_operation()
+
+        if armature_object:
+            self.assert_animation_translation(armature_object, animation_name, bone_name, frame)
+        else:
+            self.assert_mesh_origin(mesh_object, location_offset)
+
+        # make sure that the import area is clean so assets don't overwrite each other
+        self.tearDown()
+
+        # turn object origin on
+        self.blender.set_addon_property(
+            'scene',
+            'send2ue',
+            'use_object_origin',
+            True
+        )
+
+        location = [0.0, 0.0, 0.0]
+        self.send2ue_operation()
+        if armature_object:
+            self.assert_animation_translation(
+                armature_object,
+                animation_name,
+                bone_name,
+                frame,
+                offset_amount=location_offset
+            )
+        else:
+            self.assert_mesh_origin(mesh_object, location)
 
     def run_lod_tests(self, asset_name, lod_names, lod_build_settings, mesh_type):
         self.blender.set_addon_property('scene', 'send2ue', 'import_lods', True)
@@ -1084,6 +1150,13 @@ class BaseSend2ueTestCase(BaseTestCase):
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
+    def test_use_object_origin_option(self):
+        """
+        Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
+        https://github.com/EpicGames/BlenderTools/issues/223
+        """
+        raise NotImplementedError('This test case must be implemented or skipped')
+
 
 class SkipSend2UeTests(unittest.TestCase):
     @unittest.skip
@@ -1136,6 +1209,10 @@ class SkipSend2UeTests(unittest.TestCase):
 
     @unittest.skip
     def test_export_object_name_as_root_option(self):
+        pass
+
+    @unittest.skip
+    def test_use_object_origin_option(self):
         pass
 
     @unittest.skip

@@ -1,7 +1,7 @@
 ---
 home: true
 heroText: Send to Unreal
-tagline: A one-click solution for sending data from your DCC to Unreal Engine.
+tagline: A one-click solution for sending data from Blender to Unreal Engine.
 actions:
   - text: Quick Start
     link: /introduction/quickstart

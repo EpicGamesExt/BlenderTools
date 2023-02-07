@@ -93,19 +93,6 @@ class ValidationManager:
                 return False
         return True
 
-    def validate_object_names(self):
-        """
-        Checks each object for invalid names.
-        """
-        for scene_object in self.mesh_objects + self.rig_objects:
-            # check if the object name is none
-            if scene_object.name.lower() in ['none']:
-                utilities.report_error(
-                    f'Object "{scene_object.name}" has an invalid name. Please rename it.'
-                )
-                return False
-        return True
-
     def validate_geometry_exists(self):
         """
         Checks the geometry of each object to see if it has vertices.
@@ -121,12 +108,12 @@ class ValidationManager:
         """
         Checks that the unit scale is correct.
         """
-        if self.properties.validate_scene_scale != 'off':
-            length_unit = str(round(bpy.context.scene.unit_settings.scale_length, 3))
-            if length_unit != self.properties.validate_scene_scale:
+        if self.properties.validate_scene_scale:
+            length_unit = str(round(bpy.context.scene.unit_settings.scale_length, 1))
+            if length_unit != "1.0":
                 utilities.report_error(
-                    f'The scene scale "{length_unit}" is not recommended. Please change to '
-                    f'"{self.properties.validate_scene_scale}", or disable this validation.'
+                    f'The scene scale "{length_unit}" is not 1. Please change it to 1, '
+                    f'or disable this validation.'
                 )
                 return False
         return True
@@ -372,6 +359,12 @@ class ValidationManager:
 
             invalid_object_names = []
             for blender_object in export_objects:
+                if blender_object.name.lower() in ['none']:
+                    utilities.report_error(
+                        f'Object "{blender_object.name}" has an invalid name. Please rename it.'
+                    )
+                    return False
+
                 match = re.search(RegexPresets.INVALID_NAME_CHARACTERS, blender_object.name)
                 if match:
                     invalid_object_names.append(f'\"{blender_object.name}\"')

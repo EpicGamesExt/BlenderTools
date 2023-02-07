@@ -8,12 +8,12 @@ from . import operators, properties, constants
 from .dependencies import remote_execution, unreal
 from .dependencies.unreal import UnrealRemoteCalls
 from .ui import header_menu, addon_preferences, file_browser, dialog
-from .core import formatting, validations, settings, utilities, export, ingest, extension
+from .core import formatting, validations, settings, utilities, export, ingest, extension, io
 
 bl_info = {
     "name": "Send to Unreal",
     "author": "Epic Games Inc.",
-    "version": (2, 2, 1),
+    "version": (2, 3, 0),
     "blender": (3, 3, 0),
     "location": "Header > Pipeline > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
@@ -37,7 +37,8 @@ modules = [
     constants,
     remote_execution,
     addon_preferences,
-    extension
+    extension,
+    io.fbx
 ]
 
 
@@ -62,6 +63,7 @@ def register():
 
         # register the addon preferences
         addon_preferences.register()
+
     except RuntimeError as error:
         print(error)
 
@@ -95,6 +97,7 @@ def unregister():
 
         # unregister the properties
         properties.unregister()
+
     except RuntimeError as error:
         print(error)
 

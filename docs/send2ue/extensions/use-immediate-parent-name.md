@@ -1,8 +1,8 @@
 # Use Immediate Parent Name
 Gives the user more control over the naming of the assets sent to unreal with the asset taking on the name of its immediate parent that is either a collection or an empty type object.
 
-### Properties
-#### _**use immediate parent name**_
+## Properties
+### use immediate parent name
 When active, this makes the immediate parent the name of the asset if the immediate parent is a collection or an empty type object. This setting can be used concurrently with import LODs or combine meshes.
 
 <img src="./images/use-immediate-parent-name/0.png" alt="0" width="250"/>

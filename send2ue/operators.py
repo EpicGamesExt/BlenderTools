@@ -13,9 +13,9 @@ from .properties import register_scene_properties, unregister_scene_properties
 
 
 class Send2Ue(bpy.types.Operator):
-    """Quickly send your assets to an open unreal editor instance without a dialog"""
+    """Push your assets to disk and/or an open unreal editor instance"""
     bl_idname = "wm.send2ue"
-    bl_label = "Send to Unreal"
+    bl_label = "Push Assets"
 
     def __init__(self):
         self.timer = None

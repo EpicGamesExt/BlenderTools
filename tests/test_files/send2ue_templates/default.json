@@ -1,9 +1,24 @@
 {
   "advanced_ui_import": false,
   "auto_stash_active_action": true,
-  "automatically_scale_bones": true,
   "blender": {
     "export_method": {
+      "abc": {
+        "manual_transform": {
+          "global_scale": 100.0
+        },
+        "object_options": {
+          "normals": true,
+          "orcos": true,
+          "packuv": true,
+          "uvs": true,
+          "vcolors": false
+        },
+        "scene_options": {
+          "export_custom_properties": true,
+          "use_instancing": true
+        }
+      },
       "fbx": {
         "animation": {
           "bake_anim": true,
@@ -26,6 +41,7 @@
           "mesh_smooth_type": "FACE",
           "use_mesh_edges": false,
           "use_mesh_modifiers": true,
+          "use_mesh_modifiers_render": true,
           "use_subsurf": false,
           "use_tspace": false
         },
@@ -44,6 +60,7 @@
     }
   },
   "disk_animation_folder_path": "C:\\",
+  "disk_groom_folder_path": "C:\\",
   "disk_mesh_folder_path": "C:\\",
   "export_all_actions": true,
   "export_custom_property_fcurves": true,
@@ -59,18 +76,21 @@
       "static_mesh_name_affix": "SM_",
       "texture_name_affix": "T_"
     },
-    "combine_meshes": {
-      "combine_child_meshes": false
+    "combine_assets": {
+      "combine": "off"
     },
-    "object_origin": {
-      "use_object_origin": false,
-      "world_center": [
-        0.0,
-        0.0,
-        0.0
-      ]
+    "create_post_import_assets_for_groom": {
+      "binding_asset": true,
+      "blueprint_with_groom": false
     },
-    "ue2rigify": {},
+    "ue2rigify": {
+      "action_prefix": "SOURCE_",
+      "auto_sync_control_nla_to_source": true,
+      "control_mode": "CONTROL",
+      "control_rig_name": "rig",
+      "original_hide_value": true,
+      "use_ue2rigify": false
+    },
     "use_collections_as_folders": {
       "use_collections_as_folders": false
     },
@@ -79,8 +99,10 @@
     }
   },
   "import_animations": true,
+  "import_grooms": true,
   "import_lods": false,
   "import_materials_and_textures": true,
+  "import_meshes": true,
   "lod_regex": "(?i)(_LOD\\d).*",
   "path_mode": "send_to_project",
   "tab": "paths",
@@ -126,6 +148,20 @@
       }
     },
     "import_method": {
+      "abc": {
+        "conversion_settings": {
+          "rotation": [
+            90.0,
+            0.0,
+            0.0
+          ],
+          "scale": [
+            1.0,
+            -1.0,
+            1.0
+          ]
+        }
+      },
       "fbx": {
         "anim_sequence_import_data": {
           "animation_length": "unreal.FBXAnimationLengthImportType.FBXALIT_EXPORTED_TIME",
@@ -267,16 +303,18 @@
     }
   },
   "unreal_animation_folder_path": "/Game/untitled_category/untitled_asset/animations/",
+  "unreal_groom_folder_path": "/Game/untitled_category/untitled_asset/groom/",
   "unreal_mesh_folder_path": "/Game/untitled_category/untitled_asset/",
   "unreal_physics_asset_path": "",
   "unreal_skeletal_mesh_lod_settings_path": "",
   "unreal_skeleton_asset_path": "",
+  "use_object_origin": false,
   "validate_armature_transforms": true,
   "validate_materials": false,
+  "validate_object_names": true,
   "validate_paths": true,
-  "validate_scene_scale": "1.0",
-  "validate_textures": false,
-  "validate_time_units": "off",
   "validate_project_settings": true,
-  "validate_object_names": true
+  "validate_scene_scale": true,
+  "validate_textures": false,
+  "validate_time_units": "off"
 }
