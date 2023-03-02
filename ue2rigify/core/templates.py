@@ -333,6 +333,24 @@ def populate_templates_dropdown(self=None, context=None):
     return rig_templates
 
 
+def load_template_file_data(file_name, properties):
+    """
+    Loads the data from the given template file.
+
+    :param str file_name: The name of the template file.
+    :param object properties: The property group that contains variables that maintain the addon's correct state.
+    :returns: The template file data.
+    :rtype: dict
+    """
+    file_path = get_template_file_path(file_name, properties)
+
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as data_file:
+            return json.load(data_file)
+    else:
+        return {}
+
+
 def save_text_file(data, file_path):
     """
     This function saves text data to a file provided a full file path.
