@@ -29,7 +29,7 @@ the operation.
 
 ### Check blender object names
 This checks whether the blender object names in the Export collection contain any
-invalid special characters or white space. While the following special characters `'".,/.:|&!~\n\r\t@#(){}[]=;^%$\*?<>` have
+invalid special characters or white space. While the following special characters ```'".,/.:|&!~\n\r\t@#(){}[]=;^%$\`*?<>``` have
 valid usage in Blender, they are not valid to use in asset names in Unreal.
 
 Send2UE automatically converts any invalid characters to `_` during the export process
