@@ -8,7 +8,7 @@ This section defines all the properties and operators depicted below in the ‘U
 ![1](./images/3d-view-panel/1.jpg)
 ![2](./images/3d-view-panel/2.jpg)
 ![3](./images/3d-view-panel/3.jpg)
-![4](./images/3d-view-panel/4.jpg)
+![4](./images/3d-view-panel/4.png)
 
 ### Source
 
@@ -66,7 +66,7 @@ This operator switches the current mode to ‘Source’ mode, and restores the v
 
 This operator bakes the ‘Control’ rig actions to the ‘Source’ rig actions.
 
-### Freeze
-This operator freezes the rig so the user doesn't lose their data by changing modes. If the .blend file is saved in control mode, UE to Rigify will automatically freeze the rig so the rig stays unmodified from when it was last saved.
-Since mode changes are actually a complete deletion and creation of a new rigify rig, only the info provided by the "template" will be available after a mode change. So this is what freezing is for; it is a way to prevent doing a mode change. Mode changes can potentially be destructive. If you are adding information that is not through the rigify properties on the metarig, or through the node trees, then that data will be deleted on a mode change.
-UE to Rigify is designed to quickly create and delete all the constraint hierarchy, rigify rigs, and their associated data while the user is flipping through modes and editing the custom template. However, once a final custom template is made, it is highly recommended that the user freeze the rig when animating in control mode.
+### Bake every bone
+
+If enabled, this will bake every bone on the source rig. If not enabled, it will only bake the source rig bones
+that are linked to the control rig's FK bones in the FK to Source template.

@@ -42,6 +42,10 @@ overwrite_animation = (
     "If enabled, your control rig animation data will be overwritten by the animation data from your source rig"
 )
 
+bake_every_bone = (
+    "If enabled, this will bake all bones on the source rig regardless if they have a link back to the control rig"
+)
+
 new_template_name = "Define the name of your new rig template"
 
 mirror_constraints = "When enabled, this will mirror your constraints across the x-axis"

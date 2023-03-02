@@ -445,8 +445,8 @@ def set_viewport_settings(viewport_settings, properties):
                     child.hide_set(rig_object_settings['hide_rig_mesh'])
 
                 # set a custom bone shape for all the bones
-                previous_settings['custom_bone_shape'] = False
-                if rig_object_settings['custom_bone_shape']:
+                previous_settings['red_sphere_bones'] = False
+                if rig_object_settings.get('red_sphere_bones'):
                     # set a give the rig a custom color
                     set_rig_color(rig_object, 'THEME01', True)
 
@@ -464,7 +464,7 @@ def set_viewport_settings(viewport_settings, properties):
                             bone.custom_shape_scale = 0.1
 
                 # remove custom bone shapes from all the bones
-                if not rig_object_settings['custom_bone_shape']:
+                if not rig_object_settings.get('red_sphere_bones'):
                     if rig_object.name != Rigify.CONTROL_RIG_NAME:
 
                         # remove the custom rig color

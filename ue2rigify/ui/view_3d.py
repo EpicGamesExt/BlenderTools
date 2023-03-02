@@ -90,6 +90,8 @@ class UE_RIGIFY_PT_RigTemplatePanel(bpy.types.Panel):
         # control mode
         if properties.selected_mode == Modes.CONTROL.name:
             row = box.row()
+            row.prop(properties, 'bake_every_bone')
+            row = box.row()
             row.scale_y = 2.0
             row.operator('ue2rigify.revert_to_source_rig')
             row.operator('ue2rigify.bake_from_rig_to_rig', text='Bake')
