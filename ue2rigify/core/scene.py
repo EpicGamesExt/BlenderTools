@@ -832,19 +832,6 @@ def move_collection_to_collection(collection, to_collection):
             to_collection.children.link(collection)
 
 
-def has_iks_on(rig_object):
-    """
-    Check to see if any IK switches are on.
-
-    :param object rig_object: A object of type armature.
-    """
-    for bone in rig_object.pose.bones:
-        if isinstance(bone.get("IK_FK"), float):
-            if bone['IK_FK'] != 1.000:
-                return True
-    return False
-
-
 def select_related_keyed_bones(to_rig_object, from_rig_action_data, links_data):
     """
     Selects all the bones that need to keyed in the action bake.
