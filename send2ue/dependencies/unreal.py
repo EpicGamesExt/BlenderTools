@@ -187,6 +187,8 @@ def bootstrap_unreal_with_rpc_server():
     """
     if not os.environ.get('TEST_ENVIRONMENT'):
         if not is_connected():
+            import bpy
+            rpc_response_timeout = bpy.context.preferences.addons["send2ue"].preferences.rpc_response_timeout
             dependencies_path = os.path.dirname(__file__)
             result = run_commands(
                 [
@@ -196,7 +198,7 @@ def bootstrap_unreal_with_rpc_server():
                     'for thread in threading.enumerate():',
                     '\tif thread.name =="UnrealRPCServer":',
                     '\t\tthread.kill()',
-                    f'os.environ["RPC_AUTH_TOKEN"] = "{os.environ["RPC_AUTH_TOKEN"]}"',
+                    f'os.environ["RPC_TIME_OUT"] = "{rpc_response_timeout}"',
                     f'sys.path.append(r"{dependencies_path}")',
                     'from rpc import unreal_server',
                     'rpc_server = unreal_server.RPCServer()',

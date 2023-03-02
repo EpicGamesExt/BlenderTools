@@ -78,9 +78,7 @@ class RPCServerProxy(ServerProxy):
         """
         Override so we can redefine the ServerProxy to use our custom transport.
         """
-        kwargs['transport'] = RPCTransport(headers=[
-            ('Authorization', os.environ.get('RPC_AUTH_TOKEN', 'password'))
-        ])
+        kwargs['transport'] = RPCTransport()
         ServerProxy.__init__(self, *args, **kwargs)
 
 

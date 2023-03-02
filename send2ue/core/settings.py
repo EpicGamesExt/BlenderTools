@@ -244,14 +244,6 @@ def set_property_group_with_dictionary(property_group, data):
             setattr(property_group, attribute, data.get(attribute))
 
 
-def set_rpc_auth_token(self, value):
-    """
-    Overrides setter method on rpc_auth_token property to update the
-    environment variable as well.
-    """
-    os.environ['RPC_AUTH_TOKEN'] = value
-
-
 def set_rpc_response_timeout(self, value):
     """
     Overrides setter method on rpc_response_timeout property to update the

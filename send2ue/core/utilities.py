@@ -1076,7 +1076,6 @@ def setup_project(*args):
     """
     # set the auth token variable
     addon_properties = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
-    settings.set_rpc_auth_token(None, addon_properties.preferences.rpc_auth_token)
 
     # remove the cached files
     remove_temp_folder()
@@ -1122,8 +1121,13 @@ def report_error(message, details='', raise_exception=True):
 
     :param str message: The error message to display to the user.
     :param str details: The error message details to display to the user.
-    :param bool raise_exception: Whether or not to raise an exception or report the error in the popup.
+    :param bool raise_exception: Whether to raise an exception or report the error in the popup.
     """
+    # if a warning is received, then don't raise an error
+    if message == {'WARNING'}:
+        print(f'{message} {details}')
+        return
+
     if os.environ.get('SEND2UE_DEV', raise_exception):
         raise RuntimeError(message + details)
     else:

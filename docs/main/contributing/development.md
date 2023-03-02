@@ -71,10 +71,6 @@ you want to run the unittests on the open app instances.
 ## Hot reloading from PyCharm
 These steps must be completed in-order for the addons to hot-reload while you type in PyCharm.
 1. If you have the addons already installed, uninstall them and shutdown Blender and PyCharm.
-1. Set a static value for `RPC_AUTH_TOKEN` in your system environment variables and restart Pycharm and Blender.
-    ::: tip Windows
-    Hit the Windows key then search for `Edit the system environment variables` then add it.
-    :::
 1. You must symlink the addon folders into the blender addon installation location. Then enable the addons
     ::: tip Windows
     Run this from a commandline launched as administrator. Swapping out the last path with your own.
