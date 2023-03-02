@@ -1,5 +1,5 @@
 ### Minor Changes
-* Added metadata template file for control mode attributes like custom bone shapes and colors
+* Added metadata template file for control mode attributes like custom bone shapes, colors, and transforms.
   * [530](https://github.com/EpicGames/BlenderTools/issues/530)
 
 * Added Bake every option
