@@ -23,10 +23,6 @@ class SendToUnrealPreferences(Send2UeAddonProperties, bpy.types.AddonPreferences
         row.label(text='RPC Response Timeout')
         row.prop(self, 'rpc_response_timeout', text='')
         row = self.layout.row()
-        row.label(text='RPC Auth Token')
-        row.enabled = False
-        row.prop(self, 'rpc_auth_token', text='')
-        row = self.layout.row()
         row.label(text='Extensions Repo Path:')
         row = self.layout.row()
         row = row.split(factor=0.95, align=True)

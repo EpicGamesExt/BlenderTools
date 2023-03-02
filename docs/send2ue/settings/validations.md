@@ -19,7 +19,7 @@ assigned to a vertex on the mesh object. If there is a unused material, then an 
 ### Check texture references
 This checks the texture references and sees if they actually exist on disk.
 
-### Check paths:
+### Check paths
 This checks the export and import paths and makes sure they are valid before preforming
 the operation.
 
@@ -29,13 +29,8 @@ the operation.
 
 ### Check blender object names
 This checks whether the blender object names in the Export collection contain any
-invalid special characters or white space. While the following special characters `'".,/.:|&!~\n\r\t@#(){}[]=;^%$\*?<>` or ` have
+invalid special characters or white space. While the following special characters `'".,/.:|&!~\n\r\t@#(){}[]=;^%$\*?<>` have
 valid usage in Blender, they are not valid to use in asset names in Unreal.
 
 Send2UE automatically converts any invalid characters to `_` during the export process
 if this validation is turned off.
-
-::: tip Note
-  Checking the unreal paths makes a few remote calls which requires an open Unreal editor instance with remote
-execution enabled.  Also, if this is disabled it can shave 1 to 5 seconds off the validation step.
-:::
