@@ -71,13 +71,12 @@ class AuthenticatedRequestHandler(SimpleXMLRPCRequestHandler):
         :returns: Whether the request is authorized.
         :rtype: bool
         """
-        for key, value in self.headers.items():
-            # do not allow requests sent cross site
-            if key == 'Sec-Fetch-Site' and value == 'cross-site':
-                return False
-            # only allow requests from localhost
-            if key == 'Origin' and not value.startswith('localhost'):
-                return False
+        # do not allow requests sent cross site
+        if self.headers.get('Sec-Fetch-Site') == 'cross-site':
+            return False
+        # do not allow requests from another origin
+        if self.headers.get('Origin'):
+            return False
         return True
 
     def report_401(self):
