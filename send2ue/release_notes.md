@@ -3,8 +3,7 @@
   * [563](https://github.com/EpicGames/BlenderTools/issues/563)
   * [564](https://github.com/EpicGames/BlenderTools/issues/564)
   * [552](https://github.com/EpicGames/BlenderTools/issues/552)
-* Fixed issue with FBX exporter failing to export with warnings.
-Now the exports finish and warnings are printed to the system console.
+* Fixed issue with FBX exporter failing to export with warnings. Now the exports finish and warnings are printed to the system console.
   * [565](https://github.com/EpicGames/BlenderTools/issues/565)
 
 ## Deprecated
