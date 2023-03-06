@@ -1637,10 +1637,8 @@ def unpack_textures():
                                     # unpack the image
                                     if len(image.filepath_from_user()) == 0:
                                         image.filepath = '/Texture/{}'.format(image.name)
-                                        image.save()
-                                    else:
-                                        image.unpack()
                                         
+                                    image.save()
                                     unpacked_files[image.name] = image.filepath_from_user()
 
     return unpacked_files
