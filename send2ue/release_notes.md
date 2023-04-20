@@ -1,5 +1,5 @@
 ## Major Changes
-* Added Instance Assets Extension. Read more [here]()
+* Added Instance Assets Extension. Read more [here](https://epicgames.github.io/BlenderTools/send2ue/extensions/instance-assets)
   * [579](https://github.com/EpicGames/BlenderTools/issues/579)
 
 ## Minor Changes
