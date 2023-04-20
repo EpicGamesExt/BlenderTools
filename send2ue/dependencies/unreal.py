@@ -605,6 +605,90 @@ class Unreal:
             unreal.EditorAssetLibrary.save_loaded_asset(unreal.load_asset(blueprint_asset_path))
             return blueprint_asset_path
 
+    @staticmethod
+    def get_assets_on_actor(actor, only_type=None):
+        """
+        Gets all assets on an actor.
+        """
+        assets = []
+
+        # only get the asset type specified in only_type if it is provided
+        if not only_type or only_type == 'StaticMesh':
+            for component in actor.get_components_by_class(unreal.StaticMeshComponent):
+                if component.static_mesh and actor.get_class().get_name() == 'StaticMeshActor':
+                    # make sure we only get one unique instance of the asset
+                    if component.static_mesh not in assets:
+                        assets.append(component.static_mesh)
+
+        for component in actor.get_components_by_class(unreal.SkeletalMeshComponent):
+            if component.skeletal_mesh:
+                # only get the asset type specified in only_type if it is provided
+                if not only_type or only_type == 'SkeletalMesh':
+                    # make sure we only get one unique instance of the asset
+                    if component.skeletal_mesh not in assets:
+                        assets.append(component.skeletal_mesh)
+
+                # only get the asset type specified in only_type if it is provided
+                if not only_type or only_type == 'AnimSequence':
+                    if component.animation_mode == unreal.AnimationMode.ANIMATION_SINGLE_NODE:
+                        if component.animation_data and component.animation_data.anim_to_play not in assets:
+                            assets.append(component.animation_data.anim_to_play)
+
+        return assets
+
+    @staticmethod
+    def get_asset_actors_in_level():
+        """
+        Gets assets from the active level.
+        """
+        actors = []
+        actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+
+        for actor in actor_subsystem.get_all_level_actors():
+            if Unreal.get_assets_on_actor(actor):
+                actors.append(actor)
+        return actors
+
+    @staticmethod
+    def get_asset_actor_by_label(label):
+        """
+        Gets the asset actor by the given label.
+        """
+        for actor in Unreal.get_asset_actors_in_level():
+            if label == actor.get_actor_label():
+                return actor
+
+    @staticmethod
+    def has_asset_actor_with_label(label):
+        """
+        Checks if the level has actors with the given label.
+        """
+        for actor in Unreal.get_asset_actors_in_level():
+            if label == actor.get_actor_label():
+                return True
+        return False
+
+    @staticmethod
+    def delete_all_asset_actors():
+        """
+        Deletes the actor with the given label.
+        """
+        actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        for actor in Unreal.get_asset_actors_in_level():
+            actor_subsystem.destroy_actor(actor)
+            break
+
+    @staticmethod
+    def delete_asset_actor_with_label(label):
+        """
+        Deletes the actor with the given label.
+        """
+        actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+        for actor in Unreal.get_asset_actors_in_level():
+            if label == actor.get_actor_label():
+                actor_subsystem.destroy_actor(actor)
+                break
+
 
 class UnrealImportAsset(Unreal):
     def __init__(self, file_path, asset_data, property_data):
@@ -734,6 +818,7 @@ class UnrealImportAsset(Unreal):
 
         # set the options
         self._options = unreal.FbxImportUI()
+        self._options.set_editor_property('automated_import_should_detect_type', False)
         self._options.set_editor_property('import_mesh', import_mesh)
         self._options.set_editor_property('import_as_skeletal', import_as_skeletal)
         self._options.set_editor_property('import_animations', import_animations)
@@ -1293,7 +1378,7 @@ class UnrealRemoteCalls:
         skeletal_mesh_subsystem = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
         lod_count = skeletal_mesh_subsystem.get_lod_count(skeletal_mesh)
         if lod_count > 1:
-            skeletal_mesh_subsystem.remove_lo_ds(skeletal_mesh, list(range(1, lod_count)))
+            skeletal_mesh.remove_lo_ds(list(range(1, lod_count)))
 
         lod_settings_path = property_data.get('unreal_skeletal_mesh_lod_settings_path', {}).get('value', '')
         if lod_settings_path:
@@ -1491,3 +1576,68 @@ class UnrealRemoteCalls:
             curve_name,
             unreal.RawCurveTrackTypes.RCT_FLOAT
         )
+
+    @staticmethod
+    def instance_asset(asset_path, location, rotation, scale, label):
+        """
+        Instances the given asset into the active level.
+
+        :param str asset_path: The project path to the asset in unreal.
+        :param list location: The unreal actor world location.
+        :param list rotation: The unreal actor world rotation.
+        :param list scale: The unreal actor world scale.
+        :param str label: The unreal actor label.
+        """
+        asset = Unreal.get_asset(asset_path)
+        actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+
+        # if the unique name is found delete it
+        if Unreal.has_asset_actor_with_label(label):
+            Unreal.delete_asset_actor_with_label(label)
+
+        # spawn the actor
+        actor = actor_subsystem.spawn_actor_from_object(
+            asset,
+            location,
+            rotation=rotation,
+            transient=False
+        )
+        actor.set_actor_label(label)
+
+        # set the transforms of the actor with the tag that matches the unique name
+        actor = Unreal.get_asset_actor_by_label(label)
+        if actor:
+            actor.set_actor_transform(
+                new_transform=unreal.Transform(
+                    location=location,
+                    rotation=rotation,
+                    scale=scale
+                ),
+                sweep=False,
+                teleport=True
+            )
+
+    @staticmethod
+    def delete_all_asset_actors():
+        """
+        Deletes all asset actors from the current level.
+        """
+        Unreal.delete_all_asset_actors()
+
+    @staticmethod
+    def get_asset_actor_transforms(label):
+        """
+        Get the transforms for the provided actor.
+
+        :param str label: The unreal actor label.
+        :returns: A dictionary of transforms.
+        :rtype: dict
+        """
+        actor = Unreal.get_asset_actor_by_label(label)
+        if actor:
+            root_component = actor.get_editor_property('root_component')
+            return {
+                'location': root_component.get_world_location().to_tuple(),
+                'rotation': root_component.get_world_rotation().to_tuple(),
+                'scale': root_component.get_world_scale().to_tuple(),
+            }

@@ -3,6 +3,7 @@
 import os
 import re
 import bpy
+import math
 import shutil
 import importlib
 import tempfile
@@ -1015,6 +1016,15 @@ def convert_to_class_name(bl_idname):
     :return str: A class name.
     """
     return ''.join([word.capitalize() for word in re.split(r'\.|_', bl_idname)])
+
+
+def convert_blender_local_rotation_to_unreal_local_rotation(rotation):
+    """
+    Converts blender local rotation axis to an unreal local rotation axis.
+
+    :return list[float]: The blender local rotation.
+    """
+    return [-math.degrees(rotation.y), -math.degrees(rotation.z), math.degrees(rotation.x)]
 
 
 def convert_blender_to_unreal_location(location):

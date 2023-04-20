@@ -66,6 +66,9 @@ class TestSend2UeMannequins(BaseSend2ueTestCase):
         }
         self.run_lod_tests('SK_Mannequin', lods, lod_build_settings, 'skeletal')
 
+        self.log('testing re-importing lods...')
+        self.run_lod_tests('SK_Mannequin', lods, lod_build_settings, 'skeletal')
+
     def test_animations(self):
         """
         Sends the mannequin animations to unreal with various options and ensures they are identical.

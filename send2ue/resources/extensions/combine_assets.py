@@ -63,7 +63,8 @@ class CombineAssetsExtension(ExtensionBase):
         :param bpy.types.UILayout layout: The extension layout area.
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        dialog.draw_property(self, layout, 'combine')
+        box = layout.box()
+        dialog.draw_property(self, box, 'combine')
 
     def pre_operation(self, properties):
         """

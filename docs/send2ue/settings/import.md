@@ -14,8 +14,8 @@ Whether or not to import the animation from the FBX file.
 #### Groom
 Whether or not to export groom as an alembic file and import to unreal.
 
-#### Launch FBX Import UI
-When enabled this option launches the FBX import UI in Unreal.
+#### Launch Import UI
+When enabled this option launches the import UI in Unreal.
 
 ::: tip Note
   This will launch the Import UI on the first import of the asset, however it will not launch the UI again on a

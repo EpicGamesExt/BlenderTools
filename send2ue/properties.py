@@ -305,9 +305,9 @@ def get_scene_property_class():
             description="Whether or not to import groom assets"
         )
         advanced_ui_import: bpy.props.BoolProperty(
-            name="Launch FBX Import UI",
+            name="Launch Import UI",
             default=False,
-            description="When enabled this option launches the FBX import UI in Unreal"
+            description="When enabled this option launches the import UI in Unreal"
         )
         # LOD settings
         import_lods: bpy.props.BoolProperty(
@@ -466,11 +466,16 @@ def get_scene_property_class():
         )
         validate_object_names: bpy.props.BoolProperty(
             name="Check blender object names",
-            default=True,
+            default=False,
             description=(
                 "This checks whether object names in the Export folder contain any special characters "
                 "that unreal does not accept"
             )
+        )
+        validate_meshes_for_vertex_groups: bpy.props.BoolProperty(
+            name="Check meshes for vertex groups",
+            default=True,
+            description="This checks that a mesh with an armature modifier has vertex groups"
         )
 
     return Send2UeSceneProperties

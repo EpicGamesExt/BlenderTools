@@ -365,19 +365,9 @@ class BaseSend2ueTestCase(BaseTestCase):
     def setUp(self):
         super(BaseSend2ueTestCase, self).setUp()
 
-        # delete all folders
-        for property_name in [
-            'unreal_mesh_folder_path',
-            'unreal_animation_folder_path'
-        ]:
-            unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
-            self.unreal.delete_directory(unreal_folder_path)
+        # delete all actors from the unreal level
+        self.unreal.delete_all_asset_actors()
 
-        # create the export collection
-        self.blender.create_predefined_collections()
-        self.blender.set_addon_property('scene', 'send2ue', 'import_animations', False)
-
-    def tearDown(self):
         # delete all folders
         for property_name in [
             'unreal_mesh_folder_path',
@@ -387,8 +377,22 @@ class BaseSend2ueTestCase(BaseTestCase):
             unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
             self.unreal.delete_directory(unreal_folder_path)
 
-        # for addon_name in self.blender_addons:
-        #     self.blender.unregister_addon(addon_name)
+        # create the export collection
+        self.blender.create_predefined_collections()
+        self.blender.set_addon_property('scene', 'send2ue', 'import_animations', False)
+
+    def tearDown(self):
+        # delete all actors from the unreal level
+        self.unreal.delete_all_asset_actors()
+
+        # delete all folders
+        for property_name in [
+            'unreal_mesh_folder_path',
+            'unreal_animation_folder_path',
+            'unreal_groom_folder_path'
+        ]:
+            unreal_folder_path = self.blender.get_addon_property('scene', 'send2ue', property_name)
+            self.unreal.delete_directory(unreal_folder_path)
 
     def assert_asset_exists(self, asset_name, folder_path, exists=True):
         if exists:
@@ -499,6 +503,23 @@ class BaseSend2ueTestCase(BaseTestCase):
                 f'{origin}'
             )
         )
+
+    def assert_actor_location(self, actor_name, location_offset, exists):
+        transforms = self.unreal.get_asset_actor_transforms(actor_name)
+
+        if not exists:
+            self.assertEqual(
+                transforms,
+                None,
+                f'An actor "{actor_name}" was found in the active level when it should not exist'
+            )
+        else:
+            actor_location = self.send2ue.utilities.convert_unreal_to_blender_location(transforms['location'])
+            self.assertEqual(
+                location_offset,
+                actor_location,
+                f'The actor "{actor_name}" has a location of {actor_location} while in blender it is {location_offset}.'
+            )
 
     def assert_socket(self, asset_name, socket_name):
         self.log(f'Checking "{asset_name}" for socket "{socket_name}"...')
