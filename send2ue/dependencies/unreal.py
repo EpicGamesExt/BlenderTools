@@ -608,7 +608,7 @@ class Unreal:
     @staticmethod
     def get_assets_on_actor(actor, only_type=None):
         """
-        Gets all assets on an actor.
+        Gets only actors that are created by directly instancing assets.
         """
         assets = []
 
@@ -639,7 +639,7 @@ class Unreal:
     @staticmethod
     def get_asset_actors_in_level():
         """
-        Gets assets from the active level.
+        Gets actors from the active level that have assets assigned to them.
         """
         actors = []
         actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -671,7 +671,7 @@ class Unreal:
     @staticmethod
     def delete_all_asset_actors():
         """
-        Deletes the actor with the given label.
+        Deletes all actors from the active level that have assets assigned to them.
         """
         actor_subsystem = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
         for actor in Unreal.get_asset_actors_in_level():

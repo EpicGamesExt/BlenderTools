@@ -2,7 +2,6 @@
 
 import bpy
 import os
-import copy
 from math import degrees
 from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
@@ -42,7 +41,7 @@ class InstanceAssetsExtension(ExtensionBase):
         """
         MESH_INSTANCE_NAMES.clear()
         if self.place_in_active_level:
-            self.use_object_origin_state = copy.copy(properties.use_object_origin)
+            self.use_object_origin_state = properties.use_object_origin
             properties.use_object_origin = True
 
     def post_operation(self, properties):
