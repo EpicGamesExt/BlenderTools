@@ -6,9 +6,14 @@ from math import degrees
 from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
 from send2ue.dependencies.unreal import UnrealRemoteCalls
-from send2ue.core.utilities import convert_blender_to_unreal_location, get_asset_name
+from send2ue.core.utilities import (
+    convert_blender_to_unreal_location,
+    get_armature_modifier_rig_object,
+    get_asset_name
+)
 
-MESH_INSTANCE_NAMES = []
+STATIC_MESH_INSTANCE_NAMES = []
+SKELETAL_MESH_INSTANCE_NAMES = []
 
 
 class InstanceAssetsExtension(ExtensionBase):
@@ -27,11 +32,34 @@ class InstanceAssetsExtension(ExtensionBase):
         default=False,
         name='Use mesh instances',
         description=(
-            'Instances static meshes in the active level. If the data on an object is linked it will not be '
-            're-imported, just instanced. Note that this will force the asset to take on the name of its mesh data, '
+            'Instances static and skeletal meshes in the active level. If the data on an object is linked it will not '
+            'be re-imported, just instanced. Note that this will force the asset to take on the name of its mesh data, '
             'rather than its object name, and the actors in the unreal level will match the blender object name'
         )
     )
+
+    @staticmethod
+    def _rename_asset(asset_data, name, properties):
+        """
+        Renames the asset data with the given name.
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param str name: The new name of the asset.
+        """
+        asset_name = get_asset_name(name, properties)
+
+        # rename the asset path to the mesh data name instead of the object name
+        asset_path_parts = asset_data['asset_path'].split('/')
+        asset_path_parts[-1] = asset_name
+        asset_data['asset_path'] = '/'.join(asset_path_parts)
+
+        # rename the file path to the mesh data name instead of the object name
+        file_path = asset_data['file_path']
+        _, ext = os.path.splitext(file_path)
+        asset_data['file_path'] = os.path.join(
+            os.path.dirname(file_path),
+            f'{asset_name}{ext}'
+        )
 
     def pre_operation(self, properties):
         """
@@ -39,7 +67,8 @@ class InstanceAssetsExtension(ExtensionBase):
 
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
-        MESH_INSTANCE_NAMES.clear()
+        STATIC_MESH_INSTANCE_NAMES.clear()
+        SKELETAL_MESH_INSTANCE_NAMES.clear()
         if self.place_in_active_level:
             self.use_object_origin_state = properties.use_object_origin
             properties.use_object_origin = True
@@ -62,29 +91,28 @@ class InstanceAssetsExtension(ExtensionBase):
         """
         if self.use_mesh_instances:
             asset_type = asset_data['_asset_type']
-            if asset_type == UnrealTypes.STATIC_MESH:
-                mesh_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
-                mesh_instance_name = mesh_object.data.name
+            mesh_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
+            mesh_instance_name = mesh_object.data.name
 
-                # don't export this mesh again
-                if mesh_instance_name in MESH_INSTANCE_NAMES:
+            if asset_type == UnrealTypes.STATIC_MESH:
+                # don't export this static mesh again
+                if mesh_instance_name in STATIC_MESH_INSTANCE_NAMES:
                     asset_data['skip'] = True
 
-                # rename the asset path to the mesh data name instead of the object name
-                asset_path_parts = asset_data['asset_path'].split('/')
-                asset_path_parts[-1] = get_asset_name(mesh_object.data.name, properties)
-                asset_data['asset_path'] = '/'.join(asset_path_parts)
+                self._rename_asset(asset_data, mesh_instance_name, properties)
+                # track which static mesh instances are exported
+                STATIC_MESH_INSTANCE_NAMES.append(mesh_instance_name)
 
-                # rename the file path to the mesh data name instead of the object name
-                file_path = asset_data['file_path']
-                _, ext = os.path.splitext(file_path)
-                asset_data['file_path'] = os.path.join(
-                    os.path.dirname(file_path),
-                    f'{mesh_object.data.name}{ext}'
-                )
+            if asset_type == UnrealTypes.SKELETAL_MESH:
+                rig_object = get_armature_modifier_rig_object(mesh_object) or mesh_object.parent
 
-                # track which mesh instances are exported
-                MESH_INSTANCE_NAMES.append(mesh_instance_name)
+                # don't export this skeletal mesh again
+                if (mesh_instance_name, rig_object.data.name) in SKELETAL_MESH_INSTANCE_NAMES:
+                    asset_data['skip'] = True
+
+                self._rename_asset(asset_data, mesh_instance_name, properties)
+                # track which skeletal mesh instances are exported
+                SKELETAL_MESH_INSTANCE_NAMES.append((mesh_instance_name, rig_object.data.name))
 
     def post_import(self, asset_data, properties):
         """
@@ -109,13 +137,12 @@ class InstanceAssetsExtension(ExtensionBase):
             ]:
                 scene_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                 unique_name = scene_object.name
-                location = scene_object.location
+                location = list(scene_object.matrix_world.translation)
                 rotation = [degrees(i) for i in scene_object.rotation_euler]
                 scale = scene_object.scale[:]
 
             # anim sequences use the transforms of the first frame of the action
             if asset_type == UnrealTypes.ANIM_SEQUENCE:
-                scene_object = bpy.data.objects.get(asset_data['_armature_object_name'])
                 action = bpy.data.actions.get(asset_data['_action_name'])
                 unique_name = action.name
 
@@ -134,10 +161,6 @@ class InstanceAssetsExtension(ExtensionBase):
                                 break
 
             if unique_name:
-                location = list(scene_object.matrix_world.translation)
-                rotation = [degrees(i) for i in scene_object.rotation_euler]
-                scale = list(scene_object.scale)
-
                 UnrealRemoteCalls.instance_asset(
                     asset_data['asset_path'],
                     convert_blender_to_unreal_location(location),

@@ -9,9 +9,12 @@
   * [455](https://github.com/EpicGames/BlenderTools/issues/455)
 * Fixed local rotation axis for static mesh sockets.
   * [592](https://github.com/EpicGames/BlenderTools/issues/592)
+* Fixed AttributeError "NoneType" has no Attribute "matrix_world".
+  * [598](https://github.com/EpicGames/BlenderTools/issues/598)
+* Fixed root motion scale when importing assets into blender.
+  * [597](https://github.com/EpicGames/BlenderTools/issues/597)
 * Added validation to check for vertex groups on meshes that are assigned to an armature.
   * [585](https://github.com/EpicGames/BlenderTools/issues/585)
-
 
 ## Tests Passing On
 * Blender `3.3`, `3.5` (installed from blender.org)

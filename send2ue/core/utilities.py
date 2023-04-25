@@ -1531,7 +1531,7 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
                     if fcurve.data_path == 'location':
                         for keyframe_point in fcurve.keyframe_points:
                             # just the location to preserve root motion
-                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index]
+                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index] * 100
                         # don't scale the objects location handles
                         continue
 

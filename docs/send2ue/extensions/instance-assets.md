@@ -12,11 +12,9 @@ This is only supported for the following asset types:
 * `AnimSequence`
 
 ### Use mesh instances
-Instances static meshes in the active level. If the data on an object is linked it will not be
+Instances static and skeletal meshes in the active level. If the data on an object is linked it will not be
 re-imported, just instanced. Note that this will force the asset to take on the name of its mesh data,
 rather than its object name, and the actors in the unreal level will match the blender object name.
-
-This only supported for `StaticMesh` assets.
 
 ### UI
 The settings can be found under the `Import` tab
