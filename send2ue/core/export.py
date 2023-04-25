@@ -131,18 +131,20 @@ def export_custom_property_fcurves(action_name, properties):
     bpy.context.window_manager.send2ue.asset_data[asset_id]['fcurve_file_path'] = fcurve_file_path
 
 
-def export_file(properties, lod=0, file_type=FileTypes.FBX, asset_data=None):
+def export_file(properties, lod=0, file_type=FileTypes.FBX):
     """
     Calls the blender export operator with specific settings.
 
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     :param bool lod: Whether the exported mesh is a lod.
     :param str file_type: File type of the export.
-    :param dict asset_data: A mutable dictionary of asset data for the current asset.
     """
-    if not asset_data:
-        asset_id = bpy.context.window_manager.send2ue.asset_id
-        asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+    asset_id = bpy.context.window_manager.send2ue.asset_id
+    asset_data = bpy.context.window_manager.send2ue.asset_data[asset_id]
+
+    # skip if specified
+    if asset_data.get('skip'):
+        return
 
     file_path = asset_data.get('file_path')
     if lod != 0:
@@ -180,9 +182,15 @@ def get_asset_sockets(asset_name, properties):
         for child in mesh_object.children:
             if child.type == 'EMPTY' and child.name.startswith(f'{PreFixToken.SOCKET.value}_'):
                 name = utilities.get_asset_name(child.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
+                relative_location = utilities.convert_blender_to_unreal_location(
+                    child.matrix_local.translation
+                )
+                relative_rotation = utilities.convert_blender_local_rotation_to_unreal_local_rotation(
+                    child.rotation_euler
+                )
                 socket_data[name] = {
-                    'relative_location': utilities.convert_blender_to_unreal_location(child.matrix_local.translation),
-                    'relative_rotation': [math.degrees(i) for i in child.matrix_local.to_euler()],
+                    'relative_location': relative_location,
+                    'relative_rotation': relative_rotation,
                     'relative_scale': child.matrix_local.to_scale()[:]
                 }
     return socket_data
@@ -369,7 +377,8 @@ def create_animation_data(rig_objects, properties):
                     'file_path': file_path,
                     'asset_path': f'{properties.unreal_animation_folder_path}{asset_name}',
                     'asset_folder': properties.unreal_animation_folder_path,
-                    'skeleton_asset_path': utilities.get_skeleton_asset_path(rig_object, properties)
+                    'skeleton_asset_path': utilities.get_skeleton_asset_path(rig_object, properties),
+                    'skip': False
                 }
 
     return animation_data
@@ -424,7 +433,8 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 'asset_path': f'{import_path}{asset_name}',
                 'skeleton_asset_path': properties.unreal_skeleton_asset_path,
                 'lods': export_lods(asset_id, asset_name, properties),
-                'sockets': get_asset_sockets(mesh_object.name, properties)
+                'sockets': get_asset_sockets(mesh_object.name, properties),
+                'skip': False
             }
             previous_asset_names.append(asset_name)
 
@@ -469,7 +479,8 @@ def create_groom_data(hair_objects, properties):
                 '_object_type': object_type,
                 'file_path': file_path,
                 'asset_folder': import_path,
-                'asset_path': f'{import_path}{asset_name}'
+                'asset_path': f'{import_path}{asset_name}',
+                'skip': False
             }
             # export particle hair systems as alembic file
             export_hair(asset_id, properties)

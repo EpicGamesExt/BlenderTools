@@ -396,6 +396,9 @@ def export(**keywords):
                         (object_world_location[1] - asset_world_location[1]) * SCALE_FACTOR,
                         (object_world_location[2] - asset_world_location[2]) * SCALE_FACTOR
                     ))
+                    # clear rotation and scale
+                    rot = (0, 0, 0)
+                    scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
                 else:
                     loc = Vector((0, 0, 0))
 
@@ -507,6 +510,12 @@ def export(**keywords):
         ).to_4x4()
     )
 
+    # save a copy of the original export bin
+    original_fbx_animations_do = export_fbx_bin.fbx_animations_do
+    original_fbx_data_armature_elements = export_fbx_bin.fbx_data_armature_elements
+    original_fbx_data_object_elements = export_fbx_bin.fbx_data_object_elements
+    original_fbx_data_bindpose_element = export_fbx_bin.fbx_data_bindpose_element
+
     # here is where we patch in our tweaked functions
     export_fbx_bin.fbx_animations_do = fbx_animations_do
     export_fbx_bin.fbx_data_armature_elements = fbx_data_armature_elements
@@ -520,3 +529,11 @@ def export(**keywords):
         {'report': report_error}
     )
     export_fbx_bin.save(self, bpy.context, **keywords)
+
+    # now re-patch back the export bin module so that the existing fbx addon still has its original code
+    # https://github.com/EpicGames/BlenderTools/issues/598
+    export_fbx_bin.fbx_animations_do = original_fbx_animations_do
+    export_fbx_bin.fbx_data_armature_elements = original_fbx_data_armature_elements
+    export_fbx_bin.fbx_data_object_elements = original_fbx_data_object_elements
+    export_fbx_bin.fbx_data_bindpose_element = original_fbx_data_bindpose_element
+

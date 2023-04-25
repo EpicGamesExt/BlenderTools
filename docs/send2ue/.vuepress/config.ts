@@ -67,6 +67,7 @@ export default defineUserConfig({
                         '/extensions/ue2rigify',
                         '/extensions/use-immediate-parent-name',
                         '/extensions/use-collections-as-folders',
+                        '/extensions/instance-assets'
                     ]
                 },
                 {

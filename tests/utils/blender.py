@@ -496,6 +496,19 @@ class BlenderRemoteCalls:
         # restore blend file to the default test file
         bpy.ops.wm.read_homefile(app_template="")
 
+    @staticmethod
+    def duplicate_with_linked_data(object_name, new_object_name, location):
+        if not bpy.data.objects.get(new_object_name):
+            scene_object = bpy.data.objects.get(object_name)
+            scene_object_duplicate = bpy.data.objects.new(new_object_name, scene_object.data)
+            bpy.context.scene.collection.objects.link(scene_object_duplicate)
+
+            scene_object_duplicate.location.x = location[0]
+            scene_object_duplicate.location.y = location[1]
+            scene_object_duplicate.location.z = location[2]
+
+            return scene_object.data.name
+
 
 class Blender:
     @staticmethod

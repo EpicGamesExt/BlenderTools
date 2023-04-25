@@ -379,3 +379,28 @@ class ValidationManager:
                 )
                 return False
         return True
+
+    def validate_meshes_for_vertex_groups(self):
+        """
+        Checks that meshes with armature modifiers actually have vertex groups.
+        """
+        missing_vertex_groups = []
+        if self.properties.validate_meshes_for_vertex_groups:
+            for mesh_object in self.mesh_objects:
+                for modifier in mesh_object.modifiers:
+                    if modifier.type == 'ARMATURE':
+                        if modifier.use_vertex_groups and not mesh_object.vertex_groups:
+                            missing_vertex_groups.append(mesh_object.name)
+
+        if missing_vertex_groups:
+            mesh_names = ''.join([f'"{mesh_name}"' for mesh_name in missing_vertex_groups])
+
+            utilities.report_error(
+                f"The following blender object(s) {mesh_names} have an armature modifier that "
+                f"that should be assigned to vertex groups, yet no vertex groups were found. To fix this, assign "
+                f"the vertices on your rig's mesh to vertex groups that match the armature's bone names. "
+                f"Otherwise disable this validation."
+            )
+            return False
+        return True
+

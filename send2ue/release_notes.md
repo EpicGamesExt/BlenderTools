@@ -1,15 +1,21 @@
-## Minor Changes
-* Fixed various connection and timeout issues by removing the authorization token in favor of checking CORS.
-  * [563](https://github.com/EpicGames/BlenderTools/issues/563)
-  * [564](https://github.com/EpicGames/BlenderTools/issues/564)
-  * [552](https://github.com/EpicGames/BlenderTools/issues/552)
-* Fixed issue with FBX exporter failing to export with warnings. Now the exports finish and warnings are printed to the system console.
-  * [565](https://github.com/EpicGames/BlenderTools/issues/565)
+## Major Changes
+* Added Instance Assets Extension. Read more [here](https://epicgames.github.io/BlenderTools/send2ue/extensions/instance-assets)
+  * [579](https://github.com/EpicGames/BlenderTools/issues/579)
 
-## Deprecated
-* The `RPC Auth Token` option has been removed from the addon preferences since it can be cumbersome to configure and
-was causing issues. Instead, the same security can be provided by checking CORS in the RPC server.
+## Minor Changes
+* Fixed unreal api change for removing lods.
+  * [586](https://github.com/EpicGames/BlenderTools/issues/586)
+* Fixed error when attempting to remove or add affixes on empty material slot.
+  * [455](https://github.com/EpicGames/BlenderTools/issues/455)
+* Fixed local rotation axis for static mesh sockets.
+  * [592](https://github.com/EpicGames/BlenderTools/issues/592)
+* Fixed AttributeError "NoneType" has no Attribute "matrix_world".
+  * [598](https://github.com/EpicGames/BlenderTools/issues/598)
+* Fixed root motion scale when importing assets into blender.
+  * [597](https://github.com/EpicGames/BlenderTools/issues/597)
+* Added validation to check for vertex groups on meshes that are assigned to an armature.
+  * [585](https://github.com/EpicGames/BlenderTools/issues/585)
 
 ## Tests Passing On
-* Blender `3.3`, `3.4`
+* Blender `3.3`, `3.5` (installed from blender.org)
 * Unreal `5.1`

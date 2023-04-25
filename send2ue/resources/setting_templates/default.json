@@ -96,6 +96,10 @@
     },
     "use_immediate_parent_name": {
       "use_immediate_parent_name": false
+    },
+    "instance_assets": {
+      "place_in_active_level": false,
+      "use_mesh_instances": false
     }
   },
   "import_animations": true,

@@ -3,6 +3,7 @@
 import os
 import re
 import bpy
+import math
 import shutil
 import importlib
 import tempfile
@@ -1017,6 +1018,15 @@ def convert_to_class_name(bl_idname):
     return ''.join([word.capitalize() for word in re.split(r'\.|_', bl_idname)])
 
 
+def convert_blender_local_rotation_to_unreal_local_rotation(rotation):
+    """
+    Converts blender local rotation axis to an unreal local rotation axis.
+
+    :return list[float]: The blender local rotation.
+    """
+    return [-math.degrees(rotation.y), -math.degrees(rotation.z), math.degrees(rotation.x)]
+
+
 def convert_blender_to_unreal_location(location):
     """
     Converts blender location coordinates to unreal location coordinates.
@@ -1521,7 +1531,7 @@ def scale_object_actions(unordered_objects, actions, scale_factor):
                     if fcurve.data_path == 'location':
                         for keyframe_point in fcurve.keyframe_points:
                             # just the location to preserve root motion
-                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index]
+                            keyframe_point.co[1] = keyframe_point.co[1] * scale[fcurve.array_index] * 100
                         # don't scale the objects location handles
                         continue
 

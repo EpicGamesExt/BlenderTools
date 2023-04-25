@@ -38,7 +38,8 @@ def add_affixes():
             append_affix(mesh_object, properties.extensions.affixes.static_mesh_name_affix)
 
         for slot in mesh_object.material_slots:
-            append_affix(slot.material, properties.extensions.affixes.material_name_affix)
+            if slot.material:
+                append_affix(slot.material, properties.extensions.affixes.material_name_affix)
 
         texture_images = get_texture_images(mesh_object)
         rename_all_textures(texture_images, append_affix, properties)
@@ -144,10 +145,11 @@ def get_texture_images(mesh_object):
     images = []
 
     for material_slot in mesh_object.material_slots:
-        if material_slot.material.node_tree:
-            for node in material_slot.material.node_tree.nodes:
-                if node.type == 'TEX_IMAGE':
-                    images.append(node.image)
+        if material_slot.material:
+            if material_slot.material.node_tree:
+                for node in material_slot.material.node_tree.nodes:
+                    if node.type == 'TEX_IMAGE':
+                        images.append(node.image)
 
     return images
 

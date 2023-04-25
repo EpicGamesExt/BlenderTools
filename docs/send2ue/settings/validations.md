@@ -34,3 +34,6 @@ valid usage in Blender, they are not valid to use in asset names in Unreal.
 
 Send2UE automatically converts any invalid characters to `_` during the export process
 if this validation is turned off.
+
+### Check meshes for vertex groups
+This checks that a mesh with an armature modifier has vertex groups.

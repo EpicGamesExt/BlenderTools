@@ -185,7 +185,7 @@ class SettingsDialog(bpy.types.Operator, dialog.Send2UnrealDialog):
 
 
 class ImportAsset(bpy.types.Operator, file_browser.ImportAsset):
-    """Import a file came from unreal"""
+    """Import a file that came from unreal"""
     bl_idname = "wm.import_asset"
     bl_label = "Import Asset"
     filename_ext = ".fbx"
