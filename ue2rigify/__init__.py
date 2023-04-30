@@ -46,8 +46,6 @@ def register():
     # TODO remove this when new undo is stable
     bpy.context.preferences.experimental.use_undo_legacy = True
 
-    templates.copy_default_templates()
-
     # reload the submodules
     if os.environ.get('UE2RIGIFY_DEV'):
         for module in modules:
@@ -59,6 +57,7 @@ def register():
     operators.register()
     nodes.register()
 
+    templates.copy_default_templates()
 
 def unregister():
     """
