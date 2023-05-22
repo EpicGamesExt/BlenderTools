@@ -3,10 +3,12 @@
 import bpy
 import os
 from math import degrees
+from mathutils import Vector
 from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
 from send2ue.dependencies.unreal import UnrealRemoteCalls
 from send2ue.core.utilities import (
+    convert_blender_rotation_to_unreal_rotation,
     convert_blender_to_unreal_location,
     get_armature_modifier_rig_object,
     get_asset_name
@@ -122,11 +124,10 @@ class InstanceAssetsExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.place_in_active_level:
-            scene_object = None
             unique_name = None
-            location = [1, 1, 1]
-            rotation = [0, 0, 0]
-            scale = [1, 1, 1]
+            location = Vector((1, 1, 1))
+            rotation = Vector((0, 0, 0))
+            scale = Vector((1, 1, 1))
 
             asset_type = asset_data['_asset_type']
 
@@ -138,7 +139,7 @@ class InstanceAssetsExtension(ExtensionBase):
                 scene_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                 unique_name = scene_object.name
                 location = list(scene_object.matrix_world.translation)
-                rotation = [degrees(i) for i in scene_object.rotation_euler]
+                rotation = scene_object.rotation_euler
                 scale = scene_object.scale[:]
 
             # anim sequences use the transforms of the first frame of the action
@@ -164,7 +165,7 @@ class InstanceAssetsExtension(ExtensionBase):
                 UnrealRemoteCalls.instance_asset(
                     asset_data['asset_path'],
                     convert_blender_to_unreal_location(location),
-                    rotation,
+                    convert_blender_rotation_to_unreal_rotation(rotation),
                     scale,
                     unique_name
                 )

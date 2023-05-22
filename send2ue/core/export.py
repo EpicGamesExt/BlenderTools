@@ -185,7 +185,7 @@ def get_asset_sockets(asset_name, properties):
                 relative_location = utilities.convert_blender_to_unreal_location(
                     child.matrix_local.translation
                 )
-                relative_rotation = utilities.convert_blender_local_rotation_to_unreal_local_rotation(
+                relative_rotation = utilities.convert_blender_rotation_to_unreal_rotation(
                     child.rotation_euler
                 )
                 socket_data[name] = {
