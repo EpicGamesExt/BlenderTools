@@ -142,15 +142,22 @@ class InstanceAssetsExtension(ExtensionBase):
 
             # anim sequences use the transforms of the first frame of the action
             if asset_type == UnrealTypes.ANIM_SEQUENCE:
+                # the transforms default to the armature object location
+                scene_object = bpy.data.objects.get(asset_data['_armature_object_name'])
+                location = list(scene_object.matrix_world.translation)
+                rotation = scene_object.rotation_euler
+                scale = scene_object.scale[:]
+
                 action = bpy.data.actions.get(asset_data['_action_name'])
                 unique_name = action.name
 
-                # set the location rotation and scale
+                # otherwise the if location is in the action curves, that first frame determines
+                # the actors location in the level
                 for fcurve in action.fcurves:
                     for keyframe in fcurve.keyframe_points:
-                        # only get the value from the start frame
-                        if keyframe.co[0] == action.frame_start:
-                            if fcurve.data_path == 'location':
+                        if fcurve.data_path == 'location':
+                            # only get the value from the start frame
+                            if keyframe.co[0] == action.frame_range[0]:
                                 location[fcurve.array_index] = keyframe.co[1]
                             break
 
