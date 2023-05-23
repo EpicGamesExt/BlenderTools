@@ -1024,7 +1024,10 @@ def convert_blender_rotation_to_unreal_rotation(rotation):
 
     :return list[float]: The blender local rotation.
     """
-    return [-math.degrees(rotation.y), -math.degrees(rotation.z), math.degrees(rotation.x)]
+    x = math.degrees(rotation[0])
+    y = math.degrees(rotation[1])
+    z = math.degrees(rotation[2])
+    return [-y, -z, x]
 
 
 def convert_blender_to_unreal_location(location):
