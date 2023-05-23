@@ -2,8 +2,6 @@
 
 import bpy
 import os
-from math import degrees
-from mathutils import Vector
 from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
 from send2ue.dependencies.unreal import UnrealRemoteCalls
