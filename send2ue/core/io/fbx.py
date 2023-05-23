@@ -396,9 +396,12 @@ def export(**keywords):
                         (object_world_location[1] - asset_world_location[1]) * SCALE_FACTOR,
                         (object_world_location[2] - asset_world_location[2]) * SCALE_FACTOR
                     ))
-                    # clear rotation and scale
-                    rot = (0, 0, 0)
-                    scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
+
+                    if bpy.context.scene.send2ue.extensions.instance_assets.place_in_active_level:
+                        # clear rotation and scale only if spawning actor
+                        # https://github.com/EpicGames/BlenderTools/issues/610
+                        rot = (0, 0, 0)
+                        scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
                 else:
                     loc = Vector((0, 0, 0))
 

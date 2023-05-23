@@ -1018,9 +1018,9 @@ def convert_to_class_name(bl_idname):
     return ''.join([word.capitalize() for word in re.split(r'\.|_', bl_idname)])
 
 
-def convert_blender_local_rotation_to_unreal_local_rotation(rotation):
+def convert_blender_rotation_to_unreal_rotation(rotation):
     """
-    Converts blender local rotation axis to an unreal local rotation axis.
+    Converts blender rotation axis to an unreal rotation axis.
 
     :return list[float]: The blender local rotation.
     """

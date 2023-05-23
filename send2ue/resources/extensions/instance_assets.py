@@ -6,8 +6,8 @@ from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
 from send2ue.dependencies.unreal import UnrealRemoteCalls
 from send2ue.core.utilities import (
+    convert_blender_rotation_to_unreal_rotation,
     convert_blender_to_unreal_location,
-    convert_blender_local_rotation_to_unreal_local_rotation,
     get_armature_modifier_rig_object,
     get_asset_name
 )
@@ -122,9 +122,8 @@ class InstanceAssetsExtension(ExtensionBase):
         :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
         """
         if self.place_in_active_level:
-            scene_object = None
             unique_name = None
-            location = [1, 1, 1]
+            location = [0, 0, 0]
             rotation = [0, 0, 0]
             scale = [1, 1, 1]
 
@@ -138,33 +137,35 @@ class InstanceAssetsExtension(ExtensionBase):
                 scene_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                 unique_name = scene_object.name
                 location = list(scene_object.matrix_world.translation)
-                rotation = list(scene_object.rotation_euler)
+                rotation = scene_object.rotation_euler
                 scale = scene_object.scale[:]
 
             # anim sequences use the transforms of the first frame of the action
             if asset_type == UnrealTypes.ANIM_SEQUENCE:
+                # the transforms default to the armature object location
+                scene_object = bpy.data.objects.get(asset_data['_armature_object_name'])
+                location = list(scene_object.matrix_world.translation)
+                rotation = scene_object.rotation_euler
+                scale = scene_object.scale[:]
+
                 action = bpy.data.actions.get(asset_data['_action_name'])
                 unique_name = action.name
 
-                # set the location rotation and scale
+                # otherwise the if location is in the action curves, that first frame determines
+                # the actors location in the level
                 for fcurve in action.fcurves:
-                    if fcurve.data_path in ['location', 'scale'] or fcurve.data_path.startswith('rotation'):
-                        for keyframe in fcurve.keyframe_points:
+                    for keyframe in fcurve.keyframe_points:
+                        if fcurve.data_path == 'location':
                             # only get the value from the start frame
-                            if keyframe.co[0] == action.frame_start:
-                                if fcurve.data_path == 'location':
-                                    location[fcurve.array_index] = keyframe.co[1]
-                                elif fcurve.data_path.startswith('rotation'):
-                                    rotation[fcurve.array_index] = keyframe.co[1]
-                                elif fcurve.data_path == 'scale':
-                                    scale[fcurve.array_index] = keyframe.co[1]
-                                break
+                            if keyframe.co[0] == action.frame_range[0]:
+                                location[fcurve.array_index] = keyframe.co[1]
+                            break
 
             if unique_name:
                 UnrealRemoteCalls.instance_asset(
                     asset_data['asset_path'],
                     convert_blender_to_unreal_location(location),
-                    convert_blender_local_rotation_to_unreal_local_rotation(rotation),
+                    convert_blender_rotation_to_unreal_rotation(rotation),
                     scale,
                     unique_name
                 )
