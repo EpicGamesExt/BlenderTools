@@ -1020,7 +1020,7 @@ def convert_to_class_name(bl_idname):
 
 def convert_blender_rotation_to_unreal_rotation(rotation):
     """
-    Converts blender local rotation axis to an unreal local rotation axis.
+    Converts blender rotation axis to an unreal rotation axis.
 
     :return list[float]: The blender local rotation.
     """

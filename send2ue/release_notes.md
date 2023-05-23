@@ -2,6 +2,8 @@
 * Fixed rotations on instance assets extension.
   * [602](https://github.com/EpicGames/BlenderTools/issues/602)
   * [621](https://github.com/EpicGames/BlenderTools/issues/621)
+* Fixed Transformation bug with use object origin option.
+  * [610](https://github.com/EpicGames/BlenderTools/issues/610)
 
 ## Special Thanks
 @abhiraaid

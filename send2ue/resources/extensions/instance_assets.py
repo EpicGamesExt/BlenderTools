@@ -125,9 +125,9 @@ class InstanceAssetsExtension(ExtensionBase):
         """
         if self.place_in_active_level:
             unique_name = None
-            location = Vector((1, 1, 1))
-            rotation = Vector((0, 0, 0))
-            scale = Vector((1, 1, 1))
+            location = [0, 0, 0]
+            rotation = [0, 0, 0]
+            scale = [1, 1, 1]
 
             asset_type = asset_data['_asset_type']
 
@@ -149,17 +149,12 @@ class InstanceAssetsExtension(ExtensionBase):
 
                 # set the location rotation and scale
                 for fcurve in action.fcurves:
-                    if fcurve.data_path in ['location', 'scale'] or fcurve.data_path.startswith('rotation'):
-                        for keyframe in fcurve.keyframe_points:
-                            # only get the value from the start frame
-                            if keyframe.co[0] == action.frame_start:
-                                if fcurve.data_path == 'location':
-                                    location[fcurve.array_index] = keyframe.co[1]
-                                elif fcurve.data_path.startswith('rotation'):
-                                    rotation[fcurve.array_index] = degrees(keyframe.co[1])
-                                elif fcurve.data_path == 'scale':
-                                    scale[fcurve.array_index] = keyframe.co[1]
-                                break
+                    for keyframe in fcurve.keyframe_points:
+                        # only get the value from the start frame
+                        if keyframe.co[0] == action.frame_start:
+                            if fcurve.data_path == 'location':
+                                location[fcurve.array_index] = keyframe.co[1]
+                            break
 
             if unique_name:
                 UnrealRemoteCalls.instance_asset(
