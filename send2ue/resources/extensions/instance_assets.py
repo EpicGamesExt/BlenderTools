@@ -2,12 +2,12 @@
 
 import bpy
 import os
-from math import degrees
 from send2ue.constants import UnrealTypes
 from send2ue.core.extension import ExtensionBase
 from send2ue.dependencies.unreal import UnrealRemoteCalls
 from send2ue.core.utilities import (
     convert_blender_to_unreal_location,
+    convert_blender_local_rotation_to_unreal_local_rotation,
     get_armature_modifier_rig_object,
     get_asset_name
 )
@@ -138,7 +138,7 @@ class InstanceAssetsExtension(ExtensionBase):
                 scene_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                 unique_name = scene_object.name
                 location = list(scene_object.matrix_world.translation)
-                rotation = [degrees(i) for i in scene_object.rotation_euler]
+                rotation = list(scene_object.rotation_euler)
                 scale = scene_object.scale[:]
 
             # anim sequences use the transforms of the first frame of the action
@@ -155,7 +155,7 @@ class InstanceAssetsExtension(ExtensionBase):
                                 if fcurve.data_path == 'location':
                                     location[fcurve.array_index] = keyframe.co[1]
                                 elif fcurve.data_path.startswith('rotation'):
-                                    rotation[fcurve.array_index] = degrees(keyframe.co[1])
+                                    rotation[fcurve.array_index] = keyframe.co[1]
                                 elif fcurve.data_path == 'scale':
                                     scale[fcurve.array_index] = keyframe.co[1]
                                 break
@@ -164,7 +164,7 @@ class InstanceAssetsExtension(ExtensionBase):
                 UnrealRemoteCalls.instance_asset(
                     asset_data['asset_path'],
                     convert_blender_to_unreal_location(location),
-                    rotation,
+                    convert_blender_local_rotation_to_unreal_local_rotation(rotation),
                     scale,
                     unique_name
                 )
