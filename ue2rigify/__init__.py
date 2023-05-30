@@ -5,7 +5,7 @@ import os
 import importlib
 from . import properties, operators, constants
 from .settings import tool_tips, viewport_settings
-from .core import scene, nodes, templates, utilities
+from .core import scene, nodes, templates, utilities, validations
 from .ui import view_3d, node_editor, addon_preferences, exporter
 
 
@@ -13,7 +13,7 @@ bl_info = {
     "name": "UE to Rigify",
     "author": "Epic Games Inc.",
     "description": "Allows you to drive a given rig and its animations with a Rigify rig.",
-    "version": (1, 6, 1),
+    "version": (1, 6, 2),
     "blender": (3, 3, 0),
     "location": "3D View > Tools > UE to Rigify",
     "wiki_url": "https://epicgames.github.io/BlenderTools/ue2rigify",
@@ -35,7 +35,8 @@ modules = [
     properties,
     node_editor,
     addon_preferences,
-    viewport_settings
+    viewport_settings,
+    validations
 ]
 
 
