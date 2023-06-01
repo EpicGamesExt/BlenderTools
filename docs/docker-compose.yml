@@ -7,6 +7,7 @@ services:
       - ./:/home/node
     environment:
       TEST: 1
+      GA_ID: $GA_ID
     working_dir: /home/node
     entrypoint: npm
     command: run build

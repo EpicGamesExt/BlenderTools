@@ -7,7 +7,7 @@ import bpy
 import importlib
 
 from ..constants import Modes, Collections, Rigify, Template
-from . import nodes, utilities, templates
+from . import nodes, utilities, templates, validations
 from ..ui import view_3d, node_editor
 from ..settings.tool_tips import *
 from ..settings.viewport_settings import *
@@ -1599,7 +1599,6 @@ def convert_to_control_rig(properties):
         )
 
 
-
 def switch_modes(self=None, context=None):
     """
     Called every time the mode enumeration dropdown is updated.
@@ -1609,44 +1608,48 @@ def switch_modes(self=None, context=None):
     """
     properties = bpy.context.scene.ue2rigify
 
-    # save the current context
-    utilities.save_context(properties)
+    # only switch modes if validations pass
+    validation_manager = validations.ValidationManager(properties)
+    if validation_manager.run():
 
-    # save the metarig
-    save_meta_rig(properties)
+        # save the current context
+        utilities.save_context(properties)
 
-    # save and remove the nodes
-    save_rig_nodes(properties)
+        # save the metarig
+        save_meta_rig(properties)
 
-    # save metadata
-    save_metadata(properties)
+        # save and remove the nodes
+        save_rig_nodes(properties)
 
-    # revert to the source rig
-    revert_to_source_rig(properties)
+        # save metadata
+        save_metadata(properties)
 
-    # restore the source mode viewport settings
-    utilities.restore_viewport_settings()
+        # revert to the source rig
+        revert_to_source_rig(properties)
 
-    # set the previous mode to the current mode
-    properties.previous_mode = properties.selected_mode
+        # restore the source mode viewport settings
+        utilities.restore_viewport_settings()
 
-    # set the template files to the previous mode
-    templates.set_template_files(properties)
+        # set the previous mode to the current mode
+        properties.previous_mode = properties.selected_mode
 
-    if properties.selected_mode == Modes.METARIG.name:
-        edit_meta_rig_template(properties)
+        # set the template files to the previous mode
+        templates.set_template_files(properties)
 
-    if properties.selected_mode == Modes.FK_TO_SOURCE.name:
-        edit_fk_to_source_nodes(properties)
+        if properties.selected_mode == Modes.METARIG.name:
+            edit_meta_rig_template(properties)
 
-    if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
-        edit_source_to_deform_nodes(properties)
+        if properties.selected_mode == Modes.FK_TO_SOURCE.name:
+            edit_fk_to_source_nodes(properties)
 
-    if properties.selected_mode == Modes.CONTROL.name:
-        convert_to_control_rig(properties)
+        if properties.selected_mode == Modes.SOURCE_TO_DEFORM.name:
+            edit_source_to_deform_nodes(properties)
 
-    # clear the undo history
-    utilities.clear_undo_history()
+        if properties.selected_mode == Modes.CONTROL.name:
+            convert_to_control_rig(properties)
 
-    # restore the context
-    utilities.load_context(properties)
+        # clear the undo history
+        utilities.clear_undo_history()
+
+        # restore the context
+        utilities.load_context(properties)

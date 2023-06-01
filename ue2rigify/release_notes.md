@@ -1,10 +1,7 @@
 ### Minor Changes
-* Added metadata template file for control mode attributes like custom bone shapes, colors, and transforms.
-  * [530](https://github.com/EpicGames/BlenderTools/issues/530)
-
-* Added Bake every option
-  * [496](https://github.com/EpicGames/BlenderTools/issues/496)
+* Added validation to ensure source rig has a scale of 1.
+  * [601](https://github.com/EpicGames/BlenderTools/issues/601)
 
 
 ## Tests Passing On
-* Blender `3.3`, `3.4`
+* Blender `3.5` (installed from blender.org)
