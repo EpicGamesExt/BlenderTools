@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@vuepress/cli": "^2.0.0-beta.62",
-    "@vuepress/plugin-google-analytics": "^2.0.0-beta.62",
+    "@vuepress/plugin-google-analytics": "^2.0.0-beta.63",
     "@vuepress/plugin-palette": "^2.0.0-beta.62"
   }
 }
