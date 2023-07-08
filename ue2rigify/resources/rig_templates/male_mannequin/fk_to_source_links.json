@@ -1,0 +1,536 @@
+[
+ {
+  "from_node": "Control Rig forearm_tweak.L.001",
+  "to_node": "Source Rig lowerarm_twist_01_l",
+  "from_socket": "forearm_tweak.L.001",
+  "to_socket": "lowerarm_twist_01_l"
+ },
+ {
+  "from_node": "Control Rig forearm_tweak.L.001",
+  "to_node": "Source Rig lowerarm_twist_01_l",
+  "from_socket": "hand_tweak.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig forearm_tweak.L.001",
+  "to_node": "Source Rig lowerarm_twist_01_l",
+  "from_socket": "forearm_tweak.L",
+  "to_socket": "lowerarm_l"
+ },
+ {
+  "from_node": "Control Rig forearm_tweak.L.001",
+  "to_node": "Source Rig lowerarm_twist_01_l",
+  "from_socket": "upper_arm_tweak.L",
+  "to_socket": "upperarm_twist_01_l"
+ },
+ {
+  "from_node": "Control Rig upper_arm_tweak.R",
+  "to_node": "Source Rig hand_r.001",
+  "from_socket": "upper_arm_tweak.R",
+  "to_socket": "upperarm_twist_01_r"
+ },
+ {
+  "from_node": "Control Rig upper_arm_tweak.R",
+  "to_node": "Source Rig hand_r.001",
+  "from_socket": "forearm_tweak.R",
+  "to_socket": "lowerarm_r"
+ },
+ {
+  "from_node": "Control Rig upper_arm_tweak.R",
+  "to_node": "Source Rig hand_r.001",
+  "from_socket": "forearm_tweak.R.001",
+  "to_socket": "lowerarm_twist_01_r"
+ },
+ {
+  "from_node": "Control Rig upper_arm_tweak.R",
+  "to_node": "Source Rig hand_r.001",
+  "from_socket": "hand_tweak.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig thumb.03.L",
+  "to_node": "Source Rig thumb_03_l",
+  "from_socket": "thumb.03.L",
+  "to_socket": "thumb_03_l"
+ },
+ {
+  "from_node": "Control Rig thumb.03.L",
+  "to_node": "Source Rig thumb_03_l",
+  "from_socket": "thumb.02.L",
+  "to_socket": "thumb_02_l"
+ },
+ {
+  "from_node": "Control Rig thumb.03.L",
+  "to_node": "Source Rig thumb_03_l",
+  "from_socket": "thumb.01.L",
+  "to_socket": "thumb_01_l"
+ },
+ {
+  "from_node": "Control Rig f_index.03.L",
+  "to_node": "Source Rig index_03_l",
+  "from_socket": "f_index.03.L",
+  "to_socket": "index_03_l"
+ },
+ {
+  "from_node": "Control Rig f_index.03.L",
+  "to_node": "Source Rig index_03_l",
+  "from_socket": "f_index.02.L",
+  "to_socket": "index_02_l"
+ },
+ {
+  "from_node": "Control Rig f_index.03.L",
+  "to_node": "Source Rig index_03_l",
+  "from_socket": "f_index.01.L",
+  "to_socket": "index_01_l"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.L",
+  "to_node": "Source Rig ring_03_l",
+  "from_socket": "f_ring.03.L",
+  "to_socket": "ring_03_l"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.L",
+  "to_node": "Source Rig ring_03_l",
+  "from_socket": "f_ring.02.L",
+  "to_socket": "ring_02_l"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.L",
+  "to_node": "Source Rig ring_03_l",
+  "from_socket": "f_ring.01.L",
+  "to_socket": "ring_01_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.L",
+  "to_node": "Source Rig pinky_03_l",
+  "from_socket": "f_pinky.03.L",
+  "to_socket": "pinky_03_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.L",
+  "to_node": "Source Rig pinky_03_l",
+  "from_socket": "f_pinky.02.L",
+  "to_socket": "pinky_02_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.L",
+  "to_node": "Source Rig pinky_03_l",
+  "from_socket": "f_pinky.01.L",
+  "to_socket": "pinky_01_l"
+ },
+ {
+  "from_node": "Control Rig thumb.02.R",
+  "to_node": "Source Rig thumb_03_r",
+  "from_socket": "thumb.03.R",
+  "to_socket": "thumb_03_r"
+ },
+ {
+  "from_node": "Control Rig thumb.02.R",
+  "to_node": "Source Rig thumb_03_r",
+  "from_socket": "thumb.02.R",
+  "to_socket": "thumb_02_r"
+ },
+ {
+  "from_node": "Control Rig thumb.02.R",
+  "to_node": "Source Rig thumb_03_r",
+  "from_socket": "thumb.01.R",
+  "to_socket": "thumb_01_r"
+ },
+ {
+  "from_node": "Control Rig f_index.03.R",
+  "to_node": "Source Rig index_03_r",
+  "from_socket": "f_index.03.R",
+  "to_socket": "index_03_r"
+ },
+ {
+  "from_node": "Control Rig f_index.03.R",
+  "to_node": "Source Rig index_03_r",
+  "from_socket": "f_index.02.R",
+  "to_socket": "index_02_r"
+ },
+ {
+  "from_node": "Control Rig f_index.03.R",
+  "to_node": "Source Rig index_03_r",
+  "from_socket": "f_index.01.R",
+  "to_socket": "index_01_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.R",
+  "to_node": "Source Rig middle_03_r",
+  "from_socket": "f_middle.03.R",
+  "to_socket": "middle_03_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.R",
+  "to_node": "Source Rig middle_03_r",
+  "from_socket": "f_middle.02.R",
+  "to_socket": "middle_02_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.R",
+  "to_node": "Source Rig middle_03_r",
+  "from_socket": "f_middle.01.R",
+  "to_socket": "middle_01_r"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.R",
+  "to_node": "Source Rig ring_03_r",
+  "from_socket": "f_ring.03.R",
+  "to_socket": "ring_03_r"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.R",
+  "to_node": "Source Rig ring_03_r",
+  "from_socket": "f_ring.02.R",
+  "to_socket": "ring_02_r"
+ },
+ {
+  "from_node": "Control Rig f_ring.03.R",
+  "to_node": "Source Rig ring_03_r",
+  "from_socket": "f_ring.01.R",
+  "to_socket": "ring_01_r"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.R",
+  "to_node": "Source Rig pinky_03_r",
+  "from_socket": "f_pinky.03.R",
+  "to_socket": "pinky_03_r"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.R",
+  "to_node": "Source Rig pinky_03_r",
+  "from_socket": "f_pinky.02.R",
+  "to_socket": "pinky_02_r"
+ },
+ {
+  "from_node": "Control Rig f_pinky.03.R",
+  "to_node": "Source Rig pinky_03_r",
+  "from_socket": "f_pinky.01.R",
+  "to_socket": "pinky_01_r"
+ },
+ {
+  "from_node": "Control Rig hips",
+  "to_node": "Source Rig pelvis",
+  "from_socket": "hips",
+  "to_socket": "pelvis"
+ },
+ {
+  "from_node": "Control Rig torso",
+  "to_node": "Source Rig pelvis.003",
+  "from_socket": "torso",
+  "to_socket": "pelvis"
+ },
+ {
+  "from_node": "Control Rig tweak_spine.004",
+  "to_node": "Source Rig neck_01",
+  "from_socket": "tweak_spine.004",
+  "to_socket": "neck_01"
+ },
+ {
+  "from_node": "Control Rig tweak_spine.004",
+  "to_node": "Source Rig neck_01",
+  "from_socket": "tweak_spine.003",
+  "to_socket": "spine_03"
+ },
+ {
+  "from_node": "Control Rig tweak_spine.004",
+  "to_node": "Source Rig neck_01",
+  "from_socket": "tweak_spine.002",
+  "to_socket": "spine_02"
+ },
+ {
+  "from_node": "Control Rig tweak_spine.004",
+  "to_node": "Source Rig neck_01",
+  "from_socket": "tweak_spine.001",
+  "to_socket": "spine_01"
+ },
+ {
+  "from_node": "Control Rig tweak_spine.004",
+  "to_node": "Source Rig neck_01",
+  "from_socket": "tweak_spine",
+  "to_socket": "pelvis"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "head",
+  "to_socket": "head"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "neck",
+  "to_socket": "neck_01"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "spine_fk.003",
+  "to_socket": "spine_03"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "spine_fk.002",
+  "to_socket": "spine_02"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "spine_fk.001",
+  "to_socket": "spine_01"
+ },
+ {
+  "from_node": "Control Rig head",
+  "to_node": "Source Rig head",
+  "from_socket": "spine_fk",
+  "to_socket": "pelvis"
+ },
+ {
+  "from_node": "Control Rig chest",
+  "to_node": "Source Rig spine_02",
+  "from_socket": "chest",
+  "to_socket": "spine_02"
+ },
+ {
+  "from_node": "Control Rig shoulder.L",
+  "to_node": "Source Rig clavicle_l",
+  "from_socket": "shoulder.L",
+  "to_socket": "clavicle_l"
+ },
+ {
+  "from_node": "Control Rig shoulder.L",
+  "to_node": "Source Rig clavicle_l",
+  "from_socket": "hand_fk.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig shoulder.L",
+  "to_node": "Source Rig clavicle_l",
+  "from_socket": "upper_arm_fk.L",
+  "to_socket": "upperarm_l"
+ },
+ {
+  "from_node": "Control Rig shoulder.L",
+  "to_node": "Source Rig clavicle_l",
+  "from_socket": "forearm_fk.L",
+  "to_socket": "lowerarm_l"
+ },
+ {
+  "from_node": "Control Rig shoulder.R",
+  "to_node": "Source Rig clavicle_r",
+  "from_socket": "shoulder.R",
+  "to_socket": "clavicle_r"
+ },
+ {
+  "from_node": "Control Rig shoulder.R",
+  "to_node": "Source Rig clavicle_r",
+  "from_socket": "hand_fk.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig shoulder.R",
+  "to_node": "Source Rig clavicle_r",
+  "from_socket": "upper_arm_fk.R",
+  "to_socket": "upperarm_r"
+ },
+ {
+  "from_node": "Control Rig shoulder.R",
+  "to_node": "Source Rig clavicle_r",
+  "from_socket": "forearm_fk.R",
+  "to_socket": "lowerarm_r"
+ },
+ {
+  "from_node": "Control Rig foot_tweak.L",
+  "to_node": "Source Rig thigh_l",
+  "from_socket": "foot_tweak.L",
+  "to_socket": "foot_l"
+ },
+ {
+  "from_node": "Control Rig foot_tweak.L",
+  "to_node": "Source Rig thigh_l",
+  "from_socket": "shin_tweak.L.001",
+  "to_socket": "calf_twist_01_l"
+ },
+ {
+  "from_node": "Control Rig foot_tweak.L",
+  "to_node": "Source Rig thigh_l",
+  "from_socket": "shin_tweak.L",
+  "to_socket": "calf_l"
+ },
+ {
+  "from_node": "Control Rig foot_tweak.L",
+  "to_node": "Source Rig thigh_l",
+  "from_socket": "thigh_tweak.L.001",
+  "to_socket": "thigh_twist_01_l"
+ },
+ {
+  "from_node": "Control Rig foot_tweak.L",
+  "to_node": "Source Rig thigh_l",
+  "from_socket": "thigh_tweak.L",
+  "to_socket": "thigh_l"
+ },
+ {
+  "from_node": "Control Rig toe.L",
+  "to_node": "Source Rig ball_l",
+  "from_socket": "toe.L",
+  "to_socket": "ball_l"
+ },
+ {
+  "from_node": "Control Rig toe.L",
+  "to_node": "Source Rig ball_l",
+  "from_socket": "foot_fk.L",
+  "to_socket": "foot_l"
+ },
+ {
+  "from_node": "Control Rig toe.L",
+  "to_node": "Source Rig ball_l",
+  "from_socket": "shin_fk.L",
+  "to_socket": "calf_l"
+ },
+ {
+  "from_node": "Control Rig toe.L",
+  "to_node": "Source Rig ball_l",
+  "from_socket": "thigh_fk.L",
+  "to_socket": "thigh_l"
+ },
+ {
+  "from_node": "Control Rig thigh_tweak.R",
+  "to_node": "Source Rig calf_r",
+  "from_socket": "shin_tweak.R",
+  "to_socket": "calf_r"
+ },
+ {
+  "from_node": "Control Rig thigh_tweak.R",
+  "to_node": "Source Rig calf_r",
+  "from_socket": "foot_tweak.R",
+  "to_socket": "foot_r"
+ },
+ {
+  "from_node": "Control Rig thigh_tweak.R",
+  "to_node": "Source Rig calf_r",
+  "from_socket": "shin_tweak.R.001",
+  "to_socket": "calf_twist_01_r"
+ },
+ {
+  "from_node": "Control Rig thigh_tweak.R",
+  "to_node": "Source Rig calf_r",
+  "from_socket": "thigh_tweak.R.001",
+  "to_socket": "thigh_twist_01_r"
+ },
+ {
+  "from_node": "Control Rig thigh_tweak.R",
+  "to_node": "Source Rig calf_r",
+  "from_socket": "thigh_tweak.R",
+  "to_socket": "thigh_r"
+ },
+ {
+  "from_node": "Control Rig toe.R",
+  "to_node": "Source Rig ball_r",
+  "from_socket": "toe.R",
+  "to_socket": "ball_r"
+ },
+ {
+  "from_node": "Control Rig toe.R",
+  "to_node": "Source Rig ball_r",
+  "from_socket": "foot_fk.R",
+  "to_socket": "foot_r"
+ },
+ {
+  "from_node": "Control Rig toe.R",
+  "to_node": "Source Rig ball_r",
+  "from_socket": "shin_fk.R",
+  "to_socket": "calf_r"
+ },
+ {
+  "from_node": "Control Rig toe.R",
+  "to_node": "Source Rig ball_r",
+  "from_socket": "thigh_fk.R",
+  "to_socket": "thigh_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.L",
+  "to_node": "Source Rig middle_03_l",
+  "from_socket": "f_middle.01.L",
+  "to_socket": "middle_01_l"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.L",
+  "to_node": "Source Rig middle_03_l",
+  "from_socket": "f_middle.02.L",
+  "to_socket": "middle_02_l"
+ },
+ {
+  "from_node": "Control Rig f_middle.03.L",
+  "to_node": "Source Rig middle_03_l",
+  "from_socket": "f_middle.03.L",
+  "to_socket": "middle_03_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.01_master.L",
+  "to_node": "Source Rig hand_l.004",
+  "from_socket": "f_pinky.01_master.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.01_master.L",
+  "to_node": "Source Rig hand_l.003",
+  "from_socket": "f_ring.01_master.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.01_master.L",
+  "to_node": "Source Rig hand_l.002",
+  "from_socket": "f_middle.01_master.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.01_master.L",
+  "to_node": "Source Rig hand_l.001",
+  "from_socket": "f_index.01_master.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig f_pinky.01_master.L",
+  "to_node": "Source Rig hand_l",
+  "from_socket": "thumb.01_master.L",
+  "to_socket": "hand_l"
+ },
+ {
+  "from_node": "Control Rig f_middle.01_master.R",
+  "to_node": "Source Rig hand_r.005",
+  "from_socket": "f_middle.01_master.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.01_master.R",
+  "to_node": "Source Rig hand_r.004",
+  "from_socket": "f_index.01_master.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.01_master.R",
+  "to_node": "Source Rig hand_r.003",
+  "from_socket": "f_ring.01_master.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.01_master.R",
+  "to_node": "Source Rig hand_r.002",
+  "from_socket": "f_pinky.01_master.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig f_middle.01_master.R",
+  "to_node": "Source Rig hand_r",
+  "from_socket": "thumb.01_master.R",
+  "to_socket": "hand_r"
+ },
+ {
+  "from_node": "Control Rig root",
+  "to_node": "Source Rig Object",
+  "from_socket": "root",
+  "to_socket": "object"
+ }
+]

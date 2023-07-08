@@ -1,0 +1,368 @@
+[
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "calf_twist_01_l",
+  "to_socket": "DEF-shin.L.001"
+ },
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "foot_l",
+  "to_socket": "DEF-foot.L"
+ },
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "thigh_twist_01_l",
+  "to_socket": "DEF-thigh.L.001"
+ },
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "ball_l",
+  "to_socket": "DEF-toe.L"
+ },
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "calf_l",
+  "to_socket": "DEF-shin.L"
+ },
+ {
+  "from_node": "Source Left Leg ",
+  "to_node": "Control Left Leg",
+  "from_socket": "thigh_l",
+  "to_socket": "DEF-thigh.L"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "foot_r",
+  "to_socket": "DEF-foot.R"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "thigh_twist_01_r",
+  "to_socket": "DEF-thigh.R.001"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "ball_r",
+  "to_socket": "DEF-toe.R"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "calf_twist_01_r",
+  "to_socket": "DEF-shin.R.001"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "calf_r",
+  "to_socket": "DEF-shin.R"
+ },
+ {
+  "from_node": "Source Right Leg",
+  "to_node": "Control Right Leg",
+  "from_socket": "thigh_r",
+  "to_socket": "DEF-thigh.R"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "head",
+  "to_socket": "DEF-spine.005"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "neck_01",
+  "to_socket": "DEF-spine.004"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "spine_03",
+  "to_socket": "DEF-spine.003"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "spine_02",
+  "to_socket": "DEF-spine.002"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "spine_01",
+  "to_socket": "DEF-spine.001"
+ },
+ {
+  "from_node": "Source Spine",
+  "to_node": "Control Spine",
+  "from_socket": "pelvis",
+  "to_socket": "DEF-spine"
+ },
+ {
+  "from_node": "Source Left Thumb",
+  "to_node": "Control Left Thumb",
+  "from_socket": "thumb_03_l",
+  "to_socket": "DEF-thumb.03.L"
+ },
+ {
+  "from_node": "Source Left Thumb",
+  "to_node": "Control Left Thumb",
+  "from_socket": "thumb_02_l",
+  "to_socket": "DEF-thumb.02.L"
+ },
+ {
+  "from_node": "Source Left Thumb",
+  "to_node": "Control Left Thumb",
+  "from_socket": "thumb_01_l",
+  "to_socket": "DEF-thumb.01.L"
+ },
+ {
+  "from_node": "Source Left Index Finger",
+  "to_node": "Control Left Index Finger",
+  "from_socket": "index_01_l",
+  "to_socket": "DEF-f_index.01.L"
+ },
+ {
+  "from_node": "Source Left Index Finger",
+  "to_node": "Control Left Index Finger",
+  "from_socket": "index_02_l",
+  "to_socket": "DEF-f_index.02.L"
+ },
+ {
+  "from_node": "Source Left Index Finger",
+  "to_node": "Control Left Index Finger",
+  "from_socket": "index_03_l",
+  "to_socket": "DEF-f_index.03.L"
+ },
+ {
+  "from_node": "Source Left Middle Finger",
+  "to_node": "Control Left Middle Finger",
+  "from_socket": "middle_01_l",
+  "to_socket": "DEF-f_middle.01.L"
+ },
+ {
+  "from_node": "Source Left Middle Finger",
+  "to_node": "Control Left Middle Finger",
+  "from_socket": "middle_03_l",
+  "to_socket": "DEF-f_middle.03.L"
+ },
+ {
+  "from_node": "Source Left Middle Finger",
+  "to_node": "Control Left Middle Finger",
+  "from_socket": "middle_02_l",
+  "to_socket": "DEF-f_middle.02.L"
+ },
+ {
+  "from_node": "Source Left Ring Finger",
+  "to_node": "Control Left Ring Finger",
+  "from_socket": "ring_03_l",
+  "to_socket": "DEF-f_ring.03.L"
+ },
+ {
+  "from_node": "Source Left Ring Finger",
+  "to_node": "Control Left Ring Finger",
+  "from_socket": "ring_02_l",
+  "to_socket": "DEF-f_ring.02.L"
+ },
+ {
+  "from_node": "Source Left Ring Finger",
+  "to_node": "Control Left Ring Finger",
+  "from_socket": "ring_01_l",
+  "to_socket": "DEF-f_ring.01.L"
+ },
+ {
+  "from_node": "Source Left Pinky Finger",
+  "to_node": "Control Left Pinky Finger",
+  "from_socket": "pinky_03_l",
+  "to_socket": "DEF-f_pinky.03.L"
+ },
+ {
+  "from_node": "Source Left Pinky Finger",
+  "to_node": "Control Left Pinky Finger",
+  "from_socket": "pinky_02_l",
+  "to_socket": "DEF-f_pinky.02.L"
+ },
+ {
+  "from_node": "Source Left Pinky Finger",
+  "to_node": "Control Left Pinky Finger",
+  "from_socket": "pinky_01_l",
+  "to_socket": "DEF-f_pinky.01.L"
+ },
+ {
+  "from_node": "Source Right Thumb",
+  "to_node": "Control Right Thumb",
+  "from_socket": "thumb_03_r",
+  "to_socket": "DEF-thumb.03.R"
+ },
+ {
+  "from_node": "Source Right Thumb",
+  "to_node": "Control Right Thumb",
+  "from_socket": "thumb_02_r",
+  "to_socket": "DEF-thumb.02.R"
+ },
+ {
+  "from_node": "Source Right Thumb",
+  "to_node": "Control Right Thumb",
+  "from_socket": "thumb_01_r",
+  "to_socket": "DEF-thumb.01.R"
+ },
+ {
+  "from_node": "Source Right Index Finger",
+  "to_node": "Control Right Index Finger",
+  "from_socket": "index_03_r",
+  "to_socket": "DEF-f_index.03.R"
+ },
+ {
+  "from_node": "Source Right Index Finger",
+  "to_node": "Control Right Index Finger",
+  "from_socket": "index_02_r",
+  "to_socket": "DEF-f_index.02.R"
+ },
+ {
+  "from_node": "Source Right Index Finger",
+  "to_node": "Control Right Index Finger",
+  "from_socket": "index_01_r",
+  "to_socket": "DEF-f_index.01.R"
+ },
+ {
+  "from_node": "Source Right Middle Finger",
+  "to_node": "Control Right Middle Finger",
+  "from_socket": "middle_03_r",
+  "to_socket": "DEF-f_middle.03.R"
+ },
+ {
+  "from_node": "Source Right Middle Finger",
+  "to_node": "Control Right Middle Finger",
+  "from_socket": "middle_02_r",
+  "to_socket": "DEF-f_middle.02.R"
+ },
+ {
+  "from_node": "Source Right Middle Finger",
+  "to_node": "Control Right Middle Finger",
+  "from_socket": "middle_01_r",
+  "to_socket": "DEF-f_middle.01.R"
+ },
+ {
+  "from_node": "Source Right Ring Finger",
+  "to_node": "Control Right Ring Finger",
+  "from_socket": "ring_03_r",
+  "to_socket": "DEF-f_ring.03.R"
+ },
+ {
+  "from_node": "Source Right Ring Finger",
+  "to_node": "Control Right Ring Finger",
+  "from_socket": "ring_02_r",
+  "to_socket": "DEF-f_ring.02.R"
+ },
+ {
+  "from_node": "Source Right Ring Finger",
+  "to_node": "Control Right Ring Finger",
+  "from_socket": "ring_01_r",
+  "to_socket": "DEF-f_ring.01.R"
+ },
+ {
+  "from_node": "Source Right Pinky Finger",
+  "to_node": "Control Right Pinky Finger",
+  "from_socket": "pinky_01_r",
+  "to_socket": "DEF-f_pinky.01.R"
+ },
+ {
+  "from_node": "Source Right Pinky Finger",
+  "to_node": "Control Right Pinky Finger",
+  "from_socket": "pinky_02_r",
+  "to_socket": "DEF-f_pinky.02.R"
+ },
+ {
+  "from_node": "Source Right Pinky Finger",
+  "to_node": "Control Right Pinky Finger",
+  "from_socket": "pinky_03_r",
+  "to_socket": "DEF-f_pinky.03.R"
+ },
+ {
+  "from_node": "Source Rig clavicle_l",
+  "to_node": "Control Rig DEF-shoulder.L",
+  "from_socket": "clavicle_l",
+  "to_socket": "DEF-shoulder.L"
+ },
+ {
+  "from_node": "Source Rig clavicle_l",
+  "to_node": "Control Rig DEF-shoulder.L",
+  "from_socket": "hand_l",
+  "to_socket": "DEF-hand.L"
+ },
+ {
+  "from_node": "Source Rig clavicle_l",
+  "to_node": "Control Rig DEF-shoulder.L",
+  "from_socket": "lowerarm_l",
+  "to_socket": "DEF-forearm.L"
+ },
+ {
+  "from_node": "Source Rig clavicle_l",
+  "to_node": "Control Rig DEF-shoulder.L",
+  "from_socket": "upperarm_l",
+  "to_socket": "DEF-upper_arm.L"
+ },
+ {
+  "from_node": "Source Rig lowerarm_twist_01_l",
+  "to_node": "Control Rig DEF-forearm.L.001",
+  "from_socket": "lowerarm_twist_01_l",
+  "to_socket": "DEF-forearm.L.001"
+ },
+ {
+  "from_node": "Source Rig lowerarm_twist_01_l",
+  "to_node": "Control Rig DEF-forearm.L.001",
+  "from_socket": "upperarm_twist_01_l",
+  "to_socket": "DEF-upper_arm.L"
+ },
+ {
+  "from_node": "Source Rig hand_r",
+  "to_node": "Control Rig DEF-hand.R",
+  "from_socket": "hand_r",
+  "to_socket": "DEF-hand.R"
+ },
+ {
+  "from_node": "Source Rig hand_r",
+  "to_node": "Control Rig DEF-hand.R",
+  "from_socket": "lowerarm_r",
+  "to_socket": "DEF-forearm.R"
+ },
+ {
+  "from_node": "Source Rig hand_r",
+  "to_node": "Control Rig DEF-hand.R",
+  "from_socket": "upperarm_r",
+  "to_socket": "DEF-upper_arm.R"
+ },
+ {
+  "from_node": "Source Rig hand_r",
+  "to_node": "Control Rig DEF-hand.R",
+  "from_socket": "clavicle_r",
+  "to_socket": "DEF-shoulder.R"
+ },
+ {
+  "from_node": "Source Rig lowerarm_twist_01_r",
+  "to_node": "Control Rig DEF-forearm.R.001",
+  "from_socket": "lowerarm_twist_01_r",
+  "to_socket": "DEF-forearm.R.001"
+ },
+ {
+  "from_node": "Source Rig lowerarm_twist_01_r",
+  "to_node": "Control Rig DEF-forearm.R.001",
+  "from_socket": "upperarm_twist_01_r",
+  "to_socket": "DEF-upper_arm.R"
+ },
+ {
+  "from_node": "Source Rig Object",
+  "to_node": "Control Rig root",
+  "from_socket": "object",
+  "to_socket": "root"
+ }
+]
