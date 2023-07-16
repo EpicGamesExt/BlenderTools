@@ -157,7 +157,7 @@ def get_export_folder_path(properties, asset_type):
     return export_folder
 
 
-def get_import_path(properties, unreal_asset_type, *args):
+def get_import_path(properties, unreal_asset_type, *args, **kwargs):
     """
     Gets the unreal import path.
 
@@ -435,7 +435,7 @@ def get_parent_collection(scene_object, collection):
         return collection
 
 
-def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path):
+def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path, *args, **kwargs):
     """
     Gets the asset path to the skeleton.
 
@@ -458,7 +458,7 @@ def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import
         for child in children:
             if child in mesh_collection_objects:
                 asset_name = get_asset_name(child.name, properties)
-                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH)
+                import_path = get_path_function(properties, UnrealTypes.SKELETAL_MESH, *args, **kwargs)
                 return f'{import_path}{asset_name}_Skeleton'
 
     report_error(

@@ -35,6 +35,7 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
                         scene_object,
                         properties,
                         self.get_full_import_path,
+                        scene_object,
                     )
                 })
             elif asset_type:
