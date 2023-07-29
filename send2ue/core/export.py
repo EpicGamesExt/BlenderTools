@@ -193,6 +193,20 @@ def get_asset_sockets(asset_name, properties):
                     'relative_rotation': relative_rotation,
                     'relative_scale': child.matrix_local.to_scale()[:]
                 }
+            elif child.type == 'EMPTY' and child.is_instancer:
+                # demote collection instances to sockets
+                name = 'MeshAttach_' + child.instance_collection.name + '#' + child.name
+                relative_location = utilities.convert_blender_to_unreal_location(
+                    child.location
+                )
+                relative_rotation = utilities.convert_blender_rotation_to_unreal_rotation(
+                    child.rotation_euler
+                )
+                socket_data[name] = {
+                    'relative_location': relative_location,
+                    'relative_rotation': relative_rotation,
+                    'relative_scale': child.matrix_local.to_scale()[:]
+                }
     return socket_data
 
 

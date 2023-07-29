@@ -356,6 +356,30 @@ def get_mesh_object_for_groom_name(groom_name):
             return scene_object.data.surface
 
 
+def get_from_collection_recursive(object_type, collection):
+    """
+    Internal method for get_from_collection()
+    """
+    collection_objects = []
+    
+    # get all the objects in the collection
+    for collection_object in collection.all_objects:
+        if collection_object.is_instancer:
+            # recurse into collection instances
+            collection_objects += get_from_collection_recursive(object_type, collection_object.instance_collection)
+        else:
+            # if the object is the correct type
+            if collection_object.type == object_type:
+                # if the object is visible
+                if collection_object.visible_get():
+                    # ensure the object doesn't end with one of the post fix tokens
+                    if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
+                        # add it to the group of objects
+                        collection_objects.append(collection_object)
+    
+    return collection_objects
+
+
 def get_from_collection(object_type):
     """
     This function fetches the objects inside each collection according to type and returns
@@ -369,16 +393,7 @@ def get_from_collection(object_type):
     # get the collection with the given name
     export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
     if export_collection:
-        # get all the objects in the collection
-        for collection_object in export_collection.all_objects:
-            # if the object is the correct type
-            if collection_object.type == object_type:
-                # if the object is visible
-                if collection_object.visible_get():
-                    # ensure the object doesn't end with one of the post fix tokens
-                    if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
-                        # add it to the group of objects
-                        collection_objects.append(collection_object)
+        collection_objects = get_from_collection_recursive(object_type, export_collection)
     return sorted(collection_objects, key=lambda obj: obj.name)
 
 
