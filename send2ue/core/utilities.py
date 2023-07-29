@@ -449,6 +449,12 @@ def get_parent_collection(scene_object, collection):
     if scene_object in collection.objects.values():
         return collection
 
+    # fallback in case scene_object is not contained within specified collection
+    for collection in bpy.data.collections:
+        for object in collection.objects:
+            if object == scene_object:
+                return collection
+
 
 def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path, *args, **kwargs):
     """
