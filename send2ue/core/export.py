@@ -198,8 +198,9 @@ def get_asset_sockets_for_mesh(mesh_object, properties, parent_mtx, scan_depth=0
         local_mtx = parent_mtx @ mesh_object.matrix_local
         if mesh_object.type == 'EMPTY' and mesh_object.name.startswith(f'{PreFixToken.SOCKET.value}_'):
             name = utilities.get_asset_name(mesh_object.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
-            socket_data[name] = local_mtx
+            socket_data[name] = mesh_object.matrix_local
         elif mesh_object.type == 'EMPTY' and mesh_object.is_instancer:
+            local_mtx = parent_mtx @ mathutils.Matrix.Translation(-mesh_object.instance_collection.instance_offset) @ mesh_object.matrix_local
             if unique_id:
                 local_id = unique_id + '_' + mesh_object.name
             else:
@@ -241,6 +242,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     if lod == 0:
         extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
 
+    # apply instance offset
+    if len(mesh_object.users_collection) == 1:
+        mesh_object.delta_location -= mesh_object.users_collection[0].instance_offset
+
     # select the scene object
     mesh_object.select_set(True)
 
@@ -262,6 +267,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     # run the post mesh export extensions
     if lod == 0:
         extension.run_extension_tasks(ExtensionTasks.POST_MESH_EXPORT.value)
+
+    # unapply instance offset
+    if len(mesh_object.users_collection) == 1:
+        mesh_object.delta_location += mesh_object.users_collection[0].instance_offset
 
 
 @utilities.track_progress(message='Exporting animation "{attribute}"...', attribute='file_path')
