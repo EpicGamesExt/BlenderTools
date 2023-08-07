@@ -209,7 +209,7 @@ class ValidationManager:
                     for polygon in mesh_object.data.polygons:
                         if polygon.material_index >= len(mesh_object.material_slots):
                             utilities.report_error('Material index out of bounds!', f'Object "{mesh_object.name}" at polygon #{polygon.index} references invalid material index #{polygon.material_index}.')
-                            continue
+                            return False
 
                         material = mesh_object.material_slots[polygon.material_index].name
                         # remove used material names from the list of unused material names
