@@ -172,8 +172,10 @@ def export_file(properties, lod=0, file_type=FileTypes.FBX):
 def get_asset_sockets_for_collection(collection_object, properties, parent_mtx, scan_depth=0, unique_id=''):
     socket_data = {}
     if collection_object:
-        for object in collection_object.objects:
-            local_mtx = parent_mtx @ mathutils.Matrix.Translation(-collection_object.instance_offset) @ object.matrix_local
+        # only iterate children which are rooted directly to the collection, children-of-children handled by inner recursion
+        root_objects = [x for x in collection_object.objects if not x.parent]
+        for object in root_objects:
+            local_mtx = parent_mtx @ mathutils.Matrix.Translation(-collection_object.instance_offset) @ object.matrix_world
             if object.is_instancer:
                 # collection object is an instance of another collection
                 socket_data |= get_asset_sockets_for_collection(object.instance_collection, properties, local_mtx, scan_depth+1, unique_id + '_' + object.name)
@@ -195,10 +197,10 @@ def get_asset_sockets_for_mesh(mesh_object, properties, parent_mtx, scan_depth=0
     """
     socket_data = {}
     if mesh_object:
-        local_mtx = parent_mtx @ mesh_object.matrix_local
+        local_mtx = parent_mtx @ mesh_object.matrix_world
         if mesh_object.type == 'EMPTY' and mesh_object.name.startswith(f'{PreFixToken.SOCKET.value}_'):
             name = utilities.get_asset_name(mesh_object.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
-            socket_data[name] = mesh_object.matrix_local
+            socket_data[name] = local_mtx
         elif mesh_object.type == 'EMPTY' and mesh_object.is_instancer:
             if unique_id:
                 local_id = unique_id + '_' + mesh_object.name
@@ -208,7 +210,7 @@ def get_asset_sockets_for_mesh(mesh_object, properties, parent_mtx, scan_depth=0
 
         # recurse into child meshes
         for child in mesh_object.children:
-            socket_data |= get_asset_sockets_for_mesh(child, properties, local_mtx, scan_depth, unique_id)
+            socket_data |= get_asset_sockets_for_mesh(child, properties, parent_mtx, scan_depth, unique_id)
     return socket_data
 
 
