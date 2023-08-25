@@ -9,14 +9,18 @@ computer to see if they are blocked by another application.
 
 Before you start the Unreal Editor, run these commands from a PowerShell prompt:
 
-     netstat -an|sls 6766
+```commandline
+    netstat -an|sls 6766
+```
 
 Then start your project (that has Remote Execution enabled with the multicast group endpoint presumably set to
 239.0.0.1:6766) and run these commands again.
 
 The first time, you run `netstat`, nothing should show up. The second time you run it, you should see this:
 
-    UDP    0.0.0.0:6766           *:*
+```commandline
+   UDP    0.0.0.0:6766           *:*
+```
 
 
 
@@ -35,4 +39,4 @@ If you open a new blend file that does not already contain Send to Unreal proper
 the defaults. If you load a saved file, the settings will be the values they were saved at.
 
 ### Why isn't it finding my X (skeleton, physics asset, ...)?
-For setting the skeleton and physics asset in the Path setting, make sure the game isn't running in PIE. For doing anything with the addon make sure not to have PIE running. 
+For setting the skeleton and physics asset in the Path setting, make sure the game isn't running in PIE. For doing anything with the addon make sure not to have PIE running.
