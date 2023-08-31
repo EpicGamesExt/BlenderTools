@@ -56,7 +56,6 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         sub_path = self.get_collections_as_path(scene_object, properties)
         export_path = os.path.join(game_path, sub_path)
         return export_path
-    
 
     def pre_import(self, asset_data, properties):
         """
