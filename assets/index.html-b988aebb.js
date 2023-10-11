@@ -1,0 +1,1 @@
+const e=JSON.parse('{"key":"v-8daa1a0e","path":"/","title":"Addons","lang":"en-US","frontmatter":{"home":false},"headers":[{"level":2,"title":"Send to Unreal","slug":"send-to-unreal","link":"#send-to-unreal","children":[]},{"level":2,"title":"UE to Rigify","slug":"ue-to-rigify","link":"#ue-to-rigify","children":[]}],"git":{},"filePathRelative":"index.md"}');export{e as data};
