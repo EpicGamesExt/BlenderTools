@@ -241,7 +241,17 @@ def update_unreal_skeleton_asset_path(self, context):
     :param object self: This is a reference to the property data object.
     :param object context: The context when the property was called.
     """
-    auto_format_unreal_asset_path('unreal_skeleton_asset_path', self)
+    name = 'unreal_skeleton_asset_path'
+    error_message = auto_format_unreal_asset_path(name, self)
+    value = getattr(self, name)
+    if value and not error_message:
+        asset_type = UnrealRemoteCalls.get_asset_type(value)
+        if asset_type != 'Skeleton':
+            error_message = f'This is a {asset_type} asset. This must be a Skeleton asset.'
+            set_property_error_message(
+                name,
+                error_message
+            )
 
 
 def update_unreal_physics_asset_path(self, context):

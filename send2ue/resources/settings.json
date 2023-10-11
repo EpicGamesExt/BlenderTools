@@ -275,12 +275,6 @@
               0.0
             ]
           },
-          "import_uniform_scale": {
-            "name": "Import Uniform Scale",
-            "description": "Import Uniform Scale",
-            "type": "FLOAT",
-            "default": 1.0
-          },
           "reorder_material_to_fbx_order": {
             "name": "Reorder Material to FBX Order",
             "description": "The material list will be reorder to the same order has the FBX file",
@@ -532,12 +526,6 @@
               0.0
             ]
           },
-          "import_uniform_scale": {
-            "name": "Import Uniform Scale",
-            "description": "Import Uniform Scale",
-            "type": "FLOAT",
-            "default": 1.0
-          },
           "reorder_material_to_fbx_order": {
             "name": "Reorder Material to FBX Order",
             "description": "The material list will be reorder to the same order has the FBX file",
@@ -704,12 +692,6 @@
               0.0,
               0.0
             ]
-          },
-          "import_uniform_scale": {
-            "name": "Import Uniform Scale",
-            "description": "Import Uniform Scale",
-            "type": "FLOAT",
-            "default": 1.0
           }
         },
         "texture_import_data": {
@@ -862,12 +844,6 @@
               0.0,
               0.0
             ]
-          },
-          "import_uniform_scale": {
-            "name": "Import Uniform Scale",
-            "description": "Import Uniform Scale",
-            "type": "FLOAT",
-            "default": 1.0
           }
         }
       },

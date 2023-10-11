@@ -193,7 +193,6 @@
             0.0,
             0.0
           ],
-          "import_uniform_scale": 1.0,
           "material_curve_suffixes": "",
           "preserve_local_transform": true,
           "remove_redundant_keys": true,
@@ -220,7 +219,6 @@
             0.0,
             0.0
           ],
-          "import_uniform_scale": 1.0,
           "morph_threshold_position": 0.014999999664723873,
           "normal_generation_method": "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE",
           "normal_import_method": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
@@ -261,7 +259,6 @@
             0.0,
             0.0
           ],
-          "import_uniform_scale": 1.0,
           "normal_generation_method": "unreal.FBXNormalGenerationMethod.MIKK_T_SPACE",
           "normal_import_method": "unreal.FBXNormalImportMethod.FBXNIM_IMPORT_NORMALS_AND_TANGENTS",
           "one_convex_hull_per_ucx": true,
@@ -299,7 +296,6 @@
             0.0,
             0.0
           ],
-          "import_uniform_scale": 1.0,
           "invert_normal_maps": false,
           "material_search_location": "unreal.MaterialSearchLocation.LOCAL"
         }
