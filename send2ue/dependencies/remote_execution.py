@@ -1,5 +1,6 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
+import os
 import sys as _sys
 import json as _json
 import uuid as _uuid
@@ -23,7 +24,7 @@ _NODE_TIMEOUT_SECONDS = 5                               # Number of seconds to w
 
 DEFAULT_MULTICAST_TTL = 0                               # Multicast TTL (0 is limited to the local host, 1 is limited to the local subnet)
 DEFAULT_MULTICAST_GROUP_ENDPOINT = ('239.0.0.1', 6766)  # The multicast group endpoint tuple that the UDP multicast socket should join (must match the "Multicast Group Endpoint" setting in the Python plugin)
-DEFAULT_MULTICAST_BIND_ADDRESS = '0.0.0.0'              # The adapter address that the UDP multicast socket should bind to, or 0.0.0.0 to bind to all adapters (must match the "Multicast Bind Address" setting in the Python plugin)
+DEFAULT_MULTICAST_BIND_ADDRESS = '127.0.0.1'            # The adapter address that the UDP multicast socket should bind to, or 127.0.0.1 to bind to all adapters (must match the "Multicast Bind Address" setting in the Python plugin)
 DEFAULT_COMMAND_ENDPOINT = ('127.0.0.1', 6776)          # The endpoint tuple for the TCP command connection hosted by this client (that the remote client will connect to)
 DEFAULT_RECEIVE_BUFFER_SIZE = 8192                      # The default receive buffer size
 
@@ -540,7 +541,7 @@ class _RemoteExecutionMessage(object):
         if self.data:
             json_obj['data'] = self.data
         return _json.dumps(json_obj, ensure_ascii=False)
-    
+
     def to_json_bytes(self):
         '''
         Convert this message to its JSON representation as UTF-8 bytes.

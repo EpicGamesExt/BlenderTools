@@ -13,6 +13,12 @@ except ImportError:
     pass
 
 
+IGNORE_PATTERNS = [
+    "__pycache__",
+    "*.pyc"
+]
+
+
 class AddonPackager:
 
     def __init__(self, addon_name, addon_folder_path, output_folder):
@@ -148,7 +154,11 @@ class AddonPackager:
                 logging.warning(f'Could not delete {versioned_folder_path}!')
 
         # copy the addon module in to the versioned directory with its addon module name as a sub directory
-        shutil.copytree(self.addon_folder_path, os.path.join(versioned_folder_path, self.addon_name))
+        shutil.copytree(
+            self.addon_folder_path,
+            os.path.join(versioned_folder_path, self.addon_name),
+            ignore=shutil.ignore_patterns(*IGNORE_PATTERNS)
+        )
 
         # make a zip archive of the copied folder
         shutil.make_archive(versioned_folder_path, 'zip', versioned_folder_path)

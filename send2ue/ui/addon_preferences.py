@@ -29,7 +29,6 @@ class SendToUnrealPreferences(Send2UeAddonProperties, bpy.types.AddonPreferences
         row.prop(self, 'extensions_repo_path', text='')
         row.operator('send2ue.reload_extensions', text='', icon='UV_SYNC_SELECT')
 
-
 def register():
     """
     Registers the addon preferences when the addon is enabled.

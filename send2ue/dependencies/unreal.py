@@ -333,6 +333,24 @@ class Unreal:
         return None
 
     @staticmethod
+    def get_bone_pose_for_frame(anim_sequence, bone_name, frame, extract_root_motion):
+        """
+        Gets the local transform of the bone at the specified frame in the anim sequence.
+
+
+        :param object anim_sequence: An unreal anim sequence object.
+        :param str bone_name: A bone name.
+        :param float frame: The frame to get the transform at.
+        :param bool extract_root_motion: Whether to include root motion in the returned transform.
+        :returns: A transform.
+        :rtype: unreal.Transform
+        """
+        pose_options = unreal.AnimPoseEvaluationOptions()
+        pose_options.set_editor_property('extract_root_motion', extract_root_motion)
+        pose = unreal.AnimPoseExtensions.get_anim_pose_at_frame(anim_sequence, frame, pose_options)
+        return unreal.AnimPoseExtensions.get_bone_pose(pose, bone_name)
+
+    @staticmethod
     def set_settings(property_group, data_object):
         """
         Sets a group of properties onto an unreal object.
@@ -985,6 +1003,17 @@ class UnrealRemoteCalls:
             lod_count = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_lod_count(asset)
 
         return lod_count
+    @staticmethod
+    def get_asset_type(asset_path):
+        """
+        Gets the asset type of the given asset.
+
+        :param str asset_path: The path to the unreal asset.
+        :return str: The number of lods on the asset.
+        """
+        asset = Unreal.get_asset(asset_path)
+        if asset:
+            return asset.__class__.__name__
 
     @staticmethod
     def asset_exists(asset_path):
@@ -992,7 +1021,7 @@ class UnrealRemoteCalls:
         Checks to see if an asset exist in unreal.
 
         :param str asset_path: The path to the unreal asset.
-        :return bool: Whether or not the asset exists.
+        :return bool: Whether the asset exists.
         """
         return bool(unreal.load_asset(asset_path))
 
@@ -1085,7 +1114,7 @@ class UnrealRemoteCalls:
 
         :param str asset_path: The path to the unreal asset.
         :param str socket_name: The name of the socket to look for.
-        :return bool: Whether or not the asset has the given socket or not.
+        :return bool: Whether the asset has the given socket or not.
         """
         mesh = Unreal.get_asset(asset_path)
         return bool(mesh.find_socket(socket_name))
@@ -1097,7 +1126,7 @@ class UnrealRemoteCalls:
 
         :param str binding_asset_path: The path to the unreal binding asset.
         :param str groom_asset_path: The path to the unreal groom asset.
-        :return bool: Whether or not the binding asset has the given groom.
+        :return bool: Whether the binding asset has the given groom.
         """
         binding_asset = unreal.load_asset(binding_asset_path)
         groom_asset = unreal.load_asset(groom_asset_path)
@@ -1114,7 +1143,7 @@ class UnrealRemoteCalls:
 
         :param str binding_asset_path: The path to the unreal binding asset.
         :param str target_mesh_path: The path to the unreal skeletal mesh asset.
-        :return bool: Whether or not the binding asset has the given skeletal mesh target.
+        :return bool: Whether the binding asset has the given skeletal mesh target.
         """
         binding_asset = unreal.load_asset(binding_asset_path)
         mesh_asset = unreal.load_asset(target_mesh_path)
@@ -1181,7 +1210,7 @@ class UnrealRemoteCalls:
 
         :param str asset_path: The path to the unreal asset.
         :param str socket_name: The name of the socket to look for.
-        :return bool: Whether or not the asset has the given socket and the owner (outer) is properly assigned or not.
+        :return bool: Whether the asset has the given socket and the owner (outer) is properly assigned or not.
         """
         mesh = Unreal.get_asset(asset_path)
         socket = mesh.find_socket(socket_name)
@@ -1196,7 +1225,7 @@ class UnrealRemoteCalls:
         Deletes an asset in unreal.
 
         :param str asset_path: The path to the unreal asset.
-        :return bool: Whether or not the asset was deleted.
+        :return bool: Whether the asset was deleted.
         """
         if unreal.EditorAssetLibrary.does_asset_exist(asset_path):
             unreal.EditorAssetLibrary.delete_asset(asset_path)
@@ -1204,14 +1233,13 @@ class UnrealRemoteCalls:
     @staticmethod
     def delete_directory(directory_path):
         """
-        Deletes an folder and its contents in unreal.
+        Deletes a folder and its contents in unreal.
 
         :param str directory_path: The game path to the unreal project folder.
-        :return bool: Whether or not the directory was deleted.
+        :return bool: Whether the directory was deleted.
         """
-        # API BUG:cant check if exists https://jira.it.epicgames.com/browse/UE-142234
-        # if unreal.EditorAssetLibrary.does_directory_exist(directory_path):
-        unreal.EditorAssetLibrary.delete_directory(directory_path)
+        if unreal.EditorAssetLibrary.does_directory_exist(directory_path):
+            unreal.EditorAssetLibrary.delete_directory(directory_path)
 
     @staticmethod
     def import_asset(file_path, asset_data, property_data):
@@ -1246,7 +1274,7 @@ class UnrealRemoteCalls:
         :param str asset_path: The project path to the asset.
         :param str asset_class: The name of the unreal asset class.
         :param str asset_factory: The name of the unreal factory.
-        :param bool unique_name: Whether or not the check if the name is unique before creating the asset.
+        :param bool unique_name: Whether the check if the name is unique before creating the asset.
         """
         asset_class = getattr(unreal, asset_class)
         factory = getattr(unreal, asset_factory)()
@@ -1472,11 +1500,13 @@ class UnrealRemoteCalls:
         """
         animation = Unreal.get_asset(asset_path)
         path = unreal.AnimationLibrary.find_bone_path_to_root(animation, bone_name)
-        transform = unreal.AnimationLibrary.get_bone_pose_for_frame(animation, bone_name, frame, True)
+        transform = Unreal.get_bone_pose_for_frame(animation, bone_name, frame, True)
         world_rotation = unreal.Rotator()
         world_location = unreal.Transform()
+
+        # this walks the bone hierarchy to get the world transforms
         for bone in path:
-            bone_transform = unreal.AnimationLibrary.get_bone_pose_for_frame(animation, str(bone), frame, True)
+            bone_transform = Unreal.get_bone_pose_for_frame(animation, str(bone), frame, True)
             world_rotation = world_rotation.combine(bone_transform.rotation.rotator())
             world_location = world_location.multiply(bone_transform)
 
@@ -1502,7 +1532,7 @@ class UnrealRemoteCalls:
     @staticmethod
     def get_origin(asset_path):
         """
-        Gets the location of the assets origin.
+        Gets the location of the asset origin.
 
         :param str asset_path: The project path to the asset.
         :return list: A list of bone name all the way to the root bone.

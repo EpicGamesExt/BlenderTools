@@ -1087,9 +1087,6 @@ def setup_project(*args):
 
     :param args: This soaks up the extra arguments for the app handler.
     """
-    # set the auth token variable
-    addon_properties = bpy.context.preferences.addons.get(ToolInfo.NAME.value)
-
     # remove the cached files
     remove_temp_folder()
 
