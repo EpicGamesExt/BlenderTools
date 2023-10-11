@@ -4,10 +4,10 @@ services:
   builds-docs:
     image: node:18-alpine
     volumes:
-      - ./:/home/node
+      - ./:/tmp/docs
     environment:
-      TEST: 1
+      PROD: 1
       GA_ID: $GA_ID
-    working_dir: /home/node
+    working_dir: /tmp/docs
     entrypoint: npm
     command: run build
