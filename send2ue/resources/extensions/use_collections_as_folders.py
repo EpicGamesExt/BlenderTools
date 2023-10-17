@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
+import os
 from send2ue.core.extension import ExtensionBase
 from send2ue.core import utilities
 from send2ue.constants import ToolInfo, UnrealTypes
@@ -16,6 +17,45 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
             "the specified mesh folder in your unreal project"
         )
     )
+
+    def pre_mesh_export(self, asset_data, properties):
+        """
+        Defines the pre mesh export logic that uses blender collections as unreal folders
+
+        :param dict asset_data: A mutable dictionary of asset data for the current asset.
+        :param Send2UeSceneProperties properties: The scene property group that contains all the addon properties.
+        """
+        if self.use_collections_as_folders:
+            asset_type = asset_data.get('_asset_type')
+            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
+                print ('Unsupported at this time')
+            elif asset_type and asset_type == UnrealTypes.STATIC_MESH:
+                object_name = asset_data.get('_mesh_object_name')
+                if object_name:
+                    scene_object = bpy.data.objects.get(object_name)
+                    asset_name = utilities.get_asset_name(object_name, properties)
+                    mesh_asset_type = utilities.get_mesh_unreal_type(scene_object)
+
+                    _, file_extension = os.path.splitext(asset_data.get('file_path'))
+                    export_path = self.get_full_export_path(properties, mesh_asset_type, scene_object)
+                    file_name_with_extension = f'{asset_name}{file_extension}'
+                    self.update_asset_data({
+                        'file_path': os.path.join(export_path, file_name_with_extension)
+                    })
+
+    def get_full_export_path(self, properties, asset_type, scene_object):
+        """
+        Gets the unreal export path when use_collections_as_folders extension is active.
+
+        :param object properties: The property group that contains variables that maintain the addon's correct state.
+        :param str asset_type: The unreal type of asset.
+        :param object scene_object: A object.
+        :return str: The full export path for the given asset.
+        """
+        game_path = utilities.get_export_folder_path(properties, asset_type)
+        sub_path = self.get_collections_as_path(scene_object, properties)
+        export_path = os.path.join(game_path, sub_path)
+        return export_path
 
     def pre_import(self, asset_data, properties):
         """
