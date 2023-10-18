@@ -27,12 +27,18 @@ class UseCollectionsAsFoldersExtension(ExtensionBase):
         """
         if self.use_collections_as_folders:
             asset_type = asset_data.get('_asset_type')
-            if asset_type and asset_type == UnrealTypes.ANIM_SEQUENCE:
-                print ('Unsupported at this time')
-            elif asset_type and asset_type == UnrealTypes.STATIC_MESH:
+            if asset_type and asset_type in [UnrealTypes.ANIM_SEQUENCE, UnrealTypes.GROOM]:
+                print('Unsupported at this time')
+            elif asset_type and asset_type in [UnrealTypes.STATIC_MESH, UnrealTypes.SKELETAL_MESH]:
                 object_name = asset_data.get('_mesh_object_name')
                 if object_name:
                     scene_object = bpy.data.objects.get(object_name)
+
+                    # if the combined assets option is on, then the name could be the empty
+                    empty_object_name = asset_data.get('empty_object_name')
+                    if empty_object_name:
+                        object_name = empty_object_name
+
                     asset_name = utilities.get_asset_name(object_name, properties)
                     mesh_asset_type = utilities.get_mesh_unreal_type(scene_object)
 

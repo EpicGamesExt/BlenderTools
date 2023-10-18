@@ -97,11 +97,12 @@ class ContainerTestManager:
         self.logger = logging.getLogger(f'{self.__class__.__name__}')
         self.setup_logging()
 
-        try:
-            self.docker_client = docker.from_env()
-            self.docker_api_client = docker.APIClient()
-        except docker.errors.DockerException:
-            raise docker.errors.DockerException('Can not talk to the docker API. Is docker installed and running?')
+        if os.environ.get('TEST_ENVIRONMENT'):
+            try:
+                self.docker_client = docker.from_env()
+                self.docker_api_client = docker.APIClient()
+            except docker.errors.DockerException:
+                raise docker.errors.DockerException('Can not talk to the docker API. Is docker installed and running?')
 
         self.containers = []
         self.start_time = int(time.time())
