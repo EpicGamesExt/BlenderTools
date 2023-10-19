@@ -389,19 +389,35 @@ def export(**keywords):
                 if asset_data['_asset_type'] == 'StaticMesh':
                     asset_object = bpy.data.objects.get(asset_data['_mesh_object_name'])
                     current_object = bpy.data.objects.get(ob_obj.name)
-                    asset_world_location = asset_object.matrix_world.to_translation()
+                    # get the world location of the current mesh
                     object_world_location = current_object.matrix_world.to_translation()
-                    loc = Vector((
-                        (object_world_location[0] - asset_world_location[0]) * SCALE_FACTOR,
-                        (object_world_location[1] - asset_world_location[1]) * SCALE_FACTOR,
-                        (object_world_location[2] - asset_world_location[2]) * SCALE_FACTOR
-                    ))
 
-                    if bpy.context.scene.send2ue.extensions.instance_assets.place_in_active_level:
-                        # clear rotation and scale only if spawning actor
-                        # https://github.com/EpicGames/BlenderTools/issues/610
+                    # if this is using the empty from the combined meshes option
+                    # https://github.com/EpicGames/BlenderTools/issues/627
+                    empty_object_name = asset_data.get('empty_object_name')
+                    if empty_object_name:
+                        empty_object = bpy.data.objects.get(empty_object_name)
+                        empty_world_location = empty_object.matrix_world.to_translation()
+                        loc = Vector((
+                            (object_world_location[0] - empty_world_location[0]) * SCALE_FACTOR,
+                            (object_world_location[1] - empty_world_location[1]) * SCALE_FACTOR,
+                            (object_world_location[2] - empty_world_location[2]) * SCALE_FACTOR
+                        ))
                         rot = (0, 0, 0)
-                        scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
+                    else:
+                        asset_world_location = asset_object.matrix_world.to_translation()
+                        loc = Vector((
+                            (object_world_location[0] - asset_world_location[0]),
+                            (object_world_location[1] - asset_world_location[1]),
+                            (object_world_location[2] - asset_world_location[2])
+                        ))
+                        # only adjust the asset object so collisions and lods are not effected
+                        # https://github.com/EpicGames/BlenderTools/issues/587
+                        if asset_object == current_object:
+                            # clear rotation and scale only if spawning actor
+                            # https://github.com/EpicGames/BlenderTools/issues/610
+                            rot = (0, 0, 0)
+                            scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
                 else:
                     loc = Vector((0, 0, 0))
 

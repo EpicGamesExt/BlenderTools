@@ -156,7 +156,8 @@ class CombineAssetsExtension(ExtensionBase):
 
                     self.update_asset_data({
                         'file_path': os.path.join(os.path.dirname(path), f'{mesh_object.parent.name}{ext}'),
-                        'asset_path': f'{asset_folder}{mesh_object.parent.name}'
+                        'asset_path': f'{asset_folder}{mesh_object.parent.name}',
+                        'empty_object_name': mesh_object.parent.name
                     })
 
     def pre_groom_export(self, asset_data, properties):

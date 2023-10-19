@@ -1,18 +1,16 @@
 ## Minor Changes
-* Fixed positional argument bug with get_full_import_path.
-  * [631](https://github.com/EpicGames/BlenderTools/issues/631)
-* Removed uniform scale option from UI that has no effect.
-  * [637](https://github.com/EpicGames/BlenderTools/issues/637)
-* Added validation to check skeleton asset type.
-  * [638](https://github.com/EpicGames/BlenderTools/issues/638)
-* Changed the default Multicast Bind Address. It is now `127.0.0.1`.
-  * [669](https://github.com/EpicGames/BlenderTools/issues/669)
-
-## Documentation Changes
-* Updated [Errors](https://epicgames.github.io/BlenderTools/send2ue/trouble-shooting/errors.html) To include Multicast Bind Address setting
+* Added collections as folder support for 'send to disk'
+  * [658](https://github.com/EpicGames/BlenderTools/pull/658)
+* Fixed Validation that detects invalid material assigned to polygon.
+  * [656](https://github.com/EpicGames/BlenderTools/pull/656)
+* Fixed export with object origin causes some collisions to be offset bug
+  * [587](https://github.com/EpicGames/BlenderTools/issues/587)
+* Fixed use object origin with combine meshes bug
+  * [627](https://github.com/EpicGames/BlenderTools/issues/627)
+  * [628](https://github.com/EpicGames/BlenderTools/issues/628)
 
 ## Special Thanks
-@DKingAlpha
+@SalamiArmi, @namrog84
 
 ## Tests Passing On
 * Blender `3.3`, `3.6` (installed from blender.org)
