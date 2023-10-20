@@ -1,7 +1,15 @@
 import os
 import logging
+import sys
+import shutil
 from datetime import datetime
 from github import Github
+
+BLENDER_ADDONS = list(filter(None, os.environ.get('BLENDER_ADDONS', 'send2ue,ue2rigify').split(',')))
+PROJECT_FOLDER = os.path.join(
+    os.path.dirname(__file__),
+    os.pardir
+)
 logging.basicConfig(level=logging.INFO)
 
 
@@ -111,9 +119,33 @@ class ReleaseAddon:
             logging.info(f'Successfully released!')
 
 
+def package_addons(addon_release_folder):
+    """
+    Packages the addons up into zip files.
+    """
+    # remove any existing releases
+    if os.path.exists(addon_release_folder):
+        logging.info(f'Deleting existing release folder "{addon_release_folder}"...')
+        shutil.rmtree(addon_release_folder)
+
+    # get the addon packager class
+    sys.path.append(os.path.join(PROJECT_FOLDER, 'tests'))
+    from utils.addon_packager import AddonPackager
+
+    # package the addons
+    for addon_name in BLENDER_ADDONS:
+        addon_folder_path = os.path.join(PROJECT_FOLDER, addon_name)
+        addon_packager = AddonPackager(addon_name, addon_folder_path, addon_release_folder)
+        addon_packager.zip_addon()
+
+
 if __name__ == '__main__':
-    # check for releases
     release_folder = os.path.join(os.path.dirname(__file__), os.pardir, 'release')
+
+    # package the addons
+    package_addons(release_folder)
+
+    # check for releases
     for zip_file in os.listdir(release_folder):
         release_addon = ReleaseAddon(
             repo_name=os.environ.get('REPO'),
