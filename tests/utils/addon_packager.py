@@ -120,7 +120,7 @@ class AddonPackager:
         """
         destination = os.path.join(self.output_folder, self.addon_name)
 
-        logging.debug(f'Copying addon "{self.addon_folder_path}" to "{destination}"')
+        logging.info(f'Copying addon "{self.addon_folder_path}" to "{destination}"')
 
         # change the permissions to allow the folders contents to be modified.
         if sys.platform == 'win32':
@@ -137,7 +137,7 @@ class AddonPackager:
         """
         Zips up the addon.
         """
-        logging.debug(f'zipping addon "{self.addon_name}" to "{self.output_folder}"')
+        logging.info(f'zipping addon "{self.addon_name}" to "{self.output_folder}"')
         # get the folder paths
         versioned_zip_file_path = self.get_addon_zip_path()
         versioned_folder_path = versioned_zip_file_path.replace('.zip', '')
