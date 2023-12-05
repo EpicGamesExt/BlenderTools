@@ -391,7 +391,6 @@ def export(**keywords):
                 asset_id = bpy.context.window_manager.send2ue.asset_id
                 asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
 
-                
                 # if this is a static mesh then check that all other mesh objects in this export are
                 # centered relative the asset object
                 if asset_data['_asset_type'] == 'StaticMesh':
@@ -442,7 +441,6 @@ def export(**keywords):
 
         # Absolutely no idea what this is, but seems mandatory for validity of the file, and defaults to
         # invalid -1 value...
-
         elem_props_template_set(tmpl, props, "p_integer", b"DefaultAttributeIndex", 0)
 
         elem_props_template_set(tmpl, props, "p_enum", b"InheritType", 1)  # RSrs
@@ -567,4 +565,3 @@ def export(**keywords):
     export_fbx_bin.fbx_data_armature_elements = original_fbx_data_armature_elements
     export_fbx_bin.fbx_data_object_elements = original_fbx_data_object_elements
     export_fbx_bin.fbx_data_bindpose_element = original_fbx_data_bindpose_element
-
