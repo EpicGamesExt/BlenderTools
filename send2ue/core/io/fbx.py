@@ -59,6 +59,12 @@ def export(**keywords):
         elem_props_template_finalize,
         fbx_name_class
     )
+    
+    # Added version check to import new elem data type added in 4.0. Shading element was updated to use char instead of bool
+    if bpy.app.version >= (4,0,0): 
+        from io_scene_fbx.fbx_utils import (
+            elem_data_single_char
+        )
 
     convert_rad_to_deg_iter = units_convertor_iter("radian", "degree")
 
@@ -384,6 +390,8 @@ def export(**keywords):
             if bpy.context.scene.send2ue.use_object_origin:
                 asset_id = bpy.context.window_manager.send2ue.asset_id
                 asset_data = bpy.context.window_manager.send2ue.asset_data.get(asset_id)
+
+                
                 # if this is a static mesh then check that all other mesh objects in this export are
                 # centered relative the asset object
                 if asset_data['_asset_type'] == 'StaticMesh':
@@ -434,6 +442,7 @@ def export(**keywords):
 
         # Absolutely no idea what this is, but seems mandatory for validity of the file, and defaults to
         # invalid -1 value...
+
         elem_props_template_set(tmpl, props, "p_integer", b"DefaultAttributeIndex", 0)
 
         elem_props_template_set(tmpl, props, "p_enum", b"InheritType", 1)  # RSrs
@@ -448,7 +457,10 @@ def export(**keywords):
         # object type, etc.
         elem_data_single_int32(model, b"MultiLayer", 0)
         elem_data_single_int32(model, b"MultiTake", 0)
-        elem_data_single_bool(model, b"Shading", True)
+        if (bpy.app.version >= (4,0,0)):
+            elem_data_single_char(model, b"Shading", b"\x01")  # Shading was changed to a char from bool in blender 4
+        else:
+            elem_data_single_bool(model, b"Shading", True)
         elem_data_single_string(model, b"Culling", b"CullingOff")
 
         if obj_type == b"Camera":
