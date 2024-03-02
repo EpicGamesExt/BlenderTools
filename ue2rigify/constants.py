@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 import os
 import tempfile
+import pathlib
 from enum import Enum
 
 
@@ -32,6 +33,7 @@ class Nodes:
 
 
 class Template:
+    CUSTOM_RIG_TEMPLATES_PATH = os.path.join(pathlib.Path().resolve(), 'resources', 'rig_templates')
     RIG_TEMPLATES_PATH = os.path.join(tempfile.gettempdir(), ToolInfo.NAME.value, 'resources', 'rig_templates')
     DEFAULT_MALE_TEMPLATE = 'male_mannequin'
     DEFAULT_FEMALE_TEMPLATE = 'female_mannequin'

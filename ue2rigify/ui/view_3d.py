@@ -43,6 +43,7 @@ class UE_RIGIFY_PT_RigTemplatePanel(bpy.types.Panel):
         # template dropdown
         row = layout.row()
         row.label(text='Template:')
+
         if properties.selected_rig_template in [
             Template.DEFAULT_MALE_TEMPLATE,
             Template.DEFAULT_FEMALE_TEMPLATE,
@@ -61,6 +62,9 @@ class UE_RIGIFY_PT_RigTemplatePanel(bpy.types.Panel):
             row.label(text='Mode:')
             row = layout.row()
             row.prop(properties, 'selected_mode', text='')
+
+        if properties.selected_rig_template == '':
+            row.operator('ue2rigify.set_default')
 
         box = layout.box()
         row = box.row()
