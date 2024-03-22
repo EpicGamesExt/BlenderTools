@@ -8,7 +8,7 @@ imported groom asset.
 ### Groom Binding Asset
 This creates a binding asset for the imported groom asset. The target skeletal mesh is the hair's surface mesh in blender
 that is part of the same import. For this option to work correctly, the _import mesh_ and _import groom_ options in the
-[import settings](https://epicgames.github.io/BlenderTools/send2ue/settings/import.html) must be turned on.
+[import settings](https://epicgamesext.github.io/BlenderTools/send2ue/settings/import.html) must be turned on.
 
 The binding asset will use the name of the groom asset and the name of the target skeletal mesh post fixed with `_Binding`.
 Note this is the unreal convention of naming binding assets.
@@ -17,7 +17,7 @@ For example, a groom asset sourced from a particle system named `hair` with a su
 will yield a binding asset named `hair_SK_Mannequin_Female_Binding`.
 
 ::: tip Note
-A binding asset can only be created when the groom's surface mesh is a [skeletal mesh](https://epicgames.github.io/BlenderTools/send2ue/asset-types/skeletal-mesh.html).
+A binding asset can only be created when the groom's surface mesh is a [skeletal mesh](https://epicgamesext.github.io/BlenderTools/send2ue/asset-types/skeletal-mesh.html).
 :::
 
 ### Blueprint Asset with Groom

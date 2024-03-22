@@ -59,7 +59,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
     def test_auto_create_collections(self):
         """
         Check that the auto creating collections option works.
-        https://github.com/EpicGames/BlenderTools/issues/115
+        https://github.com/EpicGamesExt/BlenderTools/issues/115
         """
         collection_name = self.send2ue.constants.ToolInfo.EXPORT_COLLECTION.value
 
@@ -97,7 +97,7 @@ class TestSend2UeCore(BaseSend2ueTestCaseCore):
     def test_scene_data_persistence(self):
         """
         Tests that the scene data is actually persisting in a saved blend file.
-        https://github.com/EpicGames/BlenderTools/issues/491
+        https://github.com/EpicGamesExt/BlenderTools/issues/491
         """
         self.run_scene_data_persistence_tests(
             file_name='temp_test.blend',

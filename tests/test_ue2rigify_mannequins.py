@@ -40,7 +40,7 @@ class TestUe2RigifyMannequins(BaseUe2RigifyTestCase):
     def test_new_template(self):
         """
         Tests creating a new template.
-        https://github.com/EpicGames/BlenderTools/issues/233
+        https://github.com/EpicGamesExt/BlenderTools/issues/233
         """
         self.run_new_template_tests({
                 'male_root': {
@@ -61,7 +61,7 @@ class TestUe2RigifyMannequins(BaseUe2RigifyTestCase):
         """
         Tests that baking functions correctly.
         This tests that baking the bone transforms is correct.
-        https://github.com/EpicGames/BlenderTools/issues/238
+        https://github.com/EpicGamesExt/BlenderTools/issues/238
         """
         self.run_baking_tests({
             # TODO flip animation order and fix failure

@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="300" src="https://github.com/EpicGames/BlenderTools/blob/main/docs/main/images/1.png?raw=true" alt="icon"/>
+  <img width="300" src="https://github.com/EpicGamesExt/BlenderTools/blob/main/docs/main/images/1.png?raw=true" alt="icon"/>
 </p>
 <h1 align="center">Blender Tools</h1>
 <br></br>
@@ -12,8 +12,8 @@ A repository of blender addons that improve the game development workflow betwee
 
 A one-click solution for sending assets from Blender to Unreal Engine.
 
-* [Read Docs](https://epicgames.github.io/BlenderTools/send2ue/)
-* [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=Send+to+Unreal&expanded=true)
+* [Read Docs](https://epicgamesext.github.io/BlenderTools/send2ue/)
+* [Download Addon](https://github.com/EpicGamesExt/BlenderTools/releases?q=Send+to+Unreal&expanded=true)
 
 
 ## UE to Rigify
@@ -24,16 +24,16 @@ A node based retargeting system for Blender's
 [Rigify](https://docs.blender.org/manual/en/latest/addons/rigging/rigify/index.html) addon. Quickly retarget and author
 new animation on unreal marketplace assets and more!
 
-* [Read Docs](https://epicgames.github.io/BlenderTools/ue2rigify/)
-* [Download Addon](https://github.com/EpicGames/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
+* [Read Docs](https://epicgamesext.github.io/BlenderTools/ue2rigify/)
+* [Download Addon](https://github.com/EpicGamesExt/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
 
 
 ## Help Contribute
 Contributions are encouraged! Find out how you can contribute to this repo in one of the following ways:
 
-* [Help Develop](https://epicgames.github.io/BlenderTools/contributing/development.html)
-* [Help Document](https://epicgames.github.io/BlenderTools/contributing/documentation.html)
-* [Help Test](https://epicgames.github.io/BlenderTools/contributing/testing.html)
+* [Help Develop](https://epicgamesext.github.io/BlenderTools/contributing/development.html)
+* [Help Document](https://epicgamesext.github.io/BlenderTools/contributing/documentation.html)
+* [Help Test](https://epicgamesext.github.io/BlenderTools/contributing/testing.html)
 
 
 ## Get Notified on a New Release

@@ -1,7 +1,7 @@
 # Quickstart
 This quick start guide will help you get up and running with Send to Unreal.
 
-First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/EpicGames/BlenderTools/releases?q=Send+to+unreal&expanded=true)
+First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/EpicGamesExt/BlenderTools/releases?q=Send+to+unreal&expanded=true)
 under the `Assets` dropdown. The zip file name will start with `send2ue`.
 
 ::: tip Note

@@ -58,7 +58,7 @@ will be combined into one skeletal mesh using the name of the first child mesh i
 
 ::: tip Note
  This might not give you enough control over the skeletal mesh name, so using the
-[immediate parent name](https://epicgames.github.io/BlenderTools/send2ue/extensions/use-immediate-parent-name.html)
+[immediate parent name](https://epicgamesext.github.io/BlenderTools/send2ue/extensions/use-immediate-parent-name.html)
 extension can be useful.
 :::
 

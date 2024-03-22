@@ -20,7 +20,7 @@ export default defineUserConfig({
         navbar: [
             {
                 text: 'Home',
-                link: process.env.PROD === '1' ? 'https://epicgames.github.io/BlenderTools/' : '/',
+                link: process.env.PROD === '1' ? 'https://epicgamesext.github.io/BlenderTools/' : '/',
                 target:'_self'
             }
         ],

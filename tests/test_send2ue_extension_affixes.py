@@ -86,7 +86,7 @@ class TestSend2UeExtensionAffixesCubes(SkipSend2UeTests, TestSend2UeCubes, BaseS
     def test_textures(self):
         """
         Sends a Cube with a textured material to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/83
+        https://github.com/EpicGamesExt/BlenderTools/issues/83
         """
         self.run_texture_tests({
             'Cube2_lod0_mesh': ['T_unreal-engine-logo'],

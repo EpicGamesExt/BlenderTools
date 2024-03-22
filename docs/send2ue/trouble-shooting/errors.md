@@ -13,4 +13,4 @@ You will receive this error if you do not have an "Export" set in your outliner.
 ### NoOptionError: No option 'r.skincache.compileshaders'
 The option "Support Compute Skin Cache" is required for groom imports. If you have this project setting
 on but consistently receive this error, consider turning off the "Check project settings" validation in
-send to unreal validations settings. This issue has been reported by users in [#533](https://github.com/EpicGames/BlenderTools/issues/533).
+send to unreal validations settings. This issue has been reported by users in [#533](https://github.com/EpicGamesExt/BlenderTools/issues/533).

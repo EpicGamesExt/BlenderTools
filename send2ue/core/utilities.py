@@ -790,7 +790,7 @@ def is_unreal_connected():
     Checks if the unreal rpc server is connected, and if not attempts a bootstrap.
     """
     # skips checking for and unreal connection if in send to disk mode
-    # https://github.com/EpicGames/BlenderTools/issues/420
+    # https://github.com/EpicGamesExt/BlenderTools/issues/420
     if bpy.context.scene.send2ue.path_mode == PathModes.SEND_TO_DISK.value:
         return True
 
@@ -823,7 +823,7 @@ def is_collision_of(asset_name, mesh_object_name, properties):
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     """
     # note we strip whitespace out of the collision name since whitespace is already striped out of the asset name
-    # https://github.com/EpicGames/BlenderTools/issues/397#issuecomment-1333982590
+    # https://github.com/EpicGamesExt/BlenderTools/issues/397#issuecomment-1333982590
     mesh_object_name = mesh_object_name.strip()
     return bool(
         re.fullmatch(

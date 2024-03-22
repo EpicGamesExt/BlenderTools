@@ -62,7 +62,7 @@ operation execution.
 ::: tip Note
   At minimum, an extension must have the class attribute `name` defined. Everything else is optional. A more
 advanced extension example is available
-[here](https://github.com/EpicGames/BlenderTools/blob/master/tests/test_files/send2ue_extensions/example_extension.py).
+[here](https://github.com/EpicGamesExt/BlenderTools/blob/master/tests/test_files/send2ue_extensions/example_extension.py).
 :::
 
 ### Installation
@@ -91,7 +91,7 @@ console and that the cube got sent to the `/Game/example_extension/test/` folder
 
 This same approach can be applied to many other use cases where you need to extend the Send to Unreal operation.
 For practical examples check out the
-[send2ue/resources](https://github.com/EpicGames/BlenderTools/tree/master/send2ue/resources/extensions) folder.
+[send2ue/resources](https://github.com/EpicGamesExt/BlenderTools/tree/master/send2ue/resources/extensions) folder.
 
 ## Tasks
 Tasks contain logic for key points within the runtime of the send to unreal
