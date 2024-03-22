@@ -67,7 +67,7 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
     def test_sockets(self):
         """
         Sends a Cube with sockets to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/69
+        https://github.com/EpicGamesExt/BlenderTools/issues/69
         """
         self.run_socket_tests({
             'Cube2': ['SOCKET_socket_01', 'SOCKET_socket_02']
@@ -76,8 +76,8 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
     def test_collisions(self):
         """
         Sends a Cube with complex collisions to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/22
-        https://github.com/EpicGames/BlenderTools/issues/359
+        https://github.com/EpicGamesExt/BlenderTools/issues/22
+        https://github.com/EpicGamesExt/BlenderTools/issues/359
         """
         self.run_collision_tests([
             {'Cube1': {
@@ -133,7 +133,7 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
     def test_textures(self):
         """
         Sends a Cube with a textured material to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/83
+        https://github.com/EpicGamesExt/BlenderTools/issues/83
         """
         self.run_texture_tests({
             'Cube2_lod0_mesh': ['unreal-engine-logo'],
@@ -142,7 +142,7 @@ class TestSend2UeCubes(BaseSend2ueTestCase):
     def test_use_object_origin_option(self):
         """
         Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
-        https://github.com/EpicGames/BlenderTools/issues/223
+        https://github.com/EpicGamesExt/BlenderTools/issues/223
         """
         self.run_use_object_origin_option_tests(
             mesh_object='Cube1'

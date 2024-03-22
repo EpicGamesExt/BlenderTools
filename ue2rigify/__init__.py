@@ -16,7 +16,7 @@ bl_info = {
     "version": (1, 6, 2),
     "blender": (3, 3, 0),
     "location": "3D View > Tools > UE to Rigify",
-    "wiki_url": "https://epicgames.github.io/BlenderTools/ue2rigify",
+    "wiki_url": "https://epicgamesext.github.io/BlenderTools/ue2rigify",
     "warning": "",
     "category": "Pipeline"
 }

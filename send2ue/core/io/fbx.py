@@ -400,7 +400,7 @@ def export(**keywords):
                     object_world_location = current_object.matrix_world.to_translation()
 
                     # if this is using the empty from the combined meshes option
-                    # https://github.com/EpicGames/BlenderTools/issues/627
+                    # https://github.com/EpicGamesExt/BlenderTools/issues/627
                     empty_object_name = asset_data.get('empty_object_name')
                     if empty_object_name:
                         empty_object = bpy.data.objects.get(empty_object_name)
@@ -419,10 +419,10 @@ def export(**keywords):
                             (object_world_location[2] - asset_world_location[2])
                         ))
                         # only adjust the asset object so collisions and lods are not effected
-                        # https://github.com/EpicGames/BlenderTools/issues/587
+                        # https://github.com/EpicGamesExt/BlenderTools/issues/587
                         if asset_object == current_object:
                             # clear rotation and scale only if spawning actor
-                            # https://github.com/EpicGames/BlenderTools/issues/610
+                            # https://github.com/EpicGamesExt/BlenderTools/issues/610
                             rot = (0, 0, 0)
                             scale = (1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR, 1.0 * SCALE_FACTOR)
                 else:
@@ -560,7 +560,7 @@ def export(**keywords):
     export_fbx_bin.save(self, bpy.context, **keywords)
 
     # now re-patch back the export bin module so that the existing fbx addon still has its original code
-    # https://github.com/EpicGames/BlenderTools/issues/598
+    # https://github.com/EpicGamesExt/BlenderTools/issues/598
     export_fbx_bin.fbx_animations_do = original_fbx_animations_do
     export_fbx_bin.fbx_data_armature_elements = original_fbx_data_armature_elements
     export_fbx_bin.fbx_data_object_elements = original_fbx_data_object_elements

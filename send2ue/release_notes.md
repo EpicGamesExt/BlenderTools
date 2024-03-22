@@ -1,13 +1,13 @@
 ## Minor Changes
 * Added collections as folder support for 'send to disk'
-  * [658](https://github.com/EpicGames/BlenderTools/pull/658)
+  * [658](https://github.com/EpicGamesExt/BlenderTools/pull/658)
 * Fixed Validation that detects invalid material assigned to polygon.
-  * [656](https://github.com/EpicGames/BlenderTools/pull/656)
+  * [656](https://github.com/EpicGamesExt/BlenderTools/pull/656)
 * Fixed export with object origin causes some collisions to be offset bug
-  * [587](https://github.com/EpicGames/BlenderTools/issues/587)
+  * [587](https://github.com/EpicGamesExt/BlenderTools/issues/587)
 * Fixed use object origin with combine meshes bug
-  * [627](https://github.com/EpicGames/BlenderTools/issues/627)
-  * [628](https://github.com/EpicGames/BlenderTools/issues/628)
+  * [627](https://github.com/EpicGamesExt/BlenderTools/issues/627)
+  * [628](https://github.com/EpicGamesExt/BlenderTools/issues/628)
 
 ## Special Thanks
 @SalamiArmi, @namrog84

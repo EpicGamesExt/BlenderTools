@@ -232,7 +232,7 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
             self.assert_extension(extension_name, extensions_data)
 
         # reload blank scene and check again
-        # https://github.com/EpicGames/BlenderTools/issues/395
+        # https://github.com/EpicGamesExt/BlenderTools/issues/395
         self.setUp()
         for extension_name, extensions_data in {**external_extensions, **default_extensions}.items():
             self.assert_extension(extension_name, extensions_data)
@@ -781,7 +781,7 @@ class BaseSend2ueTestCase(BaseTestCase):
 
     def run_skeleton_tests(self, object_name):
         """
-        https://github.com/EpicGames/BlenderTools/issues/249
+        https://github.com/EpicGamesExt/BlenderTools/issues/249
         This feature allows swapping out meshes on existing skeletons.
         """
         folder_path = self.blender.get_addon_property('scene', 'send2ue', 'unreal_mesh_folder_path')
@@ -1121,21 +1121,21 @@ class BaseSend2ueTestCase(BaseTestCase):
     def test_lods(self):
         """
         Sends both cube meshes with lods to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/331
+        https://github.com/EpicGamesExt/BlenderTools/issues/331
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
     def test_sockets(self):
         """
         Sends a Cube with sockets to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/69
+        https://github.com/EpicGamesExt/BlenderTools/issues/69
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
     def test_collisions(self):
         """
         Sends a Cube with complex collisions to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/22
+        https://github.com/EpicGamesExt/BlenderTools/issues/22
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
@@ -1148,7 +1148,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def test_textures(self):
         """
         Sends a Cube with a textured material to unreal.
-        https://github.com/EpicGames/BlenderTools/issues/83
+        https://github.com/EpicGamesExt/BlenderTools/issues/83
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
@@ -1161,7 +1161,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def test_export_object_name_as_root_option(self):
         """
         Tests export object name as root option.
-        https://github.com/EpicGames/BlenderTools/issues/121
+        https://github.com/EpicGamesExt/BlenderTools/issues/121
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
@@ -1174,7 +1174,7 @@ class BaseSend2ueTestCase(BaseTestCase):
     def test_use_object_origin_option(self):
         """
         Offsets Cube1_LOD0 and tests with the use_object_origin option on and off.
-        https://github.com/EpicGames/BlenderTools/issues/223
+        https://github.com/EpicGamesExt/BlenderTools/issues/223
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
@@ -1484,7 +1484,7 @@ class BaseUe2RigifyTestCase(BaseTestCase):
     def test_new_template(self):
         """
         Tests creating a new template.
-        https://github.com/EpicGames/BlenderTools/issues/233
+        https://github.com/EpicGamesExt/BlenderTools/issues/233
         """
         raise NotImplementedError('This test case must be implemented or skipped')
 
@@ -1492,6 +1492,6 @@ class BaseUe2RigifyTestCase(BaseTestCase):
         """
         related issue:
         This tests that baking the bone transforms is correct.
-        https://github.com/EpicGames/BlenderTools/issues/238
+        https://github.com/EpicGamesExt/BlenderTools/issues/238
         """
         raise NotImplementedError('This test case must be implemented or skipped')

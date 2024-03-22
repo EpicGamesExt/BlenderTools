@@ -7,7 +7,7 @@
     "name": "Epic Games Inc.",
     "email": ""
   },
-  "repository": "https://github.com/EpicGames/BlenderTools",
+  "repository": "https://github.com/EpicGamesExt/BlenderTools",
   "scripts": {
     "dev-main": "vuepress dev main",
     "dev-send2ue": "vuepress dev send2ue",

@@ -10,13 +10,13 @@ The NLA Editor is used to determine several things:
    Actions in blender all exist in the same data block namespace and just contain fcurves values.
 It is not until they are set in an object's animation data that a determination can be made that an action belongs to a particular object.
 This is different from how unreal AnimSequence assets work. Unreal AnimSequence assets must have an associated skeletal mesh in order to exist. Therefore,
-Send to Unreal only exports skeletal mesh animation if the armature object has action strips in its NLA tracks. Also read about the [auto stash active action](https://epicgames.github.io/BlenderTools/send2ue/settings/export.html#auto-stash-active-action) option.
+Send to Unreal only exports skeletal mesh animation if the armature object has action strips in its NLA tracks. Also read about the [auto stash active action](https://epicgamesext0.github.io/BlenderTools/send2ue/settings/export.html#auto-stash-active-action) option.
 :::
 
 2. Which action to export, by checking which NLA tracks are not muted.
 ::: tip Note
    All un-muted strips in the NLA Editor will be sent as an AnimSequence of the skeleton
-   that is in the `Export` collection. Also read about the [Export All Actions](https://epicgames.github.io/BlenderTools/send2ue/settings/export.html#export-all-actions) option.
+   that is in the `Export` collection. Also read about the [Export All Actions](https://epicgamesext.github.io/BlenderTools/send2ue/settings/export.html#export-all-actions) option.
 :::
 
 3. The start and end of the Unreal Animation, by using the start and end frame of the clip.
@@ -42,7 +42,7 @@ What if the skeleton and skeletal mesh already exist in your project, and you ju
 import animation onto an existing skeleton? That can be done in two ways: (1) by turning off all
 import options in the [import settings](/settings/import.html) except for Animations;
 (2) or by placing only the armature object in the `Export` collection. Both ways require you to set the project path
-to the Skeleton asset under the [Paths](https://epicgames.github.io/BlenderTools/send2ue/settings/paths.html#skeleton-asset-unreal)
+to the Skeleton asset under the [Paths](https://epicgamesext.github.io/BlenderTools/send2ue/settings/paths.html#skeleton-asset-unreal)
 tab in the settings dialog.
 
 ![4](./images/animation/4.gif)
@@ -55,7 +55,7 @@ tab in the settings dialog.
 
 In this case two strips were un-muted, therefore two animations were imported onto the referenced skeleton asset.
 ::: tip Note
-   Also if [export all actions](https://epicgames.github.io/BlenderTools/send2ue/settings/export.html#export-all-actions) was on, all actions would be exported regardless of their mute values.
+   Also if [export all actions](https://epicgamesext.github.io/BlenderTools/send2ue/settings/export.html#export-all-actions) was on, all actions would be exported regardless of their mute values.
 :::
 
 ## Morph Targets
@@ -63,7 +63,7 @@ In this case two strips were un-muted, therefore two animations were imported on
 Here is an example of how to send shape key animation in blender to unreal as an animated morph target.
 
 ::: tip Note
-   The [export custom property fcurves](https://epicgames.github.io/BlenderTools/send2ue/settings/export.html#export-custom-property-fcurves) must be set to true in
+   The [export custom property fcurves](https://epicgamesext.github.io/BlenderTools/send2ue/settings/export.html#export-custom-property-fcurves) must be set to true in
 order for this to work. Also note that this can apply to any custom property fcurves not just the morph targets fcurve.
 :::
 
