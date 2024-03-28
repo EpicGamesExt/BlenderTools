@@ -317,7 +317,7 @@ def get_scene_property_class():
         )
         lod_regex: bpy.props.StringProperty(
             name="LOD Regex",
-            default=r"(?i)(_LOD\d).*",
+            default=r"(_LOD\d).*",
             description=(
                 "Set a regular expression to determine an asset's lod identifier. The remaining unmatched string will "
                 "be used as the asset name. The first matched group's last character should be the LOD index."
