@@ -1,10 +1,22 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import bpy
-from .constants import Modes, Rigify
+from .constants import Modes, Rigify, Template
 from .ui import exporter
 from .core import scene, nodes, templates, utilities
 from bpy_extras.io_utils import ImportHelper
+
+
+class SetDefault(bpy.types.Operator):
+    """Set a default control rig mode"""
+    bl_idname = "ue2rigify.set_default"
+    bl_label = "Default"
+
+    def execute(self, context):
+        properties = bpy.context.scene.ue2rigify
+        properties.selected_mode = Modes.SOURCE.name
+        properties.selected_rig_template = Template.DEFAULT_MALE_TEMPLATE
+        return {'FINISHED'}
 
 
 class ConvertToRigifyRig(bpy.types.Operator):
@@ -294,7 +306,8 @@ operator_classes = [
     ConstrainSourceToDeform,
     RemoveConstraints,
     SwitchModes,
-    NullOperator
+    NullOperator,
+    SetDefault
 ]
 
 

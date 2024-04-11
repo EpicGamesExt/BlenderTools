@@ -267,7 +267,7 @@ def set_meta_rig(self=None, context=None):
     else:
         remove_metarig()
         create_meta_rig(self, file_path=os.path.join(
-            Template.RIG_TEMPLATES_PATH,
+            templates.get_custom_rig_template_path(),
             self.selected_starter_metarig_template,
             f'{Rigify.META_RIG_NAME}.py'
         ))

@@ -57,7 +57,7 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
         name="Metarig",
         description=tool_tips.starter_metarig_template_tool_tip,
         items=templates.safe_get_starter_metarig_templates,
-        update=scene.set_meta_rig
+        update=scene.set_meta_rig,
     )
 
     selected_rig_template: bpy.props.EnumProperty(
@@ -65,7 +65,8 @@ class UE2RigifyProperties(bpy.types.PropertyGroup):
         description=tool_tips.rig_template_tool_tip,
         items=templates.safe_populate_templates_dropdown,
         options={'ANIMATABLE'},
-        update=templates.set_template
+        update=templates.set_template,
+        default=None
     )
 
     selected_mode: bpy.props.EnumProperty(
