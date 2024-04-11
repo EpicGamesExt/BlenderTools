@@ -1645,7 +1645,10 @@ def unpack_textures():
                                 # if the unpacked image does not exist on disk
                                 if not os.path.exists(image.filepath_from_user()):
                                     # unpack the image
-                                    image.unpack()
+                                    if len(image.filepath_from_user()) == 0:
+                                        image.filepath = '/Texture/{}'.format(image.name)
+                                        
+                                    image.save()
                                     unpacked_files[image.name] = image.filepath_from_user()
 
     return unpacked_files
