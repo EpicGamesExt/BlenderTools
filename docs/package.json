@@ -16,7 +16,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "vuepress": "^2.0.0-rc.0"
+    "vuepress": "^2.0.0-rc.13"
   },
   "devDependencies": {
     "@vuepress/cli": "^2.0.0-beta.66",
