@@ -1,17 +1,13 @@
 ## Minor Changes
-* Added collections as folder support for 'send to disk'
-  * [658](https://github.com/EpicGamesExt/BlenderTools/pull/658)
-* Fixed Validation that detects invalid material assigned to polygon.
-  * [656](https://github.com/EpicGamesExt/BlenderTools/pull/656)
-* Fixed export with object origin causes some collisions to be offset bug
-  * [587](https://github.com/EpicGamesExt/BlenderTools/issues/587)
-* Fixed use object origin with combine meshes bug
-  * [627](https://github.com/EpicGamesExt/BlenderTools/issues/627)
-  * [628](https://github.com/EpicGamesExt/BlenderTools/issues/628)
+* Updated FBX mesh export to Blender 4.0
+  * [699](https://github.com/EpicGamesExt/BlenderTools/pull/699) 
+* Updated FBX anim export to Blender 4.0 
+  * [706](https://github.com/EpicGamesExt/BlenderTools/pull/706)
+* Removed (?i) from lod regex value in default settings template
 
 ## Special Thanks
-@SalamiArmi, @namrog84
+@universalconquistador, @JoshQuake
 
 ## Tests Passing On
-* Blender `3.3`, `3.6` (installed from blender.org)
-* Unreal `5.3`
+* Blender `3.6`, `4.1` (installed from blender.org)
+* Unreal `5.3`, `5.4`
