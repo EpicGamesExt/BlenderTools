@@ -88,12 +88,12 @@ def get_lod0_name(asset_name, properties):
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     :return str: The full name for lod0.
     """
-    result = re.search(rf"({properties.lod_regex})", asset_name)
+    result = re.search(properties.lod_regex, asset_name)
+
     if result:
         lod = result.groups()[-1]
         return asset_name.replace(lod, f'{lod[:-1]}0')
     return asset_name
-
 
 def get_lod_index(asset_name, properties):
     """
@@ -103,7 +103,7 @@ def get_lod_index(asset_name, properties):
     :param PropertyData properties: A property data instance that contains all property values of the tool.
     :return int: The lod index
     """
-    result = re.search(rf"({properties.lod_regex})", asset_name)
+    result = re.search(properties.lod_regex, asset_name)
     if result:
         lod = result.groups()[-1]
         return int(lod[-1])
@@ -411,9 +411,9 @@ def get_asset_name(asset_name, properties, lod=False):
 
     if properties.import_lods:
         # remove the lod name from the asset
-        result = re.search(rf"({properties.lod_regex})", asset_name)
+        result = re.search(properties.lod_regex, asset_name)
         if result and not lod:
-            asset_name = asset_name.replace(result.groups()[0], '')
+            asset_name = asset_name.split(result.groups()[0])[0]
 
     return asset_name
 
@@ -825,12 +825,16 @@ def is_collision_of(asset_name, mesh_object_name, properties):
     # note we strip whitespace out of the collision name since whitespace is already striped out of the asset name
     # https://github.com/EpicGamesExt/BlenderTools/issues/397#issuecomment-1333982590
     mesh_object_name = mesh_object_name.strip()
+
+    # fixes error re.error: global flags not at the start of the expression
+    lod_regex = properties.lod_regex.replace('(?i)', '')
+
     return bool(
         re.fullmatch(
             r"U(BX|CP|SP|CX)_" + asset_name + r"(_\d+)?",
             mesh_object_name
         ) or re.fullmatch(
-            r"U(BX|CP|SP|CX)_" + asset_name + rf"{properties.lod_regex}(_\d+)?", mesh_object_name
+            r"(?i)U(BX|CP|SP|CX)_" + asset_name + rf"{lod_regex}(_\d+)?", mesh_object_name
         )
     )
 

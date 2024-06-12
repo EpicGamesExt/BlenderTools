@@ -9,10 +9,10 @@ All of the properties can be accessed directly on the following scene data objec
 bpy.context.scene.send2ue
 ```
 
-::: tip Note
-  This scene property data is persistent and stored within your blend file. If your blend file is saved,
-then the state of your scene properties gets saved into the file as well.
-:::
+!!! note
+
+    This scene property data is persistent and stored within your blend file. If your blend file is saved,
+    then the state of your scene properties gets saved into the file as well.
 
 To find the name of the property you want to read or edit, you can use the blender python console and the tab key to list
 the properties, or open the Send to Unreal Settings Dialog and hover on a property.  Under the tool tip you will see the API reference for
@@ -84,33 +84,32 @@ bpy.ops.send2ue.start_rpc_servers()
 
 ## Examples
 
-::: tip Change Template Example
-  Here is how you could automate loading a settings template from a file and making it the active template.
-```python
-import bpy
+!!! tip
 
-# load the file into the template folder location
-bpy.ops.send2ue.load_template(filepath=r'C:/some/file/path/my_template.json')
+    Here is how you could automate loading a settings template from a file and making it the active template.
+    ```python
+    import bpy
 
-# set the active template which modifies the state of the properties
-bpy.context.scene.send2ue.active_settings_template = 'my_template.json'
-```
-:::
+    # load the file into the template folder location
+    bpy.ops.send2ue.load_template(filepath=r'C:/some/file/path/my_template.json')
 
-::: tip Change Properties Example
-  Here is how you could use Python to dynamically change the mesh import folder of your asset.
-```python
-import bpy
+    # set the active template which modifies the state of the properties
+    bpy.context.scene.send2ue.active_settings_template = 'my_template.json'
+    ```
 
-# set the mesh import folder
-folder_name = some_custom_function_that_gets_a_folder_name()
-bpy.context.scene.send2ue.unreal_mesh_folder_path = f'/Game/{folder_name}/'
+!!! tip
 
-# run send to unreal
-bpy.ops.wm.send2ue()
-```
-:::
+    Here is how you could use Python to dynamically change the mesh import folder of your asset.
+    ```python
+    import bpy
 
+    # set the mesh import folder
+    folder_name = some_custom_function_that_gets_a_folder_name()
+    bpy.context.scene.send2ue.unreal_mesh_folder_path = f'/Game/{folder_name}/'
+
+    # run send to unreal
+    bpy.ops.wm.send2ue()
+    ```
 
 The same process can be used to dynamically set any property on the Send to Unreal tool.
 

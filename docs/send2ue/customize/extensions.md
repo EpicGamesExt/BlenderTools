@@ -1,13 +1,14 @@
 # Extensions
 
-::: warning
-This feature set is still very new and could be subject to change.
-:::
+!!! warning
 
-::: tip Supported Extensions
-See the Supported Extensions section for details on extensions that ship with the Send to Unreal addon
-and are supported by this repository.
-:::
+    This feature set is still very new and could be subject to change.
+
+
+!!! tip
+
+    See the Supported Extensions section for details on extensions that ship with the Send to Unreal addon
+    and are supported by this repository.
 
 Extensions provide a python interface for Send to Unreal users to quickly and cleanly extend its functionality
 with a minimal amount of code. Within an extension class several things can be defined:
@@ -20,10 +21,10 @@ with a minimal amount of code. Within an extension class several things can be d
 In this diagram each blue arrow that plugs into a blue block represents how the extension factory takes
 pieces of your extension class and plugs in its logic within the send to unreal operation.
 
-::: tip Note
-  The queue can run many asset tasks, therefore the extension logic added in the asset task area will be fired as many
-times as there are assets. However, anything outside the asset task will be run once per send to unreal operation.
-:::
+!!! note
+
+    The queue can run many asset tasks, therefore the extension logic added in the asset task area will be fired as many
+    times as there are assets. However, anything outside the asset task will be run once per send to unreal operation.
 
 ## Example
 Here is a simple example
@@ -59,11 +60,11 @@ that prints out the asset data of the mesh, and a validation that checks to ensu
 equal to "Hello world", otherwise it returns False which terminates the send to unreal
 operation execution.
 
-::: tip Note
-  At minimum, an extension must have the class attribute `name` defined. Everything else is optional. A more
-advanced extension example is available
-[here](https://github.com/EpicGamesExt/BlenderTools/blob/master/tests/test_files/send2ue_extensions/example_extension.py).
-:::
+!!! note
+
+    At minimum, an extension must have the class attribute `name` defined. Everything else is optional. A more
+    advanced extension example is available
+    [here](https://github.com/poly-hammer/BlenderTools/blob/master/tests/test_files/send2ue_extensions/example_extension.py).
 
 ### Installation
 Save the extension code in a folder. This folder is know as the `Extensions Repo Folder`. You can place as many extensions
@@ -74,14 +75,14 @@ in this folder as needed. In this example, the file is saved to`C:\extension_rep
 Then in the Send to Unreal addon preferences set the `Extensions Repo Folder` to `C:\extension_repo`. Then click the
 `Reload Extensions` button.
 
-::: tip Note
-  Alternatively, this can be installed with python:
-```python
-# this is handy for reloading your changes as you develop extensions
-bpy.context.preferences.addons['send2ue'].preferences.extensions_repo_path = 'C:\extension_repo'
-bpy.ops.send2ue.reload_extensions()
-```
-:::
+!!! note
+
+    Alternatively, this can be installed with python:
+  ```python
+  # this is handy for reloading your changes as you develop extensions
+  bpy.context.preferences.addons['send2ue'].preferences.extensions_repo_path = 'C:\extension_repo'
+  bpy.ops.send2ue.reload_extensions()
+  ```
 
 ### Test
 Now when we use Send to Unreal to with the default cube, we can see the `asset_data` dictionary printing in the
@@ -91,7 +92,7 @@ console and that the cube got sent to the `/Game/example_extension/test/` folder
 
 This same approach can be applied to many other use cases where you need to extend the Send to Unreal operation.
 For practical examples check out the
-[send2ue/resources](https://github.com/EpicGamesExt/BlenderTools/tree/master/send2ue/resources/extensions) folder.
+[send2ue/resources](https://github.com/poly-hammer/BlenderTools/tree/master/send2ue/resources/extensions) folder.
 
 ## Tasks
 Tasks contain logic for key points within the runtime of the send to unreal
@@ -208,9 +209,9 @@ class ExampleExtension(ExtensionBase):
     name = 'example'
     hello_property: bpy.props.StringProperty(default='Hello world')
 ```
-::: tip Note
-  Properties can be any property type in `bpy.props`
-:::
+!!! note
+    
+    Properties can be any property type in `bpy.props`
 
 All properties defined in the extension class get registered as a sub property group within the
 `send2ue` scene data hierarchy. In the above example, the `hello_property` could be accessed within an
@@ -223,10 +224,10 @@ Or globally like:
 bpy.context.scene.send2ue.extensions.example.hello_property
 ```
 
-::: tip Note
-  Extension properties get saved when the blend file is saved, and can have their values saved to templates
-just like the default properties that exist in the Send to Unreal tool.
-:::
+!!! note
+
+    Extension properties get saved when the blend file is saved, and can have their values saved to templates
+    just like the default properties that exist in the Send to Unreal tool.
 
 ## Asset Data Dictionary
 During the life cycle of the Send to Unreal operation a dictionary `asset_data` is created that contains all assets
@@ -234,10 +235,10 @@ that will be sent in the operation. Per asset, data gets fetched and passed into
 param in certain extension task methods. i.e `pre_mesh_export(self, asset_data, properties)`.
 
 
-::: tip Note
-  Any `asset_data` dictionary value that is prefixed with `_` i.e. `_asset_type` etc. has no effect on how Send to Unreal uses
-that data. However, changing values not prefixed with an underscore will change the Send to Unreal behavior.
-:::
+!!! note
+
+    Any `asset_data` dictionary value that is prefixed with `_` i.e. `_asset_type` etc. has no effect on how Send to Unreal uses
+    that data. However, changing values not prefixed with an underscore will change the Send to Unreal behavior.
 
 Here is an example of a potential renaming use case.
 ```python
@@ -257,9 +258,9 @@ class ExampleExtension(ExtensionBase):
 Here you can see that we forced a rename of the asset by changing the fbx name, then we updated the asset path so that
 Send to Unreal would still have a reference to the imported asset.
 
-::: tip Note
-  In order for the `asset_data` to be updated you must call `self.update_asset_data(asset_data)` like shown above.
-:::
+!!! note
+
+    In order for the `asset_data` to be updated you must call `self.update_asset_data(asset_data)` like shown above.
 
 This is what the Mesh's `asset_data` looks like from the example above after being modified:
 ```python
@@ -276,10 +277,10 @@ This is what the Mesh's `asset_data` looks like from the example above after bei
  'sockets': {}
 }
 ```
-::: warning
-Modifying this dictionary incorrectly will produce errors. You must implement your own validations to ensure this
-is modified correctly.
-:::
+!!! warning
+
+    Modifying this dictionary incorrectly will produce errors. You must implement your own validations to ensure this
+    is modified correctly.
 
 ## Draws
 Defining draws for your extension is a way to make your extension properties available to be edited by the user.
@@ -348,9 +349,9 @@ Notice how you can define remote unreal functions on the fly by just wrapping yo
 with the `remote_unreal_decorator`. The RPC library has a factory that takes care of teleporting
 your code and imports over to the open unreal editor.
 
-::: tip Note
-  RPC calls must be defined as function or a staticmethod of a class, and only basic python data types
-can be marshalled through the function parameters. No object params or kwargs are excepted.
-:::
+!!! note
+
+    RPC calls must be defined as function or a staticmethod of a class, and only basic python data types
+    can be marshalled through the function parameters. No object params or kwargs are excepted.
 
 

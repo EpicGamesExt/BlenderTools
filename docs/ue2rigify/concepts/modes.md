@@ -14,10 +14,10 @@ These modes become available as soon as you select a "Source" rig.
 ![2](./images/modes/2.jpg)
 
 
-::: tip Note
-Your "Source" rig is the rig that you create in blender or the rig that you import into blender that has the skinned
-to mesh attached to it. The idea of UE to Rigify is that you want to drive the "Source" rig with your "Control" rig.
-:::
+!!! note
+
+    Your "Source" rig is the rig that you create in blender or the rig that you import into blender that has the skinned
+    to mesh attached to it. The idea of UE to Rigify is that you want to drive the "Source" rig with your "Control" rig.
 
 ## Source
 

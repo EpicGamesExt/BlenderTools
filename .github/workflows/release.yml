@@ -1,0 +1,35 @@
+name: Create Release
+on:
+  workflow_dispatch:
+    inputs:
+      addons:
+        type: choice
+        description: Make a choice
+        default: 'send2ue,ue2rigify'
+        options:
+        - 'ue2rigify'
+        - 'send2ue'
+        - 'send2ue,ue2rigify'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      - name: Install Requirements
+        run: |
+          pip3 install -r requirements.txt
+
+      - name: Create Release
+        run: |
+          export REPO=${{ github.repository }}
+          export GITHUB_TOKEN=${{ secrets.GH_PAT }}
+          export BLENDER_ADDONS=${{ github.event.inputs.addons }}
+          
+          python3 scripts/create_release.py

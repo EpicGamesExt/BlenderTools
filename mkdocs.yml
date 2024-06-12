@@ -1,0 +1,56 @@
+site_name: Documentation
+
+nav:
+    - Addons: 
+        - Send to Unreal: '!include ./docs/send2ue/mkdocs.yml'
+        - UE to Rigify: '!include ./docs/ue2rigify/mkdocs.yml'
+    - Contributing: 
+        - Help Develop: contributing/development.md
+        - Help Document: contributing/documentation.md
+        - Help Test: contributing/testing.md
+
+
+markdown_extensions:
+-   pymdownx.highlight:
+        anchor_linenums: true
+        line_spans: __span
+        pygments_lang_class: true
+- pymdownx.inlinehilite
+- pymdownx.snippets
+- pymdownx.superfences
+- attr_list
+- admonition
+
+plugins:
+    monorepo:
+    termynal:
+        buttons: macos
+        prompt_literal_start: [$, '>', '>>>']
+        title: shell
+    search:
+        separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+theme:
+    features:
+        - navigation.instant
+    favicon: images/icons/favicon.ico
+    icon:
+        repo: fontawesome/brands/github
+    language: en
+    name: material
+    palette:
+    -   scheme: default
+        toggle:
+            icon: material/brightness-7
+            name: Switch to dark mode
+    -   accent: blue
+        primary: black
+        scheme: slate
+        toggle:
+            icon: material/brightness-4
+            name: Switch to light mode
+
+extra:
+  analytics:
+    provider: google
+    property: !ENV GA_ID

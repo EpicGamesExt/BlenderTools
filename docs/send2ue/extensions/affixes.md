@@ -2,6 +2,7 @@
 
 The Affixes extension provides a convenient way to enforce prefix or postfix naming conventions on
 assets of a particular type.  Currently, supported asset types are:
+
 * `Static Mesh`
 * `Skeletal Mesh`
 * `Animation Sequence`
@@ -18,9 +19,9 @@ If true, this will automatically remove the affixes (prefix/suffix) by renaming 
 `Export` collection after the Send to Unreal operation runs.
 
 
-::: tip Note
- This will rename the objects in Blender, like Meshes, Textures, Materials and Actions. Be aware that this will also rename the texture image files on your hard-disk.
-:::
+!!! note
+
+    This will rename the objects in Blender, like Meshes, Textures, Materials and Actions. Be aware that this will also rename the texture image files on your hard-disk.
 
 ## UI
 The settings can be found under the `Export` tab

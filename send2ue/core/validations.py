@@ -229,7 +229,7 @@ class ValidationManager:
         """
         if self.properties.import_lods:
             for mesh_object in self.mesh_objects:
-                result = re.search(rf"({self.properties.lod_regex})", mesh_object.name)
+                result = re.search(self.properties.lod_regex, mesh_object.name)
                 if not result:
                     utilities.report_error(
                         f'Object "{mesh_object.name}" does not follow the correct lod naming convention defined in the '

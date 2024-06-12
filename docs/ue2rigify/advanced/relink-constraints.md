@@ -1,9 +1,5 @@
 # Relink Constraints
 
-<div style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%;">
-<iframe src="https://blender-tools-documentation.s3.amazonaws.com/ue2rigify/advanced/relink-constraints.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
-</div>
-
 [UE to Rigify Customization](https://docs.blender.org/manual/en/latest/addons/rigging/rigify/rig_types/basic.html)
 allows retargeting constraints belonging to the bone to point at bones created in the process of generating the rig,
 thus allowing custom rigging to integrate with generated bones.

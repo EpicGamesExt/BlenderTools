@@ -12,13 +12,13 @@ from .core import formatting, validations, settings, utilities, export, ingest, 
 
 bl_info = {
     "name": "Send to Unreal",
-    "author": "Epic Games Inc.",
+    "author": "Epic Games Inc (now a community fork)",
     "version": (2, 4, 3),
     "blender": (3, 3, 0),
     "location": "Header > Pipeline > Send to Unreal",
     "description": "Sends an asset to the first open Unreal Editor instance on your machine.",
     "warning": "",
-    "wiki_url": "https://epicgamesext.github.io/BlenderTools/send2ue",
+    "wiki_url": "https://poly-hammer.github.io/BlenderTools/send2ue",
     "category": "Pipeline",
 }
 
@@ -38,7 +38,8 @@ modules = [
     remote_execution,
     addon_preferences,
     extension,
-    io.fbx
+    io.fbx_b3,
+    io.fbx_b4
 ]
 
 

@@ -19,27 +19,28 @@ Unreal will handle exporting and importing each LOD.
 ![3](./images/static-mesh/3.png)
 
 
-::: tip Note
-  If your mesh has a LOD naming scheme and Import LODs is true, the LOD postfix will get stripped out of the final asset name based on the lod regex. For
-example:
+!!! note
 
-`pCube1_LOD0 = pCube1`
+    If your mesh has a LOD naming scheme and Import LODs is true, the LOD postfix will get stripped out of the final asset name based on the lod regex. For
+    example:
 
-`pCube2_lod0_mesh = pCube2`
-:::
+    `pCube1_LOD0 = pCube1`
+
+    `pCube2_lod0_mesh = pCube2`
 
 Also notice that the LOD build settings can be set under the
 `Import > Editor Settings > Static Mesh LOD Build Settings` group.
 
 ![4](./images/static-mesh/4.png)
 
-::: tip Note
-  The Editor Settings corresponds to what is available in the [EditorStaticMeshLibrary](https://docs.unrealengine.com/5.0/en-US/PythonAPI/class/EditorStaticMeshLibrary.html) in the Unreal Python API:
-:::
+!!! note
+
+    The Editor Settings corresponds to what is available in the [EditorStaticMeshLibrary](https://docs.unrealengine.com/5.0/en-US/PythonAPI/class/EditorStaticMeshLibrary.html) in the Unreal Python API.
 
 ## Collisions
 
 Simple collision workflows for static meshes are supported by prefixing your collision names with their respective identifiers and making them a child of the mesh.
+
 | Mesh Prefix and Name | Description |
 | -------------- | ----------------------- |
 | `UBX_[RenderMeshName]_##` | A Box must be created using a regular rectangular 3D object. You cannot move the vertices around or deform it in any way to make it something other than a rectangular prism, or else it will not work. |
@@ -56,9 +57,9 @@ Collisions are imported with the asset that matches the `[RenderMeshName]` after
 
 ![6](./images/static-mesh/6.png)
 
-::: tip Note
-  Collisions must be in the `Export` collection to be exported.
-:::
+!!! note
+
+    Collisions must be in the `Export` collection to be exported.
 
 ## Sockets
 
@@ -70,9 +71,9 @@ Any child mesh that has the pre fix `SOCKET_` in its name will be separately imp
 
 ![9](./images/static-mesh/8.png)
 
-::: tip Note
-  Socket names have the `SOCKET_` prefix stripped out. `SOCKET_socket_01` in blender becomes `socket_01` in unreal.
-:::
+!!! note
+
+    Socket names have the `SOCKET_` prefix stripped out. `SOCKET_socket_01` in blender becomes `socket_01` in unreal.
 
 ## Only Mesh
 

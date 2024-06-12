@@ -11,9 +11,10 @@ with the owners of this repository, before making a change. Each pull request mu
 1. Include the updated documentation in the pull request.
 1. The pull request will be reviewed, then merged into `dev` if all tests pass, the changes will be pushed to the `master` branch and a new versioned build will be made.
 
-::: tip Note
-  Any new features require an accompanying unit test for it to be approved.
-:::
+!!! note
+  
+    Any new features require an accompanying unit test for it to be approved.
+
 
 ## Getting Setup
 Fork the `BlenderTools` repository.
@@ -35,10 +36,9 @@ git checkout some-task-branch
 While developing, you will want to be able to rapidly test your new changes. You can do this by running this script in
 the Blender Script Editor.
 
-::: tip Note
-  You need to change `<your-repo-location>` to match the absolute path to the scripts folder in your local project.
-Running this script installs and reloads the tool.
-:::
+!!! note
+  
+    You need to change `<your-repo-location>` to match the absolute path to the scripts folder in your local project. Running this script installs and reloads the tool.
 
 
 ```python
@@ -72,12 +72,13 @@ you want to run the unittests on the open app instances.
 These steps must be completed in-order for the addons to hot-reload while you type in PyCharm.
 1. If you have the addons already installed, uninstall them and shutdown Blender and PyCharm.
 1. You must symlink the addon folders into the blender addon installation location. Then enable the addons
-    ::: tip Windows
+
+!!! Windows
     Run this from a commandline launched as administrator. Swapping out the last path with your own.
-      ```commandline:no-line-numbers
-    mklink /D "%APPDATA%\Blender Foundation\Blender\3.4\scripts\addons\send2ue" "D:\repos\BlenderTools\send2ue"
+    ```shell
+    mklink /D "%APPDATA%\Blender Foundation\Blender\3.6\scripts\addons\send2ue" "D:\repos\BlenderTools\send2ue"
     ```
-    :::
+
 1. You must install the `./scripts/addon-watcher.xml` in Pycharm by going to `Settings > Tools > File Watchers > Import`
 1. And finally blender has to be running with the send2ue addon enabled and clicking `Pipeline > Utilities > Start RPC Servers`
 Now PyCharm should reload your addons on file save events.

@@ -321,6 +321,7 @@ def get_scene_property_class():
             description=(
                 "Set a regular expression to determine an asset's lod identifier. The remaining unmatched string will "
                 "be used as the asset name. The first matched group's last character should be the LOD index."
+                "Global modifier flags will NOT work in 4.0+. For example: (?i)"
             )
         )
         unreal_skeletal_mesh_lod_settings_path: bpy.props.StringProperty(

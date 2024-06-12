@@ -1,5 +1,6 @@
-from . import fbx
+from . import fbx_b3, fbx_b4
 
 __all__ = [
-    fbx
+    'fbx_b3'
+    'fbx_b4'
 ]

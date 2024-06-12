@@ -1,0 +1,17 @@
+site_name: UE to Rigify
+docs_dir: '.'
+nav:
+  - Quick Start: "./introduction/quickstart.md"
+  - Concepts: 
+    - Modes: "./concepts/modes.md"
+    - Templates: "/concepts/templates.md"
+  - Usage: 
+    - Animation: "./usage/animation.md"
+    - New Template Example: "./usage/new-template-example.md"
+  - Advanced: 
+    - Relink Constraints: "./advanced/relink-constraints.md"
+  - Extras: 
+    - Community Templates: "./extras/community-templates.md"
+  - Trouble Shooting: 
+    - FAQ: "./trouble-shooting/faq.md"
+    - Errors: "./trouble-shooting/errors.md"

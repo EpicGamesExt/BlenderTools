@@ -1,0 +1,75 @@
+name: re-use-tests
+
+on: 
+  workflow_call:
+    inputs:
+        title:
+          required: true
+          type: string
+        blender-version:
+          required: true
+          type: string
+        unreal-version:
+          required: true
+          type: string
+    secrets:
+      GH_USER:
+        required: true
+      GH_PAT:
+        required: true
+      
+jobs:
+  tests:
+    name: ${{ inputs.title }}
+    runs-on: poly-hammer-runner
+    if: github.repository == 'poly-hammer/BlenderTools'
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      checks: write
+      id-token: write
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python Dependencies
+        shell: bash
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install --upgrade -r requirements.txt
+
+      - name: Run All Tests
+        shell: bash
+        run: |
+          source .venv/bin/activate
+
+          export GITHUB_TOKEN=${{ secrets.GH_PAT }}
+          export TEST_ENVIRONMENT=1
+          export UNREAL_VERSION=${{ inputs.unreal-version }}
+          export BLENDER_VERSION=${{ inputs.blender-version }}
+
+          echo $GITHUB_TOKEN | docker login ghcr.io -u ${{ secrets.GH_USER }} --password-stdin
+
+          cd ./tests
+          python run_tests.py
+          
+
+      - name: Publish ${{ inputs.title }} Report
+        uses: mikepenz/action-junit-report@v4
+        # always run even if the previous step fails
+        if: success() || failure()
+        with:
+          check_name: ${{ inputs.title }} Results (Unreal ${{ inputs.unreal-version }} Blender ${{ inputs.blender-version }})
+          include_passed: True
+          fail_on_failure: True
+          require_tests: True
+          require_passed_tests: True
+          detailed_summary: True
+          report_paths: './tests/results/*.xml'

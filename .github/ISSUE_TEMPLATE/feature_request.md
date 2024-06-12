@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 # Before creating an issue DO THIS FIRST!
-Search the existing [issues](https://github.com/EpicGamesExt/BlenderTools/issues?q=)
+Search the existing [issues](https://github.com/poly-hammer/BlenderTools/issues?q=)
 
 ## Feature
 ### IMPORTANT: Do this before you create a feature ticket!

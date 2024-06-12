@@ -2,14 +2,9 @@
 
 This quick start guide will help you get up and running with the UE to Rigify addon.
 
-First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/EpicGamesExt/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
+First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/poly-hammer/BlenderTools/releases?q=UE+to+Rigify&expanded=true)
 under the `Assets` dropdown. The zip file name will start with `ue2rigify`.
 
-::: tip Note
-   If you get a 404 error when you click the link above, then you will need to sign in to your github account and link
-it with your Epic Games account. Here is a [link with instructions](https://www.unrealengine.com/en-US/ue4-on-github)
-on how to link your accounts.
-:::
 
 Open Blender and install the add on. Go to `Edit > Preferences` then to addons. Click `install`.
 

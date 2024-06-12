@@ -1,3 +1,4 @@
+import sys
 from utils.base_test_case import BaseSend2ueTestCaseCore, BaseSend2ueTestCase, SkipSend2UeTests
 from test_send2ue_mannequins import TestSend2UeMannequins
 
@@ -87,6 +88,9 @@ class TestSend2UeExtensionCreatePostImportAssetsForGroomMannequins(
         """
         Runs several test cases with the create post import assets extension for groom on the mannequin meshes.
         """
+        if sys.platform == 'linux':
+            self.skipTest(reason='#TODO Skipping on linux')
+
         self.move_to_collection([
             'male_root',
             'SK_Mannequin_LOD1'

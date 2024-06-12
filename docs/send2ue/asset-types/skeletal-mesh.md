@@ -6,10 +6,10 @@ it is doing:
 
 ![overview](./images/skeletal-mesh/overview.svg)
 
-::: tip Note
-  The armature placed in the `Export` collection must be responsible for deformation, meaning only bones that are
-skinned to a mesh. No bones used for control schemes should be put in the `Export` collection.
-:::
+!!! note
+  
+    The armature placed in the `Export` collection must be responsible for deformation, meaning only bones that are
+    skinned to a mesh. No bones used for control schemes should be put in the `Export` collection.
 
 ![1](./images/skeletal-mesh/1.gif)
 
@@ -42,20 +42,20 @@ mesh lod settings.
 
 ![5](./images/skeletal-mesh/5.png)
 
-::: tip Note
-  If your mesh has a LOD naming scheme and Import LODs is true, the LOD postfix will get stripped out of the final asset name based on the lod regex. For
-example
-`SK_Mannequin_LOD0 = SK_Mannequin`
-:::
+!!! note
+
+    If your mesh has a LOD naming scheme and Import LODs is true, the LOD postfix will get stripped out of the final asset name based on the lod regex. For
+    example
+    `SK_Mannequin_LOD0 = SK_Mannequin`
 
 Also notice that the LOD build settings can be set under the
 `Import > Editor Settings > Skeletal Mesh LOD Build Settings` group.
 
 ![6](./images/skeletal-mesh/6.png)
 
-::: tip Note
-  The Editor Settings corresponds to what is available in the [EditorSkeletalMeshLibrary](https://docs.unrealengine.com/4.27/en-US/PythonAPI/class/EditorSkeletalMeshLibrary.html) in the Unreal Python API:
-:::
+!!! note
+
+    The Editor Settings corresponds to what is available in the [EditorSkeletalMeshLibrary](https://docs.unrealengine.com/4.27/en-US/PythonAPI/class/EditorSkeletalMeshLibrary.html) in the Unreal Python API.
 
 ## Only Mesh
 

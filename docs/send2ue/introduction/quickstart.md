@@ -1,14 +1,8 @@
 # Quickstart
 This quick start guide will help you get up and running with Send to Unreal.
 
-First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/EpicGamesExt/BlenderTools/releases?q=Send+to+unreal&expanded=true)
+First thing you need to do is download the latest versioned zip file from the [releases page](https://github.com/poly-hammer/BlenderTools/releases?q=Send+to+unreal&expanded=true)
 under the `Assets` dropdown. The zip file name will start with `send2ue`.
-
-::: tip Note
-   If you get a 404 error when you click the link above, then you will need to sign in to your github account and link
-it with your Epic Games account. Here is a [link with instructions](https://www.unrealengine.com/en-US/ue4-on-github)
-on how to link your accounts.
-:::
 
 Next install the addon in Blender. Go to `Edit > Preferences` then to the addons tab. Click `install`.
 
@@ -78,9 +72,9 @@ Click `Pipeline > Export > Send to Unreal`.
 ![13](./images/13.png)
 
 
-::: tip Note
-  On Windows, if you see a security alert, go ahead and allow Blender on your private network.
-:::
+!!! note
+
+    On Windows, if you see a security alert, go ahead and allow Blender on your private network.
 
 You should now see the cube in unreal under `/untitled category/untitled asset/Cube`.
 

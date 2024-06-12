@@ -8,9 +8,9 @@ if it is blocked by another application.
 
 ### You do not have a collection "Export" in your outliner. Please create it.
 You will receive this error if you do not have an "Export" set in your outliner. To fix this go to
-`Pipeline > Utilites > Create Pre-Defined Collections`.
+`Pipeline > Utilities > Create Pre-Defined Collections`.
 
 ### NoOptionError: No option 'r.skincache.compileshaders'
 The option "Support Compute Skin Cache" is required for groom imports. If you have this project setting
 on but consistently receive this error, consider turning off the "Check project settings" validation in
-send to unreal validations settings. This issue has been reported by users in [#533](https://github.com/EpicGamesExt/BlenderTools/issues/533).
+send to unreal validations settings.

@@ -1,0 +1,33 @@
+site_name: Send to Unreal
+docs_dir: '.'
+nav:
+  - Quick Start: "./introduction/quickstart.md"
+  - Asset Types:
+    - Static Mesh: "./asset-types/static-mesh.md"
+    - Skeletal Mesh: "./asset-types/skeletal-mesh.md"
+    - Anim Sequence: "./asset-types/animation-sequence.md"
+    - Groom: "./asset-types/groom.md"
+  - Settings:
+    - Paths: "./settings/paths.md"
+    - Export: "./settings/export.md"
+    - Import: "./settings/import.md"
+    - Validations: "./settings/validations.md"
+  - Customize:
+    - Templates: "./customize/templates.md"
+    - Python API: "./customize/python-api.md"
+    - Extensions: "./customize/extensions.md"
+  - Supported Extensions:
+    - Affixes: "./extensions/affixes.md"
+    - Combine Assets: "./extensions/combine-assets.md"
+    - Create Post Import Groom Assets: "./extensions/create-post-import-groom-assets.md"
+    - UE to Rigify: "./extensions/ue2rigify.md"
+    - Use Immediate Parent Name: "./extensions/use-immediate-parent-name.md"
+    - Use Collections as Folders: "./extensions/use-collections-as-folders.md"
+    - Instance Assets: "./extensions/instance-assets.md"
+  - Extras:
+    - Pipeline Menu: "./extras/pipeline-menu.md"
+    - Addon Preferences: "./extras/addon-preferences.md"
+    - Community Extensions: "./extras/community-extensions.md"
+  - Trouble Shooting:
+    - Community Extensions: "./trouble-shooting/faq.md"
+    - Errors: "./trouble-shooting/errors.md"

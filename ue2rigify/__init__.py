@@ -11,12 +11,12 @@ from .ui import view_3d, node_editor, addon_preferences, exporter
 
 bl_info = {
     "name": "UE to Rigify",
-    "author": "Epic Games Inc.",
+    "author": "Epic Games Inc (now a community fork)",
     "description": "Allows you to drive a given rig and its animations with a Rigify rig.",
-    "version": (1, 6, 2),
+    "version": (1, 6, 3),
     "blender": (3, 3, 0),
     "location": "3D View > Tools > UE to Rigify",
-    "wiki_url": "https://epicgamesext.github.io/BlenderTools/ue2rigify",
+    "wiki_url": "https://poly-hammer.github.io/BlenderTools/ue2rigify",
     "warning": "",
     "category": "Pipeline"
 }

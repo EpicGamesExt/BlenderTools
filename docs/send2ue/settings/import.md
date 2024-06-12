@@ -17,11 +17,11 @@ Whether or not to export groom as an alembic file and import to unreal.
 #### Launch Import UI
 When enabled this option launches the import UI in Unreal.
 
-::: tip Note
-  This will launch the Import UI on the first import of the asset, however it will not launch the UI again on a
-reimport. If you want to reimport an asset with new custom settings, the recommendation is to delete the asset in your
-unreal project and then just run Send to Unreal again.
-:::
+!!! note
+
+    This will launch the Import UI on the first import of the asset, however it will not launch the UI again on a
+    reimport. If you want to reimport an asset with new custom settings, the recommendation is to delete the asset in your
+    unreal project and then just run Send to Unreal again.
 
 ## LOD Settings
 The section contains the settings related to LOD workflows. You can read more about these under the

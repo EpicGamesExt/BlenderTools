@@ -1,0 +1,37 @@
+name: Tests
+
+on: 
+  push:
+    branches:
+      - main
+      - ci-testing
+    paths:
+      - 'send2ue/**/*'
+      - 'ue2rigify/**/*'
+      - 'tests/**/*'
+      - '.github/workflows/**'
+
+permissions:
+  contents: read
+  checks: write
+  id-token: write
+      
+jobs:
+  test-lts:
+    name: Test LTS
+    uses: poly-hammer/BlenderTools/.github/workflows/re-use-tests.yml@main
+    secrets: inherit
+    with:
+      title: Test LTS
+      unreal-version: 5.3
+      blender-version: 3.6
+
+  test-latest:
+    needs: test-lts
+    name: Test Latest
+    uses: poly-hammer/BlenderTools/.github/workflows/re-use-tests.yml@main
+    secrets: inherit
+    with:
+      title: Test Latest
+      unreal-version: 5.3
+      blender-version: 4.1

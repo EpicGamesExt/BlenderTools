@@ -10,30 +10,30 @@ Sends the intermediate files to a temporary location on disk and then imports th
 the Unreal Project. This doesn't require any extra configuration, but might not be ideal if your intermediate files
 need to be under source control.
 
-<img src="./images/paths/1.png" alt="1" width="500"/>
+![](./images/paths/1.png){style: "width: 500;"}
 
 ### Send to Disk
 Sends the intermediate files to a specified location on disk and does not import them.
 
-<img src="./images/paths/2.png" alt="2" width="500"/>
+![](./images/paths/2.png){style: "width: 500;"}
 
 ### Send to Disk then Project
 Sends the intermediate files to a specified location on disk and then imports them into
 the Unreal Project. This requires extra paths to be configured, but is ideal if your intermediate files
 need to be under source control.
 
-<img src="./images/paths/3.png" alt="3" width="500"/>
+![](./images/paths/3.png){style: "width: 500;"}
 
 
 ## Relative Paths
 When specifying a location on disk with either the `Send to Disk` or `Send to Disk then Project`, relative paths
 can be used if the blender file is saved.  The paths are relative to the currently open blender file.
 
-<img src="./images/paths/4.png" alt="4" width="500"/>
+![](./images/paths/4.png){style: "width: 500;"}
 
-::: tip Note
-  A relative disk path is relative to where the blend file is saved on disk.
-:::
+!!! note
+
+    A relative disk path is relative to where the blend file is saved on disk.
 
 ## Path Properties
 #### Mesh Folder (Unreal):

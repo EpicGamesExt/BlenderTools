@@ -7,6 +7,7 @@ the object in the blender scene.
 Spawns assets in the active level at the same location they are positioned in the blender scene.
 
 This is only supported for the following asset types:
+
 * `StaticMesh`
 * `SkeletalMesh`
 * `AnimSequence`

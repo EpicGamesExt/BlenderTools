@@ -12,6 +12,9 @@ from utils.container_test_manager import ContainerTestManager
 
 BLENDER_ADDONS = os.environ.get('BLENDER_ADDONS', 'send2ue,ue2rigify')
 
+BLENDER_VERSION = os.environ.get('BLENDER_VERSION', '4.1')
+UNREAL_VERSION = os.environ.get('UNREAL_VERSION', '5.4')
+
 # switch ports depending on whether in test environment or not
 BLENDER_PORT = os.environ.get('BLENDER_PORT', '9997')
 UNREAL_PORT = os.environ.get('UNREAL_PORT', '9998')
@@ -26,6 +29,7 @@ HOST_TEST_FOLDER = os.environ.get('HOST_TEST_FOLDER', os.getcwd())
 CONTAINER_TEST_FOLDER = os.environ.get('CONTAINER_TEST_FOLDER', f'{CONTAINER_REPO_FOLDER}tests')
 EXCLUSIVE_TEST_FILES = list(filter(None, os.environ.get('EXCLUSIVE_TEST_FILES', '').split(','))) or None
 EXCLUSIVE_TESTS = list(filter(None, os.environ.get('EXCLUSIVE_TESTS', '').split(','))) or None
+ALWAYS_PULL = bool(int(os.environ.get('ALWAYS_PULL', '0')))
 
 
 if __name__ == '__main__':
@@ -40,11 +44,13 @@ if __name__ == '__main__':
         'CONTAINER_REPO_FOLDER': CONTAINER_REPO_FOLDER,
         'HOST_TEST_FOLDER': HOST_TEST_FOLDER,
         'CONTAINER_TEST_FOLDER': CONTAINER_TEST_FOLDER,
+        'RPC_TRACEBACK_FILE': '/tmp/blender/send2ue/data/traceback.log',
         'RPC_TIME_OUT': '60'
     }
     # add the test environment variable if specified
     if TEST_ENVIRONMENT:
         os.environ['TEST_ENVIRONMENT'] = TEST_ENVIRONMENT
+        os.environ['RPC_TRACEBACK_FILE'] = os.path.join(HOST_TEST_FOLDER, 'data', 'traceback.log')
 
     # make sure this is set in the current environment
     os.environ.update(environment)
@@ -65,16 +71,17 @@ if __name__ == '__main__':
         f'{host_temp_folder}:/tmp/blender/send2ue/data'
     ]
 
-    logging.debug(f'Launching ContainerTestManager...')
+    logging.debug('Launching ContainerTestManager...')
     # instance the container test manager with the blender and unreal containers
     container_test_manager = ContainerTestManager(
         images={
             'blender': {
                 'connects_to': 'unreal',
                 'refresh': True,
-                'always_pull': False,
-                'tag': 'blender:3.3.1-cpu-ubuntu18.04',
-                'repository': 'nytimes',
+                'always_pull': ALWAYS_PULL,
+                'tag': f'blender-linux:{BLENDER_VERSION}',
+                'repository': 'ghcr.io/poly-hammer',
+                'user': 'root',
                 'rpc_port': BLENDER_PORT,
                 'environment': environment,
                 'volumes': volumes,
@@ -90,15 +97,18 @@ if __name__ == '__main__':
             },
             'unreal': {
                 'refresh': False,
-                'always_pull': False,
+                'always_pull': ALWAYS_PULL,
                 'rpc_port': UNREAL_PORT,
                 'environment': environment,
                 'volumes': volumes,
-                'tag': 'unreal-engine:dev-slim-5.3',
+                # 'tag': 'unreal-linux:5.4',
+                # 'repository': 'ghcr.io/poly-hammer',
+                'tag': f'unreal-engine:dev-slim-{UNREAL_VERSION}',
                 'repository': 'ghcr.io/epicgames',
                 'user': 'ue4',
                 'command': [
                     '/home/ue4/UnrealEngine/Engine/Binaries/Linux/UnrealEditor-Cmd',
+                    # '/tmp/unreal_projects/test01/test01.uproject',
                     f'{CONTAINER_TEST_FOLDER}/test_files/unreal_projects/test01/test01.uproject',
                     '-stdout',
                     '-unattended',

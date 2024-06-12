@@ -10,10 +10,10 @@ The amount of seconds that blender stops waiting for an unreal response after it
 need to be increased if you plan on importing really large assets, where the import could be longer then the
 timeout value.
 
-::: warning
-It is not recommended to set the timeout too high. The timeout is a safeguard against freezing blender and unreal
-indefinitely.
-:::
+!!! warning
+
+    It is not recommended to set the timeout too high. The timeout is a safeguard against freezing blender and unreal
+    indefinitely.
 
 ### Extensions Repo Path
 Set this path to the folder that contains your Send to Unreal python extensions. All extensions in this folder

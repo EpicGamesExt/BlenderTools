@@ -1,7 +1,11 @@
 *.blend1
 results/*
 data/*
+node_modules/*
 test_files/unreal_projects/test01/Content/*
 test_files/unreal_projects/test01/DerivedDataCache/*
 test_files/unreal_projects/test01/Intermediate/*
 test_files/unreal_projects/test01/Saved/*
+test_files/data/*
+package.json
+package-lock.json

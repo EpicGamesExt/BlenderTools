@@ -17,11 +17,12 @@ When I hit `Convert`. It converts that action over to the Rigify rig.
 
 ![2](./images/animation/2.jpg)
 
-::: tip Note
-   UE to Rigify renames the original action to have `SOURCE_` in front of it. It prefixes every action from
-the "Source" rig so it does not overwrite any bone animations just in case the Rigify "Control" rig and the "Source"
-rig happen to have matching bone names.
-:::
+!!! note
+
+      UE to Rigify renames the original action to have `SOURCE_` in front of it. It prefixes every action from
+      the "Source" rig so it does not overwrite any bone animations just in case the Rigify "Control" rig and the "Source"
+      rig happen to have matching bone names.   
+
 
 Then I would click `Bake`, and confirm.
 
