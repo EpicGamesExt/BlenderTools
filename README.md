@@ -7,12 +7,10 @@
 [![Docs](https://github.com/poly-hammer/BlenderTools/actions/workflows/docs.yml/badge.svg)](https://github.com/poly-hammer/BlenderTools/actions/workflows/docs.yml)
 [![Tests](https://github.com/poly-hammer/BlenderTools/actions/workflows/tests.yml/badge.svg)](https://github.com/poly-hammer/BlenderTools/actions/workflows/tests.yml)
 
-
+A repository of blender addons that improve the game development workflow between Blender and Unreal Engine.
 
 ### NOTE: This is a fork of the original [repository by Epic](https://github.com/EpicGamesExt/BlenderTools). 
-### This is now maintained by volunteers from the community and is not affiliated with Epic Games. 
-
-A repository of blender addons that improve the game development workflow between Blender and Unreal Engine.
+This is now maintained by [@JoshQuake](https://github.com/JoshQuake) and volunteers from the community and is not affiliated with Epic Games. 
 
 
 ## Send to Unreal
