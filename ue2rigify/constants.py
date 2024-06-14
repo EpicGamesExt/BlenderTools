@@ -40,8 +40,8 @@ class Template:
         else:
             return os.path.join(tempfile.gettempdir(), ToolInfo.NAME.value, 'resources', 'rig_templates', 'b4_0')
 
-    DEFAULT_MALE_TEMPLATE = 'male_mannequin_Ue4'
-    DEFAULT_FEMALE_TEMPLATE = 'female_mannequin_Ue4'
+    DEFAULT_MALE_TEMPLATE = 'male_mannequin_UE4'
+    DEFAULT_FEMALE_TEMPLATE = 'female_mannequin_UE4'
 
 
 class Viewport:
