@@ -698,19 +698,15 @@ def toggle_expand_in_outliner(state=2):
 
     :param int state: 1 will expand all collections, 2 will collapse them.
     """
-    try:
-        for area in bpy.context.screen.areas: 
-            if area.type == 'OUTLINER':
-                override = {'area': area}
-                bpy.ops.outliner.show_hierarchy(
-                    override_context=override, 
-                    execution_context='INVOKE_DEFAULT'
-                )
+    area = next(a for a in bpy.context.screen.areas if a.type == 'OUTLINER')
+    
+    for area in bpy.context.screen.areas:
+        if area.type == 'OUTLINER':
+            with bpy.context.temp_override(area=area):
+                bpy.ops.outliner.show_hierarchy('INVOKE_DEFAULT')
                 for i in range(state):
-                    bpy.ops.outliner.expanded_toggle(override_context=override)
-                area.tag_redraw()
-    except RuntimeError as error:
-        print(error)
+                    bpy.ops.outliner.expanded_toggle()
+            area.tag_redraw()
 
 
 def focus_on_selected():
