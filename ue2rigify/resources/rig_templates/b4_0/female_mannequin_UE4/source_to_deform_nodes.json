@@ -1,0 +1,332 @@
+[
+ {
+  "name": "Source Arms",
+  "label": "Source Arms",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   240.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "hand_l",
+   "hand_r",
+   "lowerarm_twist_01_l",
+   "lowerarm_twist_01_r",
+   "lowerarm_l",
+   "lowerarm_r",
+   "upperarm_twist_01_l",
+   "upperarm_twist_01_r",
+   "upperarm_l",
+   "upperarm_r"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "DEF Arms",
+  "label": "DEF Arms",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   240.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-hand.L",
+   "DEF-hand.R",
+   "DEF-forearm.L.001",
+   "DEF-forearm.R.001",
+   "DEF-forearm.L",
+   "DEF-forearm.R",
+   "DEF-upper_arm.L.001",
+   "DEF-upper_arm.R.001",
+   "DEF-upper_arm.L",
+   "DEF-upper_arm.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Source Legs",
+  "label": "Source Legs",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   660.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "ball_l",
+   "ball_r",
+   "foot_l",
+   "foot_r",
+   "calf_twist_01_l",
+   "calf_twist_01_r",
+   "calf_l",
+   "calf_r",
+   "thigh_twist_01_l",
+   "thigh_twist_01_r",
+   "thigh_l",
+   "thigh_r"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "DEF Legs",
+  "label": "DEF Legs",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   660.0
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-toe.L",
+   "DEF-toe.R",
+   "DEF-foot.L",
+   "DEF-foot.R",
+   "DEF-shin.L.001",
+   "DEF-shin.R.001",
+   "DEF-shin.L",
+   "DEF-shin.R",
+   "DEF-thigh.L.001",
+   "DEF-thigh.R.001",
+   "DEF-thigh.L",
+   "DEF-thigh.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Source Spine",
+  "label": "Source Spine",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -286.2301025390625,
+   920.5067138671875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "pelvis",
+   "head",
+   "neck_01",
+   "spine_03",
+   "spine_02",
+   "spine_01"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "DEF Spine",
+  "label": "DEF Spine",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   313.7698669433594,
+   920.5067138671875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-spine",
+   "DEF-spine.005",
+   "DEF-spine.004",
+   "DEF-spine.003",
+   "DEF-spine.002",
+   "DEF-spine.001"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Source Hand",
+  "label": "Source Hand",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   1880.5067138671875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "pinky_03_l",
+   "pinky_03_r",
+   "pinky_02_l",
+   "pinky_02_r",
+   "pinky_01_l",
+   "pinky_01_r",
+   "ring_03_l",
+   "ring_03_r",
+   "ring_02_l",
+   "ring_02_r",
+   "ring_01_l",
+   "ring_01_r",
+   "middle_03_l",
+   "middle_03_r",
+   "middle_02_l",
+   "middle_02_r",
+   "middle_01_l",
+   "middle_01_r",
+   "index_03_l",
+   "index_03_r",
+   "index_02_l",
+   "index_02_r",
+   "index_01_l",
+   "index_01_r",
+   "thumb_03_l",
+   "thumb_03_r",
+   "thumb_02_l",
+   "thumb_02_r",
+   "thumb_01_l",
+   "thumb_01_r"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "DEF Hand",
+  "label": "DEF Hand",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   1880.5067138671875
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-f_pinky.03.L",
+   "DEF-f_pinky.03.R",
+   "DEF-f_pinky.02.L",
+   "DEF-f_pinky.02.R",
+   "DEF-f_pinky.01.L",
+   "DEF-f_pinky.01.R",
+   "DEF-f_ring.03.L",
+   "DEF-f_ring.03.R",
+   "DEF-f_ring.02.L",
+   "DEF-f_ring.02.R",
+   "DEF-f_ring.01.L",
+   "DEF-f_ring.01.R",
+   "DEF-f_middle.03.L",
+   "DEF-f_middle.03.R",
+   "DEF-f_middle.02.L",
+   "DEF-f_middle.02.R",
+   "DEF-f_middle.01.L",
+   "DEF-f_middle.01.R",
+   "DEF-f_index.03.L",
+   "DEF-f_index.03.R",
+   "DEF-f_index.02.L",
+   "DEF-f_index.02.R",
+   "DEF-f_index.01.L",
+   "DEF-f_index.01.R",
+   "DEF-thumb.03.L",
+   "DEF-thumb.03.R",
+   "DEF-thumb.02.L",
+   "DEF-thumb.02.R",
+   "DEF-thumb.01.L",
+   "DEF-thumb.01.R"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "Source Shoulder",
+  "label": "Source Shoulder",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   -300.0,
+   335.59747314453125
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [],
+  "outputs": [
+   "clavicle_r",
+   "clavicle_l"
+  ],
+  "mode": "SOURCE_TO_DEFORM"
+ },
+ {
+  "name": "DEF Shoulder",
+  "label": "DEF Shoulder",
+  "color": [
+   0.6079999804496765,
+   0.6079999804496765,
+   0.6079999804496765
+  ],
+  "use_custom_color": false,
+  "location": [
+   300.0,
+   335.59747314453125
+  ],
+  "width": 200.0,
+  "height": 100.0,
+  "type": "CUSTOM",
+  "inputs": [
+   "DEF-shoulder.R",
+   "DEF-shoulder.L"
+  ],
+  "outputs": [],
+  "mode": "SOURCE_TO_DEFORM"
+ }
+]

@@ -23,7 +23,9 @@ def copy_default_templates():
     """
     Copies the default addon templates to the user location.
     """
-    template_location = os.path.join(os.path.dirname(__file__), os.path.pardir, 'resources', 'rig_templates')
+    template_folder = 'rig_templates/b3_6' if bpy.app.version < (4,0,0) else 'rig_templates/b4_0'
+    template_location = os.path.join(os.path.dirname(__file__), os.path.pardir, 'resources', template_folder)
+
     shutil.copytree(template_location, Template.RIG_TEMPLATES_PATH, dirs_exist_ok=True)
 
 

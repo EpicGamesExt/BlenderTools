@@ -69,7 +69,11 @@ fk_to_source_mode_settings = {
         'hide_rig_mesh': False,
         'red_sphere_bones': False,
         'relationship_lines': False,
-        'visible_bone_layers': [28, 8, 9, 12, 11, 15, 18, 6, 5, 3, 4, 14, 17]
+        'visible_bone_layers': [28, 8, 9, 12, 11, 15, 18, 6, 5, 3, 4, 14, 17],
+        'visible_bone_collections': ["Root", "Arm.L (FK)", "Arm.L (Tweak)", 
+                                     "Arm.R (Tweak)", "Arm.R (FK)", "Leg.L (Tweak)", 
+                                     "Leg.R (Tweak)", "Fingers (Detail)", "Fingers", 
+                                     "Torso", "Torso (Tweak)", "Leg.L (FK)", "Leg.R (FK)"]
     }}
 
 # ---------- edit source to deform mode viewport settings ----------
@@ -104,6 +108,7 @@ source_to_deform_mode_settings = {
         'hide_rig_mesh': False,
         'relationship_lines': False,
         'visible_bone_layers': [29],
+        'visible_bone_collections': ["Root" ,"DEF"],
         'red_sphere_bones': False
     }
 }

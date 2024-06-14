@@ -2,6 +2,7 @@
 import os
 import tempfile
 from enum import Enum
+from bpy import app
 
 
 class ToolInfo(Enum):
@@ -32,9 +33,13 @@ class Nodes:
 
 
 class Template:
-    RIG_TEMPLATES_PATH = os.path.join(tempfile.gettempdir(), ToolInfo.NAME.value, 'resources', 'rig_templates')
-    DEFAULT_MALE_TEMPLATE = 'male_mannequin'
-    DEFAULT_FEMALE_TEMPLATE = 'female_mannequin'
+    if app.version < (4,0,0):
+        RIG_TEMPLATES_PATH = os.path.join(tempfile.gettempdir(), ToolInfo.NAME.value, 'resources', 'rig_templates\\b3_6')
+    else:
+        RIG_TEMPLATES_PATH = os.path.join(tempfile.gettempdir(), ToolInfo.NAME.value, 'resources', 'rig_templates\\b4_0')
+
+    DEFAULT_MALE_TEMPLATE = 'male_mannequin_Ue4'
+    DEFAULT_FEMALE_TEMPLATE = 'female_mannequin_Ue4'
 
 
 class Viewport:

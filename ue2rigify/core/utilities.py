@@ -447,8 +447,9 @@ def set_viewport_settings(viewport_settings, properties):
                 # set a custom bone shape for all the bones
                 previous_settings['red_sphere_bones'] = False
                 if rig_object_settings.get('red_sphere_bones'):
-                    # set a give the rig a custom color
-                    set_rig_color(rig_object, 'THEME01', True)
+                    # set a give the rig a custom color if b3
+                    if bpy.app.version < (4,0,0):
+                        set_rig_color(rig_object, 'THEME01', True)
 
                     # create the display object for the bones
                     display_object = bpy.data.objects.get(Viewport.DISPLAY_SPHERE)
@@ -467,8 +468,9 @@ def set_viewport_settings(viewport_settings, properties):
                 if not rig_object_settings.get('red_sphere_bones'):
                     if rig_object.name != Rigify.CONTROL_RIG_NAME:
 
-                        # remove the custom rig color
-                        set_rig_color(rig_object, 'THEME01', False)
+                        # remove the custom rig color if b3
+                        if bpy.app.version < (4,0,0):
+                            set_rig_color(rig_object, 'THEME01', False)
                         for bone in rig_object.pose.bones:
                             bone.custom_shape = None
                             if bpy.app.version[0] > 2:
@@ -476,16 +478,28 @@ def set_viewport_settings(viewport_settings, properties):
                             else:
                                 bone.custom_shape_scale = 1
 
-                # set the visible bone layers
-                if rig_object_settings.get('visible_bone_layers'):
-                    visible_bone_layers = []
-                    for index, layer in enumerate(bpy.context.object.data.layers):
-                        visible_bone_layers.append(layer)
-                        if index in rig_object_settings['visible_bone_layers']:
-                            bpy.context.object.data.layers[index] = True
-                        else:
-                            bpy.context.object.data.layers[index] = False
-                    previous_settings['visible_bone_layers'] = visible_bone_layers
+                if bpy.app.version < (4,0,0):
+                    # set the visible bone layers if b3
+                    if rig_object_settings.get('visible_bone_layers'):
+                        visible_bone_layers = []
+                        for index, layer in enumerate(bpy.context.object.data.layers):
+                            visible_bone_layers.append(layer)
+                            if index in rig_object_settings['visible_bone_layers']:
+                                bpy.context.object.data.layers[index] = True
+                            else:
+                                bpy.context.object.data.layers[index] = False
+                        previous_settings['visible_bone_layers'] = visible_bone_layers
+                else:
+                     # set the visible bone collections if b4
+                    if rig_object_settings.get('visible_bone_collections'):
+                        visible_bone_collections = []
+                        for collection in bpy.context.object.data.collections:
+                            visible_bone_collections.append(collection.name)
+                            if collection.name in rig_object_settings['visible_bone_collections']:
+                                collection.is_visible = True
+                            else:
+                                collection.is_visible = False
+                        previous_settings['visible_bone_collections'] = visible_bone_collections
 
                 # store the previous viewport values in a dictionary in the tool properties
                 bpy.context.scene.ue2rigify.previous_viewport_settings[rig_object_name] = previous_settings
@@ -685,9 +699,17 @@ def toggle_expand_in_outliner(state=2):
     :param int state: 1 will expand all collections, 2 will collapse them.
     """
     area = next(a for a in bpy.context.screen.areas if a.type == 'OUTLINER')
-    bpy.ops.outliner.show_hierarchy({'area': area}, 'INVOKE_DEFAULT')
-    for i in range(state):
-        bpy.ops.outliner.expanded_toggle({'area': area})
+    
+    if bpy.app.version < (4,0,0):
+        bpy.ops.outliner.show_hierarchy({'area': area}, 'INVOKE_DEFAULT')
+        for i in range(state):
+            bpy.ops.outliner.expanded_toggle({'area': area})
+    else:
+        with bpy.context.temp_override(area=area):
+            bpy.ops.outliner.show_hierarchy('INVOKE_DEFAULT')
+            for i in range(state):
+                bpy.ops.outliner.expanded_toggle()
+    
     area.tag_redraw()
 
 
