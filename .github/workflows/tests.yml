@@ -1,9 +1,12 @@
 name: Tests
 
 on: 
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - main
+      - dev
       - ci-testing
     paths:
       - 'send2ue/**/*'

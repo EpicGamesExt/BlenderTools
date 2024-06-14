@@ -22,7 +22,6 @@ jobs:
   tests:
     name: ${{ inputs.title }}
     runs-on: poly-hammer-runner
-    if: github.repository == 'poly-hammer/BlenderTools'
     timeout-minutes: 120
     permissions:
       contents: read
