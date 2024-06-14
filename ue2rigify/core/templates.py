@@ -411,7 +411,7 @@ def import_zip(zip_file_path, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the template name and path from the zip file
-    template_name = os.path.basename(zip_file_path).replace('.zip', '')
+    template_name = os.path.basename(zip_file_path).replace('.zip', '').lower()
     template_folder_path = os.path.join((Template.RIG_TEMPLATES_PATH()), template_name)
 
     # create the template folder

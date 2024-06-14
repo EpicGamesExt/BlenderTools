@@ -1468,7 +1468,7 @@ class BaseUe2RigifyTestCase(BaseTestCase):
                 self.addon_name,
                 'remove_rig_template',
                 None,
-                {'template': f'{template_name}_test'}
+                {'template': f'{template_name.lower()}_test'}
             )
             for template_file_path in template_file_paths:
                 self.assertFalse(
