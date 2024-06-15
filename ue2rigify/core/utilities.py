@@ -703,14 +703,14 @@ def toggle_expand_in_outliner(state=2):
     for area in bpy.context.screen.areas:
         if area.type == 'OUTLINER':
             print(f'Area: ${area.type}')
-            with bpy.context.temp_override(area=area):
-                for region in area.regions:
-                    print(f'Region: ${region.type}')
-                    if region.type == 'WINDOW':
+            for region in area.regions:
+                print(f'Region: ${region.type}')
+                if region.type == 'WINDOW':
+                    with bpy.context.temp_override(area=area, region=region):
                         bpy.ops.outliner.show_hierarchy()
                         for i in range(state):
                             bpy.ops.outliner.expanded_toggle()
-            area.tag_redraw()
+                    area.tag_redraw()
 
 
 def focus_on_selected():
