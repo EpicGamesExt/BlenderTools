@@ -50,9 +50,9 @@ class ApplyGroomModifiersExtension(ExtensionBase):
     name = 'applygroommodifiers'
 
     apply_groom_mods: bpy.props.BoolProperty(
-        name= "Apply Groom Mods",
+        name= "Apply Groom Modifiers",
         default= False,
-        description="Automatically applies hair modifiers for export "
+        description="Automatically applies hair modifiers for export. "
                     "Modifiers restored after export finishes."
     )
 
