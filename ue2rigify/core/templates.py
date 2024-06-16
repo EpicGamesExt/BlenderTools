@@ -23,10 +23,10 @@ def copy_default_templates():
     """
     Copies the default addon templates to the user location.
     """
-    template_folder = 'rig_templates/b3_6' if bpy.app.version < (4,0,0) else 'rig_templates/b4_0'
-    template_location = os.path.join(os.path.dirname(__file__), os.path.pardir, 'resources', template_folder)
+    sub_folder = 'b3_6' if bpy.app.version[0] < 4 else 'b4_0'
+    template_location = os.path.join(os.path.dirname(__file__), os.path.pardir, 'resources', 'rig_templates', sub_folder)
 
-    shutil.copytree(template_location, Template.RIG_TEMPLATES_PATH, dirs_exist_ok=True)
+    shutil.copytree(template_location, Template.RIG_TEMPLATES_PATH(), dirs_exist_ok=True)
 
 
 def get_saved_node_data(properties):
@@ -189,7 +189,7 @@ def get_rig_templates(self=None, context=None, index_offset=0):
     :return list: A list of tuples that define the rig template enumeration.
     """
     rig_templates = []
-    rig_template_directories = next(os.walk(Template.RIG_TEMPLATES_PATH))[1]
+    rig_template_directories = next(os.walk(Template.RIG_TEMPLATES_PATH()))[1]
 
     # ensure that the male and female template are first
     rig_templates.append((
@@ -235,7 +235,7 @@ def get_template_file_path(template_file_name, properties):
         template_name = re.sub(r'\W+', '_', properties.new_template_name).lower()
 
     return os.path.join(
-        Template.RIG_TEMPLATES_PATH,
+        Template.RIG_TEMPLATES_PATH(),
         template_name,
         template_file_name
     )
@@ -286,7 +286,7 @@ def remove_template_folder(properties, template):
     properties.selected_mode = Modes.SOURCE.name
 
     # delete the selected rig template folder
-    selected_template_path = os.path.join(Template.RIG_TEMPLATES_PATH, template)
+    selected_template_path = os.path.join(Template.RIG_TEMPLATES_PATH(), template)
 
     import logging
     logging.info(selected_template_path)
@@ -307,7 +307,7 @@ def create_template_folder(template_name, properties):
     template_name = re.sub(r'\W+', '_', template_name.strip()).lower()
 
     # create the template folder
-    template_path = os.path.join(Template.RIG_TEMPLATES_PATH, template_name)
+    template_path = os.path.join(Template.RIG_TEMPLATES_PATH(), template_name)
     if not os.path.exists(template_path):
         try:
             original_umask = os.umask(0)
@@ -411,8 +411,8 @@ def import_zip(zip_file_path, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     # get the template name and path from the zip file
-    template_name = os.path.basename(zip_file_path).replace('.zip', '')
-    template_folder_path = os.path.join(Template.RIG_TEMPLATES_PATH, template_name)
+    template_name = os.path.basename(zip_file_path).replace('.zip', '').lower()
+    template_folder_path = os.path.join((Template.RIG_TEMPLATES_PATH()), template_name)
 
     # create the template folder
     create_template_folder(template_name, properties)
@@ -433,7 +433,7 @@ def export_zip(zip_file_path, properties):
     no_extension_file_path = zip_file_path.replace('.zip', '')
 
     # zip up the folder and save it to the given path
-    template_folder_path = os.path.join(Template.RIG_TEMPLATES_PATH, properties.selected_export_template)
+    template_folder_path = os.path.join(Template.RIG_TEMPLATES_PATH(), properties.selected_export_template)
     shutil.make_archive(no_extension_file_path, 'zip', template_folder_path)
 
 #

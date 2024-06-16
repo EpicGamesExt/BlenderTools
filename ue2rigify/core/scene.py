@@ -1344,7 +1344,7 @@ def load_metadata(properties):
             setattr(rig_object.data, attribute, value)
 
         # set the bone groups if b3
-        if bpy.app.version < (4,0,0):
+        if bpy.app.version[0] < 4:
             for bone_group_name, bone_group_data in visual_data.get('bone_groups', {}).items():
                 bone_group = rig_object.pose.bone_groups.get(bone_group_name)
                 if not bone_group:
@@ -1371,7 +1371,7 @@ def load_metadata(properties):
                 bone.use_custom_shape_bone_size = custom_shape_data['use_bone_size']
             
             # set the bone group if b3
-            if bpy.app.version < (4,0,0):
+            if bpy.app.version[0] < 4:
                 bone_group = rig_object.pose.bone_groups.get(bone_data.get('bone_group', ''))
                 if bone_group:
                     bone.bone_group = bone_group
@@ -1396,7 +1396,7 @@ def save_metadata(properties):
                     },
                     'bones': {},
             }
-            if bpy.app.version < (4,0,0):
+            if bpy.app.version[0] < 4:
                 visual_data['armature']['show_group_colors'] = rig_object.data.show_group_colors
                 visual_data['bone_groups'] = {}
             else:
@@ -1417,7 +1417,7 @@ def save_metadata(properties):
                         'use_bone_size': bone.use_custom_shape_bone_size
                     }
                 # save bone group if b3
-                if bpy.app.version < (4,0,0):
+                if bpy.app.version[0] < 4:
                     if bone.bone_group:
                         bone_data['bone_group'] = bone.bone_group.name
 
@@ -1425,7 +1425,7 @@ def save_metadata(properties):
                     visual_data['bones'][bone.name] = bone_data
 
             # save the bone_groups if b3
-            if bpy.app.version < (4,0,0):
+            if bpy.app.version[0] < 4:
                 for bone_group in rig_object.pose.bone_groups:
                     visual_data['bone_groups'][bone_group.name] = {
                         'color_set': bone_group.color_set,

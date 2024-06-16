@@ -1444,7 +1444,8 @@ class BaseUe2RigifyTestCase(BaseTestCase):
                 self.ue2rigify.constants.ToolInfo.NAME.value,
                 'resources',
                 'rig_templates',
-                f'{template_name}_test'
+                'b4_0' if int(os.environ.get('BLENDER_VERSION', '4.1').split('.')[0]) >= 4 else 'b3_6',
+                f'{template_name}_test'.lower()
             ]
 
             template_file_paths = [
@@ -1467,7 +1468,7 @@ class BaseUe2RigifyTestCase(BaseTestCase):
                 self.addon_name,
                 'remove_rig_template',
                 None,
-                {'template': f'{template_name}_test'}
+                {'template': f'{template_name.lower()}_test'}
             )
             for template_file_path in template_file_paths:
                 self.assertFalse(

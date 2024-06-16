@@ -448,7 +448,7 @@ def set_viewport_settings(viewport_settings, properties):
                 previous_settings['red_sphere_bones'] = False
                 if rig_object_settings.get('red_sphere_bones'):
                     # set a give the rig a custom color if b3
-                    if bpy.app.version < (4,0,0):
+                    if bpy.app.version[0] < 4:
                         set_rig_color(rig_object, 'THEME01', True)
 
                     # create the display object for the bones
@@ -469,7 +469,7 @@ def set_viewport_settings(viewport_settings, properties):
                     if rig_object.name != Rigify.CONTROL_RIG_NAME:
 
                         # remove the custom rig color if b3
-                        if bpy.app.version < (4,0,0):
+                        if bpy.app.version[0] < 4:
                             set_rig_color(rig_object, 'THEME01', False)
                         for bone in rig_object.pose.bones:
                             bone.custom_shape = None
@@ -478,7 +478,7 @@ def set_viewport_settings(viewport_settings, properties):
                             else:
                                 bone.custom_shape_scale = 1
 
-                if bpy.app.version < (4,0,0):
+                if bpy.app.version[0] < 4:
                     # set the visible bone layers if b3
                     if rig_object_settings.get('visible_bone_layers'):
                         visible_bone_layers = []
@@ -700,17 +700,15 @@ def toggle_expand_in_outliner(state=2):
     """
     area = next(a for a in bpy.context.screen.areas if a.type == 'OUTLINER')
     
-    if bpy.app.version < (4,0,0):
-        bpy.ops.outliner.show_hierarchy({'area': area}, 'INVOKE_DEFAULT')
-        for i in range(state):
-            bpy.ops.outliner.expanded_toggle({'area': area})
-    else:
-        with bpy.context.temp_override(area=area):
-            bpy.ops.outliner.show_hierarchy('INVOKE_DEFAULT')
-            for i in range(state):
-                bpy.ops.outliner.expanded_toggle()
-    
-    area.tag_redraw()
+    for area in bpy.context.screen.areas:
+        if area.type == 'OUTLINER':
+            for region in area.regions:
+                if region.type == 'WINDOW':
+                    with bpy.context.temp_override(area=area, region=region):
+                        bpy.ops.outliner.show_hierarchy()
+                        for i in range(state):
+                            bpy.ops.outliner.expanded_toggle()
+                    area.tag_redraw()
 
 
 def focus_on_selected():
