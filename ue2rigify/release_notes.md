@@ -1,7 +1,13 @@
-### Minor Changes
-* Added validation to ensure source rig has a scale of 1.
-  * [601](https://github.com/EpicGamesExt/BlenderTools/issues/601)
+## Major Changes
+* Added support for Blender 4
+  * [15](https://github.com/poly-hammer/BlenderTools/pull/15)
 
+## Minor Changes
+* Added UE5 mannequin templates
+  * [15](https://github.com/poly-hammer/BlenderTools/pull/15)
+
+## Special Thanks
+* @gzmuszynski (Rig Templates)
 
 ## Tests Passing On
-* Blender `3.5` (installed from blender.org)
+* Blender `3.6`, `4.1` (installed from blender.org)

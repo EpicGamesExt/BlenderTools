@@ -1,12 +1,14 @@
+## Major Changes
+* Combined support for Blender 3.6 and 4.1
+
 ## Minor Changes
-* Updated FBX mesh export to Blender 4.0
-  * [699](https://github.com/EpicGamesExt/BlenderTools/pull/699) 
-* Updated FBX anim export to Blender 4.0 
-  * [706](https://github.com/EpicGamesExt/BlenderTools/pull/706)
-* Removed (?i) from lod regex value in default settings template
+* Updated handling of global flags in lod_regex
+  * [9](https://github.com/poly-hammer/BlenderTools/pull/9)
+* Added Apply Groom Modifiers extension
+  * [18](https://github.com/poly-hammer/BlenderTools/pull/18)
 
 ## Special Thanks
-@universalconquistador, @JoshQuake
+@jack-yao91 for his major contributions to support the continued development of this addon!
 
 ## Tests Passing On
 * Blender `3.6`, `4.1` (installed from blender.org)
