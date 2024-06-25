@@ -1066,6 +1066,9 @@ def sync_nla_track_data(control_rig_object, source_rig_object):
     if control_rig_object and source_rig_object:
         # get the nla tracks on the source rig
         control_nla_tracks = control_rig_object.animation_data.nla_tracks
+        # create AnimData if there isn't one
+        if source_rig_object.animation_data is None:
+            source_rig_object.animation_data_create()
         source_nla_tracks = source_rig_object.animation_data.nla_tracks
 
         # remove all the nla tracks from the source rig
