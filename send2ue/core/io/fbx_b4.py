@@ -495,7 +495,6 @@ def export(**keywords):
                             (object_world_location[1] - empty_world_location[1]) * SCALE_FACTOR,
                             (object_world_location[2] - empty_world_location[2]) * SCALE_FACTOR
                         ))
-                        rot = (0, 0, 0)
                     else:
                         asset_world_location = asset_object.matrix_world.to_translation()
                         loc = Vector((
