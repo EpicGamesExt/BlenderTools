@@ -35,7 +35,8 @@ def run_in_main_thread(callable_instance, *args):
     globals().pop(ERROR_VALUE_NAME, None)
     EXECUTION_QUEUE.put((callable_instance, args))
 
-    for attempt in range(timeout * 10):
+    start_time = time.time()
+    while time.time() - start_time < timeout:
         if RETURN_VALUE_NAME in globals():
             return globals().get(RETURN_VALUE_NAME)
         elif ERROR_VALUE_NAME in globals():

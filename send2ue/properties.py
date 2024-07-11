@@ -1,6 +1,7 @@
 # Copyright Epic Games, Inc. All Rights Reserved.
 
 import os
+import sys
 import uuid
 import bpy
 from .constants import ToolInfo, PathModes, Template
@@ -16,6 +17,15 @@ class Send2UeAddonProperties:
         default=True,
         description=f"This automatically creates the pre-defined collection (Export)"
     )
+    extensions_repo_path: bpy.props.StringProperty(
+        name="Extensions Repo Path",
+        default="",
+        description=(
+            "Set this path to the folder that contains your Send to Unreal python extensions. All extensions "
+            "in this folder will be automatically loaded"
+        )
+    )
+    # ------------- Remote Execution settings ------------------
     rpc_response_timeout: bpy.props.IntProperty(
         name="RPC Response Timeout",
         default=60,
@@ -27,14 +37,30 @@ class Send2UeAddonProperties:
         set=settings.set_rpc_response_timeout,
         get=settings.get_rpc_response_timeout
     )
-    extensions_repo_path: bpy.props.StringProperty(
-            name="Extensions Repo Path",
-            default="",
-            description=(
-                "Set this path to the folder that contains your Send to Unreal python extensions. All extensions "
-                "in this folder will be automatically loaded"
-            )
+    multicast_ttl: bpy.props.IntProperty(
+        name="Multicast TTL",
+        default=0,
+        description=(
+            "Limits packet propagation for multicast connections. 0 restricts to local computer, 1 restricts to "
+            "local network. Default '0'"
         )
+    )
+    multicast_group_endpoint: bpy.props.StringProperty(
+        name="Multicast Group Endpoint",
+        default="239.0.0.1:6766",
+        description=(
+            "The multicast group endpoint that the UDP multicast socket should join. Must match setting "
+            "in Unreal."
+        )
+    )
+    command_endpoint: bpy.props.StringProperty(
+        name="Command Endpoint",
+        default="127.0.0.1:6776" if sys.platform == 'win32' else "0.0.0.0:6776",
+        description=(
+            "IP for UDP multicast to bind to and TCP command connection hosted by this client. "
+            "Must match setting in Unreal."
+        )
+    )
 
 
 class Send2UeWindowMangerProperties(bpy.types.PropertyGroup):

@@ -23,6 +23,17 @@ class SendToUnrealPreferences(Send2UeAddonProperties, bpy.types.AddonPreferences
         row.label(text='RPC Response Timeout')
         row.prop(self, 'rpc_response_timeout', text='')
         row = self.layout.row()
+
+        row.label(text="Multicast TTL")
+        row.prop(self, 'multicast_ttl', text='')
+        row = self.layout.row()
+        row.label(text="Multicast Group Endpoint")
+        row.prop(self, 'multicast_group_endpoint', text='')
+        row = self.layout.row()
+        row.label(text="Command Endpoint")
+        row.prop(self, 'command_endpoint', text='')
+        row = self.layout.row()
+
         row.label(text='Extensions Repo Path:')
         row = self.layout.row()
         row = row.split(factor=0.95, align=True)

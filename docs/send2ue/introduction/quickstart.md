@@ -45,7 +45,7 @@ Once you have enabled the plugins and project settings, you'll be prompted to re
 
 ![7](./images/7.png)
 
-Search for "python" and then enable remote execution. Now Send to Unreal will work with your new Unreal project.
+Search for "python" and then enable `remote execution` and set the Multicast bind address to `0.0.0.0`. Now Send to Unreal will work with your new Unreal project.
 
 ![8](./images/8.png)
 
