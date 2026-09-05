@@ -356,7 +356,31 @@ def get_mesh_object_for_groom_name(groom_name):
             return scene_object.data.surface
 
 
-def get_from_collection(object_type):
+def get_from_collection_recursive(object_type, collection, exclude_prefix_tokens):
+    """
+    Internal method for get_from_collection()
+    """
+    collection_objects = []
+    
+    # get all the objects in the collection
+    for collection_object in collection.all_objects:
+        if collection_object.is_instancer:
+            # recurse into collection instances
+            collection_objects += get_from_collection_recursive(object_type, collection_object.instance_collection, exclude_prefix_tokens)
+        else:
+            # if the object is the correct type
+            if collection_object.type == object_type:
+                # if the object is visible
+                if collection_object.visible_get():
+                    # ensure the object doesn't end with one of the post fix tokens
+                    if not exclude_prefix_tokens or not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
+                        # add it to the group of objects
+                        collection_objects.append(collection_object)
+    
+    return collection_objects
+
+
+def get_from_collection(object_type, exclude_prefix_tokens=True):
     """
     This function fetches the objects inside each collection according to type and returns
     an alphabetically sorted list of object references.
@@ -369,16 +393,7 @@ def get_from_collection(object_type):
     # get the collection with the given name
     export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
     if export_collection:
-        # get all the objects in the collection
-        for collection_object in export_collection.all_objects:
-            # if the object is the correct type
-            if collection_object.type == object_type:
-                # if the object is visible
-                if collection_object.visible_get():
-                    # ensure the object doesn't end with one of the post fix tokens
-                    if not any(collection_object.name.startswith(f'{token.value}_') for token in PreFixToken):
-                        # add it to the group of objects
-                        collection_objects.append(collection_object)
+        collection_objects = get_from_collection_recursive(object_type, export_collection, exclude_prefix_tokens)
     return sorted(collection_objects, key=lambda obj: obj.name)
 
 
@@ -433,6 +448,12 @@ def get_parent_collection(scene_object, collection):
 
     if scene_object in collection.objects.values():
         return collection
+
+    # fallback in case scene_object is not contained within specified collection
+    for collection in bpy.data.collections:
+        for object in collection.objects:
+            if object == scene_object:
+                return collection
 
 
 def get_skeleton_asset_path(rig_object, properties, get_path_function=get_import_path, *args, **kwargs):
@@ -632,7 +653,7 @@ def get_asset_collisions(asset_name, properties):
     collision_meshes = []
     export_collection = bpy.data.collections.get(ToolInfo.EXPORT_COLLECTION.value)
     if export_collection:
-        for mesh_object in export_collection.all_objects:
+        for mesh_object in get_from_collection(BlenderTypes.MESH, False):
             if is_collision_of(asset_name, mesh_object.name, properties):
                 collision_meshes.append(mesh_object)
     return collision_meshes

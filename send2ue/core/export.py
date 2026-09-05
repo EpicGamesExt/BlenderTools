@@ -6,7 +6,7 @@ import os
 import bpy
 from . import utilities, validations, settings, ingest, extension, io
 from ..constants import BlenderTypes, UnrealTypes, FileTypes, PreFixToken, ToolInfo, ExtensionTasks
-
+import mathutils
 
 def get_file_path(asset_name, properties, asset_type, lod=False, file_extension='fbx'):
     """
@@ -169,7 +169,26 @@ def export_file(properties, lod=0, file_type=FileTypes.FBX):
         export_alembic_file(file_path, export_settings)
 
 
-def get_asset_sockets(asset_name, properties):
+def get_asset_sockets_for_collection(collection_object, properties, parent_mtx, scan_depth=0, unique_id=''):
+    socket_data = {}
+    if collection_object:
+        # only iterate children which are rooted directly to the collection, children-of-children handled by inner recursion
+        root_objects = [x for x in collection_object.objects if not x.parent]
+        for object in root_objects:
+            local_mtx = parent_mtx @ mathutils.Matrix.Translation(-collection_object.instance_offset) @ object.matrix_world
+            if object.is_instancer:
+                # collection object is an instance of another collection
+                socket_data |= get_asset_sockets_for_collection(object.instance_collection, properties, local_mtx, scan_depth+1, unique_id + '_' + object.name)
+            elif scan_depth > 0:
+                # demote collection instances to sockets
+                name = 'MeshAttach_' + collection_object.name + '#' + unique_id
+                socket_data[name] = local_mtx
+            else:
+                socket_data |= get_asset_sockets_for_mesh(object, properties, local_mtx, scan_depth+1, unique_id)
+    return socket_data
+
+
+def get_asset_sockets_for_mesh(mesh_object, properties, parent_mtx, scan_depth=0, unique_id=''):
     """
     Gets the socket under the given asset.
 
@@ -177,22 +196,33 @@ def get_asset_sockets(asset_name, properties):
     :param object properties: The property group that contains variables that maintain the addon's correct state.
     """
     socket_data = {}
-    mesh_object = bpy.data.objects.get(asset_name)
     if mesh_object:
+        local_mtx = parent_mtx @ mesh_object.matrix_world
+        if mesh_object.type == 'EMPTY' and mesh_object.name.startswith(f'{PreFixToken.SOCKET.value}_'):
+            name = utilities.get_asset_name(mesh_object.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
+            socket_data[name] = local_mtx
+        elif mesh_object.type == 'EMPTY' and mesh_object.is_instancer:
+            if unique_id:
+                local_id = unique_id + '_' + mesh_object.name
+            else:
+                local_id = mesh_object.name
+            socket_data = get_asset_sockets_for_collection(mesh_object.instance_collection, properties, local_mtx, scan_depth+1, local_id)
+
+        # recurse into child meshes
         for child in mesh_object.children:
-            if child.type == 'EMPTY' and child.name.startswith(f'{PreFixToken.SOCKET.value}_'):
-                name = utilities.get_asset_name(child.name.replace(f'{PreFixToken.SOCKET.value}_', ''), properties)
-                relative_location = utilities.convert_blender_to_unreal_location(
-                    child.matrix_local.translation
-                )
-                relative_rotation = utilities.convert_blender_rotation_to_unreal_rotation(
-                    child.rotation_euler
-                )
-                socket_data[name] = {
-                    'relative_location': relative_location,
-                    'relative_rotation': relative_rotation,
-                    'relative_scale': child.matrix_local.to_scale()[:]
-                }
+            socket_data |= get_asset_sockets_for_mesh(child, properties, parent_mtx, scan_depth, unique_id)
+    return socket_data
+
+
+def get_asset_sockets(mesh_object, properties):
+    socket_data = get_asset_sockets_for_mesh(mesh_object, properties, mesh_object.matrix_world.inverted())
+    for socket in socket_data:
+        decomposed = socket_data[socket].decompose()
+        decomposed = socket_data[socket] = {
+            'relative_location': utilities.convert_blender_to_unreal_location(decomposed[0]),
+            'relative_rotation': utilities.convert_blender_rotation_to_unreal_rotation(decomposed[1].to_euler()),
+            'relative_scale': decomposed[2][:]
+        }
     return socket_data
 
 
@@ -212,6 +242,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     # run the pre mesh export extensions
     if lod == 0:
         extension.run_extension_tasks(ExtensionTasks.PRE_MESH_EXPORT.value)
+
+    # apply instance offset
+    if len(mesh_object.users_collection) == 1:
+        mesh_object.delta_location -= mesh_object.users_collection[0].instance_offset
 
     # select the scene object
     mesh_object.select_set(True)
@@ -234,6 +268,10 @@ def export_mesh(asset_id, mesh_object, properties, lod=0):
     # run the post mesh export extensions
     if lod == 0:
         extension.run_extension_tasks(ExtensionTasks.POST_MESH_EXPORT.value)
+
+    # unapply instance offset
+    if len(mesh_object.users_collection) == 1:
+        mesh_object.delta_location += mesh_object.users_collection[0].instance_offset
 
 
 @utilities.track_progress(message='Exporting animation "{attribute}"...', attribute='file_path')
@@ -433,7 +471,7 @@ def create_mesh_data(mesh_objects, rig_objects, properties):
                 'asset_path': f'{import_path}{asset_name}',
                 'skeleton_asset_path': properties.unreal_skeleton_asset_path,
                 'lods': export_lods(asset_id, asset_name, properties),
-                'sockets': get_asset_sockets(mesh_object.name, properties),
+                'sockets': get_asset_sockets(mesh_object, properties),
                 'skip': False
             }
             previous_asset_names.append(asset_name)
