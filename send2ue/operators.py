@@ -4,7 +4,7 @@ import os
 import bpy
 import queue
 import threading
-from .constants import ToolInfo, ExtensionTasks
+from .constants import ToolInfo, ExtensionTasks, Template
 from .core import export, utilities, settings, validations, extension
 from .ui import file_browser, dialog
 from .dependencies import unreal
@@ -220,12 +220,25 @@ class SaveTemplate(bpy.types.Operator, file_browser.ExportTemplate):
 
 
 class LoadTemplate(bpy.types.Operator, file_browser.ImportTemplate):
-    """Loads the specified template file into the template folder location"""
+    """Loads the specified template file into the template folder location and sets it as the active template"""
     bl_idname = 'send2ue.load_template'
     bl_label = 'Load Template'
     filename_ext = '.json'
 
     def execute(self, context):
+        try:
+            template_version = settings.get_template_version(self.filepath)
+        except (OSError, ValueError):
+            self.report({'ERROR'}, f'"{self.filepath}" is not a valid template file.')
+            return {'CANCELLED'}
+
+        if template_version != Template.VERSION:
+            self.report(
+                {'ERROR'},
+                f'"{self.filepath}" has template version {template_version}, but version {Template.VERSION} is required.'
+            )
+            return {'CANCELLED'}
+
         settings.load_template(self.filepath)
         return {'FINISHED'}
 

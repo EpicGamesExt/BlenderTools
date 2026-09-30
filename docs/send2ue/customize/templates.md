@@ -22,6 +22,6 @@ template that has been configured to for LODs. Click `Load` then choose the loca
 ![2](./images/templates/2.gif)
 
 ::: tip Note
-  The properties won't change until the active template is selected from the dropdown. Loading the template
-makes the template available in the dropdown, but does not modify the properties.
+  Loading a template adds it to the dropdown and sets it as the active template, so its values are applied to the
+properties right away. The template file must have a matching `template_version`, otherwise an error is reported.
 :::

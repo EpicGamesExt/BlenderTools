@@ -58,7 +58,7 @@ bpy.ops.send2ue.save_template(filepath: str)
 ```
 
 ### Load Template
-Loads the specified template file into the template folder location.
+Loads the specified template file into the template folder location and sets it as the active template.
 - param `str` `filepath` The full path of the template file.
 ```python
 bpy.ops.send2ue.load_template(filepath: str)
