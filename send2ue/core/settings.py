@@ -469,13 +469,30 @@ def populate_settings_template_dropdown(self=None, context=None):
 
 def load_template(load_path):
     """
-    Loads the given template path into the template folder.
+    Loads the given template path into the template folder and sets it as the active template.
 
     :param str load_path: The full file path of the template file.
     """
     template_name = os.path.basename(load_path)
     template_location_path = get_template_path(template_name)
-    shutil.copy(load_path, template_location_path)
+
+    template_folder = get_template_folder()
+    if not os.path.exists(template_folder):
+        os.makedirs(template_folder)
+
+    # only copy if the file is not already the one in the template folder
+    if os.path.normcase(os.path.abspath(load_path)) != os.path.normcase(os.path.abspath(template_location_path)):
+        shutil.copy(load_path, template_location_path)
+
+    # set the loaded template as the active template so its values are applied to the properties
+    properties = getattr(bpy.context.scene, ToolInfo.NAME.value, None)
+    if properties:
+        # the enum is stored by index, so adding a template file can make it already appear active. In that case
+        # the update callback would not be triggered, so the template values are applied directly
+        if properties.active_settings_template == template_name:
+            set_active_template(properties)
+        else:
+            properties.active_settings_template = template_name
 
 
 def remove_template(properties):

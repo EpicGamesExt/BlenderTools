@@ -251,8 +251,8 @@ class BaseSend2ueTestCaseCore(BaseTestCase):
             if self.test_environment:
                 file_path = os.path.normpath(file_path).replace(os.path.sep, '/')
 
+            # loading the template should also set it as the active template and apply its values
             self.blender.run_addon_operator(self.addon_name, 'load_template', None, {'filepath': file_path})
-            self.blender.set_addon_property('scene', self.addon_name, 'active_settings_template', template_name)
             for name, value in properties.items():
                 self.log(f'Checking property "{name}"...')
                 property_value = self.blender.get_addon_property(
